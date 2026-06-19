@@ -713,6 +713,7 @@ def parse_args() -> argparse.Namespace:
             "  py tools/automatizar_todo.py --solo-sheets\n"
             "  py tools/automatizar_todo.py --solo-apps-script\n"
             "  py tools/automatizar_todo.py --verificar\n"
+            "  py tools/automatizar_todo.py --sin-cuenta-servicio\n"
         ),
     )
     group = parser.add_mutually_exclusive_group(required=True)
@@ -720,9 +721,25 @@ def parse_args() -> argparse.Namespace:
     group.add_argument("--solo-sheets", action="store_true", help="Solo prerrequisitos + SA + hoja.")
     group.add_argument("--solo-apps-script", action="store_true", help="Solo Apps Script + configurar URL.")
     group.add_argument("--verificar", action="store_true", help="Solo verificar URL y prueba POST.")
+    group.add_argument(
+        "--sin-cuenta-servicio",
+        action="store_true",
+        help="Modo sin JSON: hoja manual + Apps Script (política org bloquea claves SA).",
+    )
     parser.add_argument("--sin-firebase", action="store_true", help="Omitir paso 6 (Firebase).")
     parser.add_argument("--share-with", help="Correo para compartir la hoja.")
     return parser.parse_args()
+
+
+def cmd_sin_cuenta_servicio() -> int:
+    """Delega al flujo interactivo sin JSON de cuenta de servicio."""
+    log_info("Modo sin cuenta de servicio — delegando a tools/modo_sin_json.py")
+    try:
+        result = run_py(["tools/modo_sin_json.py"], check=False)
+        return result.returncode
+    except Exception as exc:  # noqa: BLE001
+        log_error(str(exc))
+        return 1
 
 
 def cmd_verificar() -> int:
@@ -823,6 +840,8 @@ def main() -> int:
     try:
         if args.verificar:
             return cmd_verificar()
+        if args.sin_cuenta_servicio:
+            return cmd_sin_cuenta_servicio()
         if args.solo_sheets:
             return cmd_solo_sheets(args)
         if args.solo_apps_script:

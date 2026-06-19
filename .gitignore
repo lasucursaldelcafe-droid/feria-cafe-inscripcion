@@ -5,6 +5,7 @@ Thumbs.db
 js/sheets-config.js
 tools/.env
 tools/**/*-sa.json
-tools/**/service-account*.json
-tools/credentials/
+tools/credentials/*.json
+!tools/credentials/service-account.EJEMPLO.json
+!tools/credentials/apps-script-manifest.json
 tools/google-apps-script/.clasp.json

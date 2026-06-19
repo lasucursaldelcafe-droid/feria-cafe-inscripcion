@@ -26,8 +26,51 @@ Subcomandos:
 | `--solo-apps-script` | Solo Apps Script + `js/sheets-config.js` |
 | `--verificar` | Comprueba GET/OPTIONS/POST contra la Web App |
 | `--sin-firebase` | Omite despliegue Firebase en `--todo` |
+| `--sin-cuenta-servicio` | Hoja manual + Apps Script **sin JSON** de GCP |
 
 El script escribe el log en `tools/automatizar.log`, busca JSON en Descargas, abre el navegador para OAuth cuando hace falta y actualiza `tools/.env` (nunca sube secretos al repo).
+
+---
+
+## Modo sin JSON (política organizacional)
+
+Si Google Cloud **no te deja descargar** el JSON de cuenta de servicio (`Key creation is not allowed`), **no necesitas credenciales de GCP**. Los formularios escriben en la hoja mediante **Apps Script** desplegado desde tu cuenta de Google.
+
+### Guía interactiva (recomendado)
+
+```powershell
+cd D:\Desarrollo\02_Proyectos\Feria-Cafe-Inscripcion
+py tools/modo_sin_json.py
+```
+
+El script:
+
+1. Abre [sheets.new](https://sheets.new) para crear la hoja.
+2. Muestra los encabezados exactos de **Feria** y **Competencia** (copiar/pegar en fila 1).
+3. Guía el despliegue de `tools/google-apps-script/Code.gs` paso a paso.
+4. Pide la URL `/exec` y escribe `js/sheets-config.js`.
+5. Ejecuta `conectar_sheets.py --verificar`.
+
+Equivalente:
+
+```powershell
+py tools/automatizar_todo.py --sin-cuenta-servicio
+```
+
+### Referencias
+
+| Archivo | Uso |
+| ------- | --- |
+| `tools/PLANTILLA-ENCABEZADOS.json` | Encabezados en JSON + filas tabuladas para copiar |
+| `tools/credentials/README.md` | Por qué falla el JSON y alternativas (proyecto personal vs sin JSON) |
+| `tools/credentials/service-account.EJEMPLO.json` | **Solo plantilla** — no es una credencial válida |
+| `tools/credentials/apps-script-manifest.json` | Manifiesto de referencia para Apps Script |
+
+Solo encabezados (sin guía interactiva):
+
+```powershell
+py tools/modo_sin_json.py --solo-encabezados
+```
 
 ---
 
@@ -235,6 +278,7 @@ Si `WEB_APP_URL` está vacía, los formularios guardan copia en `localStorage` d
 ## Scripts relacionados
 
 - `tools/automatizar_todo.py` — orquestador completo (un comando)
+- `tools/modo_sin_json.py` — configuración **sin JSON** de cuenta de servicio
 - `tools/conectar_todo.ps1` — wrapper PowerShell → `automatizar_todo.py --todo`
 - `tools/conectar_sheets.py` — CLI granular (crear hoja, verificar, probar)
 - `tools/desplegar_apps_script.py` — despliegue con clasp
