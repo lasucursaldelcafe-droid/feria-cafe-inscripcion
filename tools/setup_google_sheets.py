@@ -21,8 +21,10 @@ from _util import (
     SPREADSHEET_TITLE,
     error,
     info,
+    load_dotenv,
     load_service_account_email,
     ok,
+    print_apps_script_instructions,
     resolve_credentials,
     warn,
     write_sheets_config,
@@ -156,14 +158,7 @@ def print_next_steps(service_email: str, spreadsheet_id: str, web_app_url: str |
     ok(f"Hoja lista: {url}")
     info(f"ID de la hoja: {spreadsheet_id}")
     print()
-    info("Pasos manuales restantes (Apps Script):")
-    print("  1. Abre la hoja con tu cuenta de Google (debe tener acceso de editor).")
-    print("  2. Extensiones → Apps Script.")
-    print(f"  3. Pega el código de: {PROJECT_ROOT / 'tools' / 'google-apps-script' / 'Code.gs'}")
-    print("  4. Implementar → Nueva implementación → Aplicación web")
-    print("     Ejecutar como: Yo | Acceso: Cualquier persona")
-    print("  5. Copia la URL /exec y vuelve a ejecutar este script con --web-app-url")
-    print("     o edita js/sheets-config.js manualmente.")
+    print_apps_script_instructions(spreadsheet_id)
     print()
     info(f"Cuenta de servicio usada: {service_email}")
     warn(
@@ -172,12 +167,14 @@ def print_next_steps(service_email: str, spreadsheet_id: str, web_app_url: str |
     )
     if not web_app_url:
         warn("WEB_APP_URL no configurada aún. Los formularios usarán localStorage como respaldo.")
+        info("Configura con: py tools/conectar_sheets.py --configurar-url \"URL/exec\"")
     print()
     info(f"Proyecto Firebase asociado al sitio: {DEFAULT_FIREBASE_PROJECT}")
 
 
 def main() -> int:
     args = parse_args()
+    load_dotenv()
 
     try:
         if args.dry_run:
@@ -196,8 +193,10 @@ def main() -> int:
 
         sheets, drive = build_services(credentials_path)
 
-        if args.sheet_id:
-            spreadsheet_id = args.sheet_id.strip()
+        import os
+
+        spreadsheet_id = (args.sheet_id or os.environ.get("GOOGLE_SHEET_ID", "")).strip()
+        if spreadsheet_id:
             info(f"Usando hoja existente: {spreadsheet_id}")
         else:
             info(f"Creando hoja: {SPREADSHEET_TITLE}")
@@ -211,9 +210,10 @@ def main() -> int:
         write_headers(sheets, spreadsheet_id, SHEET_COMPETENCIA, HEADERS_COMPETENCIA)
         ok("Encabezados configurados en Feria y Competencia.")
 
-        if args.share_with:
-            share_spreadsheet(drive, spreadsheet_id, args.share_with.strip())
-            ok(f"Hoja compartida con: {args.share_with.strip()}")
+        share_email = (args.share_with or os.environ.get("SHARE_SHEET_WITH", "")).strip()
+        if share_email:
+            share_spreadsheet(drive, spreadsheet_id, share_email)
+            ok(f"Hoja compartida con: {share_email}")
 
         if args.web_app_url:
             url = args.web_app_url.strip()

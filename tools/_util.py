@@ -58,8 +58,20 @@ HEADERS_COMPETENCIA = [
     "Comprobante tipo",
     "Comprobante enlace Drive",
     "Comprobante base64 (preview)",
+    "Acepta voluntaria",
+    "Acepta pertenencias",
+    "Acepta datos",
+    "Acepta no reembolso",
+    "Acepta descalificación",
+    "Acepta reglas",
+    "Acepta disponibilidad",
+    "Acepta imagen",
     "Observaciones",
 ]
+
+CODE_GS_PATH = TOOLS_DIR / "google-apps-script" / "Code.gs"
+SHEETS_CONFIG_PATH = PROJECT_ROOT / "js" / "sheets-config.js"
+SHEETS_CONFIG_EXAMPLE_PATH = PROJECT_ROOT / "js" / "sheets-config.example.js"
 
 DEFAULT_FIREBASE_PROJECT = "la-sucursal-del-cafe"
 
@@ -106,13 +118,46 @@ def load_service_account_email(credentials_path: Path) -> str:
     return email
 
 
+def load_dotenv(path: Path | None = None) -> None:
+    """Carga variables desde tools/.env sin sobrescribir las ya definidas."""
+    env_path = path or (TOOLS_DIR / ".env")
+    if not env_path.is_file():
+        return
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+def read_web_app_url(config_path: Path | None = None) -> str:
+    """Lee WEB_APP_URL desde js/sheets-config.js."""
+    import re
+
+    target = config_path or SHEETS_CONFIG_PATH
+    if not target.is_file():
+        return ""
+    text = target.read_text(encoding="utf-8")
+    match = re.search(r"WEB_APP_URL:\s*['\"]([^'\"]*)['\"]", text)
+    if not match:
+        return ""
+    url = match.group(1).strip()
+    if not url or "TU_ID_DE_DEPLOYMENT" in url:
+        return ""
+    return url
+
+
 def write_sheets_config(web_app_url: str) -> Path:
     """Escribe js/sheets-config.js en la raíz del proyecto."""
-    target = PROJECT_ROOT / "js" / "sheets-config.js"
+    target = SHEETS_CONFIG_PATH
     content = (
         "/**\n"
-        " * Configuración generada por tools/setup_google_sheets.py\n"
-        " * Ver tools/INSTRUCCIONES-PYTHON.md\n"
+        " * Configuración generada por tools/conectar_sheets.py\n"
+        " * Ver tools/INSTRUCCIONES-SHEETS.md\n"
         " */\n"
         "window.SHEETS_CONFIG = {\n"
         f"  WEB_APP_URL: '{web_app_url}'\n"
@@ -121,6 +166,24 @@ def write_sheets_config(web_app_url: str) -> Path:
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(content, encoding="utf-8")
     return target
+
+
+def print_apps_script_instructions(spreadsheet_id: str | None = None) -> None:
+    """Muestra pasos manuales para desplegar Code.gs."""
+    info("Pasos manuales — Apps Script (obligatorio):")
+    print("  1. Abre la hoja con tu cuenta de Google (acceso de editor).")
+    if spreadsheet_id:
+        print(f"     https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit")
+    print("  2. Extensiones → Apps Script.")
+    print(f"  3. Pega el código de: {CODE_GS_PATH}")
+    print("  4. Implementar → Nueva implementación → Aplicación web")
+    print("     Ejecutar como: Yo | Acceso: Cualquier persona")
+    print("  5. Copia la URL /exec y ejecuta:")
+    print('     py tools/conectar_sheets.py --configurar-url "https://script.google.com/.../exec"')
+    print("  6. Verifica la conexión:")
+    print("     py tools/conectar_sheets.py --verificar")
+    print()
+    info(f"Archivo Apps Script: {CODE_GS_PATH}")
 
 
 def check_command(name: str) -> str | None:

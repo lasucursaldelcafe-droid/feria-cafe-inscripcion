@@ -1,114 +1,127 @@
-# Google Sheets como base de datos — Instrucciones
+# Google Sheets — Feria y Competencia
 
-Esta guía conecta los formularios web con una hoja de cálculo para revisar todas las inscripciones.
+Conecta **index.html** (feria) y **competencia.html** (Switch Championship) con una hoja de cálculo centralizada.
 
-## 1. Crear la hoja de cálculo
+## Flujo rápido (recomendado)
 
-1. Entra a [Google Sheets](https://sheets.google.com) con la cuenta de **La Sucursal del Café**.
-2. Crea una hoja nueva, por ejemplo: **Inscripciones Feria y Switch Championship**.
-3. Renombra la primera pestaña a **Feria** (opcional: el script también crea las pestañas si no existen).
-4. Crea una segunda pestaña llamada **Competencia** (opcional).
+```powershell
+cd D:\Desarrollo\02_Proyectos\Feria-Cafe-Inscripcion
+py -3 -m pip install -r tools/requirements.txt
+copy tools\.env.example tools\.env
+# Edita tools\.env → GOOGLE_SERVICE_ACCOUNT_JSON y SHARE_SHEET_WITH
 
-> Las columnas se crean automáticamente al recibir la primera inscripción de cada tipo.
+py tools/conectar_sheets.py --crear-hoja --share-with tu@gmail.com
+```
 
-## 2. Pegar el script de Apps Script
+**Manual (Apps Script):** abre la hoja → Extensiones → Apps Script → pega `tools/google-apps-script/Code.gs` → Implementar como **Aplicación web** (Ejecutar como: Yo | Acceso: Cualquier persona).
 
-1. En la hoja: **Extensiones → Apps Script**.
-2. Borra el contenido del editor y pega el código de `tools/google-apps-script/Code.gs` de este repositorio.
-3. Guarda el proyecto (Ctrl+S) con un nombre, por ejemplo: **Inscripciones Web Feria**.
+```powershell
+py tools/conectar_sheets.py --configurar-url "https://script.google.com/macros/s/XXXXXXXX/exec"
+py tools/conectar_sheets.py --verificar
+py tools/conectar_sheets.py --probar-envio
+```
 
-## 3. Desplegar como aplicación web
+Despliega el sitio (Firebase Hosting o servidor local) después de configurar la URL.
 
-1. En Apps Script: **Implementar → Nueva implementación**.
-2. Tipo: **Aplicación web**.
-3. Configuración:
-   - **Descripción:** Inscripciones web
-   - **Ejecutar como:** Yo (tu cuenta)
-   - **Quién tiene acceso:** Cualquier persona
-4. Haz clic en **Implementar** y autoriza los permisos cuando Google lo solicite.
-5. Copia la **URL de la aplicación web** (termina en `/exec`).
+## Comandos de `conectar_sheets.py`
 
-## 4. Configurar el sitio web
-
-1. En tu copia del proyecto, copia el archivo de ejemplo:
-   ```bash
-   cp js/sheets-config.example.js js/sheets-config.js
-   ```
-2. Abre `js/sheets-config.js` y pega la URL en `WEB_APP_URL`:
-   ```javascript
-   window.SHEETS_CONFIG = {
-     WEB_APP_URL: 'https://script.google.com/macros/s/XXXXXXXX/exec'
-   };
-   ```
-3. Si despliegas en Firebase Hosting, vuelve a desplegar después de cambiar la URL:
-   ```bash
-   npx -y firebase-tools@latest deploy --only hosting
-   ```
-
-### Despliegue automático (GitHub Actions)
-
-Si usas el workflow de GitHub, agrega un secreto en el repositorio:
-
-- **Nombre:** `SHEETS_WEB_APP_URL`
-- **Valor:** la URL `/exec` de Apps Script
-
-El workflow generará `js/sheets-config.js` en cada despliegue.
-
-## 5. Probar
-
-1. Abre el sitio (local o Firebase Hosting).
-2. Envía una inscripción de prueba en **index.html** (feria).
-3. Envía otra en **competencia.html**.
-4. Revisa las pestañas **Feria** y **Competencia** en la hoja: debe aparecer una fila nueva en cada una.
-
-## Respaldo local (localStorage)
-
-Si `WEB_APP_URL` está vacío o falla la red, los formularios siguen guardando una copia en el navegador (`localStorage`). Eso **no** reemplaza la hoja: solo sirve como respaldo temporal en ese dispositivo.
-
-## Columnas registradas
-
-### Pestaña Feria
-
-| Columna | Descripción |
+| Comando | Descripción |
 |---------|-------------|
-| Fecha registro | ISO timestamp |
-| ID | Identificador único |
-| Nombre | Nombre completo |
-| Edad | Edad |
-| Celular | Teléfono |
-| Correo | Email |
-| Intereses | Lista separada por `;` |
+| `--crear-hoja` | Crea o actualiza la hoja con pestañas **Feria** y **Competencia** y todos los encabezados. |
+| `--share-with email@gmail.com` | Comparte la hoja con tu cuenta de Google (editor). |
+| `--sheet-id ID` | Usa una hoja existente en lugar de crear una nueva. |
+| `--configurar-url URL` | Escribe `js/sheets-config.js` con la URL `/exec` de Apps Script. |
+| `--verificar` | Comprueba la URL local, GET, OPTIONS y POST de prueba. |
+| `--probar-envio` | Inserta filas de prueba `TEST-*` en ambas pestañas. |
+| `--dry-run` | Con `--crear-hoja`, muestra el plan sin llamar a Google. |
 
-### Pestaña Competencia
+Variables en `tools/.env` (opcional):
 
-| Columna | Descripción |
-|---------|-------------|
-| Fecha registro | ISO timestamp |
-| ID | Identificador único (ej. `SC-…`) |
-| Evento | Nombre del torneo |
-| Valor inscripción | Monto en COP |
-| Nombre, Documento, Edad, Ciudad, Celular, Correo | Datos personales |
-| Representa, Rol, Experiencia café, Experiencia Switch, Torneos previos | Perfil profesional |
-| Equipo Switch / gramera / tetera | Confirmación de equipo propio (`Sí`/`No`) |
-| Dirección envío … Instrucciones envío | Logística del café de práctica |
-| Método pago | Forma de pago elegida |
-| Referencia pago | Texto opcional (últimos dígitos, ref. transferencia) |
-| Tiene comprobante | `Sí` / `No` |
-| Comprobante nombre | Nombre del archivo subido |
-| Comprobante tipo | MIME (`image/jpeg`, `application/pdf`, etc.) |
-| Comprobante enlace Drive | URL del archivo en Google Drive (si Apps Script pudo guardarlo) |
-| Comprobante base64 (preview) | Primeros ~1000 caracteres del data URL (respaldo si Drive falla) |
-| Observaciones | Notas del participante |
+- `GOOGLE_SERVICE_ACCOUNT_JSON` — ruta al JSON de cuenta de servicio
+- `GOOGLE_SHEET_ID` — ID de hoja existente
+- `SHARE_SHEET_WITH` — correo para compartir
+- `SHEETS_WEB_APP_URL` — URL de Apps Script (alternativa a `--configurar-url`)
 
-> **Comprobante de pago:** el formulario envía el archivo como data URL en JSON. Apps Script intenta guardarlo en la carpeta de Drive `Switch Championship — Comprobantes` y registra el enlace en la hoja. Vuelve a **Implementar** el script tras actualizar `Code.gs`.
+## Cuenta de servicio de Google
 
-Si ya tenías una hoja **Competencia** con la columna antigua `Comprobante`, puedes renombrarla a `Referencia pago` y agregar manualmente las columnas nuevas, o dejar que el script las cree en hojas nuevas.
+1. [Google Cloud Console](https://console.cloud.google.com/) → habilita **Google Sheets API** y **Google Drive API**.
+2. Crea una **cuenta de servicio** y descarga el JSON (guárdalo fuera del repo).
+3. Anota el `client_email` del JSON.
+
+La cuenta de servicio crea la hoja; **debes compartirla** con tu Gmail (`--share-with`) para abrirla y pegar Apps Script.
+
+## Apps Script (`Code.gs`)
+
+Archivo: `tools/google-apps-script/Code.gs`
+
+- Recibe JSON con `formType`: `"feria"` o `"competencia"`.
+- Escribe en la pestaña correspondiente del libro vinculado al script.
+- Guarda comprobantes de pago en Drive (`Switch Championship — Comprobantes`) y registra el enlace.
+
+Tras actualizar `Code.gs`, vuelve a **Implementar → Nueva implementación** en Apps Script.
+
+## Configuración del sitio web
+
+El script genera `js/sheets-config.js`:
+
+```javascript
+window.SHEETS_CONFIG = {
+  WEB_APP_URL: 'https://script.google.com/macros/s/XXXXXXXX/exec'
+};
+```
+
+Si despliegas con Firebase Hosting, vuelve a desplegar tras cambiar la URL. En GitHub Actions puedes usar el secreto `SHEETS_WEB_APP_URL`.
+
+## Respaldo local
+
+Si `WEB_APP_URL` está vacía, los formularios guardan copia en `localStorage` del navegador. No reemplaza la hoja central.
+
+## Columnas — pestaña Feria
+
+| Columna | Campo del formulario |
+|---------|----------------------|
+| Fecha registro | `fecha` (ISO) |
+| ID | `id` (ej. `F-…`) |
+| Nombre | `nombre` |
+| Edad | `edad` |
+| Celular | `celular` |
+| Correo | `correo` |
+| Intereses | `intereses` (lista unida con `;`) |
+
+## Columnas — pestaña Competencia
+
+| Columna | Campo del formulario |
+|---------|----------------------|
+| Fecha registro | `fecha` |
+| ID | `id` (ej. `SC-…`) |
+| Evento | `evento` |
+| Valor inscripción | `valorInscripcion` |
+| Nombre, Documento, Edad, Ciudad, Celular, Correo | datos personales |
+| Representa, Rol | perfil |
+| Experiencia café, Experiencia Switch, Torneos previos | selects / radios |
+| Equipo Switch / gramera / tetera | `equipoPropio` → `Sí`/`No` |
+| Dirección envío … Instrucciones envío | `envio.*` |
+| Método pago | `metodoPago` |
+| Referencia pago | `comprobanteReferencia` |
+| Tiene comprobante | `comprobanteArchivo.tieneComprobante` |
+| Comprobante nombre / tipo | archivo subido |
+| Comprobante enlace Drive | URL en Drive (si se guardó) |
+| Comprobante base64 (preview) | primeros ~1000 caracteres del data URL |
+| Acepta voluntaria … Acepta imagen | `aceptacionesLegales.*` → `Sí`/`No` |
+| Observaciones | `observaciones` |
 
 ## Solución de problemas
 
 | Problema | Solución |
 |----------|----------|
-| No llegan filas | Verifica que la URL termine en `/exec` y que el acceso sea "Cualquier persona". |
-| Error de permisos | Vuelve a implementar el script y acepta permisos de la hoja. |
-| Formulario envía pero hoja vacía | Abre Apps Script → **Ejecuciones** y revisa errores recientes. |
-| CORS en consola | Es normal con `mode: 'no-cors'`; si la fila aparece en Sheets, funciona. |
+| No llegan filas | URL debe terminar en `/exec` y acceso «Cualquier persona». |
+| Error de permisos | Reimplementa Apps Script y acepta permisos de hoja y Drive. |
+| Hoja vacía tras envío | Apps Script → **Ejecuciones** → revisa errores. |
+| CORS en consola del navegador | Normal con `mode: 'no-cors'`; si la fila aparece en Sheets, funciona. |
+| `--verificar` falla en OPTIONS | No crítico si GET y `--probar-envio` funcionan. |
+
+## Scripts relacionados
+
+- `tools/conectar_sheets.py` — CLI principal (este flujo)
+- `tools/setup_google_sheets.py` — bajo nivel (usado por `setup.py --sheets-only`)
+- `js/form-submit.js` — envío desde los formularios HTML

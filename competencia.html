@@ -8,519 +8,31 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Nunito:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --brown-dark: #5D3A1A;
-      --red-brand: #C1272D;
-      --red-hover: #a82026;
-      --olive: #6B703F;
-      --blue-accent: #1B4079;
-      --bg-page: #121212;
-      --cream: #faf6f0;
-      --cream-dark: #e8dfd0;
-      --cream-muted: #f0e9df;
-      --text-dark: #3a2512;
-      --success: #6B703F;
-      --success-bg: #eef2e4;
-      --error: #C1272D;
-      --error-bg: #fde8e8;
-      --shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
-      --radius: 16px;
-      --font-body: "Nunito", "Segoe UI", system-ui, sans-serif;
-      --font-display: "Pacifico", cursive;
-      --font-script: "Dancing Script", cursive;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: var(--font-body);
-      color: var(--text-dark);
-      background:
-        radial-gradient(ellipse at 15% 10%, rgba(193, 39, 45, 0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at 85% 90%, rgba(107, 112, 63, 0.14) 0%, transparent 45%),
-        radial-gradient(ellipse at 50% 50%, rgba(93, 58, 26, 0.18) 0%, transparent 60%),
-        var(--bg-page);
-      line-height: 1.5;
-    }
-
-    .page {
-      min-height: 100vh;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 1.5rem 1rem 2.5rem;
-    }
-
-    .card {
-      width: 100%;
-      max-width: 720px;
-      background: var(--cream);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      border: 1px solid rgba(107, 112, 63, 0.35);
-      animation: fadeUp 0.5s ease-out;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .card-header {
-      background: linear-gradient(145deg, var(--brown-dark) 0%, #3d2410 55%, #2a1809 100%);
-      color: var(--cream);
-      padding: 2rem 1.75rem 1.5rem;
-      text-align: center;
-      position: relative;
-    }
-
-    .card-header::after {
-      content: "";
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--red-brand) 0%, var(--olive) 35%, var(--blue-accent) 65%, var(--red-brand) 100%);
-    }
-
-    .organizer {
-      margin: 0 0 0.75rem;
-      font-size: 0.8rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      opacity: 0.85;
-    }
-
-    .brand-lockup {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .brand-logo {
-      max-width: min(320px, 90vw);
-      height: auto;
-      display: block;
-      margin: 0 auto 0.75rem;
-    }
-
-    .event-title {
-      margin: 0;
-      font-family: var(--font-display);
-      font-size: clamp(1.8rem, 5vw, 2.4rem);
-      color: var(--cream);
-      line-height: 1.2;
-    }
-
-    .event-subtitle {
-      margin: 0.35rem 0 0;
-      font-size: 1rem;
-      font-weight: 600;
-      color: rgba(250, 246, 240, 0.9);
-    }
-
-    .event-meta {
-      margin: 1rem 0 0;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      justify-content: center;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 0.35rem 0.75rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .badge.price {
-      background: rgba(193, 39, 45, 0.35);
-      border-color: rgba(193, 39, 45, 0.5);
-    }
-
-    .info-box {
-      margin: 0 0 1.5rem;
-      padding: 1rem 1.1rem;
-      background: #fff;
-      border: 2px solid var(--cream-dark);
-      border-left: 4px solid var(--blue-accent);
-      border-radius: 10px;
-      font-size: 0.88rem;
-      color: var(--brown-dark);
-    }
-
-    .info-box strong { color: var(--brown-dark); }
-
-    .info-box ul {
-      margin: 0.5rem 0 0;
-      padding-left: 1.2rem;
-    }
-
-    .info-box li { margin-bottom: 0.25rem; }
-
-    .cupo-status {
-      margin-top: 0.75rem;
-      font-weight: 700;
-      color: var(--olive);
-    }
-
-    .card-body { padding: 1.75rem; }
-
-    .section-title {
-      margin: 0 0 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--cream-dark);
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--brown-dark);
-    }
-
-    .section-title:not(:first-child) { margin-top: 1.75rem; }
-
-    .field { margin-bottom: 1.15rem; }
-
-    .field-row {
-      display: grid;
-      gap: 1rem;
-      grid-template-columns: 1fr 1fr;
-    }
-
-    @media (max-width: 560px) {
-      .field-row { grid-template-columns: 1fr; }
-    }
-
-    label {
-      display: block;
-      font-weight: 700;
-      font-size: 0.875rem;
-      margin-bottom: 0.4rem;
-      color: var(--brown-dark);
-    }
-
-    label .required { color: var(--red-brand); margin-left: 0.15rem; }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="tel"],
-    input[type="number"],
-    select,
-    textarea {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 2px solid var(--cream-dark);
-      border-radius: 10px;
-      font-size: 1rem;
-      font-family: inherit;
-      background: #fff;
-      color: var(--text-dark);
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    textarea { min-height: 80px; resize: vertical; }
-
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--olive);
-      box-shadow: 0 0 0 3px rgba(107, 112, 63, 0.28);
-    }
-
-    input[aria-invalid="true"],
-    select[aria-invalid="true"],
-    textarea[aria-invalid="true"] {
-      border-color: var(--error);
-      background: var(--error-bg);
-    }
-
-    .hint {
-      font-size: 0.78rem;
-      color: var(--olive);
-      margin-top: 0.3rem;
-    }
-
-    .error-msg {
-      display: none;
-      font-size: 0.78rem;
-      color: var(--error);
-      margin-top: 0.35rem;
-      font-weight: 600;
-    }
-
-    .error-msg.visible { display: block; }
-
-    .radio-group, .checkbox-group {
-      display: grid;
-      gap: 0.55rem;
-    }
-
-    .choice-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.65rem;
-      padding: 0.7rem 0.9rem;
-      background: #fff;
-      border: 2px solid var(--cream-dark);
-      border-radius: 10px;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-    }
-
-    .choice-item:hover {
-      border-color: var(--olive);
-      background: #fffdf9;
-    }
-
-    .choice-item:has(input:checked) {
-      border-color: var(--olive);
-      background: var(--success-bg);
-      box-shadow: inset 3px 0 0 var(--red-brand);
-    }
-
-    .choice-item input {
-      width: 1.1rem;
-      height: 1.1rem;
-      margin-top: 0.15rem;
-      accent-color: var(--red-brand);
-      flex-shrink: 0;
-      cursor: pointer;
-    }
-
-    .choice-item span { font-size: 0.9rem; line-height: 1.4; }
-
-    .terms-block {
-      padding: 1rem;
-      background: var(--cream-muted);
-      border-radius: 10px;
-      border: 2px solid var(--cream-dark);
-    }
-
-    .btn-submit {
-      width: 100%;
-      margin-top: 1rem;
-      padding: 0.95rem 1.5rem;
-      font-size: 1rem;
-      font-weight: 700;
-      font-family: inherit;
-      color: #fff;
-      background: linear-gradient(135deg, var(--red-brand) 0%, var(--red-hover) 100%);
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      box-shadow: 0 4px 16px rgba(193, 39, 45, 0.4);
-    }
-
-    .btn-submit:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .btn-submit:not(:disabled):hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 22px rgba(193, 39, 45, 0.5);
-    }
-
-    .footer-note {
-      margin-top: 1rem;
-      font-size: 0.78rem;
-      color: var(--olive);
-      text-align: center;
-    }
-
-    .footer-note a { color: var(--blue-accent); }
-
-    .form-panel.hidden { display: none; }
-
-    .success-panel {
-      display: none;
-      text-align: center;
-      padding: 2.5rem 1.75rem;
-    }
-
-    .success-panel.visible { display: block; }
-
-    .success-panel h2 {
-      margin: 0 0 0.5rem;
-      color: var(--olive);
-      font-family: var(--font-script);
-      font-size: 1.6rem;
-    }
-
-    .btn-secondary {
-      display: inline-block;
-      padding: 0.75rem 1.25rem;
-      font-weight: 700;
-      font-family: inherit;
-      color: var(--brown-dark);
-      background: #fff;
-      border: 2px solid var(--olive);
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
-    .prizes-box {
-      margin-top: 0.75rem;
-      padding: 0.75rem 1rem;
-      background: rgba(107, 112, 63, 0.12);
-      border-radius: 8px;
-      font-size: 0.85rem;
-    }
-
-    .prizes-box ul { margin: 0.35rem 0 0; padding-left: 1.1rem; }
-
-    .legal-scroll {
-      max-height: 220px;
-      overflow-y: auto;
-      padding: 0.85rem 1rem;
-      background: #fff;
-      border: 2px solid var(--cream-dark);
-      border-radius: 8px;
-      font-size: 0.8rem;
-      line-height: 1.5;
-      margin-bottom: 0.75rem;
-    }
-
-    .legal-scroll p { margin: 0 0 0.5rem; }
-
-    .btn-rules {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      margin-bottom: 0.75rem;
-      padding: 0.55rem 1rem;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #fff;
-      background: var(--blue-accent);
-      border-radius: 8px;
-      text-decoration: none;
-    }
-
-    .btn-rules:hover { opacity: 0.92; }
-
-    .btn-guide {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      margin-left: 0.5rem;
-      padding: 0.55rem 1rem;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--brown-dark);
-      background: var(--cream-muted);
-      border: 2px solid var(--olive);
-      border-radius: 8px;
-      text-decoration: none;
-    }
-
-    .btn-guide:hover { background: #fff; }
-
-    input[type="file"] {
-      width: 100%;
-      padding: 0.65rem;
-      border: 2px dashed var(--cream-dark);
-      border-radius: 10px;
-      background: #fff;
-      font-family: inherit;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    input[type="file"]:focus {
-      outline: none;
-      border-color: var(--olive);
-      box-shadow: 0 0 0 3px rgba(107, 112, 63, 0.28);
-    }
-
-    .comprobante-preview {
-      display: none;
-      margin-top: 0.75rem;
-      padding: 0.75rem;
-      background: #fff;
-      border: 2px solid var(--cream-dark);
-      border-radius: 10px;
-      align-items: center;
-      gap: 0.85rem;
-    }
-
-    .comprobante-preview.visible {
-      display: flex;
-    }
-
-    .comprobante-preview img {
-      width: 72px;
-      height: 72px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 1px solid var(--cream-dark);
-      flex-shrink: 0;
-    }
-
-    .comprobante-preview .pdf-icon {
-      width: 72px;
-      height: 72px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--cream-muted);
-      border-radius: 8px;
-      font-size: 2rem;
-      flex-shrink: 0;
-    }
-
-    .comprobante-preview .meta {
-      flex: 1;
-      min-width: 0;
-      font-size: 0.85rem;
-    }
-
-    .comprobante-preview .meta strong {
-      display: block;
-      word-break: break-all;
-      color: var(--brown-dark);
-    }
-
-    .btn-clear-file {
-      padding: 0.4rem 0.75rem;
-      font-size: 0.78rem;
-      font-weight: 700;
-      font-family: inherit;
-      color: var(--red-brand);
-      background: #fff;
-      border: 2px solid var(--red-brand);
-      border-radius: 8px;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-  </style>
+  <link rel="stylesheet" href="css/brand.css">
 </head>
 <body>
-  <main class="page">
-    <article class="card" aria-labelledby="event-title">
-      <header class="card-header">
-        <div class="brand-lockup">
+  <div class="site-shell">
+    <header class="site-hero">
+      <div class="hero-inner">
+        <div class="logo-frame">
           <img class="brand-logo" src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café">
         </div>
-        <p class="organizer">Presenta</p>
-        <h1 id="event-title" class="event-title">Switch Championship</h1>
-        <p class="event-subtitle">Competencia de café filtrado · Método Hario Switch</p>
-        <div class="event-meta">
+        <p class="hero-eyebrow">Presenta</p>
+        <h1 id="event-title" class="hero-title">Switch Championship</h1>
+        <p class="hero-subtitle">Competencia de café filtrado · Método Hario Switch</p>
+        <div class="hero-meta">
           <span class="badge">Extracción manual</span>
           <span class="badge">Café de especialidad</span>
           <span class="badge price">Inscripción $90.000 COP</span>
           <span class="badge">Cupo: 36 competidores</span>
         </div>
-      </header>
+      </div>
+      <div class="hero-accent" aria-hidden="true"></div>
+    </header>
 
-      <div id="formPanel" class="form-panel card-body">
+    <main class="site-main">
+      <article class="content-card content-card--wide" aria-labelledby="event-title">
+        <div id="formPanel" class="form-panel card-body">
         <div class="info-box" role="note">
           <strong>Switch Championship</strong> — competencia de café filtrado con Hario Switch (cupo: 36 · inscripción $90.000 COP).
           <p style="margin:0.5rem 0 0">
@@ -788,9 +300,10 @@
         <p class="hint"><a href="reglas-switch-championship.html" target="_blank" rel="noopener">Descargar reglamento oficial (PDF)</a> · <a href="como-funciona-evento.html" target="_blank" rel="noopener">¿Cómo funciona el evento?</a></p>
         <p id="inscripcionId" class="hint"></p>
         <button type="button" id="btnNueva" class="btn-secondary">Nueva inscripción</button>
-      </div>
-    </article>
-  </main>
+        </div>
+      </article>
+    </main>
+  </div>
 
   <script src="js/sheets-config.js"></script>
   <script src="js/form-submit.js"></script>
@@ -825,7 +338,7 @@
 
       if (syncNote && window.FormSubmit && !FormSubmit.isConfigured()) {
         syncNote.style.display = "block";
-        syncNote.textContent = "Modo local: configura Google Sheets para centralizar inscripciones y cupo global.";
+        syncNote.textContent = "Modo local: ejecuta py tools/conectar_sheets.py --crear-hoja para centralizar inscripciones y cupo global.";
       }
 
       function getInscripciones() {
@@ -1111,6 +624,16 @@
             metodoPago: document.getElementById("metodoPago").value,
             comprobanteReferencia: document.getElementById("comprobanteReferencia").value.trim() || null,
             comprobanteArchivo: comprobantePayload,
+            aceptacionesLegales: {
+              aceptaVoluntaria: document.getElementById("aceptaVoluntaria").checked,
+              aceptaPertenencias: document.getElementById("aceptaPertenencias").checked,
+              aceptaDatos: document.getElementById("aceptaDatos").checked,
+              aceptaNoReembolso: document.getElementById("aceptaNoReembolso").checked,
+              aceptaDescalificacion: document.getElementById("aceptaDescalificacion").checked,
+              aceptaReglas: document.getElementById("aceptaReglas").checked,
+              aceptaDisponibilidad: document.getElementById("aceptaDisponibilidad").checked,
+              aceptaImagen: document.getElementById("aceptaImagen").checked
+            },
             observaciones: document.getElementById("observaciones").value.trim() || null
           };
         }

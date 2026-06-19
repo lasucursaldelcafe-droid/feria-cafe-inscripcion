@@ -53,6 +53,14 @@ var HEADERS_COMPETENCIA = [
   'Comprobante tipo',
   'Comprobante enlace Drive',
   'Comprobante base64 (preview)',
+  'Acepta voluntaria',
+  'Acepta pertenencias',
+  'Acepta datos',
+  'Acepta no reembolso',
+  'Acepta descalificación',
+  'Acepta reglas',
+  'Acepta disponibilidad',
+  'Acepta imagen',
   'Observaciones'
 ];
 
@@ -62,6 +70,10 @@ function doGet() {
     message: 'API de inscripciones — La Sucursal del Café',
     forms: ['feria', 'competencia']
   });
+}
+
+function doOptions() {
+  return jsonResponse({ ok: true, message: 'CORS preflight' });
 }
 
 function doPost(e) {
@@ -193,11 +205,29 @@ function guessExtension_(mime, nombreArchivo) {
   return '.jpg';
 }
 
+function parseLegalAcceptances_(data) {
+  var legal = data.aceptacionesLegales || {};
+  function yn(key) {
+    return legal[key] ? 'Sí' : 'No';
+  }
+  return [
+    yn('aceptaVoluntaria'),
+    yn('aceptaPertenencias'),
+    yn('aceptaDatos'),
+    yn('aceptaNoReembolso'),
+    yn('aceptaDescalificacion'),
+    yn('aceptaReglas'),
+    yn('aceptaDisponibilidad'),
+    yn('aceptaImagen')
+  ];
+}
+
 function appendCompetencia_(data) {
   var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
   var equipo = data.equipoPropio || {};
   var envio = data.envio || {};
   var comp = parseComprobante_(data);
+  var legalCols = parseLegalAcceptances_(data);
 
   sheet.appendRow([
     data.fecha || new Date().toISOString(),
@@ -230,9 +260,10 @@ function appendCompetencia_(data) {
     comp.nombre,
     comp.tipo,
     comp.enlace,
-    comp.preview,
+    comp.preview
+  ].concat(legalCols).concat([
     data.observaciones || ''
-  ]);
+  ]));
 }
 
 function jsonResponse(obj, statusCode) {
