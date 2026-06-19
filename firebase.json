@@ -16,6 +16,10 @@
       {
         "source": "/reglas",
         "destination": "/reglas-switch-championship.html"
+      },
+      {
+        "source": "/como-funciona",
+        "destination": "/como-funciona-evento.html"
       }
     ],
     "headers": [

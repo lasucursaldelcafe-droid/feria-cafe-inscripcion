@@ -436,6 +436,101 @@
     }
 
     .btn-rules:hover { opacity: 0.92; }
+
+    .btn-guide {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-left: 0.5rem;
+      padding: 0.55rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--brown-dark);
+      background: var(--cream-muted);
+      border: 2px solid var(--olive);
+      border-radius: 8px;
+      text-decoration: none;
+    }
+
+    .btn-guide:hover { background: #fff; }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 0.65rem;
+      border: 2px dashed var(--cream-dark);
+      border-radius: 10px;
+      background: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    input[type="file"]:focus {
+      outline: none;
+      border-color: var(--olive);
+      box-shadow: 0 0 0 3px rgba(107, 112, 63, 0.28);
+    }
+
+    .comprobante-preview {
+      display: none;
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: #fff;
+      border: 2px solid var(--cream-dark);
+      border-radius: 10px;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .comprobante-preview.visible {
+      display: flex;
+    }
+
+    .comprobante-preview img {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--cream-dark);
+      flex-shrink: 0;
+    }
+
+    .comprobante-preview .pdf-icon {
+      width: 72px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--cream-muted);
+      border-radius: 8px;
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .comprobante-preview .meta {
+      flex: 1;
+      min-width: 0;
+      font-size: 0.85rem;
+    }
+
+    .comprobante-preview .meta strong {
+      display: block;
+      word-break: break-all;
+      color: var(--brown-dark);
+    }
+
+    .btn-clear-file {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      font-family: inherit;
+      color: var(--red-brand);
+      background: #fff;
+      border: 2px solid var(--red-brand);
+      border-radius: 8px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
@@ -464,22 +559,11 @@
 
       <div id="formPanel" class="form-panel card-body">
         <div class="info-box" role="note">
-          <strong>Formato del torneo:</strong> eliminatorio en 3 fases — clasificatoria (36 → 9), semifinal (9 → 3) y final.
-          <ul>
-            <li><strong>Práctica previa:</strong> 100 g de café oficial enviados a tu domicilio</li>
-            <li><strong>Por ronda:</strong> 50 g de café oficial (mismo lote para todos)</li>
-            <li><strong>Equipo propio:</strong> Hario Switch, gramera y tetera (el café lo entrega el evento)</li>
-            <li><strong>Evaluación:</strong> panel de 3 jueces sensoriales + juez principal</li>
-          </ul>
-          <div class="prizes-box">
-            <strong>Premios:</strong>
-            <ul>
-              <li>1.er puesto: <strong>$500.000 COP</strong></li>
-              <li>2.º puesto: <strong>$300.000 COP</strong></li>
-              <li>3.er puesto: <strong>$200.000 COP</strong></li>
-              <li>+ Premios de patrocinadores y cupo al evento principal de La Sucursal del Café</li>
-            </ul>
-          </div>
+          <strong>Switch Championship</strong> — competencia de café filtrado con Hario Switch (cupo: 36 · inscripción $90.000 COP).
+          <p style="margin:0.5rem 0 0">
+            <a href="como-funciona-evento.html" target="_blank" rel="noopener"><strong>¿Cómo funciona el evento?</strong></a>
+            — guía paso a paso: inscripción, pago, envío de café de práctica y día del torneo.
+          </p>
           <p id="cupoStatus" class="cupo-status" aria-live="polite"></p>
         </div>
 
@@ -646,9 +730,20 @@
           </div>
 
           <div class="field">
-            <label for="comprobante">Referencia o número de comprobante</label>
-            <input type="text" id="comprobante" name="comprobante" maxlength="60" placeholder="Opcional si ya realizaste el pago" aria-describedby="comprobante-hint">
-            <p id="comprobante-hint" class="hint">Si pagas después, podrás enviar el comprobante por correo o WhatsApp.</p>
+            <label for="comprobanteReferencia">Referencia de pago (opcional)</label>
+            <input type="text" id="comprobanteReferencia" name="comprobanteReferencia" maxlength="60" placeholder="Ej. últimos dígitos de transferencia" aria-describedby="comprobante-ref-hint">
+            <p id="comprobante-ref-hint" class="hint">Número o referencia de la transacción, si aplica.</p>
+          </div>
+
+          <div class="field">
+            <label for="comprobanteArchivo">Comprobante de pago (opcional, recomendado)</label>
+            <input type="file" id="comprobanteArchivo" name="comprobanteArchivo" accept="image/jpeg,image/png,image/webp,application/pdf" aria-describedby="comprobante-hint comprobante-error comprobantePreview">
+            <p id="comprobante-hint" class="hint">
+              Sube una foto o PDF de tu pago de <strong>$90.000 COP</strong>. Formatos: JPG, PNG, WebP o PDF · máx. 5 MB.
+              Incluir el comprobante acelera la confirmación de tu cupo.
+            </p>
+            <div id="comprobantePreview" class="comprobante-preview" aria-live="polite"></div>
+            <span id="comprobante-error" class="error-msg" role="alert"></span>
           </div>
 
           <div class="field">
@@ -658,11 +753,15 @@
 
           <h2 class="section-title">5. Términos y condiciones legales</h2>
 
-          <a class="btn-rules" href="assets/reglas-switch-championship.pdf" download="Reglamento-Switch-Championship-2026.pdf">
+          <a class="btn-rules" href="reglas-switch-championship.html" target="_blank" rel="noopener">
             📄 Descargar reglamento (PDF)
           </a>
-          <p class="hint" style="margin-top:-0.25rem;margin-bottom:0.75rem">
-            También disponible en <a href="reglas-switch-championship.html" target="_blank" rel="noopener">versión web</a>.
+          <a class="btn-guide" href="como-funciona-evento.html" target="_blank" rel="noopener">
+            ¿Cómo funciona el evento?
+          </a>
+          <p class="hint" style="margin-top:0.5rem;margin-bottom:0.75rem">
+            El reglamento se abre en versión web optimizada para <strong>Imprimir → Guardar como PDF</strong>.
+            La guía del participante explica el formato y la logística sin mezclar las reglas oficiales.
           </p>
 
           <div class="legal-scroll" tabindex="0" aria-label="Resumen legal">
@@ -722,7 +821,8 @@
         <div style="font-size:3rem;margin-bottom:0.5rem" aria-hidden="true">🏆</div>
         <h2>¡Inscripción registrada!</h2>
         <p>Tu cupo en el <strong>Switch Championship</strong> quedó registrado. Te contactaremos para confirmar el pago y el envío del café de práctica (100 g) a la dirección indicada.</p>
-        <p class="hint"><a href="assets/reglas-switch-championship.pdf" download="Reglamento-Switch-Championship-2026.pdf">Descargar reglamento oficial (PDF)</a></p>
+        <p id="successComprobanteNote" class="hint"></p>
+        <p class="hint"><a href="reglas-switch-championship.html" target="_blank" rel="noopener">Descargar reglamento oficial (PDF)</a> · <a href="como-funciona-evento.html" target="_blank" rel="noopener">¿Cómo funciona el evento?</a></p>
         <p id="inscripcionId" class="hint"></p>
         <button type="button" id="btnNueva" class="btn-secondary">Nueva inscripción</button>
       </div>
@@ -746,6 +846,19 @@
       const cupoStatus = document.getElementById("cupoStatus");
       const inscripcionId = document.getElementById("inscripcionId");
       const syncNote = document.getElementById("syncNote");
+      const successComprobanteNote = document.getElementById("successComprobanteNote");
+      const comprobanteInput = document.getElementById("comprobanteArchivo");
+      const comprobantePreview = document.getElementById("comprobantePreview");
+
+      const MAX_COMPROBANTE_BYTES = 5 * 1024 * 1024;
+      const COMPROBANTE_TIPOS = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "application/pdf"
+      ];
+
+      let comprobanteArchivoData = null;
 
       if (syncNote && window.FormSubmit && !FormSubmit.isConfigured()) {
         syncNote.style.display = "block";
@@ -774,6 +887,89 @@
       }
 
       updateCupo();
+
+      function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+        return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+      }
+
+      function clearComprobantePreview() {
+        comprobanteArchivoData = null;
+        if (comprobanteInput) comprobanteInput.value = "";
+        if (comprobantePreview) {
+          comprobantePreview.classList.remove("visible");
+          comprobantePreview.innerHTML = "";
+        }
+        showError("comprobante-error", "");
+      }
+
+      function renderComprobantePreview(data) {
+        if (!comprobantePreview || !data) return;
+        var isPdf = data.tipoArchivo === "application/pdf";
+        var thumb = isPdf
+          ? '<div class="pdf-icon" aria-hidden="true">📄</div>'
+          : '<img src="' + data.base64 + '" alt="Vista previa del comprobante">';
+        comprobantePreview.innerHTML =
+          thumb +
+          '<div class="meta"><strong>' + data.nombreArchivo + '</strong>' +
+          data.tipoArchivo + " · " + formatFileSize(data.tamanoBytes) + '</div>' +
+          '<button type="button" class="btn-clear-file" id="btnClearComprobante">Quitar</button>';
+        comprobantePreview.classList.add("visible");
+        var btnClear = document.getElementById("btnClearComprobante");
+        if (btnClear) {
+          btnClear.addEventListener("click", clearComprobantePreview);
+        }
+      }
+
+      function readFileAsDataUrl(file) {
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function () { resolve(reader.result); };
+          reader.onerror = function () { reject(new Error("No se pudo leer el archivo.")); };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function validateComprobanteFile(file) {
+        if (!file) return "";
+        if (COMPROBANTE_TIPOS.indexOf(file.type) === -1) {
+          return "Formato no permitido. Usa JPG, PNG, WebP o PDF.";
+        }
+        if (file.size > MAX_COMPROBANTE_BYTES) {
+          return "El archivo supera 5 MB. Elige uno más pequeño.";
+        }
+        return "";
+      }
+
+      if (comprobanteInput) {
+        comprobanteInput.addEventListener("change", function () {
+          var file = comprobanteInput.files && comprobanteInput.files[0];
+          clearComprobantePreview();
+          if (!file) return;
+
+          var msg = validateComprobanteFile(file);
+          if (msg) {
+            showError("comprobante-error", msg);
+            comprobanteInput.value = "";
+            return;
+          }
+
+          readFileAsDataUrl(file).then(function (dataUrl) {
+            comprobanteArchivoData = {
+              tieneComprobante: true,
+              nombreArchivo: file.name,
+              tipoArchivo: file.type,
+              tamanoBytes: file.size,
+              base64: dataUrl
+            };
+            renderComprobantePreview(comprobanteArchivoData);
+          }).catch(function () {
+            showError("comprobante-error", "No se pudo cargar el comprobante. Intenta de nuevo.");
+            comprobanteInput.value = "";
+          });
+        });
+      }
 
       function showError(id, message) {
         const el = document.getElementById(id);
@@ -908,61 +1104,113 @@
         if (getInscripciones().length >= CUPO_MAX) return;
         if (!validateAll()) return;
 
-        const id = "SC-" + Date.now().toString(36).toUpperCase();
-        const entry = {
-          id: id,
-          fecha: new Date().toISOString(),
-          evento: "Switch Championship",
-          valorInscripcion: PRECIO,
-          nombre: document.getElementById("nombre").value.trim(),
-          documento: document.getElementById("documento").value.trim(),
-          edad: Number(document.getElementById("edad").value),
-          ciudad: document.getElementById("ciudad").value.trim(),
-          celular: document.getElementById("celular").value.trim(),
-          correo: document.getElementById("correo").value.trim().toLowerCase(),
-          representa: document.getElementById("representa").value.trim(),
-          rol: form.querySelector('input[name="rol"]:checked').value,
-          experiencia: document.getElementById("experiencia").value,
-          experienciaSwitch: document.getElementById("switchExp").value,
-          torneosPrevios: form.querySelector('input[name="torneos"]:checked').value,
-          equipoPropio: {
-            harioSwitch: true,
-            gramera: true,
-            tetera: true
-          },
-          envio: {
-            direccion: document.getElementById("direccion").value.trim(),
-            ciudad: document.getElementById("ciudadEnvio").value.trim(),
-            departamento: document.getElementById("departamento").value.trim(),
-            codigoPostal: document.getElementById("codigoPostal").value.trim() || null,
-            receptor: document.getElementById("receptor").value.trim(),
-            instrucciones: document.getElementById("instruccionesEnvio").value.trim() || null
-          },
-          metodoPago: document.getElementById("metodoPago").value,
-          comprobante: document.getElementById("comprobante").value.trim() || null,
-          observaciones: document.getElementById("observaciones").value.trim() || null
-        };
+        var file = comprobanteInput && comprobanteInput.files && comprobanteInput.files[0];
+        if (file) {
+          var fileMsg = validateComprobanteFile(file);
+          if (fileMsg) {
+            showError("comprobante-error", fileMsg);
+            return;
+          }
+        }
+
+        var id = "SC-" + Date.now().toString(36).toUpperCase();
+
+        function buildEntry(comprobantePayload) {
+          return {
+            id: id,
+            fecha: new Date().toISOString(),
+            evento: "Switch Championship",
+            valorInscripcion: PRECIO,
+            nombre: document.getElementById("nombre").value.trim(),
+            documento: document.getElementById("documento").value.trim(),
+            edad: Number(document.getElementById("edad").value),
+            ciudad: document.getElementById("ciudad").value.trim(),
+            celular: document.getElementById("celular").value.trim(),
+            correo: document.getElementById("correo").value.trim().toLowerCase(),
+            representa: document.getElementById("representa").value.trim(),
+            rol: form.querySelector('input[name="rol"]:checked').value,
+            experiencia: document.getElementById("experiencia").value,
+            experienciaSwitch: document.getElementById("switchExp").value,
+            torneosPrevios: form.querySelector('input[name="torneos"]:checked').value,
+            equipoPropio: {
+              harioSwitch: true,
+              gramera: true,
+              tetera: true
+            },
+            envio: {
+              direccion: document.getElementById("direccion").value.trim(),
+              ciudad: document.getElementById("ciudadEnvio").value.trim(),
+              departamento: document.getElementById("departamento").value.trim(),
+              codigoPostal: document.getElementById("codigoPostal").value.trim() || null,
+              receptor: document.getElementById("receptor").value.trim(),
+              instrucciones: document.getElementById("instruccionesEnvio").value.trim() || null
+            },
+            metodoPago: document.getElementById("metodoPago").value,
+            comprobanteReferencia: document.getElementById("comprobanteReferencia").value.trim() || null,
+            comprobanteArchivo: comprobantePayload,
+            observaciones: document.getElementById("observaciones").value.trim() || null
+          };
+        }
 
         btnSubmit.disabled = true;
         btnSubmit.textContent = "Enviando…";
 
-        FormSubmit.submitForm(FORM_TYPE, STORAGE_KEY, entry).then(function (result) {
-          btnSubmit.disabled = getInscripciones().length >= CUPO_MAX;
-          btnSubmit.textContent = "Inscribirme en Switch Championship";
-          if (!result.ok) {
-            alert("No se pudo guardar la inscripción. Intenta de nuevo.");
-            return;
-          }
+        function finalizeSubmit(entry, hadComprobante) {
+          FormSubmit.submitForm(FORM_TYPE, STORAGE_KEY, entry).then(function (result) {
+            btnSubmit.disabled = getInscripciones().length >= CUPO_MAX;
+            btnSubmit.textContent = "Inscribirme en Switch Championship";
+            if (!result.ok) {
+              alert("No se pudo guardar la inscripción. Intenta de nuevo.");
+              return;
+            }
 
-          inscripcionId.textContent = "Número de inscripción: " + id;
-          formPanel.classList.add("hidden");
-          successPanel.classList.add("visible");
-          updateCupo();
-        });
+            inscripcionId.textContent = "Número de inscripción: " + id;
+            if (successComprobanteNote) {
+              successComprobanteNote.textContent = hadComprobante
+                ? "Recibimos tu comprobante de pago. Validaremos el pago de $90.000 COP y te confirmaremos por correo o WhatsApp."
+                : "Si aún no pagaste o no adjuntaste comprobante, puedes enviarlo después por correo o WhatsApp para acelerar la confirmación.";
+            }
+            formPanel.classList.add("hidden");
+            successPanel.classList.add("visible");
+            updateCupo();
+          });
+        }
+
+        if (comprobanteArchivoData && comprobanteArchivoData.base64) {
+          finalizeSubmit(buildEntry(comprobanteArchivoData), true);
+          return;
+        }
+
+        if (file) {
+          readFileAsDataUrl(file).then(function (dataUrl) {
+            finalizeSubmit(buildEntry({
+              tieneComprobante: true,
+              nombreArchivo: file.name,
+              tipoArchivo: file.type,
+              tamanoBytes: file.size,
+              base64: dataUrl
+            }), true);
+          }).catch(function () {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "Inscribirme en Switch Championship";
+            showError("comprobante-error", "No se pudo leer el comprobante. Intenta de nuevo.");
+          });
+          return;
+        }
+
+        finalizeSubmit(buildEntry({
+          tieneComprobante: false,
+          nombreArchivo: null,
+          tipoArchivo: null,
+          tamanoBytes: 0,
+          base64: null
+        }), false);
       });
 
       btnNueva.addEventListener("click", function () {
         form.reset();
+        clearComprobantePreview();
+        if (successComprobanteNote) successComprobanteNote.textContent = "";
         form.querySelectorAll("[aria-invalid]").forEach(function (el) {
           el.removeAttribute("aria-invalid");
         });

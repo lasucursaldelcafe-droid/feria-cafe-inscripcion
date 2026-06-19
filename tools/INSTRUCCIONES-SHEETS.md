@@ -81,7 +81,28 @@ Si `WEB_APP_URL` está vacío o falla la red, los formularios siguen guardando u
 
 ### Pestaña Competencia
 
-Incluye datos personales, perfil profesional, equipo, dirección de envío del café de práctica, pago y observaciones. Ver encabezados en `Code.gs`.
+| Columna | Descripción |
+|---------|-------------|
+| Fecha registro | ISO timestamp |
+| ID | Identificador único (ej. `SC-…`) |
+| Evento | Nombre del torneo |
+| Valor inscripción | Monto en COP |
+| Nombre, Documento, Edad, Ciudad, Celular, Correo | Datos personales |
+| Representa, Rol, Experiencia café, Experiencia Switch, Torneos previos | Perfil profesional |
+| Equipo Switch / gramera / tetera | Confirmación de equipo propio (`Sí`/`No`) |
+| Dirección envío … Instrucciones envío | Logística del café de práctica |
+| Método pago | Forma de pago elegida |
+| Referencia pago | Texto opcional (últimos dígitos, ref. transferencia) |
+| Tiene comprobante | `Sí` / `No` |
+| Comprobante nombre | Nombre del archivo subido |
+| Comprobante tipo | MIME (`image/jpeg`, `application/pdf`, etc.) |
+| Comprobante enlace Drive | URL del archivo en Google Drive (si Apps Script pudo guardarlo) |
+| Comprobante base64 (preview) | Primeros ~1000 caracteres del data URL (respaldo si Drive falla) |
+| Observaciones | Notas del participante |
+
+> **Comprobante de pago:** el formulario envía el archivo como data URL en JSON. Apps Script intenta guardarlo en la carpeta de Drive `Switch Championship — Comprobantes` y registra el enlace en la hoja. Vuelve a **Implementar** el script tras actualizar `Code.gs`.
+
+Si ya tenías una hoja **Competencia** con la columna antigua `Comprobante`, puedes renombrarla a `Referencia pago` y agregar manualmente las columnas nuevas, o dejar que el script las cree en hojas nuevas.
 
 ## Solución de problemas
 

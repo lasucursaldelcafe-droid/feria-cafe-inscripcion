@@ -17,10 +17,23 @@
     return !!getWebAppUrl();
   }
 
+  function stripHeavyFields(entry) {
+    var copy = JSON.parse(JSON.stringify(entry));
+    if (copy.comprobanteArchivo && copy.comprobanteArchivo.base64) {
+      copy.comprobanteArchivo = {
+        tieneComprobante: copy.comprobanteArchivo.tieneComprobante,
+        nombreArchivo: copy.comprobanteArchivo.nombreArchivo,
+        tipoArchivo: copy.comprobanteArchivo.tipoArchivo,
+        base64OmitidoEnLocal: true
+      };
+    }
+    return copy;
+  }
+
   function saveLocal(storageKey, entry) {
     try {
       var list = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      list.push(entry);
+      list.push(stripHeavyFields(entry));
       localStorage.setItem(storageKey, JSON.stringify(list));
       return true;
     } catch (e) {

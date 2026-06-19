@@ -8,6 +8,8 @@
 
 var SHEET_FERIA = 'Feria';
 var SHEET_COMPETENCIA = 'Competencia';
+var COMPROBANTE_PREVIEW_MAX = 1000;
+var DRIVE_FOLDER_NAME = 'Switch Championship — Comprobantes';
 
 var HEADERS_FERIA = [
   'Fecha registro',
@@ -45,7 +47,12 @@ var HEADERS_COMPETENCIA = [
   'Receptor',
   'Instrucciones envío',
   'Método pago',
-  'Comprobante',
+  'Referencia pago',
+  'Tiene comprobante',
+  'Comprobante nombre',
+  'Comprobante tipo',
+  'Comprobante enlace Drive',
+  'Comprobante base64 (preview)',
   'Observaciones'
 ];
 
@@ -114,10 +121,84 @@ function appendFeria_(data) {
   ]);
 }
 
+function parseComprobante_(data) {
+  var archivo = data.comprobanteArchivo || {};
+  var tiene = !!(archivo.tieneComprobante || archivo.base64);
+  var nombre = String(archivo.nombreArchivo || '');
+  var tipo = String(archivo.tipoArchivo || '');
+  var base64 = String(archivo.base64 || '');
+  var referencia = String(data.comprobanteReferencia || data.comprobante || '').trim();
+  var enlace = '';
+  var preview = '';
+
+  if (base64) {
+    preview = base64.length > COMPROBANTE_PREVIEW_MAX
+      ? base64.substring(0, COMPROBANTE_PREVIEW_MAX) + '…'
+      : base64;
+    enlace = saveComprobanteToDrive_(data.id || 'sin-id', nombre, tipo, base64);
+  }
+
+  return {
+    referencia: referencia,
+    tiene: tiene ? 'Sí' : 'No',
+    nombre: nombre,
+    tipo: tipo,
+    enlace: enlace,
+    preview: preview
+  };
+}
+
+function saveComprobanteToDrive_(inscripcionId, nombreArchivo, mimeType, dataUrl) {
+  try {
+    var match = String(dataUrl).match(/^data:([^;]+);base64,(.+)$/);
+    if (!match) return '';
+
+    var mime = mimeType || match[1];
+    var bytes = Utilities.base64Decode(match[2]);
+    var blob = Utilities.newBlob(bytes, mime, nombreArchivo || 'comprobante');
+
+    var folder = getOrCreateComprobantesFolder_();
+    var safeName = String(inscripcionId).replace(/[^\w\-]/g, '_');
+    var ext = guessExtension_(mime, nombreArchivo);
+    var file = folder.createFile(blob.setName(safeName + '_' + (nombreArchivo || ('comprobante' + ext))));
+
+    try {
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch (shareErr) {
+      // Si falla el permiso, conservar el archivo privado con enlace interno.
+    }
+
+    return file.getUrl();
+  } catch (err) {
+    Logger.log('Error guardando comprobante en Drive: ' + err);
+    return '';
+  }
+}
+
+function getOrCreateComprobantesFolder_() {
+  var folders = DriveApp.getFoldersByName(DRIVE_FOLDER_NAME);
+  if (folders.hasNext()) {
+    return folders.next();
+  }
+  return DriveApp.createFolder(DRIVE_FOLDER_NAME);
+}
+
+function guessExtension_(mime, nombreArchivo) {
+  if (nombreArchivo && nombreArchivo.indexOf('.') !== -1) {
+    return nombreArchivo.substring(nombreArchivo.lastIndexOf('.'));
+  }
+  if (mime === 'application/pdf') return '.pdf';
+  if (mime === 'image/png') return '.png';
+  if (mime === 'image/webp') return '.webp';
+  return '.jpg';
+}
+
 function appendCompetencia_(data) {
   var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
   var equipo = data.equipoPropio || {};
   var envio = data.envio || {};
+  var comp = parseComprobante_(data);
+
   sheet.appendRow([
     data.fecha || new Date().toISOString(),
     data.id || '',
@@ -144,7 +225,12 @@ function appendCompetencia_(data) {
     envio.receptor || '',
     envio.instrucciones || '',
     data.metodoPago || '',
-    data.comprobante || '',
+    comp.referencia,
+    comp.tiene,
+    comp.nombre,
+    comp.tipo,
+    comp.enlace,
+    comp.preview,
     data.observaciones || ''
   ]);
 }
