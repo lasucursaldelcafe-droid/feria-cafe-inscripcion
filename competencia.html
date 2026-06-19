@@ -103,41 +103,10 @@
     }
 
     .brand-logo {
-      width: min(220px, 70vw);
+      max-width: min(320px, 90vw);
       height: auto;
-      filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.35));
-    }
-
-    .brand-wordmark {
-      margin: 0;
-      line-height: 1.1;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: baseline;
-      gap: 0.15em 0.3em;
-    }
-
-    .brand-wordmark .t-la,
-    .brand-wordmark .t-cafe {
-      font-family: var(--font-script);
-      font-size: clamp(1.4rem, 4vw, 1.8rem);
-      font-weight: 700;
-      color: var(--red-brand);
-    }
-
-    .brand-wordmark .t-sucursal {
-      font-family: var(--font-display);
-      font-size: clamp(1.2rem, 3.5vw, 1.55rem);
-      color: var(--cream);
-    }
-
-    .brand-wordmark .t-del {
-      font-family: var(--font-script);
-      font-size: clamp(1rem, 3vw, 1.3rem);
-      font-weight: 600;
-      color: var(--olive);
-      filter: brightness(1.25);
+      display: block;
+      margin: 0 auto 0.75rem;
     }
 
     .event-title {
@@ -538,13 +507,7 @@
     <article class="card" aria-labelledby="event-title">
       <header class="card-header">
         <div class="brand-lockup">
-          <img class="brand-logo" src="assets/logo-sucursal-cafe.svg" width="220" height="90" alt="La Sucursal del Café">
-          <p class="brand-wordmark" aria-label="La Sucursal del Café">
-            <span class="t-la">La</span>
-            <span class="t-sucursal">Sucursal</span>
-            <span class="t-del">del</span>
-            <span class="t-cafe">Café</span>
-          </p>
+          <img class="brand-logo" src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café">
         </div>
         <p class="organizer">Presenta</p>
         <h1 id="event-title" class="event-title">Switch Championship</h1>
