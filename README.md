@@ -8,7 +8,8 @@ Formularios web para **La Sucursal del Café**: asistencia a la feria y inscripc
 |---------|-----|
 | Formulario feria | `https://viajes-peludos-cotizador.web.app/` |
 | Switch Championship | `https://viajes-peludos-cotizador.web.app/competencia.html` |
-| Reglamento (PDF vía imprimir) | `https://viajes-peludos-cotizador.web.app/reglas-switch-championship.html` |
+| Reglamento (PDF) | `https://viajes-peludos-cotizador.web.app/assets/reglas-switch-championship.pdf` |
+| Reglamento (web) | `https://viajes-peludos-cotizador.web.app/reglas-switch-championship.html` |
 | Repositorio GitHub | `https://github.com/lasucursaldelcafe-droid/feria-cafe-inscripcion` |
 
 > Si el despliegue aún no se ha ejecutado, las URLs anteriores estarán disponibles tras `firebase deploy`.
@@ -17,7 +18,8 @@ Formularios web para **La Sucursal del Café**: asistencia a la feria y inscripc
 
 - **`index.html`** — Inscripción general a la feria (nombre, edad, contacto, intereses).
 - **`competencia.html`** — Switch Championship: perfil profesional, equipo, envío del café de práctica, pago y términos legales.
-- **`reglas-switch-championship.html`** — Reglamento oficial (imprimir → guardar como PDF).
+- **`reglas-switch-championship.html`** — Reglamento oficial (versión web).
+- **`assets/reglas-switch-championship.pdf`** — Reglamento descargable (PDF).
 
 ## Base de datos (Google Sheets)
 
