@@ -61,7 +61,7 @@ HEADERS_COMPETENCIA = [
     "Observaciones",
 ]
 
-DEFAULT_FIREBASE_PROJECT = "viajes-peludos-cotizador"
+DEFAULT_FIREBASE_PROJECT = "la-sucursal-del-cafe"
 
 
 def ok(msg: str) -> None:

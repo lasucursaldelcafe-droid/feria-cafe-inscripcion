@@ -31,7 +31,7 @@ SHARE_SHEET_WITH=tu-correo@gmail.com
 SHEETS_WEB_APP_URL=
 
 # Firebase Hosting
-FIREBASE_PROJECT=viajes-peludos-cotizador
+FIREBASE_PROJECT=la-sucursal-del-cafe
 FIREBASE_TOKEN=
 FIREBASE_SERVICE_ACCOUNT_JSON=
 """
@@ -100,7 +100,7 @@ def build_sheets_args(args: argparse.Namespace) -> list[str]:
 
 def build_firebase_args(args: argparse.Namespace) -> list[str]:
     out: list[str] = []
-    project = args.project or os.environ.get("FIREBASE_PROJECT", "viajes-peludos-cotizador")
+    project = args.project or os.environ.get("FIREBASE_PROJECT", "la-sucursal-del-cafe")
     out += ["--project", project]
     token = args.token or os.environ.get("FIREBASE_TOKEN")
     if token:
@@ -125,7 +125,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sheet-id", help="ID de hoja existente")
     parser.add_argument("--share-with", help="Correo para compartir la hoja")
     parser.add_argument("--web-app-url", help="URL /exec de Apps Script")
-    parser.add_argument("--project", default="viajes-peludos-cotizador")
+    parser.add_argument("--project", default="la-sucursal-del-cafe")
     parser.add_argument("--token", help="Token firebase login:ci")
     parser.add_argument("--service-account", help="JSON cuenta de servicio Firebase")
     parser.add_argument("--dry-run", action="store_true")

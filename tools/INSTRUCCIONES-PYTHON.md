@@ -76,7 +76,9 @@ Python **no puede** desplegar Apps Script de forma fiable sin herramientas extra
 
 ## 2. Firebase Hosting
 
-Proyecto configurado: `viajes-peludos-cotizador` (ver `.firebaserc`).
+Proyecto configurado: `la-sucursal-del-cafe` (ver `.firebaserc`). **No uses credenciales de Viajes Peludos.**
+
+Guía paso a paso para crear el proyecto: `tools/CONFIGURAR-FIREBASE-NUEVO.md`
 
 ### Opción A — Sesión local (desarrollo)
 
@@ -130,7 +132,7 @@ Variables en `tools/.env` (copia desde `.env.example`):
 | `GOOGLE_SHEET_ID` | ID opcional de hoja existente |
 | `SHARE_SHEET_WITH` | Correo editor de la hoja |
 | `SHEETS_WEB_APP_URL` | URL `/exec` de Apps Script |
-| `FIREBASE_PROJECT` | `viajes-peludos-cotizador` |
+| `FIREBASE_PROJECT` | `la-sucursal-del-cafe` |
 | `FIREBASE_TOKEN` | Token de `firebase login:ci` |
 | `FIREBASE_SERVICE_ACCOUNT_JSON` | JSON para deploy sin login |
 
@@ -148,5 +150,6 @@ Variables en `tools/.env` (copia desde `.env.example`):
 ## Referencias
 
 - Guía manual de Sheets: `tools/INSTRUCCIONES-SHEETS.md`
+- Configurar Firebase dedicado: `tools/CONFIGURAR-FIREBASE-NUEVO.md`
 - Workflow CI: `.github/workflows/deploy-firebase.yml`
 - Repositorio: [lasucursaldelcafe-droid/feria-cafe-inscripcion](https://github.com/lasucursaldelcafe-droid/feria-cafe-inscripcion)

@@ -6,10 +6,10 @@ Formularios web para **La Sucursal del Café**: asistencia a la feria y inscripc
 
 | Recurso | URL |
 |---------|-----|
-| Formulario feria | `https://viajes-peludos-cotizador.web.app/` |
-| Switch Championship | `https://viajes-peludos-cotizador.web.app/competencia.html` |
-| Reglamento (PDF) | `https://viajes-peludos-cotizador.web.app/assets/reglas-switch-championship.pdf` |
-| Reglamento (web) | `https://viajes-peludos-cotizador.web.app/reglas-switch-championship.html` |
+| Formulario feria | `https://la-sucursal-del-cafe.web.app/` |
+| Switch Championship | `https://la-sucursal-del-cafe.web.app/competencia.html` |
+| Reglamento (PDF) | `https://la-sucursal-del-cafe.web.app/assets/reglas-switch-championship.pdf` |
+| Reglamento (web) | `https://la-sucursal-del-cafe.web.app/reglas-switch-championship.html` |
 | Repositorio GitHub | `https://github.com/lasucursaldelcafe-droid/feria-cafe-inscripcion` |
 
 > Si el despliegue aún no se ha ejecutado, las URLs anteriores estarán disponibles tras `firebase deploy`.
@@ -38,13 +38,15 @@ Sin URL configurada, los formularios guardan copia local en `localStorage` del n
 
 ## Firebase Hosting
 
-Proyecto Firebase: **`viajes-peludos-cotizador`**
+Proyecto Firebase: **`la-sucursal-del-cafe`** (dedicado a La Sucursal del Café; no compartido con Viajes Peludos).
+
+Guía de configuración inicial: [`tools/CONFIGURAR-FIREBASE-NUEVO.md`](tools/CONFIGURAR-FIREBASE-NUEVO.md)
 
 ### Despliegue manual
 
 ```bash
 npx -y firebase-tools@latest login
-npx -y firebase-tools@latest use viajes-peludos-cotizador
+npx -y firebase-tools@latest use la-sucursal-del-cafe
 npx -y firebase-tools@latest deploy --only hosting
 ```
 
@@ -56,7 +58,7 @@ Secretos recomendados en GitHub:
 
 | Secreto | Uso |
 |---------|-----|
-| `FIREBASE_SERVICE_ACCOUNT` | JSON de cuenta de servicio con rol *Firebase Hosting Admin* |
+| `FIREBASE_SERVICE_ACCOUNT` | JSON de cuenta de servicio del proyecto **`la-sucursal-del-cafe`** con rol *Firebase Hosting Admin* |
 | `SHEETS_WEB_APP_URL` | URL `/exec` de Apps Script (opcional) |
 
 ## Desarrollo local
@@ -75,6 +77,7 @@ Abre `index.html` o `competencia.html` en un servidor local (Live Server, `npx s
 │   └── sheets-config.js    # (local, no versionado)
 ├── tools/
 │   ├── google-apps-script/Code.gs
+│   ├── CONFIGURAR-FIREBASE-NUEVO.md
 │   └── INSTRUCCIONES-SHEETS.md
 ├── firebase.json
 ├── .firebaserc
