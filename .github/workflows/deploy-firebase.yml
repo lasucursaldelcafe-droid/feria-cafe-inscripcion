@@ -1,0 +1,32 @@
+name: Deploy Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generar js/sheets-config.js
+        env:
+          SHEETS_URL: ${{ secrets.SHEETS_WEB_APP_URL }}
+        run: |
+          if [ -n "$SHEETS_URL" ]; then
+            printf "window.SHEETS_CONFIG = {\n  WEB_APP_URL: '%s'\n};\n" "$SHEETS_URL" > js/sheets-config.js
+          else
+            printf "window.SHEETS_CONFIG = {\n  WEB_APP_URL: ''\n};\n" > js/sheets-config.js
+          fi
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: viajes-peludos-cotizador
+          channelId: live
