@@ -3,3 +3,7 @@ Thumbs.db
 *.log
 .cursor/
 js/sheets-config.js
+tools/.env
+tools/**/*-sa.json
+tools/**/service-account*.json
+tools/credentials/
