@@ -174,9 +174,9 @@ def print_apps_script_instructions(spreadsheet_id: str | None = None) -> None:
     print("  1. Abre la hoja con tu cuenta de Google (acceso de editor).")
     if spreadsheet_id:
         print(f"     https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit")
-    print("  2. Extensiones → Apps Script.")
+    print("  2. Extensiones > Apps Script.")
     print(f"  3. Pega el código de: {CODE_GS_PATH}")
-    print("  4. Implementar → Nueva implementación → Aplicación web")
+    print("  4. Implementar > Nueva implementacion > Aplicacion web")
     print("     Ejecutar como: Yo | Acceso: Cualquier persona")
     print("  5. Copia la URL /exec y ejecuta:")
     print('     py tools/conectar_sheets.py --configurar-url "https://script.google.com/.../exec"')

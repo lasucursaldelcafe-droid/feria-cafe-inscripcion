@@ -7,3 +7,4 @@ tools/.env
 tools/**/*-sa.json
 tools/**/service-account*.json
 tools/credentials/
+tools/google-apps-script/.clasp.json

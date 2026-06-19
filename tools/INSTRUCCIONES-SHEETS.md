@@ -25,15 +25,17 @@ Despliega el sitio (Firebase Hosting o servidor local) después de configurar la
 
 ## Comandos de `conectar_sheets.py`
 
-| Comando | Descripción |
-|---------|-------------|
-| `--crear-hoja` | Crea o actualiza la hoja con pestañas **Feria** y **Competencia** y todos los encabezados. |
-| `--share-with email@gmail.com` | Comparte la hoja con tu cuenta de Google (editor). |
-| `--sheet-id ID` | Usa una hoja existente en lugar de crear una nueva. |
-| `--configurar-url URL` | Escribe `js/sheets-config.js` con la URL `/exec` de Apps Script. |
-| `--verificar` | Comprueba la URL local, GET, OPTIONS y POST de prueba. |
-| `--probar-envio` | Inserta filas de prueba `TEST-*` en ambas pestañas. |
-| `--dry-run` | Con `--crear-hoja`, muestra el plan sin llamar a Google. |
+
+| Comando                        | Descripción                                                                                |
+| ------------------------------ | ------------------------------------------------------------------------------------------ |
+| `--crear-hoja`                 | Crea o actualiza la hoja con pestañas **Feria** y **Competencia** y todos los encabezados. |
+| `--share-with email@gmail.com` | Comparte la hoja con tu cuenta de Google (editor).                                         |
+| `--sheet-id ID`                | Usa una hoja existente en lugar de crear una nueva.                                        |
+| `--configurar-url URL`         | Escribe `js/sheets-config.js` con la URL `/exec` de Apps Script.                           |
+| `--verificar`                  | Comprueba la URL local, GET, OPTIONS y POST de prueba.                                     |
+| `--probar-envio`               | Inserta filas de prueba `TEST-`* en ambas pestañas.                                        |
+| `--dry-run`                    | Con `--crear-hoja`, muestra el plan sin llamar a Google.                                   |
+
 
 Variables en `tools/.env` (opcional):
 
@@ -78,50 +80,57 @@ Si `WEB_APP_URL` está vacía, los formularios guardan copia en `localStorage` d
 
 ## Columnas — pestaña Feria
 
-| Columna | Campo del formulario |
-|---------|----------------------|
-| Fecha registro | `fecha` (ISO) |
-| ID | `id` (ej. `F-…`) |
-| Nombre | `nombre` |
-| Edad | `edad` |
-| Celular | `celular` |
-| Correo | `correo` |
-| Intereses | `intereses` (lista unida con `;`) |
+
+| Columna        | Campo del formulario              |
+| -------------- | --------------------------------- |
+| Fecha registro | `fecha` (ISO)                     |
+| ID             | `id` (ej. `F-…`)                  |
+| Nombre         | `nombre`                          |
+| Edad           | `edad`                            |
+| Celular        | `celular`                         |
+| Correo         | `correo`                          |
+| Intereses      | `intereses` (lista unida con `;`) |
+
 
 ## Columnas — pestaña Competencia
 
-| Columna | Campo del formulario |
-|---------|----------------------|
-| Fecha registro | `fecha` |
-| ID | `id` (ej. `SC-…`) |
-| Evento | `evento` |
-| Valor inscripción | `valorInscripcion` |
-| Nombre, Documento, Edad, Ciudad, Celular, Correo | datos personales |
-| Representa, Rol | perfil |
-| Experiencia café, Experiencia Switch, Torneos previos | selects / radios |
-| Equipo Switch / gramera / tetera | `equipoPropio` → `Sí`/`No` |
-| Dirección envío … Instrucciones envío | `envio.*` |
-| Método pago | `metodoPago` |
-| Referencia pago | `comprobanteReferencia` |
-| Tiene comprobante | `comprobanteArchivo.tieneComprobante` |
-| Comprobante nombre / tipo | archivo subido |
-| Comprobante enlace Drive | URL en Drive (si se guardó) |
-| Comprobante base64 (preview) | primeros ~1000 caracteres del data URL |
-| Acepta voluntaria … Acepta imagen | `aceptacionesLegales.*` → `Sí`/`No` |
-| Observaciones | `observaciones` |
+
+| Columna                                               | Campo del formulario                   |
+| ----------------------------------------------------- | -------------------------------------- |
+| Fecha registro                                        | `fecha`                                |
+| ID                                                    | `id` (ej. `SC-…`)                      |
+| Evento                                                | `evento`                               |
+| Valor inscripción                                     | `valorInscripcion`                     |
+| Nombre, Documento, Edad, Ciudad, Celular, Correo      | datos personales                       |
+| Representa, Rol                                       | perfil                                 |
+| Experiencia café, Experiencia Switch, Torneos previos | selects / radios                       |
+| Equipo Switch / gramera / tetera                      | `equipoPropio` → `Sí`/`No`             |
+| Dirección envío … Instrucciones envío                 | `envio.*`                              |
+| Método pago                                           | `metodoPago`                           |
+| Referencia pago                                       | `comprobanteReferencia`                |
+| Tiene comprobante                                     | `comprobanteArchivo.tieneComprobante`  |
+| Comprobante nombre / tipo                             | archivo subido                         |
+| Comprobante enlace Drive                              | URL en Drive (si se guardó)            |
+| Comprobante base64 (preview)                          | primeros ~1000 caracteres del data URL |
+| Acepta voluntaria … Acepta imagen                     | `aceptacionesLegales.*` → `Sí`/`No`    |
+| Observaciones                                         | `observaciones`                        |
+
 
 ## Solución de problemas
 
-| Problema | Solución |
-|----------|----------|
-| No llegan filas | URL debe terminar en `/exec` y acceso «Cualquier persona». |
-| Error de permisos | Reimplementa Apps Script y acepta permisos de hoja y Drive. |
-| Hoja vacía tras envío | Apps Script → **Ejecuciones** → revisa errores. |
-| CORS en consola del navegador | Normal con `mode: 'no-cors'`; si la fila aparece en Sheets, funciona. |
-| `--verificar` falla en OPTIONS | No crítico si GET y `--probar-envio` funcionan. |
+
+| Problema                       | Solución                                                              |
+| ------------------------------ | --------------------------------------------------------------------- |
+| No llegan filas                | URL debe terminar en `/exec` y acceso «Cualquier persona».            |
+| Error de permisos              | Reimplementa Apps Script y acepta permisos de hoja y Drive.           |
+| Hoja vacía tras envío          | Apps Script → **Ejecuciones** → revisa errores.                       |
+| CORS en consola del navegador  | Normal con `mode: 'no-cors'`; si la fila aparece en Sheets, funciona. |
+| `--verificar` falla en OPTIONS | No crítico si GET y `--probar-envio` funcionan.                       |
+
 
 ## Scripts relacionados
 
 - `tools/conectar_sheets.py` — CLI principal (este flujo)
 - `tools/setup_google_sheets.py` — bajo nivel (usado por `setup.py --sheets-only`)
 - `js/form-submit.js` — envío desde los formularios HTML
+

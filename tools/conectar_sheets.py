@@ -339,6 +339,10 @@ def cmd_probar_envio() -> int:
 
 
 def main() -> int:
+    if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
     args = parse_args()
     load_dotenv()
 
