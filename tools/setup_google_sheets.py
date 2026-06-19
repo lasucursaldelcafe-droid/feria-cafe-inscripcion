@@ -11,10 +11,6 @@ import argparse
 import sys
 from pathlib import Path
 
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-
 from _util import (
     DEFAULT_FIREBASE_PROJECT,
     HEADERS_COMPETENCIA,
@@ -67,6 +63,9 @@ def parse_args() -> argparse.Namespace:
 
 
 def build_services(credentials_path: Path):
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
+
     credentials = service_account.Credentials.from_service_account_file(
         str(credentials_path),
         scopes=SCOPES,
@@ -181,11 +180,6 @@ def main() -> int:
     args = parse_args()
 
     try:
-        credentials_path = resolve_credentials(args.credentials)
-        service_email = load_service_account_email(credentials_path)
-        info(f"Credenciales: {credentials_path}")
-        info(f"Cuenta de servicio: {service_email}")
-
         if args.dry_run:
             ok("Modo dry-run: no se contactará la API de Google.")
             if args.sheet_id:
@@ -194,6 +188,11 @@ def main() -> int:
                 info(f"Se crearía: {SPREADSHEET_TITLE}")
             info(f"Pestañas: {SHEET_FERIA}, {SHEET_COMPETENCIA}")
             return 0
+
+        credentials_path = resolve_credentials(args.credentials)
+        service_email = load_service_account_email(credentials_path)
+        info(f"Credenciales: {credentials_path}")
+        info(f"Cuenta de servicio: {service_email}")
 
         sheets, drive = build_services(credentials_path)
 
@@ -229,11 +228,16 @@ def main() -> int:
     except FileNotFoundError as exc:
         error(str(exc))
         return 2
-    except HttpError as exc:
-        error(f"Error de Google API: {exc}")
-        info("Verifica que Sheets API y Drive API estén habilitadas en Google Cloud.")
-        return 3
     except Exception as exc:  # noqa: BLE001 — script CLI
+        name = exc.__class__.__name__
+        if name == "ModuleNotFoundError":
+            error(str(exc))
+            info("Instala dependencias: py -3 -m pip install -r tools/requirements.txt")
+            return 4
+        if name == "HttpError":
+            error(f"Error de Google API: {exc}")
+            info("Verifica que Sheets API y Drive API estén habilitadas en Google Cloud.")
+            return 3
         error(str(exc))
         return 1
 
