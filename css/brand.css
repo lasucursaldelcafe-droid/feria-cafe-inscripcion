@@ -92,12 +92,7 @@ body {
   max-height: 140px;
   height: auto;
   object-fit: contain;
-  border: 2px solid rgba(0, 0, 0, 0.85);
-  border-radius: 6px;
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.4),
-    0 2px 6px rgba(0, 0, 0, 0.28),
-    0 0 12px rgba(0, 0, 0, 0.12);
+  filter: drop-shadow(0 2px 8px rgba(93, 58, 26, 0.12));
 }
 
 .hero-eyebrow {
@@ -823,9 +818,7 @@ body.page-rules {
   width: min(240px, 70vw);
   max-height: 110px;
   margin: 0 auto 1rem;
-  border: 1.5px solid rgba(0, 0, 0, 0.65);
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  filter: none;
 }
 
 .rules-doc h1 {
@@ -951,9 +944,7 @@ body.page-rules {
   }
 
   .rules-doc .brand-logo {
-    border: 1px solid #121212;
-    box-shadow: none;
-    border-radius: 3px;
+    filter: none;
   }
 }
 
