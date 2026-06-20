@@ -1721,6 +1721,10 @@ body.page-rules {
 
 .festival-nav__brand img {
   height: 58px;
+  padding: var(--logo-reborde-pad-y) var(--logo-reborde-pad-x);
+  background: var(--logo-reborde-bg);
+  border-radius: var(--logo-reborde-radius);
+  box-shadow: var(--logo-reborde-shadow);
 }
 
 /* —— WOC hero —— */
@@ -2266,6 +2270,10 @@ body.page-rules {
   display: block;
   height: 58px;
   width: auto;
+  padding: var(--logo-reborde-pad-y) var(--logo-reborde-pad-x);
+  background: var(--logo-reborde-bg);
+  border-radius: var(--logo-reborde-radius);
+  box-shadow: var(--logo-reborde-shadow);
 }
 
 .festival-nav__menu {
