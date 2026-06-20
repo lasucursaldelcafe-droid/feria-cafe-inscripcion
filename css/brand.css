@@ -108,10 +108,11 @@ a:hover {
   color: var(--red-brand);
 }
 
-.hint a,
-.card-body a,
-.info-box a,
-.section a,
+/* Enlaces de texto — excluye CTAs (.btn-*, modal CTA) */
+.hint a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta),
+.card-body a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta),
+.info-box a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta),
+.section a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta),
 .terms-privacy-link a,
 .footer-note a,
 .success-summary a,
@@ -127,10 +128,10 @@ a:hover {
   text-underline-offset: 2px;
 }
 
-.hint a:hover,
-.card-body a:hover,
-.info-box a:hover,
-.section a:hover,
+.hint a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):hover,
+.card-body a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):hover,
+.info-box a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):hover,
+.section a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):hover,
 .terms-privacy-link a:hover,
 .footer-note a:hover,
 .success-summary a:hover,
@@ -712,7 +713,12 @@ textarea[aria-invalid="true"] {
 .festival-btn-primary,
 .festival-btn-secondary,
 .feria-modal__cta,
-.feria-modal__dismiss {
+.feria-modal__dismiss,
+.btn-rules,
+.btn-guide,
+.btn-select-all,
+.btn-clear-file,
+.btn-whatsapp {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -738,11 +744,17 @@ textarea[aria-invalid="true"] {
 .festival-btn-primary,
 .festival-btn-secondary,
 .feria-modal__cta,
-.feria-modal__dismiss {
+.feria-modal__dismiss,
+.btn-rules,
+.btn-guide,
+.btn-select-all,
+.btn-clear-file,
+.btn-whatsapp {
   color: #fff;
   background: #C1272D;
   border: 2px solid #a82026;
   box-shadow: 0 4px 18px rgba(193, 39, 45, 0.32);
+  text-decoration: none;
 }
 
 .btn-submit:hover:not(:disabled),
@@ -750,7 +762,12 @@ textarea[aria-invalid="true"] {
 .festival-btn-primary:hover,
 .festival-btn-secondary:hover,
 .feria-modal__cta:hover,
-.feria-modal__dismiss:hover {
+.feria-modal__dismiss:hover,
+.btn-rules:hover,
+.btn-guide:hover,
+.btn-select-all:hover,
+.btn-clear-file:hover,
+.btn-whatsapp:hover {
   background: #a82026;
   border-color: #8f1c21;
   transform: translateY(-1px);
@@ -763,7 +780,12 @@ textarea[aria-invalid="true"] {
 .festival-btn-primary:active,
 .festival-btn-secondary:active,
 .feria-modal__cta:active,
-.feria-modal__dismiss:active {
+.feria-modal__dismiss:active,
+.btn-rules:active,
+.btn-guide:active,
+.btn-select-all:active,
+.btn-clear-file:active,
+.btn-whatsapp:active {
   transform: translateY(0);
 }
 
@@ -772,7 +794,12 @@ textarea[aria-invalid="true"] {
 .festival-btn-primary:focus-visible,
 .festival-btn-secondary:focus-visible,
 .feria-modal__cta:focus-visible,
-.feria-modal__dismiss:focus-visible {
+.feria-modal__dismiss:focus-visible,
+.btn-rules:focus-visible,
+.btn-guide:focus-visible,
+.btn-select-all:focus-visible,
+.btn-clear-file:focus-visible,
+.btn-whatsapp:focus-visible {
   outline: 3px solid var(--brown-deep);
   outline-offset: 2px;
 }
@@ -845,49 +872,17 @@ textarea[aria-invalid="true"] {
 }
 
 .btn-rules {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   gap: 0.35rem;
   margin-bottom: 0.75rem;
-  min-height: var(--btn-min-height);
-  padding: var(--btn-padding-y) var(--btn-padding-x);
-  font-size: var(--btn-font-size);
-  font-weight: 700;
-  font-family: inherit;
-  color: #fff;
-  background: #C1272D;
-  border: 2px solid #a82026;
-  border-radius: var(--btn-radius);
-  text-decoration: none;
-  box-shadow: 0 4px 18px rgba(193, 39, 45, 0.32);
-  transition: transform 0.15s, box-shadow 0.2s, background 0.2s, border-color 0.2s;
-}
-
-.btn-rules:hover {
-  background: #a82026;
-  border-color: #8f1c21;
-  color: #fff;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 22px rgba(193, 39, 45, 0.42);
 }
 
 .btn-guide {
-  display: inline-flex;
-  align-items: center;
   gap: 0.35rem;
   margin-left: 0.5rem;
   padding: 0.55rem 1rem;
   font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--coffee-dark);
-  background: var(--cream-muted);
-  border: 2px solid var(--coffee-dark);
   border-radius: 8px;
-  text-decoration: none;
 }
-
-.btn-guide:hover { background: #fff; }
 
 input[type="file"] {
   width: 100%;
@@ -923,29 +918,9 @@ input[type="file"] {
 
 .btn-select-all {
   flex-shrink: 0;
-  min-height: 44px;
   padding: 0.45rem 0.85rem;
   font-size: 0.82rem;
-  font-weight: 700;
-  font-family: inherit;
-  color: #fff;
-  background: #C1272D;
-  border: 2px solid #a82026;
   border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 4px 18px rgba(193, 39, 45, 0.32);
-}
-
-.btn-select-all:hover {
-  background: #a82026;
-  border-color: #8f1c21;
-  color: #fff;
-}
-
-.btn-select-all:focus-visible {
-  outline: 3px solid var(--coffee-deep);
-  outline-offset: 2px;
 }
 
 .btn-select-all[aria-pressed="true"] {
@@ -1177,21 +1152,8 @@ input[type="file"] {
 .btn-clear-file {
   padding: 0.4rem 0.75rem;
   font-size: 0.78rem;
-  font-weight: 700;
-  font-family: inherit;
-  color: #fff;
-  background: #C1272D;
-  border: 2px solid #a82026;
   border-radius: 8px;
-  cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-.btn-clear-file:hover {
-  background: #a82026;
-  border-color: #8f1c21;
-  color: #fff;
 }
 
 /* —— Success panel —— */
@@ -1288,25 +1250,11 @@ input[type="file"] {
 }
 
 .btn-whatsapp {
-  display: inline-block;
   padding: 0.75rem 1.35rem;
   border-radius: 999px;
-  background: var(--red-cta);
-  color: #fff;
-  font-weight: 700;
   font-size: 0.95rem;
-  text-decoration: none;
-  box-shadow: 0 4px 14px rgba(193, 39, 45, 0.32);
-  transition: background 0.15s ease, transform 0.15s ease;
   min-height: 44px;
   line-height: 1.25;
-  touch-action: manipulation;
-}
-
-.btn-whatsapp:hover {
-  background: var(--red-hover);
-  color: #fff;
-  transform: translateY(-1px);
 }
 
 .footer-note {
@@ -3566,4 +3514,69 @@ body.page-rules {
   textarea {
     font-size: 1rem;
   }
+}
+
+/* —— CTAs: regla autoritativa (última palabra) —— */
+
+.btn-submit,
+.btn-secondary,
+.festival-btn-primary,
+.festival-btn-secondary,
+.feria-modal__cta,
+.feria-modal__dismiss,
+.btn-rules,
+.btn-select-all,
+.btn-clear-file,
+.btn-guide,
+.btn-whatsapp,
+.festival-footer a.btn-submit,
+.festival-footer a.btn-secondary,
+.festival-contact-actions a,
+.festival-save-card a.btn-submit,
+.card-body a.btn-submit,
+.card-body a.btn-secondary,
+.card-body a.btn-rules,
+.card-body a.btn-guide {
+  background: #C1272D !important;
+  color: #fff !important;
+  border-color: #a82026 !important;
+  text-decoration: none !important;
+}
+
+.btn-submit:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled),
+.festival-btn-primary:hover,
+.festival-btn-secondary:hover,
+.feria-modal__cta:hover,
+.feria-modal__dismiss:hover,
+.btn-rules:hover,
+.btn-select-all:hover,
+.btn-clear-file:hover,
+.btn-guide:hover,
+.btn-whatsapp:hover,
+.festival-footer a.btn-submit:hover,
+.festival-footer a.btn-secondary:hover,
+.festival-contact-actions a:hover,
+.festival-save-card a.btn-submit:hover,
+.card-body a.btn-submit:hover,
+.card-body a.btn-secondary:hover,
+.card-body a.btn-rules:hover,
+.card-body a.btn-guide:hover {
+  background: #a82026 !important;
+  color: #fff !important;
+  border-color: #8f1c21 !important;
+}
+
+.btn-submit:visited,
+.btn-secondary:visited,
+.festival-btn-primary:visited,
+.festival-btn-secondary:visited,
+.feria-modal__cta:visited,
+.btn-rules:visited,
+.btn-guide:visited,
+.btn-whatsapp:visited,
+.festival-footer a.btn-submit:visited,
+.festival-footer a.btn-secondary:visited,
+.festival-contact-actions a:visited {
+  color: #fff !important;
 }

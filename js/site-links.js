@@ -32,6 +32,15 @@
     qr: '/qr'
   };
 
+  /** Alias legibles (p. ej. data-link="como-funciona"). */
+  var ALIASES = {
+    'como-funciona': 'comoFunciona'
+  };
+
+  function resolveKey(key) {
+    return ALIASES[key] || key;
+  }
+
   function useHostedPaths() {
     var protocol = global.location.protocol;
     if (protocol === 'file:') return false;
@@ -41,13 +50,14 @@
 
   function href(key) {
     var map = useHostedPaths() ? HOSTED : LOCAL;
-    return map[key] || '#';
+    return map[resolveKey(key)] || '#';
   }
 
   function absUrl(key) {
     var base = (global.EVENT_CONFIG && global.EVENT_CONFIG.siteUrl) || global.location.origin;
     base = String(base).replace(/\/$/, '');
-    var path = HOSTED[key] || LOCAL[key];
+    var resolved = resolveKey(key);
+    var path = HOSTED[resolved] || LOCAL[resolved];
     if (path === '/') return base + '/';
     if (path.charAt(0) === '/') return base + path;
     return base + '/' + path;
@@ -55,7 +65,7 @@
 
   function applyLinkElements(root) {
     (root || document).querySelectorAll('[data-link]').forEach(function (el) {
-      var key = el.getAttribute('data-link');
+      var key = resolveKey(el.getAttribute('data-link'));
       if (!key) return;
       var url = href(key);
       var hash = el.getAttribute('data-hash');

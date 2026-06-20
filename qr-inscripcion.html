@@ -7,7 +7,7 @@
   <link rel="apple-touch-icon" href="assets/logo-la-sucursal-del-cafe.png">
   <meta name="description" content="Códigos QR para inscripción — La Sucursal del Café">
   <title>QR inscripción — La Sucursal del Café</title>
-  <link rel="stylesheet" href="css/brand.css">
+  <link rel="stylesheet" href="css/brand.css?v=20260619">
 </head>
 <body>
   <div class="site-shell">
@@ -49,13 +49,7 @@
   <script>
     (function () {
       function abs(key) {
-        if (window.SiteLinks && SiteLinks.absUrl) {
-          return SiteLinks.absUrl(key);
-        }
-        var base = String((window.EVENT_CONFIG && EVENT_CONFIG.siteUrl) || window.location.origin).replace(/\/$/, '');
-        var paths = { feria: '/inscripcion', competencia: '/competencia' };
-        var path = paths[key] || '/';
-        return path.charAt(0) === '/' ? base + path : base + '/' + path;
+        return SiteLinks.absUrl(key);
       }
 
       function renderQr(boxId, url) {

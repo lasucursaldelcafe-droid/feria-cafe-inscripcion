@@ -62,10 +62,7 @@ npx -y firebase-tools@latest deploy --only hosting
 
 Push a `main` → `.github/workflows/deploy-firebase.yml` publica el sitio.
 
-| Secreto | Uso |
-|---------|-----|
-| `FIREBASE_SERVICE_ACCOUNT` | JSON cuenta de servicio (*Firebase Hosting Admin*) |
-| `SHEETS_WEB_APP_URL` | URL `/exec` de Apps Script (opcional) |
+Configuración paso a paso de secretos (`FIREBASE_SERVICE_ACCOUNT`, `SHEETS_WEB_APP_URL`): ver sección **GitHub Actions (CI)** en [`CHECKLIST.md`](CHECKLIST.md). No subas `js/sheets-config.js` ni el JSON de la cuenta de servicio al repositorio.
 
 ## Herramientas Python (`tools/`)
 
