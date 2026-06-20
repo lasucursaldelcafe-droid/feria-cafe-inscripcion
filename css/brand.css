@@ -109,10 +109,10 @@ a:hover {
 }
 
 /* Enlaces de texto — excluye CTAs (.btn-*, modal CTA) */
-.hint a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta),
-.card-body a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta),
-.info-box a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta),
-.section a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta),
+.hint a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.btn-select-all):not(.btn-clear-file):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):not(.feria-modal__dismiss),
+.card-body a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.btn-select-all):not(.btn-clear-file):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):not(.feria-modal__dismiss),
+.info-box a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.btn-select-all):not(.btn-clear-file):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):not(.feria-modal__dismiss),
+.section a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.btn-select-all):not(.btn-clear-file):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):not(.feria-modal__dismiss),
 .terms-privacy-link a,
 .footer-note a,
 .success-summary a,
@@ -128,10 +128,10 @@ a:hover {
   text-underline-offset: 2px;
 }
 
-.hint a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):hover,
-.card-body a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):hover,
-.info-box a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):hover,
-.section a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):hover,
+.hint a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.btn-select-all):not(.btn-clear-file):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):not(.feria-modal__dismiss):hover,
+.card-body a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.btn-select-all):not(.btn-clear-file):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):not(.feria-modal__dismiss):hover,
+.info-box a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.btn-select-all):not(.btn-clear-file):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):not(.feria-modal__dismiss):hover,
+.section a:not(.btn-submit):not(.btn-secondary):not(.btn-rules):not(.btn-guide):not(.btn-whatsapp):not(.btn-select-all):not(.btn-clear-file):not(.festival-btn-primary):not(.festival-btn-secondary):not(.feria-modal__cta):not(.feria-modal__dismiss):hover,
 .terms-privacy-link a:hover,
 .footer-note a:hover,
 .success-summary a:hover,
@@ -3532,11 +3532,21 @@ body.page-rules {
 .festival-footer a.btn-submit,
 .festival-footer a.btn-secondary,
 .festival-contact-actions a,
+.festival-sub-cta a,
+.festival-partner-cta a,
+.festival-hero-cta a,
+.woc-hero__cta a,
 .festival-save-card a.btn-submit,
 .card-body a.btn-submit,
 .card-body a.btn-secondary,
 .card-body a.btn-rules,
-.card-body a.btn-guide {
+.card-body a.btn-guide,
+.card-body a.btn-select-all,
+.card-body a.btn-clear-file,
+.card-body a.btn-whatsapp,
+.card-body button.btn-submit,
+.card-body button.btn-secondary,
+.card-body button.btn-select-all {
   background: #C1272D !important;
   color: #fff !important;
   border-color: #a82026 !important;
@@ -3557,11 +3567,21 @@ body.page-rules {
 .festival-footer a.btn-submit:hover,
 .festival-footer a.btn-secondary:hover,
 .festival-contact-actions a:hover,
+.festival-sub-cta a:hover,
+.festival-partner-cta a:hover,
+.festival-hero-cta a:hover,
+.woc-hero__cta a:hover,
 .festival-save-card a.btn-submit:hover,
 .card-body a.btn-submit:hover,
 .card-body a.btn-secondary:hover,
 .card-body a.btn-rules:hover,
-.card-body a.btn-guide:hover {
+.card-body a.btn-guide:hover,
+.card-body a.btn-select-all:hover,
+.card-body a.btn-clear-file:hover,
+.card-body a.btn-whatsapp:hover,
+.card-body button.btn-submit:hover:not(:disabled),
+.card-body button.btn-secondary:hover:not(:disabled),
+.card-body button.btn-select-all:hover {
   background: #a82026 !important;
   color: #fff !important;
   border-color: #8f1c21 !important;
@@ -3577,6 +3597,10 @@ body.page-rules {
 .btn-whatsapp:visited,
 .festival-footer a.btn-submit:visited,
 .festival-footer a.btn-secondary:visited,
-.festival-contact-actions a:visited {
+.festival-contact-actions a:visited,
+.festival-sub-cta a:visited,
+.festival-partner-cta a:visited,
+.festival-hero-cta a:visited,
+.woc-hero__cta a:visited {
   color: #fff !important;
 }
