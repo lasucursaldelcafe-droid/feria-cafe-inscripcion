@@ -11,9 +11,13 @@
         "Edad",
         "Celular",
         "Correo",
-        "Intereses"
+        "Intereses",
+        "Acepta voluntaria",
+        "Acepta pertenencias",
+        "Acepta datos",
+        "Acepta imagen"
       ],
-      "como_pegar": "Selecciona A1, pega la fila completa (7 columnas). Google Sheets separará automáticamente en columnas si copias desde esta lista separada por tabulador."
+      "como_pegar": "Selecciona A1, pega la fila completa (11 columnas). Google Sheets separará automáticamente en columnas si copias desde esta lista separada por tabulador."
     },
     "Competencia": {
       "nombre_pestana": "Competencia",
@@ -63,7 +67,7 @@
     }
   },
   "fila_tabulada_para_copiar": {
-    "Feria": "Fecha registro\tID\tNombre\tEdad\tCelular\tCorreo\tIntereses",
+    "Feria": "Fecha registro\tID\tNombre\tEdad\tCelular\tCorreo\tIntereses\tAcepta voluntaria\tAcepta pertenencias\tAcepta datos\tAcepta imagen",
     "Competencia": "Fecha registro\tID\tEvento\tValor inscripción\tNombre\tDocumento\tEdad\tCiudad\tCelular\tCorreo\tRepresenta\tRol\tExperiencia café\tExperiencia Switch\tTorneos previos\tEquipo Switch\tEquipo gramera\tEquipo tetera\tDirección envío\tCiudad envío\tDepartamento\tCódigo postal\tReceptor\tInstrucciones envío\tMétodo pago\tReferencia pago\tTiene comprobante\tComprobante nombre\tComprobante tipo\tComprobante enlace Drive\tComprobante base64 (preview)\tAcepta voluntaria\tAcepta pertenencias\tAcepta datos\tAcepta no reembolso\tAcepta descalificación\tAcepta reglas\tAcepta disponibilidad\tAcepta imagen\tObservaciones"
   }
 }

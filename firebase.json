@@ -6,9 +6,34 @@
       "**/.*",
       "**/node_modules/**",
       ".git/**",
-      ".github/**"
+      ".github/**",
+      "tools/**"
     ],
     "rewrites": [
+      {
+        "source": "/festival",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/festival.html",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/el-evento",
+        "destination": "/el-evento.html"
+      },
+      {
+        "source": "/actividades",
+        "destination": "/actividades.html"
+      },
+      {
+        "source": "/patrocinadores",
+        "destination": "/patrocinadores.html"
+      },
+      {
+        "source": "/inscripcion",
+        "destination": "/inscripcion.html"
+      },
       {
         "source": "/competencia",
         "destination": "/competencia.html"
@@ -20,6 +45,14 @@
       {
         "source": "/como-funciona",
         "destination": "/como-funciona-evento.html"
+      },
+      {
+        "source": "/privacidad",
+        "destination": "/privacidad.html"
+      },
+      {
+        "source": "/qr",
+        "destination": "/qr-inscripcion.html"
       }
     ],
     "headers": [

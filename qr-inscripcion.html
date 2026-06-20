@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
+  <link rel="apple-touch-icon" href="assets/logo-la-sucursal-del-cafe.png">
+  <meta name="description" content="Códigos QR para inscripción — La Sucursal del Café">
+  <title>QR inscripción — La Sucursal del Café</title>
+  <link rel="stylesheet" href="css/brand.css">
+</head>
+<body>
+  <div class="site-shell">
+    <header class="site-hero">
+      <div class="hero-inner">
+        <h1 class="hero-title">QR de inscripción</h1>
+        <p class="hero-subtitle">Escanea para abrir los formularios en el celular</p>
+      </div>
+      <div class="hero-accent" aria-hidden="true"></div>
+    </header>
+    <main class="site-main">
+      <article class="content-card">
+        <div class="card-body qr-grid">
+          <section class="qr-card">
+            <h2>Feria general</h2>
+            <div id="qrFeria" class="qr-box" aria-label="QR feria"></div>
+            <p class="hint" id="urlFeria"></p>
+          </section>
+          <section class="qr-card">
+            <h2>Switch Championship</h2>
+            <div id="qrCompetencia" class="qr-box" aria-label="QR competencia"></div>
+            <p class="hint" id="urlCompetencia"></p>
+          </section>
+        </div>
+        <p class="footer-note">
+          <a data-link="festival" href="index.html">Inicio</a> ·
+          <a data-link="feria" href="inscripcion.html">Inscripción feria</a> ·
+          <a data-link="competencia" href="competencia.html">Switch Championship</a> ·
+          <a data-link="privacidad" href="privacidad.html">Privacidad</a> ·
+          <a data-link="qr" href="qr-inscripcion.html">QR</a>
+        </p>
+      </article>
+    </main>
+  </div>
+  <script src="js/event-config.js"></script>
+  <script src="js/site-links.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/lib/browser.js"></script>
+  <script src="js/site-chrome.js"></script>
+  <script>
+    (function () {
+      function abs(key) {
+        if (window.SiteLinks && SiteLinks.absUrl) {
+          return SiteLinks.absUrl(key);
+        }
+        var base = String((window.EVENT_CONFIG && EVENT_CONFIG.siteUrl) || window.location.origin).replace(/\/$/, '');
+        var paths = { feria: '/inscripcion', competencia: '/competencia' };
+        var path = paths[key] || '/';
+        return path.charAt(0) === '/' ? base + path : base + '/' + path;
+      }
+
+      function renderQr(boxId, url) {
+        var box = document.getElementById(boxId);
+        if (!box || !window.QRCode) return;
+        QRCode.toCanvas(url, { width: 220, margin: 2 }, function (err, canvas) {
+          if (err) {
+            box.innerHTML = '<p class="hint">No se pudo generar el QR. Usa el enlace de abajo.</p>';
+            return;
+          }
+          box.appendChild(canvas);
+        });
+      }
+
+      var urls = {
+        feria: abs('feria'),
+        competencia: abs('competencia')
+      };
+
+      document.getElementById('urlFeria').innerHTML = '<a href="' + urls.feria + '">' + urls.feria + '</a>';
+      document.getElementById('urlCompetencia').innerHTML = '<a href="' + urls.competencia + '">' + urls.competencia + '</a>';
+      renderQr('qrFeria', urls.feria);
+      renderQr('qrCompetencia', urls.competencia);
+    })();
+  </script>
+</body>
+</html>

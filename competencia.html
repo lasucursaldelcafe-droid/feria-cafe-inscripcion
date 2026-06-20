@@ -3,28 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Inscripción Switch Championship — Competencia de café filtrado con Hario Switch">
+  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
+  <link rel="apple-touch-icon" href="assets/logo-la-sucursal-del-cafe.png">
+  <meta name="description" content="Inscripción Switch Championship — 4 julio 2026, Purist Marbella. Competencia Hario Switch.">
+  <meta property="og:title" content="Switch Championship — Inscripción">
+  <meta property="og:description" content="1.ª clasificatoria · 4 de julio 2026 · Purist Marbella, Ciudad Jardín · $90.000 COP">
+  <meta property="og:image" content="assets/logo-la-sucursal-del-cafe.png">
   <title>Inscripción — Switch Championship</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Nunito:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/brand.css">
 </head>
-<body>
+<body class="page-festival page-form" data-festival-page="competencia">
+  <header class="site-header">
+    <nav class="festival-nav" aria-label="Navegación principal">
+      <a class="festival-nav__brand" data-link="festival" href="index.html">
+        <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="120" height="48">
+      </a>
+      <button type="button" class="festival-nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navMenu">Menú</button>
+      <ul class="festival-nav__menu" id="navMenu">
+        <li><a data-link="festival" data-nav="home" href="index.html">Inicio</a></li>
+        <li><a data-link="evento" data-nav="evento" href="el-evento.html">El evento</a></li>
+        <li><a data-link="actividades" data-nav="actividades" href="actividades.html">Actividades</a></li>
+        <li><a data-link="patrocinadores" data-nav="patrocinadores" href="patrocinadores.html">Patrocinadores</a></li>
+        <li><a data-link="feria" data-nav="inscripcion" href="inscripcion.html">Inscripción</a></li>
+        <li><a data-link="competencia" data-nav="competencia" href="competencia.html">Competencia</a></li>
+      </ul>
+    </nav>
+  </header>
   <div class="site-shell">
-    <header class="site-hero">
-      <div class="hero-inner">
-        <div class="logo-frame">
-          <img class="brand-logo" src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café">
-        </div>
-        <p class="hero-eyebrow">Presenta</p>
-        <h1 id="event-title" class="hero-title">Switch Championship</h1>
-        <p class="hero-subtitle">Competencia de café filtrado · Método Hario Switch</p>
+    <header class="site-hero site-hero--sub">
+      <div class="festival-sub-hero">
+        <p class="festival-kicker">Switch Championship · 1.ª clasificatoria</p>
+        <h1 id="event-title" class="festival-sub-hero__title">Competencia</h1>
+        <p class="hero-subtitle festival-sub-hero__lead">Café filtrado con Hario Switch · 4 de julio de 2026 · Purist Marbella</p>
         <div class="hero-meta">
-          <span class="badge">Extracción manual</span>
-          <span class="badge">Café de especialidad</span>
-          <span class="badge price">Inscripción $90.000 COP</span>
-          <span class="badge">Cupo: 36 competidores</span>
+          <span class="badge">📅 4 jul 2026</span>
+          <span class="badge">📍 Purist Marbella</span>
+          <span class="badge price">$90.000 COP</span>
+          <span class="badge">Cupo: 36</span>
         </div>
       </div>
       <div class="hero-accent" aria-hidden="true"></div>
@@ -34,12 +52,50 @@
       <article class="content-card content-card--wide" aria-labelledby="event-title">
         <div id="formPanel" class="form-panel card-body">
         <div class="info-box" role="note">
-          <strong>Switch Championship</strong> — competencia de café filtrado con Hario Switch (cupo: 36 · inscripción $90.000 COP).
+          <p style="margin:0 0 0.5rem"><a data-link="festival" href="index.html">← Volver al evento</a></p>
+          <strong>Switch Championship — Evento 1</strong> — competencia de café filtrado con Hario Switch (cupo: 36 · inscripción $90.000 COP).
           <p style="margin:0.5rem 0 0">
-            <a href="como-funciona-evento.html" target="_blank" rel="noopener"><strong>¿Cómo funciona el evento?</strong></a>
+            <strong>Fecha:</strong> viernes <span data-bind="torneo.fecha">4 de julio de 2026</span> ·
+            <strong>Sede:</strong> <span data-bind="torneo.lugar">Purist Marbella, Ciudad Jardín</span>.
+          </p>
+          <p class="hint" style="margin:0.5rem 0 0">Inscripción solo para este torneo. La <a data-link="feria" href="inscripcion.html">feria</a> (29 y 30 de agosto en Palmetto Plaza, Cali) tiene formulario aparte.</p>
+          <p style="margin:0.5rem 0 0">
+            Esta es la <strong>1.ª de 3 competencias clasificatorias</strong> que se realizarán antes de la
+            <strong>competencia principal</strong> de La Sucursal del Café. Los ganadores y clasificados de estas
+            rondas previas avanzan en la ruta hacia el evento principal.
+          </p>
+          <p style="margin:0.5rem 0 0">
+            <a data-link="comoFunciona" href="como-funciona-evento.html" target="_blank" rel="noopener"><strong>¿Cómo funciona el evento?</strong></a>
             — guía paso a paso: inscripción, pago, envío de café de práctica y día del torneo.
           </p>
           <p id="cupoStatus" class="cupo-status" aria-live="polite"></p>
+          <div id="waitlistPanel" class="waitlist-panel" aria-live="polite">
+            <h3 style="margin:0 0 0.5rem;color:var(--red-brand)">Cupo completo — Lista de espera</h3>
+            <p class="hint" style="margin:0 0 0.75rem">Déjanos tus datos y te contactamos si se libera un cupo.</p>
+            <div class="field-row">
+              <div class="field">
+                <label for="waitNombre">Nombre <span class="required">*</span></label>
+                <input type="text" id="waitNombre" maxlength="100">
+              </div>
+              <div class="field">
+                <label for="waitDocumento">Documento <span class="required">*</span></label>
+                <input type="text" id="waitDocumento" maxlength="20">
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="waitCorreo">Correo <span class="required">*</span></label>
+                <input type="email" id="waitCorreo" maxlength="120">
+              </div>
+              <div class="field">
+                <label for="waitCelular">Celular <span class="required">*</span></label>
+                <input type="tel" id="waitCelular" maxlength="20">
+              </div>
+            </div>
+            <button type="button" class="btn-secondary" id="btnWaitlist">Unirme a lista de espera</button>
+            <span id="waitlist-error" class="error-msg" role="alert"></span>
+            <p id="waitlist-ok" class="hint" style="display:none;color:var(--olive)"></p>
+          </div>
         </div>
 
         <form id="competenciaForm" novalidate>
@@ -82,6 +138,16 @@
             <label for="correo">Correo electrónico <span class="required">*</span></label>
             <input type="email" id="correo" name="correo" autocomplete="email" required placeholder="Ej. nombre@correo.com" aria-describedby="correo-error">
             <span id="correo-error" class="error-msg" role="alert"></span>
+          </div>
+
+          <div class="field">
+            <label for="fotoParticipante">Foto del participante <span class="required">*</span></label>
+            <input type="file" id="fotoParticipante" name="fotoParticipante" accept="image/jpeg,image/png,image/webp" required aria-describedby="foto-hint foto-error fotoPreview">
+            <p id="foto-hint" class="hint">
+              Sube una foto tuya, de frente y con buena luz. Formatos: JPG, PNG o WebP · máx. 5 MB.
+            </p>
+            <div id="fotoPreview" class="comprobante-preview" aria-live="polite"></div>
+            <span id="foto-error" class="error-msg" role="alert"></span>
           </div>
 
           <h2 class="section-title">2. Perfil profesional</h2>
@@ -192,17 +258,19 @@
 
           <h2 class="section-title">4. Inscripción y pago</h2>
 
-          <div class="field">
-            <label for="metodoPago">Método de pago de inscripción ($90.000 COP) <span class="required">*</span></label>
-            <select id="metodoPago" name="metodoPago" required aria-describedby="metodoPago-error">
-              <option value="">Selecciona…</option>
-              <option value="Transferencia bancaria">Transferencia bancaria</option>
-              <option value="Nequi / Daviplata">Nequi / Daviplata</option>
-              <option value="Efectivo en sitio">Efectivo en sitio (día del evento)</option>
-              <option value="Otro">Otro</option>
-            </select>
-            <span id="metodoPago-error" class="error-msg" role="alert"></span>
+          <div class="info-box payment-box" role="note" aria-label="Datos de pago oficial">
+            <strong>Pago de inscripción — $90.000 COP</strong>
+            <p style="margin:0.5rem 0 0">Realiza tu pago a la cuenta oficial del evento:</p>
+            <ul style="margin:0.5rem 0 0">
+              <li><strong>Banco / app:</strong> Nubank</li>
+              <li><strong>Usuario / llave:</strong> <code>@mvl616</code></li>
+              <li><strong>Titular:</strong> Manuel Barraza</li>
+              <li><strong>Valor:</strong> $90.000 COP (inscripción Switch Championship)</li>
+            </ul>
+            <p class="hint" style="margin:0.5rem 0 0">Único método de pago aceptado. Adjunta el comprobante en este formulario para confirmar tu cupo más rápido.</p>
           </div>
+
+          <input type="hidden" id="metodoPago" name="metodoPago" value="Nubank (@mvl616) — Manuel Barraza">
 
           <div class="field">
             <label for="comprobanteReferencia">Referencia de pago (opcional)</label>
@@ -228,113 +296,297 @@
 
           <h2 class="section-title">5. Términos y condiciones legales</h2>
 
-          <a class="btn-rules" href="reglas-switch-championship.html" target="_blank" rel="noopener">
+          <a class="btn-rules" data-link="reglasPdf" href="assets/reglas-switch-championship.pdf" target="_blank" rel="noopener">
             📄 Descargar reglamento (PDF)
           </a>
-          <a class="btn-guide" href="como-funciona-evento.html" target="_blank" rel="noopener">
+          <a class="btn-guide" data-link="comoFunciona" href="como-funciona-evento.html" target="_blank" rel="noopener">
             ¿Cómo funciona el evento?
+          </a>
+          <a class="btn-guide" data-link="reglas" href="reglas-switch-championship.html" target="_blank" rel="noopener" style="margin-left:0;margin-top:0.5rem">
+            Reglamento (web)
           </a>
           <p class="hint" style="margin-top:0.5rem;margin-bottom:0.75rem">
             El reglamento se abre en versión web optimizada para <strong>Imprimir → Guardar como PDF</strong>.
             La guía del participante explica el formato y la logística sin mezclar las reglas oficiales.
           </p>
 
-          <div class="legal-scroll" tabindex="0" aria-label="Resumen legal">
-            <p><strong>Participación voluntaria:</strong> Mi inscripción es libre y voluntaria, bajo mi propia responsabilidad.</p>
-            <p><strong>Pertinencias:</strong> El evento no se hace responsable por pérdida, daño o hurto de pertenencias personales de participantes o asistentes.</p>
-            <p><strong>Datos personales:</strong> Autorizo el uso de mis datos para gestión del torneo, envío de café, comunicaciones y registro de asistencia.</p>
-            <p><strong>No reembolsos:</strong> El valor de inscripción ($90.000 COP) no tiene devolución bajo ninguna circunstancia.</p>
-            <p><strong>Asistencia y descalificación:</strong> No asistir a la ronda correspondiente en el horario asignado implica descalificación automática sin reembolso.</p>
-            <p><strong>Reglamento:</strong> Acepto el formato eliminatorio (36→9→3), protocolo Hario Switch, tiempos oficiales y criterios de evaluación del reglamento anexo.</p>
-          </div>
-
           <div class="terms-block field">
-            <label class="choice-item">
-              <input type="checkbox" id="aceptaVoluntaria" name="aceptaVoluntaria" required>
-              <span>Declaro que participo de forma <strong>voluntaria</strong> y bajo mi responsabilidad. <span class="required">*</span></span>
-            </label>
-            <label class="choice-item" style="margin-top:0.5rem">
-              <input type="checkbox" id="aceptaPertenencias" name="aceptaPertenencias" required>
-              <span>Entiendo que el evento <strong>no es responsable</strong> de mis pertenencias personales. <span class="required">*</span></span>
-            </label>
-            <label class="choice-item" style="margin-top:0.5rem">
-              <input type="checkbox" id="aceptaDatos" name="aceptaDatos" required>
-              <span>Autorizo el <strong>tratamiento de mis datos personales</strong> para fines del torneo y logística. <span class="required">*</span></span>
-            </label>
-            <label class="choice-item" style="margin-top:0.5rem">
-              <input type="checkbox" id="aceptaNoReembolso" name="aceptaNoReembolso" required>
-              <span>Acepto la política de <strong>no devolución</strong> del valor de inscripción. <span class="required">*</span></span>
-            </label>
-            <label class="choice-item" style="margin-top:0.5rem">
-              <input type="checkbox" id="aceptaDescalificacion" name="aceptaDescalificacion" required>
-              <span>Acepto que <strong>no asistir a mi ronda</strong> implica descalificación automática. <span class="required">*</span></span>
-            </label>
-            <label class="choice-item" style="margin-top:0.5rem">
-              <input type="checkbox" id="aceptaReglas" name="aceptaReglas" required>
-              <span>He leído y acepto el <strong>reglamento oficial</strong> del Switch Championship. <span class="required">*</span></span>
-            </label>
-            <label class="choice-item" style="margin-top:0.5rem">
-              <input type="checkbox" id="aceptaDisponibilidad" name="aceptaDisponibilidad" required>
-              <span>Confirmo disponibilidad para asistir a las rondas en las que avance. <span class="required">*</span></span>
-            </label>
-            <label class="choice-item" style="margin-top:0.5rem">
-              <input type="checkbox" id="aceptaImagen" name="aceptaImagen" required>
-              <span>Autorizo el uso de mi nombre e imagen para difusión del evento. <span class="required">*</span></span>
-            </label>
+            <div class="terms-toolbar">
+              <p class="hint terms-hint">Despliega cada punto para leer el detalle. Debes aceptar los ocho.</p>
+              <button type="button" id="btnSelectAllTerms" class="btn-select-all" aria-pressed="false">
+                Seleccionar todas
+              </button>
+            </div>
+
+            <div class="term-disclosure">
+              <div class="term-disclosure__header">
+                <label class="choice-item choice-item--compact">
+                  <input type="checkbox" id="aceptaVoluntaria" name="aceptaVoluntaria" required>
+                  <span>Participación <strong>voluntaria</strong> <span class="required" aria-hidden="true">*</span></span>
+                </label>
+                <button type="button" class="term-disclosure__toggle" aria-expanded="false" aria-controls="term-aceptaVoluntaria">Detalle</button>
+              </div>
+              <div id="term-aceptaVoluntaria" class="term-disclosure__panel" hidden>
+                <p class="term-disclosure__body">Mi inscripción es libre y voluntaria, bajo mi propia responsabilidad.</p>
+              </div>
+            </div>
+
+            <div class="term-disclosure">
+              <div class="term-disclosure__header">
+                <label class="choice-item choice-item--compact">
+                  <input type="checkbox" id="aceptaPertenencias" name="aceptaPertenencias" required>
+                  <span>Responsabilidad de <strong>pertenencias</strong> <span class="required" aria-hidden="true">*</span></span>
+                </label>
+                <button type="button" class="term-disclosure__toggle" aria-expanded="false" aria-controls="term-aceptaPertenencias">Detalle</button>
+              </div>
+              <div id="term-aceptaPertenencias" class="term-disclosure__panel" hidden>
+                <p class="term-disclosure__body">El evento no se hace responsable por pérdida, daño o hurto de pertenencias personales de participantes o asistentes.</p>
+              </div>
+            </div>
+
+            <div class="term-disclosure">
+              <div class="term-disclosure__header">
+                <label class="choice-item choice-item--compact">
+                  <input type="checkbox" id="aceptaDatos" name="aceptaDatos" required>
+                  <span>Tratamiento de <strong>datos personales</strong> <span class="required" aria-hidden="true">*</span></span>
+                </label>
+                <button type="button" class="term-disclosure__toggle" aria-expanded="false" aria-controls="term-aceptaDatos">Detalle</button>
+              </div>
+              <div id="term-aceptaDatos" class="term-disclosure__panel" hidden>
+                <p class="term-disclosure__body">Autorizo el uso de mis datos para gestión del torneo, envío de café, comunicaciones y registro de asistencia.</p>
+              </div>
+            </div>
+
+            <div class="term-disclosure">
+              <div class="term-disclosure__header">
+                <label class="choice-item choice-item--compact">
+                  <input type="checkbox" id="aceptaNoReembolso" name="aceptaNoReembolso" required>
+                  <span>Política de <strong>no devolución</strong> <span class="required" aria-hidden="true">*</span></span>
+                </label>
+                <button type="button" class="term-disclosure__toggle" aria-expanded="false" aria-controls="term-aceptaNoReembolso">Detalle</button>
+              </div>
+              <div id="term-aceptaNoReembolso" class="term-disclosure__panel" hidden>
+                <p class="term-disclosure__body">El valor de inscripción ($90.000 COP) no tiene devolución bajo ninguna circunstancia.</p>
+              </div>
+            </div>
+
+            <div class="term-disclosure">
+              <div class="term-disclosure__header">
+                <label class="choice-item choice-item--compact">
+                  <input type="checkbox" id="aceptaDescalificacion" name="aceptaDescalificacion" required>
+                  <span><strong>Descalificación</strong> por inasistencia <span class="required" aria-hidden="true">*</span></span>
+                </label>
+                <button type="button" class="term-disclosure__toggle" aria-expanded="false" aria-controls="term-aceptaDescalificacion">Detalle</button>
+              </div>
+              <div id="term-aceptaDescalificacion" class="term-disclosure__panel" hidden>
+                <p class="term-disclosure__body">No asistir a la ronda correspondiente en el horario asignado implica descalificación automática sin reembolso.</p>
+              </div>
+            </div>
+
+            <div class="term-disclosure">
+              <div class="term-disclosure__header">
+                <label class="choice-item choice-item--compact">
+                  <input type="checkbox" id="aceptaReglas" name="aceptaReglas" required>
+                  <span><strong>Reglamento oficial</strong> <span class="required" aria-hidden="true">*</span></span>
+                </label>
+                <button type="button" class="term-disclosure__toggle" aria-expanded="false" aria-controls="term-aceptaReglas">Detalle</button>
+              </div>
+              <div id="term-aceptaReglas" class="term-disclosure__panel" hidden>
+                <p class="term-disclosure__body">Acepto el formato eliminatorio (36→9→3), protocolo Hario Switch, sorteo de método por dados antes de cada ronda, tiempos oficiales y criterios de evaluación del <a data-link="reglasPdf" href="assets/reglas-switch-championship.pdf" target="_blank" rel="noopener">reglamento anexo (PDF)</a> y la <a data-link="reglas" href="reglas-switch-championship.html" target="_blank" rel="noopener">versión web</a>.</p>
+              </div>
+            </div>
+
+            <div class="term-disclosure">
+              <div class="term-disclosure__header">
+                <label class="choice-item choice-item--compact">
+                  <input type="checkbox" id="aceptaDisponibilidad" name="aceptaDisponibilidad" required>
+                  <span><strong>Disponibilidad</strong> para rondas <span class="required" aria-hidden="true">*</span></span>
+                </label>
+                <button type="button" class="term-disclosure__toggle" aria-expanded="false" aria-controls="term-aceptaDisponibilidad">Detalle</button>
+              </div>
+              <div id="term-aceptaDisponibilidad" class="term-disclosure__panel" hidden>
+                <p class="term-disclosure__body">Confirmo disponibilidad para asistir a las rondas oficiales del torneo en las que avance, según calendario y horarios de la organización.</p>
+              </div>
+            </div>
+
+            <div class="term-disclosure">
+              <div class="term-disclosure__header">
+                <label class="choice-item choice-item--compact">
+                  <input type="checkbox" id="aceptaImagen" name="aceptaImagen" required>
+                  <span>Uso de <strong>imagen y difusión</strong> <span class="required" aria-hidden="true">*</span></span>
+                </label>
+                <button type="button" class="term-disclosure__toggle" aria-expanded="false" aria-controls="term-aceptaImagen">Detalle</button>
+              </div>
+              <div id="term-aceptaImagen" class="term-disclosure__panel" hidden>
+                <p class="term-disclosure__body">Autorizo el uso de mi nombre e imagen en fotografías, videos y redes sociales relacionados con el torneo.</p>
+              </div>
+            </div>
+
+            <p class="hint terms-privacy-link">Lee la <a data-link="privacidad" href="privacidad.html" target="_blank" rel="noopener">política de privacidad</a>.</p>
             <span id="terminos-error" class="error-msg" role="alert"></span>
           </div>
 
           <button type="submit" class="btn-submit" id="btnSubmit">Inscribirme en Switch Championship</button>
           <p id="syncNote" class="hint" style="text-align:center;margin-top:0.75rem;display:none"></p>
-          <p class="footer-note">
-            ¿Solo quieres asistir a la feria? <a href="index.html">Formulario de asistencia general</a>
-          </p>
         </form>
       </div>
 
       <div id="successPanel" class="success-panel" role="status" aria-live="polite">
         <div style="font-size:3rem;margin-bottom:0.5rem" aria-hidden="true">🏆</div>
-        <h2>¡Inscripción registrada!</h2>
-        <p>Tu cupo en el <strong>Switch Championship</strong> quedó registrado. Te contactaremos para confirmar el pago y el envío del café de práctica (100 g) a la dirección indicada.</p>
+        <h2 id="successTitle">¡Inscripción completada!</h2>
+        <p id="successLead"></p>
+        <div id="successSummary" class="success-summary"></div>
         <p id="successComprobanteNote" class="hint"></p>
-        <p class="hint"><a href="reglas-switch-championship.html" target="_blank" rel="noopener">Descargar reglamento oficial (PDF)</a> · <a href="como-funciona-evento.html" target="_blank" rel="noopener">¿Cómo funciona el evento?</a></p>
+        <div id="successWhatsappGroup" class="whatsapp-group-cta" hidden
+             data-whatsapp-url="https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9">
+          <p class="whatsapp-group-cta__title">Únete al grupo de WhatsApp del torneo</p>
+          <p class="whatsapp-group-cta__text">Recibirás avisos, logística y novedades del Switch Championship.</p>
+          <a id="successWhatsappGroupLink" class="btn-whatsapp" href="#" target="_blank" rel="noopener noreferrer">Entrar al grupo de WhatsApp</a>
+        </div>
+        <p class="hint">
+          <a data-link="reglasPdf" href="assets/reglas-switch-championship.pdf" target="_blank" rel="noopener">Reglamento (PDF)</a> ·
+          <a data-link="reglas" href="reglas-switch-championship.html" target="_blank" rel="noopener">Reglamento (web)</a> ·
+          <a data-link="comoFunciona" href="como-funciona-evento.html" target="_blank" rel="noopener">¿Cómo funciona el evento?</a>
+        </p>
         <p id="inscripcionId" class="hint"></p>
         <button type="button" id="btnNueva" class="btn-secondary">Nueva inscripción</button>
         </div>
       </article>
     </main>
+
+    <footer id="contacto" class="festival-footer">
+      <div class="festival-wrap festival-footer__inner">
+        <div class="festival-footer__brand">
+          <p class="festival-footer__col-title">Evento</p>
+          <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="160" height="64" loading="lazy">
+          <p id="festivalInstagram" class="festival-social">
+            <a id="igLink" href="#" target="_blank" rel="noopener noreferrer">@lasucursaldelcafe_festival</a>
+          </p>
+        </div>
+        <nav class="festival-footer__nav" aria-label="Enlaces del sitio">
+          <p class="festival-footer__col-title">Navegación</p>
+          <a data-link="festival" href="index.html">Inicio</a>
+          <a data-link="evento" href="el-evento.html">El evento</a>
+          <a data-link="actividades" href="actividades.html">Actividades</a>
+          <a data-link="patrocinadores" href="patrocinadores.html">Patrocinadores</a>
+          <a data-link="feria" href="inscripcion.html">Inscripción</a>
+          <a data-link="competencia" href="competencia.html">Competencia</a>
+          <a data-link="privacidad" href="privacidad.html">Privacidad</a>
+        </nav>
+        <div class="festival-footer__contact">
+          <p class="festival-footer__col-title">Contacto</p>
+          <p class="festival-footer__dates">
+            Competencia · <span data-bind="torneo.fecha">4 de julio de 2026</span><br>
+            <span data-bind="torneo.lugar">Purist Marbella, Ciudad Jardín</span>
+          </p>
+          <div class="festival-contact-actions">
+            <a class="btn-submit" id="waContact" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <a class="btn-secondary" id="emailContact" href="mailto:lasucursaldelcafe@gmail.com">Correo</a>
+          </div>
+        </div>
+        <p class="festival-footer__copy">© 2026 La Sucursal del Café · Apoya lo nuestro, toma café colombiano.</p>
+      </div>
+    </footer>
   </div>
 
+  <script src="js/event-config.js"></script>
+  <script src="js/site-links.js"></script>
   <script src="js/sheets-config.js"></script>
   <script src="js/form-submit.js"></script>
+  <script src="js/terms-disclosure.js"></script>
+  <script src="js/site-chrome.js"></script>
+  <script src="js/festival-nav.js"></script>
   <script>
     (function () {
+      const cfg = window.EVENT_CONFIG || {};
+      const ev = cfg.evento1 || {};
+      const pago = cfg.pago || {};
       const STORAGE_KEY = "switch_championship_inscripciones";
       const FORM_TYPE = "competencia";
-      const CUPO_MAX = 36;
-      const PRECIO = 90000;
+      const CUPO_MAX = cfg.cupoCompetencia || 36;
+      const PRECIO = pago.monto || 90000;
+      const METODO_PAGO = pago.metodo || "Nubank (@mvl616) — Manuel Barraza";
+      const EVENTO_NOMBRE = ev.nombre || "Switch Championship — Evento 1";
+      const EVENTO_FECHA = ev.fecha || "4 de julio de 2026";
+      const EVENTO_SEDE = (window.SiteChrome && SiteChrome.torneoLugar) ? SiteChrome.torneoLugar() : (ev.sede + (ev.ciudad ? ", " + ev.ciudad : ""));
+      const DEFAULT_WHATSAPP_GRUPO_URL = "https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9";
 
       const form = document.getElementById("competenciaForm");
       const formPanel = document.getElementById("formPanel");
       const successPanel = document.getElementById("successPanel");
+      const successTitle = document.getElementById("successTitle");
+      const successLead = document.getElementById("successLead");
+      const successSummary = document.getElementById("successSummary");
       const btnNueva = document.getElementById("btnNueva");
       const btnSubmit = document.getElementById("btnSubmit");
       const cupoStatus = document.getElementById("cupoStatus");
       const inscripcionId = document.getElementById("inscripcionId");
       const syncNote = document.getElementById("syncNote");
       const successComprobanteNote = document.getElementById("successComprobanteNote");
+      const successWhatsappGroup = document.getElementById("successWhatsappGroup");
+      const successWhatsappGroupLink = document.getElementById("successWhatsappGroupLink");
+
+      function isValidWhatsappGrupoUrl(url) {
+        return /^https:\/\/chat\.whatsapp\.com\//.test(String(url || "").trim());
+      }
+
+      function resolveWhatsappGrupoUrl(serverMeta) {
+        serverMeta = serverMeta || {};
+        var candidates = [
+          serverMeta.whatsappGrupoUrl,
+          ev.whatsappGrupoUrl,
+          successWhatsappGroup && successWhatsappGroup.getAttribute("data-whatsapp-url"),
+          DEFAULT_WHATSAPP_GRUPO_URL
+        ];
+        for (var i = 0; i < candidates.length; i++) {
+          var url = String(candidates[i] || "").trim();
+          if (isValidWhatsappGrupoUrl(url)) return url;
+        }
+        return "";
+      }
+
+      function hideWhatsappGroup() {
+        if (!successWhatsappGroup) return;
+        successWhatsappGroup.hidden = true;
+        successWhatsappGroup.setAttribute("hidden", "");
+        successWhatsappGroup.classList.remove("is-visible");
+      }
+
+      function showWhatsappGroup(url) {
+        if (!successWhatsappGroup || !successWhatsappGroupLink || !isValidWhatsappGrupoUrl(url)) {
+          hideWhatsappGroup();
+          return;
+        }
+        successWhatsappGroupLink.href = url;
+        successWhatsappGroupLink.setAttribute("aria-label", "Entrar al grupo de WhatsApp del Switch Championship");
+        successWhatsappGroup.removeAttribute("hidden");
+        successWhatsappGroup.hidden = false;
+        successWhatsappGroup.classList.add("is-visible");
+      }
       const comprobanteInput = document.getElementById("comprobanteArchivo");
       const comprobantePreview = document.getElementById("comprobantePreview");
+      const fotoInput = document.getElementById("fotoParticipante");
+      const fotoPreview = document.getElementById("fotoPreview");
+      const waitlistPanel = document.getElementById("waitlistPanel");
+      const btnWaitlist = document.getElementById("btnWaitlist");
 
-      const MAX_COMPROBANTE_BYTES = 5 * 1024 * 1024;
+      const MAX_ARCHIVO_BYTES = 5 * 1024 * 1024;
+      const MAX_COMPROBANTE_BYTES = MAX_ARCHIVO_BYTES;
+      const MAX_FOTO_BYTES = MAX_ARCHIVO_BYTES;
       const COMPROBANTE_TIPOS = [
         "image/jpeg",
         "image/png",
         "image/webp",
         "application/pdf"
       ];
+      const FOTO_TIPOS = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+      ];
 
       let comprobanteArchivoData = null;
+      let fotoParticipanteData = null;
 
       if (syncNote && window.FormSubmit && !FormSubmit.isConfigured()) {
         syncNote.style.display = "block";
@@ -352,17 +604,120 @@
 
       function updateCupo() {
         const count = getInscripciones().length;
+        renderCupo(count);
+      }
+
+      function renderCupo(count, options) {
+        options = options || {};
         const restantes = Math.max(0, CUPO_MAX - count);
         cupoStatus.textContent = "Cupos registrados: " + count + " de " + CUPO_MAX + " (" + restantes + " disponibles)";
         const lleno = count >= CUPO_MAX;
-        btnSubmit.disabled = lleno;
-        if (lleno) {
-          cupoStatus.textContent += " — Cupo completo. Contáctanos para lista de espera.";
+        const bloquear = lleno && !options.fetchError;
+        btnSubmit.disabled = bloquear;
+        if (formPanel) formPanel.querySelector("#competenciaForm").style.display = bloquear ? "none" : "";
+        if (waitlistPanel) waitlistPanel.classList.toggle("visible", bloquear);
+        cupoStatus.style.color = lleno && !options.fetchError ? "var(--red-brand)" : "";
+        if (options.fetchError) {
           cupoStatus.style.color = "var(--red-brand)";
+          cupoStatus.textContent = "No se pudo consultar cupos en línea. ";
+          var retryBtn = document.getElementById("btnRetryCupo");
+          if (!retryBtn) {
+            retryBtn = document.createElement("button");
+            retryBtn.type = "button";
+            retryBtn.id = "btnRetryCupo";
+            retryBtn.className = "btn-secondary";
+            retryBtn.style.marginTop = "0.5rem";
+            retryBtn.textContent = "Reintentar";
+            retryBtn.addEventListener("click", refreshCupo);
+            cupoStatus.parentNode.insertBefore(retryBtn, cupoStatus.nextSibling);
+          }
+          retryBtn.style.display = "";
+          return;
+        }
+        var retryBtn = document.getElementById("btnRetryCupo");
+        if (retryBtn) retryBtn.style.display = "none";
+        if (lleno) {
+          cupoStatus.textContent += " — Cupo completo. Únete a la lista de espera abajo.";
         }
       }
 
-      updateCupo();
+      function refreshCupo() {
+        var configured = window.FormSubmit && FormSubmit.isConfigured && FormSubmit.isConfigured();
+        if (configured && FormSubmit.fetchCupoCount) {
+          cupoStatus.textContent = "Consultando cupos…";
+          FormSubmit.fetchCupoCount().then(function (data) {
+            if (data && data.ok && typeof data.count === "number") {
+              renderCupo(data.count);
+            } else {
+              renderCupo(0, { fetchError: true });
+            }
+          }).catch(function () {
+            renderCupo(0, { fetchError: true });
+          });
+        } else {
+          updateCupo();
+        }
+      }
+
+      function verifyCupoDisponible() {
+        var configured = window.FormSubmit && FormSubmit.isConfigured && FormSubmit.isConfigured();
+        if (configured && FormSubmit.fetchCupoCount) {
+          return FormSubmit.fetchCupoCount().then(function (data) {
+            if (data && data.ok && typeof data.count === "number") {
+              renderCupo(data.count);
+              return !data.completo;
+            }
+            renderCupo(0, { fetchError: true });
+            return false;
+          }).catch(function () {
+            renderCupo(0, { fetchError: true });
+            return false;
+          });
+        }
+        return Promise.resolve(getInscripciones().length < CUPO_MAX);
+      }
+
+      refreshCupo();
+
+      if (btnWaitlist) {
+        btnWaitlist.addEventListener("click", function () {
+          var nombre = document.getElementById("waitNombre").value.trim();
+          var documento = document.getElementById("waitDocumento").value.trim();
+          var correo = document.getElementById("waitCorreo").value.trim().toLowerCase();
+          var celular = document.getElementById("waitCelular").value.trim();
+          var errEl = document.getElementById("waitlist-error");
+          var okEl = document.getElementById("waitlist-ok");
+          if (!nombre || !documento || !correo || !celular) {
+            errEl.textContent = "Completa todos los campos.";
+            errEl.classList.add("visible");
+            return;
+          }
+          errEl.classList.remove("visible");
+          btnWaitlist.disabled = true;
+          btnWaitlist.textContent = "Enviando…";
+          var entry = {
+            id: "WL-" + Date.now().toString(36).toUpperCase(),
+            fecha: new Date().toISOString(),
+            formulario: "competencia",
+            nombre: nombre,
+            documento: documento,
+            correo: correo,
+            celular: celular,
+            motivo: "Cupo completo"
+          };
+          FormSubmit.submitWaitlist(entry).then(function (res) {
+            btnWaitlist.disabled = false;
+            btnWaitlist.textContent = "Unirme a lista de espera";
+            if (!res.ok) {
+              errEl.textContent = res.duplicate ? "Ya estás en la lista de espera." : (res.error || "No se pudo registrar.");
+              errEl.classList.add("visible");
+              return;
+            }
+            okEl.style.display = "block";
+            okEl.textContent = "Listo. Te avisaremos si se libera un cupo. Revisa tu correo.";
+          });
+        });
+      }
 
       function formatFileSize(bytes) {
         if (bytes < 1024) return bytes + " B";
@@ -380,22 +735,49 @@
         showError("comprobante-error", "");
       }
 
-      function renderComprobantePreview(data) {
-        if (!comprobantePreview || !data) return;
+      function clearFotoPreview(clearInput) {
+        fotoParticipanteData = null;
+        if (clearInput && fotoInput) fotoInput.value = "";
+        if (fotoPreview) {
+          fotoPreview.classList.remove("visible");
+          fotoPreview.innerHTML = "";
+        }
+        showError("foto-error", "");
+      }
+
+      function renderArchivoPreview(container, data, options) {
+        options = options || {};
+        if (!container || !data) return;
         var isPdf = data.tipoArchivo === "application/pdf";
         var thumb = isPdf
           ? '<div class="pdf-icon" aria-hidden="true">📄</div>'
-          : '<img src="' + data.base64 + '" alt="Vista previa del comprobante">';
-        comprobantePreview.innerHTML =
+          : '<img src="' + data.base64 + '" alt="' + (options.alt || "Vista previa") + '">';
+        container.innerHTML =
           thumb +
           '<div class="meta"><strong>' + data.nombreArchivo + '</strong>' +
           data.tipoArchivo + " · " + formatFileSize(data.tamanoBytes) + '</div>' +
-          '<button type="button" class="btn-clear-file" id="btnClearComprobante">Quitar</button>';
-        comprobantePreview.classList.add("visible");
-        var btnClear = document.getElementById("btnClearComprobante");
+          '<button type="button" class="btn-clear-file" data-clear="' + options.clearId + '">Quitar</button>';
+        container.classList.add("visible");
+        var btnClear = container.querySelector("[data-clear]");
         if (btnClear) {
-          btnClear.addEventListener("click", clearComprobantePreview);
+          btnClear.addEventListener("click", options.onClear);
         }
+      }
+
+      function renderComprobantePreview(data) {
+        renderArchivoPreview(comprobantePreview, data, {
+          alt: "Vista previa del comprobante",
+          clearId: "comprobante",
+          onClear: clearComprobantePreview
+        });
+      }
+
+      function renderFotoPreview(data) {
+        renderArchivoPreview(fotoPreview, data, {
+          alt: "Vista previa de tu foto",
+          clearId: "foto",
+          onClear: function () { clearFotoPreview(true); }
+        });
       }
 
       function readFileAsDataUrl(file) {
@@ -403,6 +785,55 @@
           var reader = new FileReader();
           reader.onload = function () { resolve(reader.result); };
           reader.onerror = function () { reject(new Error("No se pudo leer el archivo.")); };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function compressImageFile(file, maxDim, quality) {
+        maxDim = maxDim || 1600;
+        quality = quality || 0.82;
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function () {
+            var img = new Image();
+            img.onload = function () {
+              var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+              var width = Math.max(1, Math.round(img.width * scale));
+              var height = Math.max(1, Math.round(img.height * scale));
+              var canvas = document.createElement("canvas");
+              canvas.width = width;
+              canvas.height = height;
+              var ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, width, height);
+              canvas.toBlob(function (blob) {
+                if (!blob) {
+                  reject(new Error("No se pudo comprimir la foto."));
+                  return;
+                }
+                var outReader = new FileReader();
+                outReader.onload = function () {
+                  var baseName = (file.name || "foto").replace(/\.[^.]+$/, "");
+                  resolve({
+                    nombreArchivo: baseName + ".jpg",
+                    tipoArchivo: "image/jpeg",
+                    tamanoBytes: blob.size,
+                    base64: outReader.result
+                  });
+                };
+                outReader.onerror = function () {
+                  reject(new Error("No se pudo procesar la foto."));
+                };
+                outReader.readAsDataURL(blob);
+              }, "image/jpeg", quality);
+            };
+            img.onerror = function () {
+              reject(new Error("No se pudo cargar la imagen."));
+            };
+            img.src = reader.result;
+          };
+          reader.onerror = function () {
+            reject(new Error("No se pudo leer la foto."));
+          };
           reader.readAsDataURL(file);
         });
       }
@@ -416,6 +847,54 @@
           return "El archivo supera 5 MB. Elige uno más pequeño.";
         }
         return "";
+      }
+
+      function validateFotoFile(file) {
+        if (!file) return "La foto del participante es obligatoria.";
+        if (FOTO_TIPOS.indexOf(file.type) === -1) {
+          return "Formato no permitido. Usa JPG, PNG o WebP.";
+        }
+        if (file.size > MAX_FOTO_BYTES) {
+          return "La foto supera 5 MB. Elige una imagen más pequeña.";
+        }
+        return "";
+      }
+
+      function validateFoto() {
+        if (fotoParticipanteData && fotoParticipanteData.base64) {
+          showError("foto-error", "");
+          return true;
+        }
+        showError("foto-error", "La foto del participante es obligatoria.");
+        return false;
+      }
+
+      if (fotoInput) {
+        fotoInput.addEventListener("change", function () {
+          var file = fotoInput.files && fotoInput.files[0];
+          clearFotoPreview(false);
+          if (!file) return;
+
+          var msg = validateFotoFile(file);
+          if (msg) {
+            showError("foto-error", msg);
+            clearFotoPreview(true);
+            return;
+          }
+
+          if (fotoPreview) {
+            fotoPreview.innerHTML = '<p class="hint">Procesando foto…</p>';
+            fotoPreview.classList.add("visible");
+          }
+
+          compressImageFile(file).then(function (payload) {
+            fotoParticipanteData = payload;
+            renderFotoPreview(fotoParticipanteData);
+          }).catch(function () {
+            showError("foto-error", "No se pudo cargar la foto. Intenta con otra imagen JPG o PNG.");
+            clearFotoPreview(true);
+          });
+        });
       }
 
       if (comprobanteInput) {
@@ -556,6 +1035,19 @@
         return ok;
       }
 
+      var termsUi = TermsDisclosure.init({
+        termIds: [
+          "aceptaVoluntaria", "aceptaPertenencias", "aceptaDatos", "aceptaNoReembolso",
+          "aceptaDescalificacion", "aceptaReglas", "aceptaDisponibilidad", "aceptaImagen"
+        ],
+        onChange: function () {
+          var terminosError = document.getElementById("terminos-error");
+          if (terminosError && terminosError.classList.contains("visible")) {
+            validateTerms();
+          }
+        }
+      });
+
       function validateAll() {
         let valid = true;
         Object.keys(validators).forEach(function (key) {
@@ -570,32 +1062,88 @@
         if (!validateSelect("switchExp", "switchExp-error")) valid = false;
         if (!validateRadio("torneos", "torneos-error")) valid = false;
         if (!validateEquipo()) valid = false;
-        if (!validateSelect("metodoPago", "metodoPago-error")) valid = false;
+        if (!validateFoto()) valid = false;
         if (!validateTerms()) valid = false;
         return valid;
       }
 
+      function showSuccessMessage(entry, hadComprobante, submitMeta) {
+        submitMeta = submitMeta || {};
+        var primerNombre = (entry.nombre || "").split(/\s+/)[0] || "competidor";
+        var whatsappUrl = resolveWhatsappGrupoUrl(submitMeta);
+        var fotoRecibida = !!(entry.fotoParticipante && entry.fotoParticipante.base64);
+        var fotoLine = fotoRecibida
+          ? "Recibida correctamente"
+          : "Pendiente de confirmar";
+        if (submitMeta.fotoEnlace) {
+          fotoLine += " · <a href=\"" + submitMeta.fotoEnlace + "\" target=\"_blank\" rel=\"noopener\">Ver en Drive</a>";
+        } else if (submitMeta.skipped) {
+          fotoLine += " (modo local — sube de nuevo si cambias de dispositivo)";
+        }
+
+        if (successTitle) {
+          successTitle.textContent = "¡Inscripción completada, " + primerNombre + "!";
+        }
+        if (successLead) {
+          successLead.textContent =
+            "Cumpliste todos los requisitos. Tu registro en el Switch Championship " +
+            "(1.ª de 3 clasificatorias) fue enviado correctamente.";
+        }
+        if (successSummary) {
+          successSummary.innerHTML =
+            "<ul>" +
+            "<li><strong>Número de inscripción:</strong> " + entry.id + "</li>" +
+            "<li><strong>Evento:</strong> " + EVENTO_NOMBRE + " — 1.ª clasificatoria</li>" +
+            "<li><strong>Fecha y sede:</strong> " + EVENTO_FECHA + " · " + EVENTO_SEDE + "</li>" +
+            "<li><strong>Pago:</strong> $90.000 COP a Nubank <code>@mvl616</code> (Manuel Barraza)</li>" +
+            "<li><strong>Café de práctica:</strong> 100 g a la dirección indicada, tras validar el pago</li>" +
+            "<li><strong>Foto:</strong> " + fotoLine + "</li>" +
+            "<li><strong>Próximo paso:</strong> Únete al grupo de WhatsApp del torneo y revisa tu correo</li>" +
+            "</ul>";
+        }
+        showWhatsappGroup(whatsappUrl);
+        if (successComprobanteNote) {
+          successComprobanteNote.textContent = hadComprobante
+            ? "Recibimos tu comprobante de pago. Validaremos los $90.000 COP en Nubank @mvl616 y te confirmaremos por correo o WhatsApp."
+            : "Pendiente: realiza tu pago de $90.000 COP a Nubank @mvl616 (Manuel Barraza) y envía el comprobante si aún no lo adjuntaste.";
+        }
+        if (inscripcionId) {
+          inscripcionId.textContent = "Guarda tu número de inscripción: " + entry.id;
+        }
+      }
+
       form.addEventListener("submit", function (e) {
         e.preventDefault();
-        if (getInscripciones().length >= CUPO_MAX) return;
         if (!validateAll()) return;
+
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = "Verificando cupo…";
+
+        verifyCupoDisponible().then(function (cupoOk) {
+          if (!cupoOk) {
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = "Inscribirme en Switch Championship";
+            return;
+          }
 
         var file = comprobanteInput && comprobanteInput.files && comprobanteInput.files[0];
         if (file) {
           var fileMsg = validateComprobanteFile(file);
           if (fileMsg) {
             showError("comprobante-error", fileMsg);
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "Inscribirme en Switch Championship";
             return;
           }
         }
 
         var id = "SC-" + Date.now().toString(36).toUpperCase();
 
-        function buildEntry(comprobantePayload) {
+        function buildEntry(comprobantePayload, fotoPayload) {
           return {
             id: id,
             fecha: new Date().toISOString(),
-            evento: "Switch Championship",
+            evento: EVENTO_NOMBRE + " · " + EVENTO_FECHA + " · " + EVENTO_SEDE,
             valorInscripcion: PRECIO,
             nombre: document.getElementById("nombre").value.trim(),
             documento: document.getElementById("documento").value.trim(),
@@ -621,9 +1169,10 @@
               receptor: document.getElementById("receptor").value.trim(),
               instrucciones: document.getElementById("instruccionesEnvio").value.trim() || null
             },
-            metodoPago: document.getElementById("metodoPago").value,
+            metodoPago: METODO_PAGO,
             comprobanteReferencia: document.getElementById("comprobanteReferencia").value.trim() || null,
             comprobanteArchivo: comprobantePayload,
+            fotoParticipante: fotoPayload,
             aceptacionesLegales: {
               aceptaVoluntaria: document.getElementById("aceptaVoluntaria").checked,
               aceptaPertenencias: document.getElementById("aceptaPertenencias").checked,
@@ -638,32 +1187,59 @@
           };
         }
 
+        if (!fotoParticipanteData || !fotoParticipanteData.base64) {
+          showError("foto-error", "La foto del participante es obligatoria.");
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = "Inscribirme en Switch Championship";
+          return;
+        }
+
+        var fotoPayload = {
+          nombreArchivo: fotoParticipanteData.nombreArchivo,
+          tipoArchivo: fotoParticipanteData.tipoArchivo,
+          tamanoBytes: fotoParticipanteData.tamanoBytes,
+          base64: fotoParticipanteData.base64
+        };
+
         btnSubmit.disabled = true;
         btnSubmit.textContent = "Enviando…";
 
         function finalizeSubmit(entry, hadComprobante) {
           FormSubmit.submitForm(FORM_TYPE, STORAGE_KEY, entry).then(function (result) {
-            btnSubmit.disabled = getInscripciones().length >= CUPO_MAX;
             btnSubmit.textContent = "Inscribirme en Switch Championship";
             if (!result.ok) {
-              alert("No se pudo guardar la inscripción. Intenta de nuevo.");
+              btnSubmit.disabled = false;
+              if (result.duplicate) {
+                alert("Ya existe una inscripción con este correo o documento.");
+              } else if (result.cupoCompleto) {
+                alert("Cupo completo. Puedes unirte a la lista de espera.");
+                refreshCupo();
+              } else {
+                var errMsg = result.error || "No se pudo guardar la inscripción. Intenta de nuevo.";
+                if (/foto/i.test(errMsg)) {
+                  showError("foto-error", errMsg);
+                  document.getElementById("fotoParticipante").focus();
+                }
+                alert(errMsg);
+              }
+              refreshCupo();
               return;
             }
 
-            inscripcionId.textContent = "Número de inscripción: " + id;
-            if (successComprobanteNote) {
-              successComprobanteNote.textContent = hadComprobante
-                ? "Recibimos tu comprobante de pago. Validaremos el pago de $90.000 COP y te confirmaremos por correo o WhatsApp."
-                : "Si aún no pagaste o no adjuntaste comprobante, puedes enviarlo después por correo o WhatsApp para acelerar la confirmación.";
-            }
+            showSuccessMessage(entry, hadComprobante, {
+              whatsappGrupoUrl: result.whatsappGrupoUrl,
+              fotoEnlace: result.fotoEnlace,
+              skipped: result.skipped
+            });
             formPanel.classList.add("hidden");
             successPanel.classList.add("visible");
-            updateCupo();
+            successPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+            refreshCupo();
           });
         }
 
         if (comprobanteArchivoData && comprobanteArchivoData.base64) {
-          finalizeSubmit(buildEntry(comprobanteArchivoData), true);
+          finalizeSubmit(buildEntry(comprobanteArchivoData, fotoPayload), true);
           return;
         }
 
@@ -675,7 +1251,7 @@
               tipoArchivo: file.type,
               tamanoBytes: file.size,
               base64: dataUrl
-            }), true);
+            }, fotoPayload), true);
           }).catch(function () {
             btnSubmit.disabled = false;
             btnSubmit.textContent = "Inscribirme en Switch Championship";
@@ -690,13 +1266,20 @@
           tipoArchivo: null,
           tamanoBytes: 0,
           base64: null
-        }), false);
+        }, fotoPayload), false);
+        });
       });
 
       btnNueva.addEventListener("click", function () {
         form.reset();
         clearComprobantePreview();
+        clearFotoPreview(true);
         if (successComprobanteNote) successComprobanteNote.textContent = "";
+        if (successLead) successLead.textContent = "";
+        if (successSummary) successSummary.innerHTML = "";
+        if (inscripcionId) inscripcionId.textContent = "";
+        hideWhatsappGroup();
+        if (successTitle) successTitle.textContent = "¡Inscripción completada!";
         form.querySelectorAll("[aria-invalid]").forEach(function (el) {
           el.removeAttribute("aria-invalid");
         });
@@ -704,9 +1287,13 @@
           el.classList.remove("visible");
           el.textContent = "";
         });
+        if (termsUi) {
+          termsUi.collapseAll();
+          termsUi.resetCheckedState();
+        }
         successPanel.classList.remove("visible");
         formPanel.classList.remove("hidden");
-        updateCupo();
+        refreshCupo();
         document.getElementById("nombre").focus();
       });
     })();

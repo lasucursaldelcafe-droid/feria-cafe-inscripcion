@@ -16,6 +16,20 @@ SPREADSHEET_TITLE = "Switch Championship — Inscripciones"
 SHEET_FERIA = "Feria"
 SHEET_COMPETENCIA = "Competencia"
 
+SHEET_LISTA_ESPERA = "Lista de espera"
+
+HEADERS_LISTA_ESPERA = [
+    "Fecha registro",
+    "ID",
+    "Formulario",
+    "Nombre",
+    "Documento",
+    "Correo",
+    "Celular",
+    "Motivo",
+    "Notas admin",
+]
+
 HEADERS_FERIA = [
     "Fecha registro",
     "ID",
@@ -24,6 +38,12 @@ HEADERS_FERIA = [
     "Celular",
     "Correo",
     "Intereses",
+    "Acepta voluntaria",
+    "Acepta pertenencias",
+    "Acepta datos",
+    "Acepta imagen",
+    "Estado registro",
+    "Notas admin",
 ]
 
 HEADERS_COMPETENCIA = [
@@ -37,6 +57,9 @@ HEADERS_COMPETENCIA = [
     "Ciudad",
     "Celular",
     "Correo",
+    "Foto participante nombre",
+    "Foto participante tipo",
+    "Foto participante enlace Drive",
     "Representa",
     "Rol",
     "Experiencia café",
@@ -67,6 +90,9 @@ HEADERS_COMPETENCIA = [
     "Acepta disponibilidad",
     "Acepta imagen",
     "Observaciones",
+    "Estado pago",
+    "Cupo confirmado",
+    "Notas admin",
 ]
 
 CODE_GS_PATH = TOOLS_DIR / "google-apps-script" / "Code.gs"

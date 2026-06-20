@@ -1,7 +1,12 @@
 .DS_Store
 Thumbs.db
+desktop.ini
 *.log
 .cursor/
+.firebase/
+node_modules/
+__pycache__/
+tools/__pycache__/
 js/sheets-config.js
 tools/.env
 tools/**/*-sa.json

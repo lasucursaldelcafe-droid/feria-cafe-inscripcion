@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
+  <link rel="apple-touch-icon" href="assets/logo-la-sucursal-del-cafe.png">
+  <meta name="description" content="Reglamento oficial Switch Championship 2026 — 4 julio, Purist Marbella">
+  <meta property="og:title" content="Reglamento Switch Championship 2026">
+  <meta property="og:image" content="assets/logo-la-sucursal-del-cafe.png">
   <title>Reglamento Oficial — Switch Championship 2026</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,10 +36,11 @@
   <div class="rules-doc">
   <div class="no-print">
     <p><strong>Reglamento oficial — Switch Championship</strong><br>
-    <span style="font-size:0.9em">Documento normativo para imprimir o guardar como PDF. Para una guía amigable del evento, visita <a href="como-funciona-evento.html">¿Cómo funciona el evento?</a></span></p>
+    <span style="font-size:0.9em">Documento normativo para imprimir o guardar como PDF. Para una guía amigable del evento, visita <a data-link="comoFunciona" href="como-funciona-evento.html">¿Cómo funciona el evento?</a></span></p>
     <button type="button" onclick="window.print()">Imprimir / Guardar PDF</button>
-    <button type="button" onclick="location.href='competencia.html'">Volver al formulario</button>
-    <button type="button" class="secondary" onclick="location.href='como-funciona-evento.html'">Guía del participante</button>
+    <button type="button" id="btnVolverFormulario">Volver al formulario</button>
+    <button type="button" class="secondary" id="btnGuiaParticipante">Guía del participante</button>
+    <a class="btn-rules" data-link="reglasPdf" href="assets/reglas-switch-championship.pdf" target="_blank" rel="noopener" style="display:inline-flex;margin-top:0.5rem">Descargar PDF</a>
   </div>
 
   <img class="brand-logo print-only-logo" src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café">
@@ -44,16 +50,20 @@
   <p class="meta">
     Organizador: <strong>La Sucursal del Café</strong><br>
     Método: Hario Switch · Extracción manual · Café de especialidad<br>
-    Versión: 1.0 · Junio 2026
+    Versión: 1.1 · Junio 2026
   </p>
 
   <h2>1. Información general</h2>
   <table>
     <tr><th>Concepto</th><th>Detalle</th></tr>
-    <tr><td>Nombre del evento</td><td>Switch Championship — Competencia de Café Filtrado</td></tr>
+    <tr><td>Nombre del evento</td><td>Switch Championship — Evento 1 (Competencia de Café Filtrado)</td></tr>
+    <tr><td>Circuito</td><td>1.ª de 3 competencias clasificatorias previas a la competencia principal</td></tr>
+    <tr><td>Fecha</td><td>Viernes <strong>4 de julio de 2026</strong></td></tr>
+    <tr><td>Sede</td><td><strong>Purist Marbella</strong>, Ciudad Jardín</td></tr>
     <tr><td>Método obligatorio</td><td>Hario Switch (extracción manual)</td></tr>
     <tr><td>Cupo máximo</td><td>36 competidores</td></tr>
     <tr><td>Inscripción</td><td>$90.000 COP por participante</td></tr>
+    <tr><td>Pago de inscripción</td><td>Nubank <strong>@mvl616</strong> — titular: <strong>Manuel Barraza</strong></td></tr>
     <tr><td>Formato</td><td>Eliminatorio en tres fases: clasificatoria, semifinal y final</td></tr>
     <tr><td>Café oficial</td><td>Un único lote de café de especialidad para práctica y competencia</td></tr>
   </table>
@@ -61,7 +71,7 @@
   <h2>2. Condiciones de participación</h2>
   <div class="legal">
     <p><strong>2.1 Participación voluntaria.</strong> La inscripción implica participación libre y voluntaria. El competidor declara actuar por iniciativa propia y bajo su responsabilidad.</p>
-    <p><strong>2.2 Requisitos.</strong> Ser mayor de 18 años, completar el formulario de inscripción, pagar el valor de inscripción y aceptar íntegramente este reglamento.</p>
+    <p><strong>2.2 Requisitos.</strong> Ser mayor de 18 años, completar el formulario de inscripción, pagar el valor de inscripción ($90.000 COP a la cuenta oficial <strong>Nubank @mvl616</strong>, titular <strong>Manuel Barraza</strong>) y aceptar íntegramente este reglamento.</p>
     <p><strong>2.3 Sin devoluciones.</strong> El valor de inscripción <strong>no es reembolsable</strong> bajo ninguna circunstancia (incluye retiro voluntario, descalificación, fuerza mayor o no asistencia).</p>
     <p><strong>2.4 Datos personales.</strong> El organizador tratará los datos de inscritos para gestión del evento, comunicaciones, logística de envío de café, registro de asistencia y difusión autorizada. Al inscribirse, el participante autoriza este tratamiento conforme a la normativa aplicable.</p>
     <p><strong>2.5 Pertinencias personales.</strong> El evento <strong>no se hace responsable</strong> por pérdida, daño o hurto de pertenencias personales de participantes, jueces, staff o asistentes.</p>
@@ -77,6 +87,7 @@
     <tr><td>Final</td><td>3</td><td>50 g</td><td>Campeón, 2.º y 3.º lugar</td></tr>
   </table>
   <p><strong>Café de práctica:</strong> 100 g de café oficial por participante (logística según dirección de inscripción). <strong>En ronda:</strong> 50 g por competidor por fase.</p>
+  <p><strong>Ruta al evento principal:</strong> Este torneo es la <strong>1.ª de 3 competencias clasificatorias</strong> previas a la <strong>competencia principal</strong> de La Sucursal del Café. Las dos clasificatorias restantes se comunicarán en fechas posteriores.</p>
 
   <h2>4. Tiempos y protocolo por ronda</h2>
   <p>Siguiendo la estructura del Hario V60 Brewers Cup (tiempos de ajuste, práctica, competencia y catación):</p>
@@ -92,6 +103,27 @@
     <li>Preparación ciega: los jueces no conocen la identidad del competidor durante la evaluación.</li>
     <li>El juez principal coordina tiempos, arbitra y resuelve incidencias.</li>
   </ul>
+
+  <h3 id="sorteo-dados">4.1 Sorteo de método por dados (antes de cada ronda)</h3>
+  <p>Antes de iniciar cada ronda —clasificatoria, semifinal o final—, todos los competidores activos de esa fase participarán en un <strong>sorteo con dados oficiales del evento</strong>. El resultado del dado asignará al azar el <strong>método de uso del Hario Switch (V60 Switch)</strong> que cada participante deberá ejecutar en esa ronda.</p>
+  <ul>
+    <li>El sorteo se realiza en presencia del juez principal, con dados proporcionados por el organizador.</li>
+    <li>Cada competidor lanza un dado (o el juez principal lanza en representación de cada estación, según indique el staff).</li>
+    <li>El método asignado es <strong>obligatorio</strong> para esa ronda; no se puede cambiar salvo indicación expresa del juez principal por causa de fuerza mayor.</li>
+    <li>El método sorteado se anuncia y registra antes del tiempo de ajuste; el competidor debe preparar su estación conforme a ese perfil.</li>
+    <li>Incumplir el método asignado se considera <strong>incumplimiento grave del protocolo</strong> y puede derivar en descalificación (ver sección 9).</li>
+  </ul>
+  <p>Tabla oficial de correspondencia dado → método (Hario Switch / V60 Switch):</p>
+  <table>
+    <tr><th>Dado</th><th>Método asignado</th><th>Descripción breve</th></tr>
+    <tr><td>1</td><td>Inmersión total</td><td>Válvula cerrada durante toda la extracción; apertura y drenado al final</td></tr>
+    <tr><td>2</td><td>Bloom + inmersión</td><td>Bloom con válvula cerrada; vertido parcial; cierre; apertura y drenado final</td></tr>
+    <tr><td>3</td><td>Percolación abierta</td><td>Válvula abierta; vertido continuo estilo V60 (sin cierre de válvula)</td></tr>
+    <tr><td>4</td><td>Vertidos escalonados</td><td>Bloom + dos o más vertidos con válvula alternando cerrada/abierta según indique el juez</td></tr>
+    <tr><td>5</td><td>Inmersión corta</td><td>Válvula cerrada con tiempo de inmersión fijo (anunciado por el juez); drenado controlado</td></tr>
+    <tr><td>6</td><td>Híbrido bloom largo</td><td>Bloom prolongado con válvula cerrada; apertura parcial; vertido final y drenado</td></tr>
+  </table>
+  <p>El juez principal puede publicar al inicio de cada fase una hoja de referencia con estos métodos. Ante empate en interpretación, prevalece la instrucción verbal del juez principal.</p>
 
   <h2>5. Equipo del competidor vs. equipo del evento</h2>
   <h3>5.1 A cargo del competidor (obligatorio)</h3>
@@ -149,7 +181,7 @@
   <h2>9. Asistencia, puntualidad y descalificación</h2>
   <ul>
     <li><strong>Asistencia obligatoria:</strong> El competidor debe presentarse en el horario asignado para cada ronda en la que esté activo.</li>
-    <li><strong>Descalificación automática</strong> por: no asistir a la ronda correspondiente, llegar tarde sin autorización del juez principal, uso de café no oficial, alterar muestras, conducta antideportiva o incumplimiento grave del protocolo.</li>
+    <li><strong>Descalificación automática</strong> por: no asistir a la ronda correspondiente, llegar tarde sin autorización del juez principal, uso de café no oficial, alterar muestras, conducta antideportiva, incumplir el método asignado por dados o incumplimiento grave del protocolo.</li>
     <li>El retiro voluntario no genera devolución de inscripción.</li>
     <li>Las decisiones del juez principal en materia de conducta y tiempo son definitivas salvo recurso formal inmediato.</li>
   </ul>
@@ -169,9 +201,31 @@
   <p>Al enviar el formulario de inscripción y marcar las casillas de aceptación, el participante declara haber leído, comprendido y aceptado íntegramente este reglamento, incluyendo las cláusulas de participación voluntaria, tratamiento de datos, no responsabilidad por pertenencias, política de no reembolso y descalificación por inasistencia.</p>
 
   <div class="doc-footer">
+    <p class="no-print" style="margin-bottom:1rem;font-size:0.95rem">
+      <a data-link="competencia" href="competencia.html">← Inscripción Switch Championship</a> ·
+      <a data-link="feria" href="inscripcion.html">Feria</a> ·
+      <a data-link="comoFunciona" href="como-funciona-evento.html">¿Cómo funciona?</a> ·
+      <a data-link="privacidad" href="privacidad.html">Privacidad</a> ·
+      <a data-link="qr" href="qr-inscripcion.html">QR</a>
+    </p>
     Switch Championship 2026 — La Sucursal del Café<br>
     Documento oficial para participantes, patrocinadores y aliados · © 2026
   </div>
   </div>
+  <script src="js/event-config.js"></script>
+  <script src="js/site-links.js"></script>
+  <script src="js/site-chrome.js"></script>
+  <script>
+    (function () {
+      var href = SiteLinks && SiteLinks.href ? SiteLinks.href : function (k) {
+        var local = (SiteLinks && SiteLinks.LOCAL) || {};
+        return local[k] || '#';
+      };
+      var btnForm = document.getElementById('btnVolverFormulario');
+      var btnGuia = document.getElementById('btnGuiaParticipante');
+      if (btnForm) btnForm.addEventListener('click', function () { location.href = href('competencia'); });
+      if (btnGuia) btnGuia.addEventListener('click', function () { location.href = href('comoFunciona'); });
+    })();
+  </script>
 </body>
 </html>

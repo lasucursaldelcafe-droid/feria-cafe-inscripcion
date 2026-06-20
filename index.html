@@ -3,325 +3,185 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Inscripción a La Sucursal del Café — feria de café especial">
-  <title>Inscripción — La Sucursal del Café</title>
+  <meta name="description" content="La Sucursal del Café — Feria de café especial. 29 y 30 de agosto de 2026 · Palmetto Plaza, Cali. Café que conecta.">
+  <meta property="og:title" content="La Sucursal del Café — Feria de café especial">
+  <meta property="og:description" content="Exposiciones, cata, talleres y competencias. 29–30 ago 2026 · Palmetto Plaza, Cali.">
+  <meta property="og:image" content="assets/logo-la-sucursal-del-cafe.png">
+  <title>La Sucursal del Café — Feria de café especial</title>
+  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
+  <link rel="apple-touch-icon" href="assets/logo-la-sucursal-del-cafe.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Nunito:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/brand.css">
 </head>
-<body>
+<body class="page-festival" data-festival-page="home">
+  <a class="skip-link" href="#explorar">Explorar el festival</a>
+
+  <header class="site-header">
+    <nav class="festival-nav" aria-label="Navegación principal">
+      <a class="festival-nav__brand" data-link="festival" href="index.html">
+        <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="120" height="48">
+      </a>
+      <button type="button" class="festival-nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navMenu">Menú</button>
+      <ul class="festival-nav__menu" id="navMenu">
+        <li><a data-link="festival" data-nav="home" href="index.html">Inicio</a></li>
+        <li><a data-link="evento" data-nav="evento" href="el-evento.html">El evento</a></li>
+        <li><a data-link="actividades" data-nav="actividades" href="actividades.html">Actividades</a></li>
+        <li><a data-link="patrocinadores" data-nav="patrocinadores" href="patrocinadores.html">Patrocinadores</a></li>
+        <li><a data-link="feria" data-nav="inscripcion" href="inscripcion.html">Inscripción</a></li>
+        <li><a data-link="competencia" data-nav="competencia" href="competencia.html">Competencia</a></li>
+      </ul>
+    </nav>
+  </header>
+
   <div class="site-shell">
-    <header class="site-hero">
-      <div class="hero-inner">
-        <div class="logo-frame">
-          <img class="brand-logo" src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café">
+    <header class="site-hero site-hero--coffee">
+      <div class="festival-sub-hero">
+        <p class="festival-kicker" id="festivalSlogan">Café que conecta</p>
+        <h1 class="festival-sub-hero__title" id="heroTitle">La Sucursal del Café</h1>
+        <p class="festival-sub-hero__lead" id="festivalLead">
+          El punto de encuentro del café especial en Cali: productores, tostadores, cata y talleres en un solo lugar.
+          Entrada gratuita — cupos limitados.
+        </p>
+        <div class="hero-meta">
+          <span id="badgeFestivalFecha" class="badge">📅 29–30 ago 2026</span>
+          <span id="badgeFestivalSede" class="badge">📍 Palmetto Plaza, Cali</span>
+          <span class="badge badge--green">✓ Inscripción gratis</span>
         </div>
-        <p class="hero-eyebrow">Feria de café especial</p>
-        <h1 id="form-title" class="hero-title">Inscripción a la feria</h1>
-        <p class="hero-subtitle">Regístrate para vivir cata, torneos, talleres y la experiencia completa de La Sucursal del Café.</p>
+        <div class="festival-sub-cta">
+          <a class="btn-submit festival-btn-primary" data-link="feria" href="inscripcion.html">Quiero inscribirme</a>
+          <a class="btn-secondary festival-btn-secondary" data-link="evento" href="el-evento.html">Conoce el evento</a>
+        </div>
       </div>
       <div class="hero-accent" aria-hidden="true"></div>
     </header>
 
-    <main class="site-main">
-      <article class="content-card" aria-labelledby="form-title">
-        <div id="formPanel" class="form-panel card-body">
-        <form id="inscripcionForm" novalidate>
-          <div class="field">
-            <label for="nombre">Nombre completo <span class="required" aria-hidden="true">*</span></label>
-            <input
-              type="text"
-              id="nombre"
-              name="nombre"
-              autocomplete="name"
-              required
-              minlength="2"
-              maxlength="100"
-              placeholder="Ej. María González"
-              aria-describedby="nombre-error"
-            >
-            <span id="nombre-error" class="error-msg" role="alert"></span>
-          </div>
-
-          <div class="field">
-            <label for="edad">Edad <span class="required" aria-hidden="true">*</span></label>
-            <input
-              type="number"
-              id="edad"
-              name="edad"
-              required
-              min="1"
-              max="120"
-              inputmode="numeric"
-              placeholder="Ej. 28"
-              aria-describedby="edad-error edad-hint"
-            >
-            <p id="edad-hint" class="hint">Ingresa un número entre 1 y 120</p>
-            <span id="edad-error" class="error-msg" role="alert"></span>
-          </div>
-
-          <div class="field">
-            <label for="celular">Celular <span class="required" aria-hidden="true">*</span></label>
-            <input
-              type="tel"
-              id="celular"
-              name="celular"
-              autocomplete="tel"
-              required
-              inputmode="tel"
-              placeholder="Ej. 5512345678"
-              aria-describedby="celular-error celular-hint"
-            >
-            <p id="celular-hint" class="hint">10 dígitos (México) o formato internacional con +</p>
-            <span id="celular-error" class="error-msg" role="alert"></span>
-          </div>
-
-          <div class="field">
-            <label for="correo">Correo electrónico <span class="required" aria-hidden="true">*</span></label>
-            <input
-              type="email"
-              id="correo"
-              name="correo"
-              autocomplete="email"
-              required
-              placeholder="Ej. nombre@correo.com"
-              aria-describedby="correo-error"
-            >
-            <span id="correo-error" class="error-msg" role="alert"></span>
-          </div>
-
-          <fieldset class="field">
-            <legend>Interés en la feria <span class="required" aria-hidden="true">*</span></legend>
-            <p class="hint" style="margin-top: -0.4rem; margin-bottom: 0.75rem;">Selecciona una o más opciones</p>
-            <div class="interests-grid" role="group" aria-describedby="intereses-error">
-              <label class="checkbox-item">
-                <input type="checkbox" name="interes" value="Conocer más del café especial">
-                <span>Conocer más del café especial</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="interes" value="Torneos y cata">
-                <span>Torneos y cata</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="interes" value="Compra de café para negocio">
-                <span>Compra de café para negocio</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="interes" value="Compra de café para consumo personal">
-                <span>Compra de café para consumo personal</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="interes" value="Maquila de marca">
-                <span>Maquila de marca</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="interes" value="Transformación de producto">
-                <span>Transformación de producto</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="checkbox" name="interes" value="Aprendizaje, cursos, talleres">
-                <span>Aprendizaje, cursos, talleres</span>
-              </label>
-            </div>
-            <span id="intereses-error" class="error-msg interests-error" role="alert"></span>
-          </fieldset>
-
-          <button type="submit" class="btn-submit" id="btnSubmit">Enviar inscripción</button>
-          <p id="syncNote" class="hint" style="text-align:center;margin-top:0.75rem;display:none"></p>
-
-          <p class="footer-note">
-            ¿Quieres competir en el Switch Championship? <a href="competencia.html">Inscripción a la competencia</a>
+    <main class="site-main site-main--festival">
+      <section id="explorar" class="festival-section festival-section--light">
+        <div class="festival-wrap">
+          <p class="festival-kicker">Navegación</p>
+          <h2 class="section-title section-title--dark">Explora el festival</h2>
+          <p class="festival-section-intro" id="festivalMensaje">
+            Dos días para descubrir, probar y conectar con la comunidad cafetera de Cali.
+            Elige por dónde empezar — y asegura tu entrada gratis antes de que se agoten los cupos.
           </p>
-        </form>
-      </div>
-
-      <div id="successPanel" class="success-panel" role="status" aria-live="polite">
-        <div class="success-icon" aria-hidden="true">✅</div>
-        <h2>¡Inscripción enviada!</h2>
-        <p>Gracias por registrarte en <strong>La Sucursal del Café</strong>. Te esperamos en la feria.</p>
-        <button type="button" id="btnNuevaInscripcion" class="btn-secondary">Registrar otra persona</button>
+          <p class="festival-lead festival-lead--dark">
+            En Palmetto Plaza encontrarás exposiciones de café tostado, fincas de origen, competencias Aeropress y V60,
+            además de cata y talleres con marcas como Ghost, Medium Café, Elixir, Black Coffee y Prisma Tostadora.
+          </p>
+          <nav class="festival-home-nav" aria-label="Secciones del festival">
+            <a class="festival-home-card" data-link="evento" href="el-evento.html">
+              <span class="festival-home-card__icon" aria-hidden="true">☕</span>
+              <strong>El evento</strong>
+              <span>Por qué asistir, quién debería ir y qué vivirás</span>
+            </a>
+            <a class="festival-home-card" data-link="actividades" href="actividades.html">
+              <span class="festival-home-card__icon" aria-hidden="true">📋</span>
+              <strong>Actividades</strong>
+              <span>Exposiciones, fincas, competencias, cata y talleres</span>
+            </a>
+            <a class="festival-home-card" data-link="patrocinadores" href="patrocinadores.html">
+              <span class="festival-home-card__icon" aria-hidden="true">🤝</span>
+              <strong>Patrocinadores</strong>
+              <span>Aliados que impulsan la cultura del café en Cali</span>
+            </a>
+            <a class="festival-home-card festival-home-card--accent" data-link="feria" href="inscripcion.html">
+              <span class="festival-home-card__icon" aria-hidden="true">✓</span>
+              <strong>Asegura tu entrada gratis</strong>
+              <span>Registro en 2 minutos · 29–30 ago 2026</span>
+            </a>
+            <a class="festival-home-card festival-home-card--accent" data-link="competencia" href="competencia.html">
+              <span class="festival-home-card__icon" aria-hidden="true">🏆</span>
+              <strong>Switch Championship</strong>
+              <span>Competencia aparte · 4 jul 2026 · Purist Marbella</span>
+            </a>
+            <a class="festival-home-card" href="#contacto">
+              <span class="festival-home-card__icon" aria-hidden="true">💬</span>
+              <strong>Contacto</strong>
+              <span>WhatsApp, correo e Instagram del festival</span>
+            </a>
+          </nav>
         </div>
-      </article>
+      </section>
+
+      <section class="festival-section festival-section--beige">
+        <div class="festival-wrap">
+          <article class="content-card content-card--cta">
+            <div class="card-body festival-save-card">
+              <p class="festival-kicker">Reserva la fecha</p>
+              <h2 class="section-title section-title--dark" id="saveDateTitle">No te lo pierdas</h2>
+              <p class="festival-save-card__dates">29 y 30 de agosto de 2026</p>
+              <p class="festival-save-card__venue">Palmetto Plaza · Cali, Valle del Cauca</p>
+              <p class="festival-section-intro">
+                Sé parte de la comunidad cafetera del Pacífico. Inscríbete gratis y recibe novedades del programa.
+              </p>
+              <a class="btn-submit festival-btn-primary" data-link="feria" href="inscripcion.html">Asegura tu entrada gratis</a>
+            </div>
+          </article>
+        </div>
+      </section>
     </main>
+
+    <footer id="contacto" class="festival-footer">
+      <div class="festival-wrap festival-footer__inner">
+        <div class="festival-footer__brand">
+          <p class="festival-footer__col-title">Evento</p>
+          <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="160" height="64" loading="lazy">
+          <p id="festivalInstagram" class="festival-social">
+            <a id="igLink" href="#" target="_blank" rel="noopener noreferrer">@lasucursaldelcafe_festival</a>
+          </p>
+        </div>
+        <nav class="festival-footer__nav" aria-label="Enlaces del sitio">
+          <p class="festival-footer__col-title">Navegación</p>
+          <a data-link="festival" href="index.html">Inicio</a>
+          <a data-link="evento" href="el-evento.html">El evento</a>
+          <a data-link="actividades" href="actividades.html">Actividades</a>
+          <a data-link="patrocinadores" href="patrocinadores.html">Patrocinadores</a>
+          <a data-link="feria" href="inscripcion.html">Inscripción</a>
+          <a data-link="competencia" href="competencia.html">Competencia</a>
+          <a data-link="privacidad" href="privacidad.html">Privacidad</a>
+        </nav>
+        <div class="festival-footer__contact">
+          <p class="festival-footer__col-title">Contacto</p>
+          <p class="festival-footer__dates">
+            Feria · <span data-bind="feria.fecha">29 y 30 de agosto de 2026</span><br>
+            <span data-bind="feria.lugar">Palmetto Plaza, Cali</span>
+          </p>
+          <div class="festival-contact-actions">
+            <a class="btn-submit" id="waContact" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <a class="btn-secondary" id="emailContact" href="mailto:lasucursaldelcafe@gmail.com">Correo</a>
+          </div>
+        </div>
+        <p class="festival-footer__copy">© 2026 La Sucursal del Café · Apoya lo nuestro, toma café colombiano.</p>
+      </div>
+    </footer>
   </div>
 
-  <script src="js/sheets-config.js"></script>
-  <script src="js/form-submit.js"></script>
-  <script>
-    (function () {
-      const STORAGE_KEY = "feria_cafe_inscripciones";
-      const FORM_TYPE = "feria";
+  <div id="feriaModal" class="feria-modal" role="dialog" aria-modal="true" aria-labelledby="feriaModalTitle" hidden>
+    <div class="feria-modal__backdrop" data-modal-close tabindex="-1" aria-hidden="true"></div>
+    <div class="feria-modal__panel" role="document">
+      <button type="button" class="feria-modal__close" aria-label="Cerrar" data-modal-close>×</button>
+      <img class="feria-modal__logo" src="assets/logo-la-sucursal-del-cafe.png" alt="">
+      <p class="feria-modal__eyebrow" id="feriaModalEyebrow">Cupos limitados · Entrada gratis</p>
+      <h2 id="feriaModalTitle" class="feria-modal__title">¡Reserva tu lugar en la feria!</h2>
+      <p class="feria-modal__text" id="feriaModalDates">
+        Sé parte de la comunidad cafetera el <strong>29 y 30 de agosto de 2026</strong> en
+        <strong>Palmetto Plaza, Cali</strong>. Cata, talleres, exposiciones y competencias te esperan.
+        La inscripción es <strong>gratuita</strong>, pero los cupos son limitados.
+      </p>
+      <div class="feria-modal__actions">
+        <a class="btn-submit feria-modal__cta" data-link="feria" data-modal-cta href="inscripcion.html">Quiero inscribirme</a>
+        <button type="button" class="btn-secondary feria-modal__dismiss" data-modal-close>Explorar primero</button>
+      </div>
+      <p class="feria-modal__note">¿Compites? También puedes inscribirte al <a data-link="competencia" href="competencia.html">Switch Championship</a>.</p>
+    </div>
+  </div>
 
-      const form = document.getElementById("inscripcionForm");
-      const formPanel = document.getElementById("formPanel");
-      const successPanel = document.getElementById("successPanel");
-      const btnNueva = document.getElementById("btnNuevaInscripcion");
-      const btnSubmit = document.getElementById("btnSubmit");
-      const syncNote = document.getElementById("syncNote");
-
-      if (syncNote && window.FormSubmit && !FormSubmit.isConfigured()) {
-        syncNote.style.display = "block";
-        syncNote.textContent = "Modo local: ejecuta py tools/conectar_sheets.py --crear-hoja para centralizar inscripciones.";
-      }
-
-      const fields = {
-        nombre: {
-          el: document.getElementById("nombre"),
-          error: document.getElementById("nombre-error"),
-          validate: function (value) {
-            const trimmed = value.trim();
-            if (!trimmed) return "El nombre es obligatorio.";
-            if (trimmed.length < 2) return "El nombre debe tener al menos 2 caracteres.";
-            if (!/^[\p{L}\s'.-]+$/u.test(trimmed)) return "El nombre contiene caracteres no válidos.";
-            return "";
-          }
-        },
-        edad: {
-          el: document.getElementById("edad"),
-          error: document.getElementById("edad-error"),
-          validate: function (value) {
-            if (value === "" || value === null) return "La edad es obligatoria.";
-            const num = Number(value);
-            if (!Number.isInteger(num)) return "La edad debe ser un número entero.";
-            if (num < 1 || num > 120) return "La edad debe estar entre 1 y 120.";
-            return "";
-          }
-        },
-        celular: {
-          el: document.getElementById("celular"),
-          error: document.getElementById("celular-error"),
-          validate: function (value) {
-            const trimmed = value.trim();
-            if (!trimmed) return "El celular es obligatorio.";
-            const digits = trimmed.replace(/\D/g, "");
-            if (trimmed.startsWith("+")) {
-              if (digits.length < 10 || digits.length > 15) {
-                return "Formato internacional inválido. Usa + y entre 10 y 15 dígitos.";
-              }
-            } else if (digits.length !== 10) {
-              return "Ingresa un número de 10 dígitos o formato internacional (+52...).";
-            }
-            return "";
-          }
-        },
-        correo: {
-          el: document.getElementById("correo"),
-          error: document.getElementById("correo-error"),
-          validate: function (value) {
-            const trimmed = value.trim();
-            if (!trimmed) return "El correo es obligatorio.";
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-            if (!emailRegex.test(trimmed)) return "Ingresa un correo electrónico válido.";
-            return "";
-          }
-        }
-      };
-
-      const interesesError = document.getElementById("intereses-error");
-
-      function showFieldError(field, message) {
-        field.error.textContent = message;
-        field.error.classList.toggle("visible", !!message);
-        field.el.setAttribute("aria-invalid", message ? "true" : "false");
-      }
-
-      function validateIntereses() {
-        const checked = form.querySelectorAll('input[name="interes"]:checked');
-        const message = checked.length === 0 ? "Selecciona al menos un interés." : "";
-        interesesError.textContent = message;
-        interesesError.classList.toggle("visible", !!message);
-        return !message;
-      }
-
-      function validateField(key) {
-        const field = fields[key];
-        const message = field.validate(field.el.value);
-        showFieldError(field, message);
-        return !message;
-      }
-
-      Object.keys(fields).forEach(function (key) {
-        fields[key].el.addEventListener("blur", function () {
-          validateField(key);
-        });
-        fields[key].el.addEventListener("input", function () {
-          if (fields[key].error.classList.contains("visible")) {
-            validateField(key);
-          }
-        });
-      });
-
-      form.querySelectorAll('input[name="interes"]').forEach(function (checkbox) {
-        checkbox.addEventListener("change", function () {
-          if (interesesError.classList.contains("visible")) {
-            validateIntereses();
-          }
-        });
-      });
-
-      function showSuccess() {
-        formPanel.classList.add("hidden");
-        successPanel.classList.add("visible");
-      }
-
-      function resetForm() {
-        form.reset();
-        Object.keys(fields).forEach(function (key) {
-          showFieldError(fields[key], "");
-        });
-        interesesError.textContent = "";
-        interesesError.classList.remove("visible");
-        successPanel.classList.remove("visible");
-        formPanel.classList.remove("hidden");
-        fields.nombre.el.focus();
-      }
-
-      form.addEventListener("submit", function (event) {
-        event.preventDefault();
-
-        let valid = true;
-        Object.keys(fields).forEach(function (key) {
-          if (!validateField(key)) valid = false;
-        });
-        if (!validateIntereses()) valid = false;
-
-        if (!valid) {
-          const firstInvalid = form.querySelector('[aria-invalid="true"]') ||
-            (interesesError.classList.contains("visible") ? interesesError : null);
-          if (firstInvalid && firstInvalid.focus) firstInvalid.focus();
-          return;
-        }
-
-        const intereses = Array.from(form.querySelectorAll('input[name="interes"]:checked'))
-          .map(function (cb) { return cb.value; });
-
-        const entry = {
-          id: "F-" + Date.now().toString(36).toUpperCase(),
-          fecha: new Date().toISOString(),
-          nombre: fields.nombre.el.value.trim(),
-          edad: Number(fields.edad.el.value),
-          celular: fields.celular.el.value.trim(),
-          correo: fields.correo.el.value.trim().toLowerCase(),
-          intereses: intereses
-        };
-
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = "Enviando…";
-
-        FormSubmit.submitForm(FORM_TYPE, STORAGE_KEY, entry).then(function (result) {
-          btnSubmit.disabled = false;
-          btnSubmit.textContent = "Enviar inscripción";
-          if (!result.ok) {
-            alert("No se pudo guardar la inscripción. Intenta de nuevo.");
-            return;
-          }
-          showSuccess();
-        });
-      });
-
-      btnNueva.addEventListener("click", resetForm);
-    })();
-  </script>
+  <script src="js/event-config.js"></script>
+  <script src="js/site-links.js"></script>
+  <script src="js/site-chrome.js"></script>
+  <script src="js/festival-nav.js"></script>
+  <script src="js/festival-modal.js"></script>
 </body>
 </html>

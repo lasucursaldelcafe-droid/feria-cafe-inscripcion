@@ -1,48 +1,56 @@
-# Feria Café — Inscripciones en línea
+# Feria Café — La Sucursal del Café
 
-Formularios web para **La Sucursal del Café**: asistencia a la feria y inscripción al **Switch Championship**. Diseño responsive, datos centralizados en Google Sheets y hosting en Firebase.
+Sitio del festival de café especial: páginas informativas + formularios de inscripción (feria y Switch Championship). Datos en Google Sheets vía Apps Script. Hosting en Firebase.
 
 ## URLs publicadas
 
-| Recurso | URL |
-|---------|-----|
-| Formulario feria | `https://la-sucursal-del-cafe.web.app/` |
-| Switch Championship | `https://la-sucursal-del-cafe.web.app/competencia.html` |
-| Reglamento (PDF) | `https://la-sucursal-del-cafe.web.app/assets/reglas-switch-championship.pdf` |
-| Reglamento (web) | `https://la-sucursal-del-cafe.web.app/reglas-switch-championship.html` |
-| Repositorio GitHub | `https://github.com/lasucursaldelcafe-droid/feria-cafe-inscripcion` |
+| Página | URL |
+|--------|-----|
+| Inicio | https://la-sucursal-del-cafe.web.app/ |
+| El evento | https://la-sucursal-del-cafe.web.app/el-evento |
+| Actividades | https://la-sucursal-del-cafe.web.app/actividades |
+| Patrocinadores | https://la-sucursal-del-cafe.web.app/patrocinadores |
+| Inscripción feria | https://la-sucursal-del-cafe.web.app/inscripcion |
+| Switch Championship | https://la-sucursal-del-cafe.web.app/competencia |
+| ¿Cómo funciona? | https://la-sucursal-del-cafe.web.app/como-funciona |
+| Reglamento | https://la-sucursal-del-cafe.web.app/reglas |
+| Privacidad | https://la-sucursal-del-cafe.web.app/privacidad |
+| QR inscripción | https://la-sucursal-del-cafe.web.app/qr |
+| Alias festival | https://la-sucursal-del-cafe.web.app/festival |
 
-> Si el despliegue aún no se ha ejecutado, las URLs anteriores estarán disponibles tras `firebase deploy`.
+Checklist operativo: [`CHECKLIST.md`](CHECKLIST.md)
 
-## Formularios
+## Estructura del sitio
 
-- **`index.html`** — Inscripción general a la feria (nombre, edad, contacto, intereses).
-- **`competencia.html`** — Switch Championship: perfil profesional, equipo, envío del café de práctica, pago y términos legales.
-- **`reglas-switch-championship.html`** — Reglamento oficial (versión web).
-- **`assets/reglas-switch-championship.pdf`** — Reglamento descargable (PDF).
+- **`index.html`** — Landing del festival (hero, actividades, patrocinadores, CTAs).
+- **`el-evento.html`**, **`actividades.html`**, **`patrocinadores.html`** — Subpáginas informativas.
+- **`inscripcion.html`** — Formulario feria (gratis).
+- **`competencia.html`** — Switch Championship ($90.000 COP, cupo 36).
+- **`como-funciona-evento.html`**, **`reglas-switch-championship.html`**, **`privacidad.html`**, **`qr-inscripcion.html`** — Guía, reglamento, legal y QR.
+- **`festival.html`** — Redirección al inicio (alias `/festival`).
 
-## Base de datos (Google Sheets)
+## Formularios → Google Sheets
 
-Las inscripciones se envían a una hoja de cálculo mediante Google Apps Script.
-
-**Guía completa:** [`tools/INSTRUCCIONES-SHEETS.md`](tools/INSTRUCCIONES-SHEETS.md)
-
-Resumen:
+Guía completa: [`tools/INSTRUCCIONES-SHEETS.md`](tools/INSTRUCCIONES-SHEETS.md)
 
 1. Crear hoja en Google Sheets.
 2. Pegar `tools/google-apps-script/Code.gs` en Apps Script.
 3. Desplegar como **Aplicación web** (acceso: cualquier persona).
-4. Copiar la URL en `js/sheets-config.js` (desde `js/sheets-config.example.js`).
+4. Copiar la URL `/exec` en `js/sheets-config.js` (desde `js/sheets-config.example.js`).
 
-Sin URL configurada, los formularios guardan copia local en `localStorage` del navegador.
+Sin URL configurada, los formularios guardan copia local en `localStorage`.
+
+## Desarrollo local
+
+```bash
+npx serve .
+```
+
+Abre la URL que indique el servidor (p. ej. http://localhost:3000).
 
 ## Firebase Hosting
 
-Proyecto Firebase: **`la-sucursal-del-cafe`** (dedicado a La Sucursal del Café; no compartido con Viajes Peludos).
-
-Guía de configuración inicial: [`tools/CONFIGURAR-FIREBASE-NUEVO.md`](tools/CONFIGURAR-FIREBASE-NUEVO.md)
-
-### Despliegue manual
+Proyecto: **`la-sucursal-del-cafe`**
 
 ```bash
 npx -y firebase-tools@latest login
@@ -50,37 +58,42 @@ npx -y firebase-tools@latest use la-sucursal-del-cafe
 npx -y firebase-tools@latest deploy --only hosting
 ```
 
-### Despliegue automático (GitHub Actions)
+### GitHub Actions
 
-Al hacer push a `main`, el workflow `.github/workflows/deploy-firebase.yml` publica el sitio.
-
-Secretos recomendados en GitHub:
+Push a `main` → `.github/workflows/deploy-firebase.yml` publica el sitio.
 
 | Secreto | Uso |
 |---------|-----|
-| `FIREBASE_SERVICE_ACCOUNT` | JSON de cuenta de servicio del proyecto **`la-sucursal-del-cafe`** con rol *Firebase Hosting Admin* |
+| `FIREBASE_SERVICE_ACCOUNT` | JSON cuenta de servicio (*Firebase Hosting Admin*) |
 | `SHEETS_WEB_APP_URL` | URL `/exec` de Apps Script (opcional) |
 
-## Desarrollo local
+## Herramientas Python (`tools/`)
 
-Abre `index.html` o `competencia.html` en un servidor local (Live Server, `npx serve .`, etc.) para probar los scripts.
+Ver [`tools/INSTRUCCIONES-PYTHON.md`](tools/INSTRUCCIONES-PYTHON.md) para automatizar Sheets, Apps Script y Firebase.
 
-## Estructura
+## Estructura de archivos
 
 ```
-├── index.html              # Feria
-├── competencia.html        # Switch Championship
+├── index.html
+├── el-evento.html
+├── actividades.html
+├── patrocinadores.html
+├── inscripcion.html
+├── competencia.html
+├── como-funciona-evento.html
 ├── reglas-switch-championship.html
+├── privacidad.html
+├── qr-inscripcion.html
+├── festival.html
+├── css/brand.css
 ├── js/
-│   ├── form-submit.js      # Envío a Sheets + localStorage
-│   ├── sheets-config.example.js
+│   ├── site-links.js       # Rutas local vs Firebase
+│   ├── festival-nav.js     # Nav + contacto
+│   ├── site-chrome.js      # Footer, OG, data-bind
+│   ├── form-submit.js      # Envío a Sheets
 │   └── sheets-config.js    # (local, no versionado)
-├── tools/
-│   ├── google-apps-script/Code.gs
-│   ├── CONFIGURAR-FIREBASE-NUEVO.md
-│   └── INSTRUCCIONES-SHEETS.md
+├── tools/google-apps-script/Code.gs
 ├── firebase.json
-├── .firebaserc
 └── .github/workflows/deploy-firebase.yml
 ```
 

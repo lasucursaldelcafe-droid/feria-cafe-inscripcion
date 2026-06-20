@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
+  <link rel="apple-touch-icon" href="assets/logo-la-sucursal-del-cafe.png">
+  <title>Redirigiendo al inicio…</title>
+  <script src="js/site-links.js"></script>
+  <script>
+    (function () {
+      var target = (window.SiteLinks && SiteLinks.href)
+        ? SiteLinks.href('festival')
+        : 'index.html';
+      var link = document.createElement('link');
+      link.rel = 'canonical';
+      link.href = target;
+      document.head.appendChild(link);
+      location.replace(target);
+    })();
+  </script>
+  <noscript><meta http-equiv="refresh" content="0;url=/"></noscript>
+</head>
+<body>
+  <p><a data-link="festival" href="index.html">Ir al inicio del festival</a></p>
+</body>
+</html>

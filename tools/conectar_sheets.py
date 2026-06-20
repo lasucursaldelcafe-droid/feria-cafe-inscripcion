@@ -206,6 +206,23 @@ def cmd_verificar() -> int:
         return 2
     ok(f"GET OK — formularios soportados: {payload.get('forms', [])}")
 
+    info("Probando GET cupo (contador competencia)…")
+    cupo_status, cupo_body = http_request(url + ("&" if "?" in url else "?") + "action=cupo", "GET")
+    if cupo_status == 200:
+        try:
+            cupo_payload = json.loads(cupo_body)
+            if cupo_payload.get("ok") and "count" in cupo_payload:
+                ok(
+                    f"Cupo OK — {cupo_payload.get('count')} de {cupo_payload.get('max')} "
+                    f"({cupo_payload.get('disponibles')} disponibles)"
+                )
+            else:
+                warn("GET ?action=cupo no devolvió contador; actualiza Apps Script (Code.gs) y redepliega.")
+        except json.JSONDecodeError:
+            warn("GET ?action=cupo no devolvió JSON válido; redepliega Apps Script.")
+    else:
+        warn(f"GET ?action=cupo respondió HTTP {cupo_status}; redepliega Apps Script con la versión nueva.")
+
     info("Probando OPTIONS (preflight)…")
     opt_status, opt_body = http_request(url, "OPTIONS")
     if opt_status == 200:
@@ -247,6 +264,12 @@ def sample_feria_payload() -> dict:
             "celular": "3001234567",
             "correo": "prueba-feria@example.com",
             "intereses": ["Aprendizaje, cursos, talleres"],
+            "aceptacionesLegales": {
+                "aceptaVoluntaria": True,
+                "aceptaPertenencias": True,
+                "aceptaDatos": True,
+                "aceptaImagen": True,
+            },
         },
     }
 
@@ -287,6 +310,11 @@ def sample_competencia_payload() -> dict:
                 "nombreArchivo": None,
                 "tipoArchivo": None,
                 "base64": None,
+            },
+            "fotoParticipante": {
+                "nombreArchivo": "prueba.png",
+                "tipoArchivo": "image/png",
+                "base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
             },
             "aceptacionesLegales": {
                 "aceptaVoluntaria": True,
