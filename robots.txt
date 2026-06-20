@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /admin.html
+
+Sitemap: https://la-sucursal-del-cafe.web.app/sitemap.xml

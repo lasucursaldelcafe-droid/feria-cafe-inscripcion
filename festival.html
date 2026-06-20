@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
   <link rel="apple-touch-icon" href="assets/logo-la-sucursal-del-cafe.png">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://la-sucursal-del-cafe.web.app/">
   <title>Redirigiendo al inicio…</title>
   <script src="js/site-links.js"></script>
   <script>
@@ -14,7 +16,7 @@
         : 'index.html';
       var link = document.createElement('link');
       link.rel = 'canonical';
-      link.href = target;
+      link.href = 'https://la-sucursal-del-cafe.web.app/';
       document.head.appendChild(link);
       location.replace(target);
     })();
