@@ -8,6 +8,7 @@ node_modules/
 __pycache__/
 tools/__pycache__/
 js/sheets-config.js
+js/admin-config.js
 tools/.env
 tools/**/*-sa.json
 tools/credentials/*.json

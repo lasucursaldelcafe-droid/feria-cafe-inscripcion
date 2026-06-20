@@ -1,0 +1,257 @@
+/* Panel de administración — La Sucursal del Café */
+
+.admin-page {
+  min-height: 100vh;
+  background: var(--gradient-section-light);
+  color: var(--text-dark);
+}
+
+.admin-header {
+  background: var(--gradient-hero-coffee);
+  color: var(--text-on-dark);
+  padding: var(--space-4) var(--space-3);
+  text-align: center;
+}
+
+.admin-header__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  margin: 0 0 0.25rem;
+}
+
+.admin-header__sub {
+  opacity: 0.85;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.admin-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-3);
+}
+
+.admin-card {
+  background: var(--surface-card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-coffee-subtle);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.admin-card__title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  margin: 0 0 var(--space-3);
+  color: var(--coffee-deep);
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.admin-login-form label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.admin-login-form input {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-coffee);
+  border-radius: var(--btn-radius);
+  font-size: 1rem;
+  background: var(--cream-pale);
+}
+
+.admin-login-form input:focus {
+  outline: 2px solid var(--green-accent);
+  outline-offset: 1px;
+}
+
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--btn-min-height);
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  border: none;
+  border-radius: var(--btn-radius);
+  font-weight: 600;
+  font-size: var(--btn-font-size);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.admin-btn--primary {
+  background: var(--red-cta);
+  color: #fff;
+}
+
+.admin-btn--primary:hover {
+  background: var(--red-hover);
+}
+
+.admin-btn--secondary {
+  background: transparent;
+  color: var(--coffee-deep);
+  border: 1px solid var(--border-coffee);
+}
+
+.admin-btn--secondary:hover {
+  background: var(--cream-muted);
+}
+
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.admin-toolbar__user {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.admin-stat {
+  background: var(--cream-pale);
+  border: 1px solid var(--border-coffee-subtle);
+  border-radius: 10px;
+  padding: var(--space-2) var(--space-3);
+}
+
+.admin-stat__label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.admin-stat__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--coffee-deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-error {
+  background: var(--error-bg);
+  color: var(--error);
+  padding: var(--space-2);
+  border-radius: 8px;
+  margin-bottom: var(--space-2);
+  font-size: 0.95rem;
+}
+
+.admin-loading {
+  text-align: center;
+  padding: var(--space-3);
+  color: var(--text-muted);
+}
+
+.admin-empty {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+  margin-top: var(--space-2);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid var(--border-coffee-subtle);
+  text-align: left;
+  vertical-align: top;
+}
+
+.admin-table th {
+  background: var(--cream-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-table tr:hover td {
+  background: var(--cream-pale);
+}
+
+.admin-top-pages {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-top-pages li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--border-coffee-subtle);
+  font-size: 0.9rem;
+}
+
+.admin-top-pages__path {
+  color: var(--text-body);
+  word-break: break-all;
+}
+
+.admin-top-pages__count {
+  font-weight: 700;
+  color: var(--green-accent);
+  flex-shrink: 0;
+}
+
+.admin-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+
+.admin-section-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: var(--space-2);
+}
+
+.admin-section-tabs button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-coffee);
+  background: var(--cream-pale);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.admin-section-tabs button.is-active {
+  background: var(--coffee-deep);
+  color: var(--text-on-dark);
+  border-color: var(--coffee-deep);
+}
+
+@media (max-width: 600px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

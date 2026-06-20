@@ -229,6 +229,39 @@
     });
   }
 
+  function ensureAnalytics() {
+    var path = (global.location.pathname || '').toLowerCase();
+    if (path.indexOf('admin') !== -1) return;
+
+    function loadAnalyticsScript() {
+      if (document.querySelector('script[data-page-analytics]')) return;
+      var a = document.createElement('script');
+      a.src = 'js/analytics-tracker.js';
+      a.setAttribute('data-page-analytics', '1');
+      document.body.appendChild(a);
+    }
+
+    if (global.SHEETS_CONFIG && global.SHEETS_CONFIG.WEB_APP_URL) {
+      loadAnalyticsScript();
+      return;
+    }
+
+    var existing = document.querySelector('script[src*="sheets-config"]');
+    if (existing) {
+      if (global.SHEETS_CONFIG && global.SHEETS_CONFIG.WEB_APP_URL) {
+        loadAnalyticsScript();
+      } else {
+        existing.addEventListener('load', loadAnalyticsScript);
+      }
+      return;
+    }
+
+    var s = document.createElement('script');
+    s.src = 'js/sheets-config.js';
+    s.onload = loadAnalyticsScript;
+    document.body.appendChild(s);
+  }
+
   function init() {
     if (global.SiteLinks && global.SiteLinks.apply) {
       global.SiteLinks.apply(document);
@@ -237,6 +270,7 @@
     applyPageCopy();
     ensureOgMeta();
     renderSiteFooter();
+    ensureAnalytics();
   }
 
   if (document.readyState === 'loading') {

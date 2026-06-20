@@ -53,6 +53,10 @@
       {
         "source": "/qr",
         "destination": "/qr-inscripcion.html"
+      },
+      {
+        "source": "/admin",
+        "destination": "/admin.html"
       }
     ],
     "headers": [
@@ -71,6 +75,19 @@
           {
             "key": "Cache-Control",
             "value": "max-age=3600"
+          }
+        ]
+      },
+      {
+        "source": "/admin**",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-store"
           }
         ]
       }

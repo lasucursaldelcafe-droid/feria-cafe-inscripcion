@@ -6,6 +6,12 @@
 var SHEET_FERIA = 'Feria';
 var SHEET_COMPETENCIA = 'Competencia';
 var SHEET_LISTA_ESPERA = 'Lista de espera';
+var SHEET_ANALYTICS = 'Analytics';
+var ADMIN_SESSION_TTL_SEC = 28800; // 8 horas
+
+var HEADERS_ANALYTICS = [
+  'Timestamp', 'Path', 'Titulo', 'Referrer', 'Session ID', 'User agent'
+];
 var CUPO_MAX_COMPETENCIA = 36;
 var COMPROBANTE_PREVIEW_MAX = 1000;
 var DRIVE_FOLDER_NAME = 'Switch Championship — Comprobantes';
@@ -51,10 +57,13 @@ function doGet(e) {
       completo: count >= CUPO_MAX_COMPETENCIA
     });
   }
+  if (params.action === 'admin_dashboard') {
+    return handleAdminDashboard_(params.token || '');
+  }
   return jsonResponse({
     ok: true,
     message: 'API de inscripciones — La Sucursal del Café',
-    forms: ['feria', 'competencia', 'lista_espera']
+    forms: ['feria', 'competencia', 'lista_espera', 'admin', 'analytics']
   });
 }
 
@@ -65,6 +74,18 @@ function doOptions() {
 function doPost(e) {
   try {
     var payload = parsePayload_(e);
+    var action = String(payload.action || '').toLowerCase();
+
+    if (action === 'admin_login') {
+      return handleAdminLogin_(payload);
+    }
+    if (action === 'pageview') {
+      return trackPageview_(payload);
+    }
+    if (action === 'admin_logout') {
+      return handleAdminLogout_(payload.token || '');
+    }
+
     var formType = String(payload.formType || '').toLowerCase();
     var data = payload.data || payload;
     var id = '';
@@ -120,7 +141,8 @@ function sincronizarEncabezados() {
   applyHeaders_(getOrCreateSheet_(SHEET_FERIA, HEADERS_FERIA), HEADERS_FERIA);
   applyHeaders_(getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA), HEADERS_COMPETENCIA);
   applyHeaders_(getOrCreateSheet_(SHEET_LISTA_ESPERA, HEADERS_LISTA_ESPERA), HEADERS_LISTA_ESPERA);
-  Logger.log('Encabezados sincronizados: Feria, Competencia, Lista de espera.');
+  applyHeaders_(getOrCreateSheet_(SHEET_ANALYTICS, HEADERS_ANALYTICS), HEADERS_ANALYTICS);
+  Logger.log('Encabezados sincronizados: Feria, Competencia, Lista de espera, Analytics.');
 }
 
 function applyHeaders_(sheet, headers) {
@@ -537,4 +559,229 @@ function jsonResponse(obj, statusCode) {
   var output = ContentService.createTextOutput(JSON.stringify(obj));
   output.setMimeType(ContentService.MimeType.JSON);
   return output;
+}
+
+// —— Admin y analíticas (credenciales en Propiedades del script, nunca en el repo) ——
+
+function getAdminCredentials_() {
+  var props = PropertiesService.getScriptProperties();
+  var username = String(props.getProperty('ADMIN_USER') || props.getProperty('ADMIN_USERNAME') || '').trim();
+  var password = String(props.getProperty('ADMIN_PASS') || props.getProperty('ADMIN_PASSWORD') || '');
+  return { username: username, password: password };
+}
+
+/**
+ * Configura credenciales en Propiedades del script (ejecutar desde el editor, no commitear).
+ * configurarCredencialesAdmin('tu_usuario', 'tu_contraseña_segura');
+ */
+function configurarCredencialesAdmin(username, password) {
+  if (!username || !password) {
+    throw new Error('Usuario y contraseña requeridos.');
+  }
+  PropertiesService.getScriptProperties().setProperties({
+    ADMIN_USER: String(username).trim(),
+    ADMIN_PASS: String(password)
+  });
+  Logger.log('Credenciales de admin configuradas para: ' + username);
+}
+
+/** Alias público para el editor de Apps Script. */
+function adminLogin(username, password) {
+  return handleAdminLogin_({ username: username, password: password });
+}
+
+/** Alias público — requiere token de sesión válido. */
+function adminGetDashboard(token) {
+  return handleAdminDashboard_(token);
+}
+
+/** Alias público — registra una visita de prueba. */
+function trackPageview(path, title) {
+  return trackPageview_({ path: path || '/', title: title || '' });
+}
+
+function generateSessionToken_() {
+  return Utilities.getUuid() + '-' + Utilities.getUuid();
+}
+
+function storeAdminSession_(token, username) {
+  CacheService.getScriptCache().put('admin_' + token, username, ADMIN_SESSION_TTL_SEC);
+}
+
+function validateAdminToken_(token) {
+  if (!token) return false;
+  return !!CacheService.getScriptCache().get('admin_' + token);
+}
+
+function handleAdminLogin_(payload) {
+  var creds = getAdminCredentials_();
+  if (!creds.username || !creds.password) {
+    return jsonResponse({
+      ok: false,
+      error: 'Admin no configurado. Ejecuta configurarCredencialesAdmin en Apps Script.'
+    }, 503);
+  }
+
+  var username = String(payload.username || '').trim();
+  var password = String(payload.password || '');
+
+  if (username !== creds.username || password !== creds.password) {
+    return jsonResponse({ ok: false, error: 'Usuario o contraseña incorrectos.' }, 401);
+  }
+
+  var token = generateSessionToken_();
+  storeAdminSession_(token, username);
+
+  return jsonResponse({
+    ok: true,
+    token: token,
+    expiresIn: ADMIN_SESSION_TTL_SEC,
+    username: username
+  });
+}
+
+function handleAdminLogout_(token) {
+  if (token) {
+    CacheService.getScriptCache().remove('admin_' + token);
+  }
+  return jsonResponse({ ok: true });
+}
+
+function trackPageview_(payload) {
+  var sheet = getOrCreateSheet_(SHEET_ANALYTICS, HEADERS_ANALYTICS);
+  var path = String(payload.path || '/').substring(0, 200);
+  var title = String(payload.title || '').substring(0, 120);
+  var referrer = String(payload.referrer || '').substring(0, 300);
+  var sessionId = String(payload.sessionId || '').substring(0, 64);
+  var ua = String(payload.userAgent || '').substring(0, 120);
+
+  sheet.appendRow([
+    new Date().toISOString(),
+    path,
+    title,
+    referrer,
+    sessionId,
+    ua
+  ]);
+
+  return jsonResponse({ ok: true });
+}
+
+function readSheetRows_(sheetName, headers, maxRows) {
+  var sheet = getOrCreateSheet_(sheetName, headers);
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+
+  var startRow = Math.max(2, lastRow - maxRows + 1);
+  var values = sheet.getRange(startRow, 1, lastRow, headers.length).getValues();
+  var rows = [];
+
+  for (var i = values.length - 1; i >= 0; i--) {
+    var row = {};
+    headers.forEach(function (h, idx) {
+      var val = values[i][idx];
+      if (val instanceof Date) {
+        row[h] = val.toISOString();
+      } else {
+        row[h] = val === '' ? '' : String(val);
+      }
+    });
+    rows.push(row);
+  }
+  return rows;
+}
+
+function sanitizeCompetenciaRow_(row) {
+  if (row['Comprobante base64 (preview)']) {
+    row['Comprobante base64 (preview)'] = '(omitido)';
+  }
+  return row;
+}
+
+function getAnalyticsStats_() {
+  var sheet = getOrCreateSheet_(SHEET_ANALYTICS, HEADERS_ANALYTICS);
+  var lastRow = sheet.getLastRow();
+  var total = lastRow > 1 ? lastRow - 1 : 0;
+  var todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  var visitsToday = 0;
+  var visitsFeriaPageToday = 0;
+  var visitsCompetenciaPageToday = 0;
+  var pageCountsToday = {};
+
+  if (lastRow >= 2) {
+    var data = sheet.getRange(2, 1, lastRow, 2).getValues();
+    for (var i = 0; i < data.length; i++) {
+      var ts = data[i][0];
+      var path = String(data[i][1] || '').toLowerCase();
+      if (!(ts instanceof Date) || ts < todayStart) continue;
+      visitsToday++;
+      if (path.indexOf('inscripcion') !== -1) visitsFeriaPageToday++;
+      if (path.indexOf('competencia') !== -1) visitsCompetenciaPageToday++;
+      var key = path || '/';
+      pageCountsToday[key] = (pageCountsToday[key] || 0) + 1;
+    }
+  }
+
+  return {
+    total: total,
+    today: visitsToday,
+    feriaPageToday: visitsFeriaPageToday,
+    competenciaPageToday: visitsCompetenciaPageToday,
+    topPagesToday: pageCountsToday
+  };
+}
+
+function handleAdminDashboard_(token) {
+  if (!validateAdminToken_(token)) {
+    return jsonResponse({ ok: false, error: 'Sesión inválida o expirada.' }, 401);
+  }
+
+  var feriaCount = getSheetRowCount_(SHEET_FERIA, HEADERS_FERIA);
+  var competenciaCount = getCompetenciaCount_();
+  var listaCount = getSheetRowCount_(SHEET_LISTA_ESPERA, HEADERS_LISTA_ESPERA);
+  var analytics = getAnalyticsStats_();
+
+  var feriaConv = analytics.feriaPageToday > 0
+    ? Math.round((feriaCount / analytics.feriaPageToday) * 100)
+    : 0;
+  var compConv = analytics.competenciaPageToday > 0
+    ? Math.round((competenciaCount / analytics.competenciaPageToday) * 100)
+    : 0;
+
+  var recentFeria = readSheetRows_(SHEET_FERIA, HEADERS_FERIA, 25);
+  var recentCompetencia = readSheetRows_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA, 25)
+    .map(sanitizeCompetenciaRow_);
+
+  return jsonResponse({
+    ok: true,
+    generatedAt: new Date().toISOString(),
+    stats: {
+      visitsToday: analytics.today,
+      visitsTotal: analytics.total,
+      feriaRegistrations: feriaCount,
+      competenciaRegistrations: competenciaCount,
+      listaEspera: listaCount,
+      competenciaCupo: {
+        count: competenciaCount,
+        max: CUPO_MAX_COMPETENCIA,
+        disponibles: Math.max(0, CUPO_MAX_COMPETENCIA - competenciaCount),
+        completo: competenciaCount >= CUPO_MAX_COMPETENCIA
+      },
+      feriaPageViewsToday: analytics.feriaPageToday,
+      competenciaPageViewsToday: analytics.competenciaPageToday,
+      conversionFeriaPct: feriaConv,
+      conversionCompetenciaPct: compConv,
+      topPagesToday: analytics.topPagesToday
+    },
+    recentFeria: recentFeria,
+    recentCompetencia: recentCompetencia
+  });
+}
+
+function getSheetRowCount_(sheetName, headers) {
+  var sheet = getOrCreateSheet_(sheetName, headers);
+  var lastRow = sheet.getLastRow();
+  return lastRow > 1 ? lastRow - 1 : 0;
 }
