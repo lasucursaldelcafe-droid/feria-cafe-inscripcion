@@ -10,46 +10,43 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/brand.css?v=20260620c">
-  <link rel="stylesheet" href="css/admin.css?v=20260620c">
+  <link rel="stylesheet" href="css/brand.css?v=20260621a">
+  <link rel="stylesheet" href="css/admin.css?v=20260621a">
 </head>
 <body class="admin-page">
   <header class="admin-header">
-    <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="100" height="40" style="margin-bottom:0.75rem">
+    <img class="admin-header__logo" src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="120" height="48">
     <h1 class="admin-header__title">Panel de administración</h1>
     <p class="admin-header__sub">Analíticas e inscripciones — acceso restringido</p>
   </header>
 
   <main class="admin-main">
     <div id="adminError" class="admin-error" hidden role="alert"></div>
-    <div id="adminLoading" class="admin-loading" hidden>Cargando…</div>
+    <div id="adminLoading" class="admin-loading" hidden>Cargando panel…</div>
 
-    <section id="adminLogin" class="admin-card" aria-labelledby="loginTitle">
-      <h2 id="loginTitle" class="admin-card__title">Iniciar sesión</h2>
-      <div class="admin-login-form">
-        <button type="button" id="googleSignInBtn" class="admin-btn admin-btn--google">
-          <svg class="admin-btn__google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-          </svg>
-          Iniciar sesión con Google
+    <section id="adminStart" class="admin-card admin-start" aria-labelledby="startTitle">
+      <div class="admin-start__inner">
+        <h2 id="startTitle" class="admin-card__title">Resumen del festival</h2>
+        <p class="admin-start__lead">Visitas al sitio, registros de feria e inscripciones Switch Championship.</p>
+        <p class="admin-open-banner" role="status">
+          Panel interno — URL no publicada en el sitio. No compartas este enlace.
+        </p>
+        <button type="button" id="loadDashboardBtn" class="admin-btn admin-btn--primary admin-start__cta">
+          Ver panel de analíticas
         </button>
       </div>
-      <p class="admin-note">Solo <strong>lasucursaldelcafe@gmail.com</strong> puede acceder. Esta página no está enlazada desde el sitio público.</p>
     </section>
 
     <section id="adminDashboard" hidden aria-labelledby="dashTitle">
       <div class="admin-toolbar">
         <div>
-          <h2 id="dashTitle" class="admin-card__title" style="margin-bottom:0.25rem">Resumen</h2>
+          <h2 id="dashTitle" class="admin-card__title admin-toolbar__title">Resumen</h2>
           <p id="dashboardUpdated" class="admin-toolbar__user"></p>
         </div>
-        <div style="display:flex;gap:0.5rem;align-items:center">
+        <div class="admin-toolbar__actions">
           <span id="adminUserLabel" class="admin-toolbar__user"></span>
+          <button type="button" id="downloadAllBtn" class="admin-btn admin-btn--secondary">Descargar todo (CSV)</button>
           <button type="button" id="refreshBtn" class="admin-btn admin-btn--secondary">Actualizar</button>
-          <button type="button" id="logoutBtn" class="admin-btn admin-btn--secondary">Salir</button>
         </div>
       </div>
 
@@ -89,26 +86,32 @@
       </div>
 
       <div class="admin-card">
-        <h3 class="admin-card__title">Páginas más visitadas hoy</h3>
+        <div class="admin-card__head">
+          <h3 class="admin-card__title">Páginas más visitadas hoy</h3>
+          <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-export="analytics">Descargar CSV</button>
+        </div>
         <div id="topPagesToday"></div>
       </div>
 
       <div class="admin-card">
-        <h3 class="admin-card__title">Últimos registros — Feria (visitantes)</h3>
+        <div class="admin-card__head">
+          <h3 class="admin-card__title"><span id="feriaTableTitle">Inscritos — Feria (visitantes)</span></h3>
+          <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-export="feria">Descargar CSV</button>
+        </div>
         <div id="tableFeria"></div>
       </div>
 
       <div class="admin-card">
-        <h3 class="admin-card__title">Últimas inscripciones — Switch Championship</h3>
+        <div class="admin-card__head">
+          <h3 class="admin-card__title"><span id="competenciaTableTitle">Inscritos — Switch Championship</span></h3>
+          <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-export="competencia">Descargar CSV</button>
+        </div>
         <div id="tableCompetencia"></div>
       </div>
     </section>
   </main>
 
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="js/firebase-config.js"></script>
   <script src="js/sheets-config.js"></script>
-  <script src="js/admin-dashboard.js"></script>
+  <script src="js/admin-dashboard.js?v=20260621a"></script>
 </body>
 </html>

@@ -1,16 +1,22 @@
 /**
- * Panel de administración — Firebase Auth (Google) + datos vía Apps Script.
- * Solo lasucursaldelcafe@gmail.com puede acceder (validado en cliente y servidor).
+ * Panel admin — Apps Script (modo público sin login mientras OAuth esté roto).
  */
 (function (global) {
   'use strict';
 
-  var auth = null;
-  var currentUser = null;
+  var PUBLIC_ADMIN = true;
+  var lastDashboardData = null;
+  var exportInFlight = false;
 
-  function getAllowedEmail() {
-    return String(global.ALLOWED_ADMIN_EMAIL || 'lasucursaldelcafe@gmail.com').trim().toLowerCase();
-  }
+  var DEFAULT_FERIA_COLS = [
+    'Fecha registro', 'ID', 'Nombre', 'Edad', 'Celular', 'Correo', 'Intereses',
+    'Estado registro', 'Notas admin'
+  ];
+
+  var DEFAULT_COMP_COLS = [
+    'Fecha registro', 'ID', 'Nombre', 'Correo', 'Celular', 'Ciudad',
+    'Estado pago', 'Cupo confirmado', 'Comprobante enlace Drive'
+  ];
 
   function getWebAppUrl() {
     var cfg = global.SHEETS_CONFIG || {};
@@ -19,74 +25,52 @@
     return url;
   }
 
-  function initFirebase() {
-    var cfg = global.FIREBASE_CONFIG;
-    if (!cfg || !cfg.apiKey || cfg.apiKey === 'TU_API_KEY') {
-      throw new Error('Configura js/firebase-config.js con tu app web de Firebase.');
-    }
-    if (!global.firebase || !global.firebase.apps) {
-      throw new Error('Firebase SDK no cargado.');
-    }
-    if (!global.firebase.apps.length) {
-      global.firebase.initializeApp(cfg);
-    }
-    auth = global.firebase.auth();
-    return auth;
-  }
-
-  function isAuthorizedEmail(email) {
-    return String(email || '').trim().toLowerCase() === getAllowedEmail();
-  }
-
-  function postJson(payload) {
+  function buildAdminUrl(action, extraParams) {
     var url = getWebAppUrl();
-    if (!url) {
-      return Promise.resolve({ ok: false, error: 'URL de Apps Script no configurada.' });
-    }
-    return fetch(url, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
-    }).then(function (res) {
-      return res.json().catch(function () {
-        return { ok: false, error: 'Respuesta inválida del servidor.' };
-      });
-    }).catch(function (err) {
-      return { ok: false, error: err.message || String(err) };
-    });
-  }
-
-  function fetchDashboard(idToken) {
-    var url = getWebAppUrl();
-    if (!url) {
-      return Promise.resolve({ ok: false, error: 'URL de Apps Script no configurada.' });
-    }
+    if (!url) return '';
     var sep = url.indexOf('?') >= 0 ? '&' : '?';
-    return fetch(
-      url + sep + 'action=admin_dashboard&idToken=' + encodeURIComponent(idToken),
-      { method: 'GET', mode: 'cors', cache: 'no-store' }
-    ).then(function (res) {
-      return res.json().catch(function () {
-        return { ok: false, error: 'Respuesta inválida del servidor.' };
+    var qs = 'action=' + encodeURIComponent(action);
+    if (extraParams) {
+      Object.keys(extraParams).forEach(function (key) {
+        var val = extraParams[key];
+        if (val !== undefined && val !== null && val !== '') {
+          qs += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(val);
+        }
       });
-    }).catch(function (err) {
-      return { ok: false, error: err.message || String(err) };
+    }
+    return url + sep + qs;
+  }
+
+  function fetchJson(url) {
+    return fetch(url, { method: 'GET', mode: 'cors', cache: 'no-store' })
+      .then(function (res) {
+        return res.json().catch(function () {
+          return { ok: false, error: 'Respuesta inválida del servidor (HTTP ' + res.status + ').' };
+        });
+      })
+      .catch(function (err) {
+        return { ok: false, error: err.message || String(err) };
+      });
+  }
+
+  function fetchDashboard() {
+    var requestUrl = buildAdminUrl('admin_dashboard');
+    if (!requestUrl) {
+      return Promise.resolve({ ok: false, error: 'URL de Apps Script no configurada.' });
+    }
+    return fetchJson(requestUrl).then(function (data) {
+      if (data.ok && data.message && !data.stats) {
+        return {
+          ok: false,
+          error: 'Apps Script desactualizado: falta action=admin_dashboard. Ejecuta py tools/setup_admin.py'
+        };
+      }
+      return data;
     });
   }
 
-  function signOutUser() {
-    currentUser = null;
-    if (!auth) return Promise.resolve();
-    return auth.signOut().catch(function () { /* noop */ });
-  }
-
-  function rejectUnauthorizedUser(user) {
-    currentUser = null;
-    return signOutUser().then(function () {
-      showLogin();
-      showError('No autorizado. Solo ' + getAllowedEmail() + ' puede acceder al panel.');
-    });
+  function fetchExport(dataset) {
+    return fetchJson(buildAdminUrl('admin_export', { dataset: dataset }));
   }
 
   function formatNumber(n) {
@@ -101,12 +85,17 @@
       .replace(/"/g, '&quot;');
   }
 
-  function renderTable(headers, rows, columns) {
+  function isLinkColumn(col) {
+    return col.toLowerCase().indexOf('enlace') !== -1;
+  }
+
+  function renderTable(rows, columns, metaText) {
+    var cols = columns || [];
+    var meta = metaText ? '<p class="admin-table-meta">' + escapeHtml(metaText) + '</p>' : '';
     if (!rows || !rows.length) {
-      return '<p class="admin-empty">Sin registros todavía.</p>';
+      return meta + '<p class="admin-empty">Sin registros todavía.</p>';
     }
-    var cols = columns || headers;
-    var html = '<div class="admin-table-wrap"><table class="admin-table"><thead><tr>';
+    var html = meta + '<div class="admin-table-wrap"><table class="admin-table"><thead><tr>';
     cols.forEach(function (col) {
       html += '<th>' + escapeHtml(col) + '</th>';
     });
@@ -115,7 +104,7 @@
       html += '<tr>';
       cols.forEach(function (col) {
         var val = row[col] || '';
-        if (col.indexOf('enlace') !== -1 && val && val.indexOf('http') === 0) {
+        if (isLinkColumn(col) && val && val.indexOf('http') === 0) {
           html += '<td><a href="' + escapeHtml(val) + '" target="_blank" rel="noopener">Ver</a></td>';
         } else {
           html += '<td>' + escapeHtml(val) + '</td>';
@@ -144,19 +133,120 @@
     return html;
   }
 
-  function showLogin() {
-    document.getElementById('adminLogin').hidden = false;
-    document.getElementById('adminDashboard').hidden = true;
+  function rowsToCsv(headers, rows) {
+    function esc(val) {
+      var s = val === null || val === undefined ? '' : String(val);
+      if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    }
+    var lines = [headers.map(esc).join(',')];
+    (rows || []).forEach(function (row) {
+      lines.push(headers.map(function (h) { return esc(row[h] || ''); }).join(','));
+    });
+    return '\uFEFF' + lines.join('\r\n');
   }
 
-  function showDashboard() {
-    document.getElementById('adminLogin').hidden = true;
-    document.getElementById('adminDashboard').hidden = false;
+  function downloadCsvText(filename, csvText) {
+    var blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename || 'export.csv';
+    anchor.style.display = 'none';
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  }
+
+  function stampFilename(prefix) {
+    var d = new Date();
+    var pad = function (n) { return n < 10 ? '0' + n : String(n); };
+    return prefix + '-' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '.csv';
+  }
+
+  function setExportButtonsDisabled(disabled) {
+    document.querySelectorAll('[data-export], #downloadAllBtn').forEach(function (btn) {
+      btn.disabled = disabled;
+    });
+  }
+
+  function exportFromCache(dataset) {
+    if (!lastDashboardData) return false;
+    var data = lastDashboardData;
+
+    if (dataset === 'feria') {
+      downloadCsvText(
+        stampFilename('feria-inscritos'),
+        rowsToCsv(data.feriaColumns || DEFAULT_FERIA_COLS, data.allFeria || data.recentFeria || [])
+      );
+      return true;
+    }
+    if (dataset === 'competencia') {
+      downloadCsvText(
+        stampFilename('switch-championship'),
+        rowsToCsv(data.competenciaColumns || DEFAULT_COMP_COLS, data.allCompetencia || data.recentCompetencia || [])
+      );
+      return true;
+    }
+    return false;
+  }
+
+  function triggerExport(dataset) {
+    if (exportInFlight) return;
+    exportInFlight = true;
+    setExportButtonsDisabled(true);
+
+    if (dataset !== 'analytics' && dataset !== 'all' && exportFromCache(dataset)) {
+      exportInFlight = false;
+      setExportButtonsDisabled(false);
+      showError('');
+      return;
+    }
+
+    fetchExport(dataset).then(function (result) {
+      exportInFlight = false;
+      setExportButtonsDisabled(false);
+      if (!result.ok) {
+        showError(result.error || 'No se pudo exportar.');
+        return;
+      }
+      showError('');
+      if (result.files && result.files.length) {
+        result.files.forEach(function (file) {
+          downloadCsvText(file.filename, file.csv);
+        });
+        return;
+      }
+      if (result.csv) {
+        downloadCsvText(result.filename || stampFilename(result.dataset || 'export'), result.csv);
+      }
+    }).catch(function (err) {
+      exportInFlight = false;
+      setExportButtonsDisabled(false);
+      showError(err.message || 'Error al exportar.');
+    });
+  }
+
+  function showStart() {
+    var start = document.getElementById('adminStart');
+    var dash = document.getElementById('adminDashboard');
+    if (start) start.hidden = false;
+    if (dash) dash.hidden = true;
+  }
+
+  function showDashboardView() {
+    var start = document.getElementById('adminStart');
+    var dash = document.getElementById('adminDashboard');
+    if (start) start.hidden = true;
+    if (dash) dash.hidden = false;
   }
 
   function setLoading(isLoading) {
     var el = document.getElementById('adminLoading');
     if (el) el.hidden = !isLoading;
+    var btn = document.getElementById('loadDashboardBtn');
+    if (btn) btn.disabled = isLoading;
   }
 
   function showError(msg) {
@@ -171,8 +261,17 @@
     }
   }
 
+  function pickRows(data, key) {
+    if (data[key]) return data[key];
+    if (key === 'allFeria' && data.recentFeria) return data.recentFeria;
+    if (key === 'allCompetencia' && data.recentCompetencia) return data.recentCompetencia;
+    return [];
+  }
+
   function renderDashboard(data) {
+    lastDashboardData = data;
     var stats = data.stats || {};
+
     document.getElementById('statVisitsToday').textContent = formatNumber(stats.visitsToday);
     document.getElementById('statVisitsTotal').textContent = formatNumber(stats.visitsTotal);
     document.getElementById('statFeria').textContent = formatNumber(stats.feriaRegistrations);
@@ -184,23 +283,34 @@
       formatNumber(cupo.count) + ' / ' + formatNumber(cupo.max) +
       (cupo.completo ? ' (completo)' : '');
 
-    document.getElementById('statConvFeria').textContent =
-      (stats.conversionFeriaPct || 0) + '%';
-    document.getElementById('statConvComp').textContent =
-      (stats.conversionCompetenciaPct || 0) + '%';
+    document.getElementById('statConvFeria').textContent = (stats.conversionFeriaPct || 0) + '%';
+    document.getElementById('statConvComp').textContent = (stats.conversionCompetenciaPct || 0) + '%';
 
     document.getElementById('topPagesToday').innerHTML = renderTopPages(stats.topPagesToday);
 
-    var feriaCols = ['Fecha registro', 'ID', 'Nombre', 'Correo', 'Celular', 'Intereses', 'Estado registro'];
-    document.getElementById('tableFeria').innerHTML =
-      renderTable([], data.recentFeria || [], feriaCols);
+    var feriaRows = pickRows(data, 'allFeria');
+    var feriaCols = data.feriaColumns || DEFAULT_FERIA_COLS;
+    var feriaTitle = document.getElementById('feriaTableTitle');
+    if (feriaTitle) {
+      feriaTitle.textContent = 'Inscritos — Feria (visitantes) — ' + formatNumber(feriaRows.length) + ' total';
+    }
+    document.getElementById('tableFeria').innerHTML = renderTable(
+      feriaRows,
+      feriaCols,
+      feriaRows.length ? 'Todos los registros, más recientes primero.' : ''
+    );
 
-    var compCols = [
-      'Fecha registro', 'ID', 'Nombre', 'Correo', 'Celular', 'Ciudad',
-      'Estado pago', 'Cupo confirmado', 'Comprobante enlace Drive'
-    ];
-    document.getElementById('tableCompetencia').innerHTML =
-      renderTable([], data.recentCompetencia || [], compCols);
+    var compRows = pickRows(data, 'allCompetencia');
+    var compCols = data.competenciaColumns || DEFAULT_COMP_COLS;
+    var compTitle = document.getElementById('competenciaTableTitle');
+    if (compTitle) {
+      compTitle.textContent = 'Inscritos — Switch Championship — ' + formatNumber(compRows.length) + ' total';
+    }
+    document.getElementById('tableCompetencia').innerHTML = renderTable(
+      compRows,
+      compCols,
+      compRows.length ? 'Todos los registros, más recientes primero.' : ''
+    );
 
     var updated = document.getElementById('dashboardUpdated');
     if (updated && data.generatedAt) {
@@ -208,124 +318,56 @@
     }
 
     var userEl = document.getElementById('adminUserLabel');
-    if (userEl) {
-      userEl.textContent = currentUser && currentUser.email ? currentUser.email : 'Admin';
-    }
+    if (userEl) userEl.textContent = 'Panel interno';
   }
 
-  function loadDashboard(user) {
-    if (!user) {
-      showLogin();
-      return;
-    }
-
-    if (!isAuthorizedEmail(user.email)) {
-      return rejectUnauthorizedUser(user);
-    }
-
+  function loadDashboard() {
     setLoading(true);
     showError('');
 
-    user.getIdToken(true).then(function (idToken) {
-      return fetchDashboard(idToken);
-    }).then(function (data) {
+    fetchDashboard().then(function (data) {
       setLoading(false);
       if (!data.ok) {
-        if (data.error && (data.error.indexOf('autorizado') !== -1 || data.error.indexOf('inválida') !== -1)) {
-          return rejectUnauthorizedUser(user);
-        }
         showError(data.error || 'No se pudo cargar el panel.');
+        showStart();
         return;
       }
-      currentUser = user;
-      showDashboard();
+      showDashboardView();
       renderDashboard(data);
     }).catch(function (err) {
       setLoading(false);
       showError(err.message || 'Error al cargar el panel.');
-    });
-  }
-
-  function signInWithGoogle() {
-    if (!auth) return;
-    showError('');
-    setLoading(true);
-    var provider = new global.firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).then(function (result) {
-      var user = result.user;
-      if (!isAuthorizedEmail(user.email)) {
-        setLoading(false);
-        return rejectUnauthorizedUser(user);
-      }
-      return loadDashboard(user);
-    }).catch(function (err) {
-      setLoading(false);
-      if (err.code === 'auth/popup-closed-by-user') {
-        showError('');
-        return;
-      }
-      if (err.code === 'auth/unauthorized-domain') {
-        showError('Dominio no autorizado en Firebase. Agrega este sitio en Authentication → Dominios autorizados.');
-        return;
-      }
-      showError(err.message || 'No se pudo iniciar sesión con Google.');
+      showStart();
     });
   }
 
   function bindEvents() {
-    var googleBtn = document.getElementById('googleSignInBtn');
-    if (googleBtn) {
-      googleBtn.addEventListener('click', signInWithGoogle);
-    }
-
-    var logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', function () {
-        signOutUser().then(function () {
-          showLogin();
-          showError('');
-        });
-      });
-    }
+    var loadBtn = document.getElementById('loadDashboardBtn');
+    if (loadBtn) loadBtn.addEventListener('click', loadDashboard);
 
     var refreshBtn = document.getElementById('refreshBtn');
-    if (refreshBtn) {
-      refreshBtn.addEventListener('click', function () {
-        if (currentUser) loadDashboard(currentUser);
-      });
+    if (refreshBtn) refreshBtn.addEventListener('click', loadDashboard);
+
+    var downloadAllBtn = document.getElementById('downloadAllBtn');
+    if (downloadAllBtn) {
+      downloadAllBtn.addEventListener('click', function () { triggerExport('all'); });
     }
+
+    document.querySelectorAll('[data-export]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        triggerExport(btn.getAttribute('data-export'));
+      });
+    });
   }
 
   function init() {
     if (!getWebAppUrl()) {
       showError('Configura js/sheets-config.js con la URL de Apps Script.');
-      showLogin();
+      showStart();
       return;
     }
-
-    try {
-      initFirebase();
-    } catch (err) {
-      showError(err.message || String(err));
-      showLogin();
-      return;
-    }
-
     bindEvents();
-
-    auth.onAuthStateChanged(function (user) {
-      if (!user) {
-        currentUser = null;
-        showLogin();
-        setLoading(false);
-        return;
-      }
-      if (!isAuthorizedEmail(user.email)) {
-        rejectUnauthorizedUser(user);
-        return;
-      }
-      loadDashboard(user);
-    });
+    if (PUBLIC_ADMIN) loadDashboard();
   }
 
   if (document.readyState === 'loading') {

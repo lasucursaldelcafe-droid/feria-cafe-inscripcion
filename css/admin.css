@@ -13,6 +13,7 @@
   text-align: center;
 }
 
+.admin-header__logo,
 .admin-header > img {
   display: inline-block;
   margin-bottom: 0.75rem;
@@ -20,6 +21,84 @@
   background: var(--logo-reborde-bg);
   border-radius: var(--logo-reborde-radius);
   box-shadow: var(--logo-reborde-shadow);
+}
+
+.admin-start {
+  text-align: center;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.admin-start__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.admin-start__lead {
+  margin: 0;
+  color: var(--text-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  max-width: 36ch;
+}
+
+.admin-start__cta {
+  min-width: var(--btn-min-width);
+  margin-top: var(--space-1);
+}
+
+.admin-open-banner {
+  margin: 0;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  color: var(--coffee-deep);
+  background: var(--cream-muted);
+  border: 1px solid var(--border-coffee-subtle);
+  border-radius: 8px;
+}
+
+.admin-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.admin-card__head .admin-card__title {
+  margin: 0;
+}
+
+.admin-toolbar__title {
+  margin-bottom: 0.25rem !important;
+}
+
+.admin-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.admin-btn--sm {
+  min-height: 36px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+}
+
+.admin-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-table-meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-2);
 }
 
 .admin-header__title {
@@ -173,6 +252,17 @@
   font-weight: 700;
   color: var(--coffee-deep);
   font-variant-numeric: tabular-nums;
+}
+
+.admin-notice {
+  background: rgba(187, 94, 60, 0.12);
+  color: var(--coffee-deep);
+  border: 1px solid rgba(187, 94, 60, 0.35);
+  padding: var(--space-2);
+  border-radius: 8px;
+  margin-bottom: var(--space-2);
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 
 .admin-error {
