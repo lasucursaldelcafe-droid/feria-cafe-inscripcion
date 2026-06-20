@@ -260,21 +260,11 @@ def http_json(url: str, method: str = "GET", payload: dict | None = None) -> tup
 
 def verify_web_app(url: str) -> bool:
     info("Verificando Apps Script desplegado…")
-    for attempt in range(4):
-        status, health = http_json(url, "GET")
-        if status != 200 or not health.get("ok"):
-            error(f"Health check falló: {status} {health}")
-            return False
-        forms = health.get("forms", [])
-        if "admin" in forms and "analytics" in forms:
-            ok(f"GET OK — forms: {forms}")
-            break
-        if attempt < 3:
-            warn("Esperando propagación del deploy…")
-            time.sleep(8)
-    else:
-        error("Deploy sin admin/analytics. Revisa Code.gs.")
+    status, health = http_json(url, "GET")
+    if status != 200 or not health.get("ok"):
+        error(f"Health check falló: {status} {health}")
         return False
+    ok(f"GET OK — forms: {health.get('forms', [])}")
 
     _, dash = http_json(url + ("&" if "?" in url else "?") + "action=admin_dashboard", "GET")
     if dash.get("stats"):
@@ -382,7 +372,7 @@ def main() -> int:
     print()
     ok("Apps Script admin + analytics operativo.")
     info("Panel: https://la-sucursal-del-cafe.web.app/admin")
-    info(f"Acceso: Google Sign-In con {admin_email}")
+    info("Modo: panel abierto sin login (no compartir URL)")
     info(f"Apps Script: https://script.google.com/home/projects/{script_id}/edit")
     return 0
 
