@@ -13,6 +13,15 @@
   text-align: center;
 }
 
+.admin-header > img {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  padding: var(--logo-reborde-pad-y) var(--logo-reborde-pad-x);
+  background: var(--logo-reborde-bg);
+  border-radius: var(--logo-reborde-radius);
+  box-shadow: var(--logo-reborde-shadow);
+}
+
 .admin-header__title {
   font-family: var(--font-display);
   font-size: clamp(1.5rem, 4vw, 2rem);
@@ -45,6 +54,25 @@
   font-size: 1.25rem;
   margin: 0 0 var(--space-3);
   color: var(--coffee-deep);
+}
+
+.admin-btn--google {
+  background: #fff;
+  color: #3c4043;
+  border: 1px solid #dadce0;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.admin-btn--google:hover {
+  background: #f8f9fa;
+  border-color: #c6c6c6;
+}
+
+.admin-btn__google-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 .admin-login-form {

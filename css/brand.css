@@ -74,6 +74,13 @@
   --btn-radius: 10px;
   --btn-min-width: 200px;
 
+  /* Logo reborde (fondos café / oscuros) */
+  --logo-reborde-bg: #fff;
+  --logo-reborde-pad-y: 0.55rem;
+  --logo-reborde-pad-x: 0.85rem;
+  --logo-reborde-radius: 10px;
+  --logo-reborde-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+
   /* Gradientes de marca */
   --gradient-hero-coffee: linear-gradient(155deg, #2a1f18 0%, var(--coffee-deep) 42%, var(--coffee-dark) 100%);
   --gradient-section-light: linear-gradient(180deg, var(--cream-light) 0%, var(--cream-beige) 100%);
@@ -194,6 +201,38 @@ a:hover {
   height: auto;
   object-fit: contain;
   filter: drop-shadow(0 2px 8px rgba(93, 58, 26, 0.12));
+}
+
+/* Logo sobre fondos café / oscuros: base blanca tipo reborde */
+.site-hero--coffee .logo-frame,
+.woc-hero .logo-frame,
+.festival-section--dark .logo-frame {
+  background: var(--logo-reborde-bg);
+  border-radius: var(--logo-reborde-radius);
+  box-shadow: var(--logo-reborde-shadow);
+  padding: var(--logo-reborde-pad-y) var(--logo-reborde-pad-x);
+}
+
+.site-hero--coffee .logo-frame .brand-logo,
+.site-hero--coffee .brand-logo,
+.woc-hero .logo-frame .brand-logo,
+.woc-hero .brand-logo,
+.festival-section--dark .logo-frame .brand-logo,
+.festival-section--dark .brand-logo {
+  background: var(--logo-reborde-bg);
+  padding: var(--logo-reborde-pad-y) var(--logo-reborde-pad-x);
+  border-radius: var(--logo-reborde-radius);
+  box-shadow: var(--logo-reborde-shadow);
+  filter: none;
+}
+
+.site-hero--coffee .logo-frame .brand-logo,
+.woc-hero .logo-frame .brand-logo,
+.festival-section--dark .logo-frame .brand-logo {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
 }
 
 .hero-eyebrow {
@@ -2888,11 +2927,10 @@ body.page-rules {
   height: 64px;
   width: auto;
   margin-bottom: 0.75rem;
-  padding: 0.55rem 0.85rem;
-  background: var(--cream-pale);
-  border: 1px solid rgba(250, 246, 240, 0.45);
-  border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  padding: var(--logo-reborde-pad-y) var(--logo-reborde-pad-x);
+  background: var(--logo-reborde-bg);
+  border-radius: var(--logo-reborde-radius);
+  box-shadow: var(--logo-reborde-shadow);
 }
 
 .festival-footer .festival-social a {

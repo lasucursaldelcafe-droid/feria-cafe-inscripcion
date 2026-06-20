@@ -1,12 +1,16 @@
 /**
- * Panel de administración — autenticación y datos vía Apps Script.
- * Credenciales NUNCA en este archivo; se validan en el servidor.
+ * Panel de administración — Firebase Auth (Google) + datos vía Apps Script.
+ * Solo lasucursaldelcafe@gmail.com puede acceder (validado en cliente y servidor).
  */
 (function (global) {
   'use strict';
 
-  var TOKEN_KEY = 'lsc_admin_token';
-  var USER_KEY = 'lsc_admin_user';
+  var auth = null;
+  var currentUser = null;
+
+  function getAllowedEmail() {
+    return String(global.ALLOWED_ADMIN_EMAIL || 'lasucursaldelcafe@gmail.com').trim().toLowerCase();
+  }
 
   function getWebAppUrl() {
     var cfg = global.SHEETS_CONFIG || {};
@@ -15,26 +19,23 @@
     return url;
   }
 
-  function getToken() {
-    try {
-      return sessionStorage.getItem(TOKEN_KEY) || '';
-    } catch (e) {
-      return '';
+  function initFirebase() {
+    var cfg = global.FIREBASE_CONFIG;
+    if (!cfg || !cfg.apiKey || cfg.apiKey === 'TU_API_KEY') {
+      throw new Error('Configura js/firebase-config.js con tu app web de Firebase.');
     }
+    if (!global.firebase || !global.firebase.apps) {
+      throw new Error('Firebase SDK no cargado.');
+    }
+    if (!global.firebase.apps.length) {
+      global.firebase.initializeApp(cfg);
+    }
+    auth = global.firebase.auth();
+    return auth;
   }
 
-  function setSession(token, username) {
-    try {
-      sessionStorage.setItem(TOKEN_KEY, token);
-      sessionStorage.setItem(USER_KEY, username || '');
-    } catch (e) { /* noop */ }
-  }
-
-  function clearSession() {
-    try {
-      sessionStorage.removeItem(TOKEN_KEY);
-      sessionStorage.removeItem(USER_KEY);
-    } catch (e) { /* noop */ }
+  function isAuthorizedEmail(email) {
+    return String(email || '').trim().toLowerCase() === getAllowedEmail();
   }
 
   function postJson(payload) {
@@ -56,17 +57,16 @@
     });
   }
 
-  function fetchDashboard(token) {
+  function fetchDashboard(idToken) {
     var url = getWebAppUrl();
     if (!url) {
       return Promise.resolve({ ok: false, error: 'URL de Apps Script no configurada.' });
     }
     var sep = url.indexOf('?') >= 0 ? '&' : '?';
-    return fetch(url + sep + 'action=admin_dashboard&token=' + encodeURIComponent(token), {
-      method: 'GET',
-      mode: 'cors',
-      cache: 'no-store'
-    }).then(function (res) {
+    return fetch(
+      url + sep + 'action=admin_dashboard&idToken=' + encodeURIComponent(idToken),
+      { method: 'GET', mode: 'cors', cache: 'no-store' }
+    ).then(function (res) {
       return res.json().catch(function () {
         return { ok: false, error: 'Respuesta inválida del servidor.' };
       });
@@ -75,17 +75,18 @@
     });
   }
 
-  function login(username, password) {
-    return postJson({ action: 'admin_login', username: username, password: password });
+  function signOutUser() {
+    currentUser = null;
+    if (!auth) return Promise.resolve();
+    return auth.signOut().catch(function () { /* noop */ });
   }
 
-  function logout() {
-    var token = getToken();
-    clearSession();
-    if (token) {
-      return postJson({ action: 'admin_logout', token: token });
-    }
-    return Promise.resolve({ ok: true });
+  function rejectUnauthorizedUser(user) {
+    currentUser = null;
+    return signOutUser().then(function () {
+      showLogin();
+      showError('No autorizado. Solo ' + getAllowedEmail() + ' puede acceder al panel.');
+    });
   }
 
   function formatNumber(n) {
@@ -208,67 +209,79 @@
 
     var userEl = document.getElementById('adminUserLabel');
     if (userEl) {
-      try {
-        userEl.textContent = sessionStorage.getItem(USER_KEY) || 'Admin';
-      } catch (e) {
-        userEl.textContent = 'Admin';
-      }
+      userEl.textContent = currentUser && currentUser.email ? currentUser.email : 'Admin';
     }
   }
 
-  function loadDashboard() {
-    var token = getToken();
-    if (!token) {
+  function loadDashboard(user) {
+    if (!user) {
       showLogin();
       return;
     }
 
+    if (!isAuthorizedEmail(user.email)) {
+      return rejectUnauthorizedUser(user);
+    }
+
     setLoading(true);
     showError('');
-    fetchDashboard(token).then(function (data) {
+
+    user.getIdToken(true).then(function (idToken) {
+      return fetchDashboard(idToken);
+    }).then(function (data) {
       setLoading(false);
       if (!data.ok) {
-        if (data.error && data.error.indexOf('Sesión') !== -1) {
-          clearSession();
-          showLogin();
+        if (data.error && (data.error.indexOf('autorizado') !== -1 || data.error.indexOf('inválida') !== -1)) {
+          return rejectUnauthorizedUser(user);
         }
         showError(data.error || 'No se pudo cargar el panel.');
         return;
       }
+      currentUser = user;
       showDashboard();
       renderDashboard(data);
+    }).catch(function (err) {
+      setLoading(false);
+      showError(err.message || 'Error al cargar el panel.');
+    });
+  }
+
+  function signInWithGoogle() {
+    if (!auth) return;
+    showError('');
+    setLoading(true);
+    var provider = new global.firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).then(function (result) {
+      var user = result.user;
+      if (!isAuthorizedEmail(user.email)) {
+        setLoading(false);
+        return rejectUnauthorizedUser(user);
+      }
+      return loadDashboard(user);
+    }).catch(function (err) {
+      setLoading(false);
+      if (err.code === 'auth/popup-closed-by-user') {
+        showError('');
+        return;
+      }
+      if (err.code === 'auth/unauthorized-domain') {
+        showError('Dominio no autorizado en Firebase. Agrega este sitio en Authentication → Dominios autorizados.');
+        return;
+      }
+      showError(err.message || 'No se pudo iniciar sesión con Google.');
     });
   }
 
   function bindEvents() {
-    var form = document.getElementById('loginForm');
-    if (form) {
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        showError('');
-        var username = (document.getElementById('loginUsername').value || '').trim();
-        var password = document.getElementById('loginPassword').value || '';
-        if (!username || !password) {
-          showError('Ingresa usuario y contraseña.');
-          return;
-        }
-        setLoading(true);
-        login(username, password).then(function (result) {
-          setLoading(false);
-          if (!result.ok) {
-            showError(result.error || 'No se pudo iniciar sesión.');
-            return;
-          }
-          setSession(result.token, result.username);
-          loadDashboard();
-        });
-      });
+    var googleBtn = document.getElementById('googleSignInBtn');
+    if (googleBtn) {
+      googleBtn.addEventListener('click', signInWithGoogle);
     }
 
     var logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', function () {
-        logout().then(function () {
+        signOutUser().then(function () {
           showLogin();
           showError('');
         });
@@ -278,7 +291,7 @@
     var refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) {
       refreshBtn.addEventListener('click', function () {
-        loadDashboard();
+        if (currentUser) loadDashboard(currentUser);
       });
     }
   }
@@ -289,12 +302,30 @@
       showLogin();
       return;
     }
-    bindEvents();
-    if (getToken()) {
-      loadDashboard();
-    } else {
+
+    try {
+      initFirebase();
+    } catch (err) {
+      showError(err.message || String(err));
       showLogin();
+      return;
     }
+
+    bindEvents();
+
+    auth.onAuthStateChanged(function (user) {
+      if (!user) {
+        currentUser = null;
+        showLogin();
+        setLoading(false);
+        return;
+      }
+      if (!isAuthorizedEmail(user.email)) {
+        rejectUnauthorizedUser(user);
+        return;
+      }
+      loadDashboard(user);
+    });
   }
 
   if (document.readyState === 'loading') {
