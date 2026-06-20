@@ -50,8 +50,18 @@
       if (el && text) el.textContent = text;
     }
 
+    var visitante = feria.visitante || {};
+
     if (fest.slogan) setText('festivalSlogan', fest.slogan);
     if (fest.mensaje) setText('festivalMensaje', fest.mensaje);
+    if (visitante.entradaSinCosto) {
+      setText(
+        'festivalLead',
+        visitante.entradaSinCosto + ' ' + (visitante.registroOpcional || '')
+      );
+    } else if (feria.entrada) {
+      setText('festivalLead', 'Productores, tostadores, cata y talleres en Cali. ' + feria.entrada);
+    }
     if (fest.lema) setText('statLema', fest.lema);
     if (feria.fechaCorta) setText('statFecha', feria.fechaCorta);
     if (feria.ciudad) setText('statCiudad', feria.ciudad + ', Valle del Cauca');
@@ -73,7 +83,10 @@
       modalDates.innerHTML =
         'Sé parte de la comunidad cafetera el <strong>' + feria.fecha + '</strong> en ' +
         '<strong>' + feria.sede + ', ' + (feria.ciudad || 'Cali') + '</strong>. ' +
-        'Cata, talleres, exposiciones y competencias te esperan. La inscripción es <strong>gratuita</strong>, pero los cupos son limitados.';
+        'Cata, talleres, exposiciones y competencias te esperan. ' +
+        '<strong>' + (visitante.entradaSinCosto || 'La feria no tiene precio de ingreso.') + '</strong> ' +
+        (visitante.registroOpcional || 'El registro como visitante es opcional.') + ' ' +
+        (visitante.premiosRegistro || '');
     }
 
     var modalCfg = fest.modal || {};
@@ -82,6 +95,15 @@
     if (modalCfg.cta) {
       var modalCta = document.querySelector('[data-modal-cta]');
       if (modalCta) modalCta.textContent = modalCfg.cta;
+    }
+    if (modalCfg.note) {
+      var modalNote = document.querySelector('.feria-modal__note');
+      if (modalNote) {
+        modalNote.innerHTML =
+          '¿Compites en café filtrado? Eso es aparte: ' +
+          '<a data-link="competencia" href="competencia.html">inscripción de pago al Switch Championship</a>.';
+        if (global.SiteLinks && global.SiteLinks.apply) global.SiteLinks.apply(modalNote);
+      }
     }
     if (modalCfg.dismiss) {
       var modalDismiss = document.querySelector('.feria-modal__dismiss');
@@ -112,6 +134,20 @@
       ['emailContact', 'emailPatrocinador'].forEach(function (id) {
         var em = document.getElementById(id);
         if (em) em.href = 'mailto:' + contact.email;
+      });
+    }
+
+    var premios = feria.premiosVisitante || {};
+    if (premios.titulo) setText('premiosVisitantesTitle', premios.titulo);
+    if (premios.intro) setText('premiosVisitantesIntro', premios.intro);
+    if (premios.nota) setText('premiosVisitantesNota', premios.nota);
+    var premiosList = document.getElementById('premiosVisitantesLista');
+    if (premiosList && premios.items && premios.items.length) {
+      premiosList.innerHTML = '';
+      premios.items.forEach(function (item) {
+        var li = document.createElement('li');
+        li.textContent = item;
+        premiosList.appendChild(li);
       });
     }
   }

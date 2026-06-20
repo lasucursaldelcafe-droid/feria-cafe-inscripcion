@@ -15,7 +15,7 @@ window.EVENT_CONFIG = {
     nombre: 'Switch Championship — Evento 1',
     fecha: '4 de julio de 2026',
     fechaCorta: '4 jul 2026',
-    sede: 'Purist Marbella',
+    sede: 'Plaza Marbella',
     ciudad: 'Ciudad Jardín',
     whatsappGrupoUrl: 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9',
     whatsappGrupoNombre: 'Switch Championship — competidores'

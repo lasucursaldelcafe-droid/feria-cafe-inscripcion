@@ -409,7 +409,7 @@ function buildEmailBody_(formType, data) {
     lines.push('Recibimos tu inscripción al Switch Championship (Evento 1).');
     lines.push('Número de inscripción: ' + id);
     lines.push('Fecha: 4 de julio de 2026');
-    lines.push('Sede: Purist Marbella, Ciudad Jardín');
+    lines.push('Sede: Plaza Marbella, Centro Comercial (Curis)');
     lines.push('Pago: $90.000 COP a Nubank @mvl616 (Manuel Barraza)');
     lines.push('');
     lines.push('Únete al grupo de WhatsApp del torneo:');

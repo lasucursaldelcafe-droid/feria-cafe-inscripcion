@@ -29,7 +29,7 @@
         <li><a data-link="evento" data-nav="evento" href="el-evento.html">El evento</a></li>
         <li><a data-link="actividades" data-nav="actividades" href="actividades.html">Actividades</a></li>
         <li><a data-link="patrocinadores" data-nav="patrocinadores" href="patrocinadores.html">Patrocinadores</a></li>
-        <li><a data-link="feria" data-nav="inscripcion" href="inscripcion.html">Inscripción</a></li>
+        <li><a data-link="feria" data-nav="inscripcion" href="inscripcion.html">Registro visitante</a></li>
         <li><a data-link="competencia" data-nav="competencia" href="competencia.html">Competencia</a></li>
       </ul>
     </nav>
@@ -47,10 +47,11 @@
         <div class="hero-meta">
           <span id="badgeFestivalFecha" class="badge">📅 29–30 ago 2026</span>
           <span id="badgeFestivalSede" class="badge">📍 Palmetto Plaza, Cali</span>
-          <span class="badge badge--green">✓ Inscripción gratis</span>
+          <span class="badge badge--green">✓ Entrada sin costo</span>
+          <span class="badge">🎁 Premios si te registras</span>
         </div>
         <div class="festival-sub-cta">
-          <a class="btn-submit festival-btn-primary" data-link="feria" href="inscripcion.html">Quiero inscribirme</a>
+          <a class="btn-submit festival-btn-primary" data-link="feria" href="inscripcion.html">Registrarme como visitante</a>
           <a class="btn-secondary festival-btn-secondary" data-link="evento" href="el-evento.html">Conoce el evento</a>
         </div>
       </div>
@@ -64,11 +65,11 @@
           <h2 class="section-title section-title--dark">Explora el festival</h2>
           <p class="festival-section-intro" id="festivalMensaje">
             Dos días para descubrir, probar y conectar con la comunidad cafetera de Cali.
-            Elige por dónde empezar — y asegura tu entrada gratis antes de que se agoten los cupos.
+            Elige por dónde empezar. Puedes entrar sin registrarte; el registro como visitante es opcional y te da acceso a premios exclusivos para visitantes registrados.
           </p>
           <p class="festival-lead festival-lead--dark">
-            En Palmetto Plaza encontrarás exposiciones de café tostado, fincas de origen, competencias Aeropress y V60,
-            además de cata y talleres con marcas como Ghost, Medium Café, Elixir, Black Coffee y Prisma Tostadora.
+            En Palmetto Plaza encontrarás exposiciones de café tostado, fincas de origen, el Switch Championship,
+            además de cata y talleres con marcas como Ghost, Medium Café, Elixir y Black Coffee.
           </p>
           <nav class="festival-home-nav" aria-label="Secciones del festival">
             <a class="festival-home-card" data-link="evento" href="el-evento.html">
@@ -88,13 +89,13 @@
             </a>
             <a class="festival-home-card festival-home-card--accent" data-link="feria" href="inscripcion.html">
               <span class="festival-home-card__icon" aria-hidden="true">✓</span>
-              <strong>Asegura tu entrada gratis</strong>
-              <span>Registro en 2 minutos · 29–30 ago 2026</span>
+              <strong>Registro de visitante</strong>
+              <span>Opcional · premios exclusivos si te registras</span>
             </a>
             <a class="festival-home-card festival-home-card--accent" data-link="competencia" href="competencia.html">
               <span class="festival-home-card__icon" aria-hidden="true">🏆</span>
               <strong>Switch Championship</strong>
-              <span>Competencia aparte · 4 jul 2026 · Purist Marbella</span>
+              <span>3 clasificatorias + final · 1.ª: 4 jul 2026 · Plaza Marbella</span>
             </a>
             <a class="festival-home-card" href="#contacto">
               <span class="festival-home-card__icon" aria-hidden="true">💬</span>
@@ -114,9 +115,9 @@
               <p class="festival-save-card__dates">29 y 30 de agosto de 2026</p>
               <p class="festival-save-card__venue">Palmetto Plaza · Cali, Valle del Cauca</p>
               <p class="festival-section-intro">
-                Sé parte de la comunidad cafetera del Pacífico. Inscríbete gratis y recibe novedades del programa.
+                La entrada no tiene costo. Regístrate como visitante (opcional) y participa por premios exclusivos para visitantes registrados.
               </p>
-              <a class="btn-submit festival-btn-primary" data-link="feria" href="inscripcion.html">Asegura tu entrada gratis</a>
+              <a class="btn-submit festival-btn-primary" data-link="feria" href="inscripcion.html">Registrarme como visitante</a>
             </div>
           </article>
         </div>
@@ -138,7 +139,7 @@
           <a data-link="evento" href="el-evento.html">El evento</a>
           <a data-link="actividades" href="actividades.html">Actividades</a>
           <a data-link="patrocinadores" href="patrocinadores.html">Patrocinadores</a>
-          <a data-link="feria" href="inscripcion.html">Inscripción</a>
+          <a data-link="feria" href="inscripcion.html">Registro visitante</a>
           <a data-link="competencia" href="competencia.html">Competencia</a>
           <a data-link="privacidad" href="privacidad.html">Privacidad</a>
         </nav>
@@ -163,18 +164,19 @@
     <div class="feria-modal__panel" role="document">
       <button type="button" class="feria-modal__close" aria-label="Cerrar" data-modal-close>×</button>
       <img class="feria-modal__logo" src="assets/logo-la-sucursal-del-cafe.png" alt="">
-      <p class="feria-modal__eyebrow" id="feriaModalEyebrow">Entrada gratis</p>
-      <h2 id="feriaModalTitle" class="feria-modal__title">¡Reserva tu lugar en la feria!</h2>
+      <p class="feria-modal__eyebrow" id="feriaModalEyebrow">Entrada sin costo · Registro opcional</p>
+      <h2 id="feriaModalTitle" class="feria-modal__title">Registro de visitante (opcional)</h2>
       <p class="feria-modal__text" id="feriaModalDates">
         Sé parte de la comunidad cafetera el <strong>29 y 30 de agosto de 2026</strong> en
         <strong>Palmetto Plaza, Cali</strong>. Cata, talleres, exposiciones y competencias te esperan.
-        La inscripción es <strong>gratuita</strong>.
+        <strong>La feria no tiene precio de ingreso.</strong> Puedes entrar sin registrarte.
+        Si te registras como visitante, participas por <strong>premios exclusivos para visitantes registrados</strong>.
       </p>
       <div class="feria-modal__actions">
-        <a class="btn-submit feria-modal__cta" data-link="feria" data-modal-cta href="inscripcion.html">Quiero inscribirme</a>
+        <a class="btn-submit feria-modal__cta" data-link="feria" data-modal-cta href="inscripcion.html">Registrarme como visitante</a>
         <button type="button" class="btn-secondary feria-modal__dismiss" data-modal-close>Explorar primero</button>
       </div>
-      <p class="feria-modal__note">¿Compites? También puedes inscribirte al <a data-link="competencia" href="competencia.html">Switch Championship</a>.</p>
+      <p class="feria-modal__note">¿Compites en café filtrado? Eso es aparte: <a data-link="competencia" href="competencia.html">inscripción de pago al Switch Championship</a>.</p>
     </div>
   </div>
 

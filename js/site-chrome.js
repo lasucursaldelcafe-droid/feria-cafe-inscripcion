@@ -50,7 +50,15 @@
     }
 
     if (page === 'feria') {
-      setText('heroSubtitle', 'Regístrate para cata, talleres y actividades · ' + feria.fecha + ' · ' + feriaLugar());
+      var visitante = feria.visitante || {};
+      setText(
+        'heroSubtitle',
+        (visitante.resumen || 'Entrada sin costo · registro opcional · premios si te registras') +
+          ' · ' +
+          feria.fecha +
+          ' · ' +
+          feriaLugar()
+      );
       setText('badgeFeriaFecha', '📅 ' + (feria.fechaCorta || feria.fecha));
       setText('badgeFeriaSede', '📍 ' + feriaLugar());
       setHtml(
@@ -59,12 +67,18 @@
       );
       setHtml(
         'successLeadFeria',
-        'Gracias por registrarte en <strong>La Sucursal del Café</strong>. Te esperamos el <strong>' +
+        'Gracias por registrarte como <strong>visitante</strong> en la feria de <strong>La Sucursal del Café</strong>. ' +
+          'Quedas en la lista para <strong>premios exclusivos de visitantes registrados</strong>. ' +
+          'Recuerda: la entrada no tiene costo y no era obligatorio registrarse para asistir. Te esperamos el <strong>' +
           feria.fecha +
           '</strong> (' +
           feriaLugar() +
           ').'
       );
+      var formTitle = document.getElementById('form-title');
+      if (formTitle && visitante.titulo) formTitle.textContent = visitante.titulo;
+      var btnSubmit = document.getElementById('btnSubmit');
+      if (btnSubmit) btnSubmit.textContent = 'Enviar registro de visitante';
     }
 
     document.querySelectorAll('[data-bind]').forEach(function (el) {
@@ -151,7 +165,7 @@
 
     if (page === 'festival') {
       crosslink =
-        '<a href="' + href('feria') + '">Inscripción feria</a> · ' +
+        '<a href="' + href('feria') + '">Registro visitante</a> · ' +
         '<a href="' + href('competencia') + '">Switch Championship</a>' +
         '<span class="site-footer-dates">' + (feria.fechaCorta || feria.fecha || '') +
         ' · ' + feriaLugar() + '</span>';
@@ -162,7 +176,7 @@
         ' · ' + torneoLugar() + '</span>';
     } else if (page === 'torneo') {
       crosslink =
-        '¿Vienes a la feria? <a href="' + href('feria') + '">Inscripción feria de café</a>' +
+        '¿Vienes a la feria? <a href="' + href('feria') + '">Registro de visitante (opcional)</a>' +
         '<span class="site-footer-dates">' + (feria.fechaCorta || feria.fecha || '') +
         ' · ' + feriaLugar() + '</span>';
     } else {
@@ -204,10 +218,22 @@
     shell.insertAdjacentHTML('beforeend', html);
   }
 
+  function applyFeriaVisitanteNav() {
+    var visitante = (cfg.feria && cfg.feria.visitante) || {};
+    var label = visitante.nav || 'Registro visitante';
+    document.querySelectorAll('[data-nav="inscripcion"]').forEach(function (el) {
+      el.textContent = label;
+    });
+    document.querySelectorAll('.festival-footer__nav a[data-link="feria"]').forEach(function (el) {
+      el.textContent = label;
+    });
+  }
+
   function init() {
     if (global.SiteLinks && global.SiteLinks.apply) {
       global.SiteLinks.apply(document);
     }
+    applyFeriaVisitanteNav();
     applyPageCopy();
     ensureOgMeta();
     renderSiteFooter();
