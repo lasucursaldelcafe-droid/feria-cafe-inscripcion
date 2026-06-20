@@ -59,6 +59,9 @@ function doGet(e) {
   if (params.action === 'admin_dashboard') {
     return handleAdminDashboard_(params.idToken || '');
   }
+  if (params.action === 'admin_export') {
+    return handleAdminExport_(params.idToken || '', params.dataset || '');
+  }
   return jsonResponse({
     ok: true,
     message: 'API de inscripciones — La Sucursal del Café',
@@ -648,6 +651,19 @@ function trackPageview_(payload) {
   return jsonResponse({ ok: true });
 }
 
+function rowObjectFromValues_(headers, values) {
+  var row = {};
+  headers.forEach(function (h, idx) {
+    var val = values[idx];
+    if (val instanceof Date) {
+      row[h] = val.toISOString();
+    } else {
+      row[h] = val === '' ? '' : String(val);
+    }
+  });
+  return row;
+}
+
 function readSheetRows_(sheetName, headers, maxRows) {
   var sheet = getOrCreateSheet_(sheetName, headers);
   var lastRow = sheet.getLastRow();
@@ -658,18 +674,45 @@ function readSheetRows_(sheetName, headers, maxRows) {
   var rows = [];
 
   for (var i = values.length - 1; i >= 0; i--) {
-    var row = {};
-    headers.forEach(function (h, idx) {
-      var val = values[i][idx];
-      if (val instanceof Date) {
-        row[h] = val.toISOString();
-      } else {
-        row[h] = val === '' ? '' : String(val);
-      }
-    });
-    rows.push(row);
+    rows.push(rowObjectFromValues_(headers, values[i]));
   }
   return rows;
+}
+
+/** Todas las filas de una hoja (newestFirst = true → más recientes primero). */
+function readAllSheetRows_(sheetName, headers, newestFirst) {
+  var sheet = getOrCreateSheet_(sheetName, headers);
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+
+  var values = sheet.getRange(2, 1, lastRow, headers.length).getValues();
+  var rows = [];
+  for (var i = 0; i < values.length; i++) {
+    rows.push(rowObjectFromValues_(headers, values[i]));
+  }
+  if (newestFirst) rows.reverse();
+  return rows;
+}
+
+function rowsToCsv_(headers, rows) {
+  function esc(val) {
+    var s = val === null || val === undefined ? '' : String(val);
+    if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+  var lines = [headers.map(esc).join(',')];
+  rows.forEach(function (row) {
+    lines.push(headers.map(function (h) { return esc(row[h] || ''); }).join(','));
+  });
+  return '\uFEFF' + lines.join('\r\n');
+}
+
+function assertAdminAccess_(idToken) {
+  var adminEmail = idToken ? verifyFirebaseIdToken_(idToken) : null;
+  if (!adminEmail && !isPublicAdminAllowed_()) {
+    return { ok: false, error: 'No autorizado o sesión inválida.' };
+  }
+  return { ok: true, adminEmail: adminEmail };
 }
 
 function sanitizeCompetenciaRow_(row) {
@@ -729,10 +772,16 @@ function configurarAdminPublico(permitir) {
   Logger.log('ALLOW_PUBLIC_ADMIN=' + (permitir ? 'true' : 'false'));
 }
 
+function competenciaDisplayHeaders_() {
+  return HEADERS_COMPETENCIA.filter(function (h) {
+    return h !== 'Comprobante base64 (preview)';
+  });
+}
+
 function handleAdminDashboard_(idToken) {
-  var adminEmail = idToken ? verifyFirebaseIdToken_(idToken) : null;
-  if (!adminEmail && !isPublicAdminAllowed_()) {
-    return jsonResponse({ ok: false, error: 'No autorizado o sesión inválida.' }, 401);
+  var access = assertAdminAccess_(idToken);
+  if (!access.ok) {
+    return jsonResponse({ ok: false, error: access.error }, 401);
   }
 
   var feriaCount = getSheetRowCount_(SHEET_FERIA, HEADERS_FERIA);
@@ -747,8 +796,8 @@ function handleAdminDashboard_(idToken) {
     ? Math.round((competenciaCount / analytics.competenciaPageToday) * 100)
     : 0;
 
-  var recentFeria = readSheetRows_(SHEET_FERIA, HEADERS_FERIA, 25);
-  var recentCompetencia = readSheetRows_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA, 25)
+  var allFeria = readAllSheetRows_(SHEET_FERIA, HEADERS_FERIA, true);
+  var allCompetencia = readAllSheetRows_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA, true)
     .map(sanitizeCompetenciaRow_);
 
   return jsonResponse({
@@ -772,9 +821,95 @@ function handleAdminDashboard_(idToken) {
       conversionCompetenciaPct: compConv,
       topPagesToday: analytics.topPagesToday
     },
-    recentFeria: recentFeria,
-    recentCompetencia: recentCompetencia
+    feriaColumns: HEADERS_FERIA,
+    competenciaColumns: competenciaDisplayHeaders_(),
+    allFeria: allFeria,
+    allCompetencia: allCompetencia
   });
+}
+
+function handleAdminExport_(idToken, dataset) {
+  var access = assertAdminAccess_(idToken);
+  if (!access.ok) {
+    return jsonResponse({ ok: false, error: access.error }, 401);
+  }
+
+  dataset = String(dataset || '').toLowerCase();
+  var stamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+
+  if (dataset === 'feria') {
+    var feriaRows = readAllSheetRows_(SHEET_FERIA, HEADERS_FERIA, false);
+    return jsonResponse({
+      ok: true,
+      dataset: 'feria',
+      filename: 'feria-inscritos-' + stamp + '.csv',
+      csv: rowsToCsv_(HEADERS_FERIA, feriaRows)
+    });
+  }
+
+  if (dataset === 'competencia') {
+    var compRows = readAllSheetRows_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA, false)
+      .map(sanitizeCompetenciaRow_);
+    return jsonResponse({
+      ok: true,
+      dataset: 'competencia',
+      filename: 'switch-championship-' + stamp + '.csv',
+      csv: rowsToCsv_(HEADERS_COMPETENCIA, compRows)
+    });
+  }
+
+  if (dataset === 'analytics') {
+    var analyticsRows = readAllSheetRows_(SHEET_ANALYTICS, HEADERS_ANALYTICS, false);
+    return jsonResponse({
+      ok: true,
+      dataset: 'analytics',
+      filename: 'analytics-' + stamp + '.csv',
+      csv: rowsToCsv_(HEADERS_ANALYTICS, analyticsRows)
+    });
+  }
+
+  if (dataset === 'lista_espera') {
+    var listaRows = readAllSheetRows_(SHEET_LISTA_ESPERA, HEADERS_LISTA_ESPERA, false);
+    return jsonResponse({
+      ok: true,
+      dataset: 'lista_espera',
+      filename: 'lista-espera-' + stamp + '.csv',
+      csv: rowsToCsv_(HEADERS_LISTA_ESPERA, listaRows)
+    });
+  }
+
+  if (dataset === 'all') {
+    return jsonResponse({
+      ok: true,
+      dataset: 'all',
+      files: [
+        {
+          filename: 'feria-inscritos-' + stamp + '.csv',
+          csv: rowsToCsv_(HEADERS_FERIA, readAllSheetRows_(SHEET_FERIA, HEADERS_FERIA, false))
+        },
+        {
+          filename: 'switch-championship-' + stamp + '.csv',
+          csv: rowsToCsv_(
+            HEADERS_COMPETENCIA,
+            readAllSheetRows_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA, false).map(sanitizeCompetenciaRow_)
+          )
+        },
+        {
+          filename: 'analytics-' + stamp + '.csv',
+          csv: rowsToCsv_(HEADERS_ANALYTICS, readAllSheetRows_(SHEET_ANALYTICS, HEADERS_ANALYTICS, false))
+        },
+        {
+          filename: 'lista-espera-' + stamp + '.csv',
+          csv: rowsToCsv_(HEADERS_LISTA_ESPERA, readAllSheetRows_(SHEET_LISTA_ESPERA, HEADERS_LISTA_ESPERA, false))
+        }
+      ]
+    });
+  }
+
+  return jsonResponse({
+    ok: false,
+    error: 'dataset inválido. Usa: feria, competencia, analytics, lista_espera, all'
+  }, 400);
 }
 
 function getSheetRowCount_(sheetName, headers) {

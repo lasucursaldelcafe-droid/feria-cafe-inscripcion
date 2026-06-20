@@ -40,7 +40,19 @@ Tras **3 intentos fallidos** de arreglar Google OAuth (`GeneralOAuthFlow`, `401 
 | Cupo competencia | Confirmados vs máximo (36) |
 | Conversión (aprox.) | Registros ÷ visitas a `/inscripcion` o `/competencia` hoy |
 | Top páginas hoy | Rutas más visitadas |
-| Tablas | Últimos 25 registros feria y competencia |
+| Tablas | **Todos** los inscritos feria y Switch (más recientes primero) |
+| Descargas CSV | Por hoja (`feria`, `competencia`, `analytics`) o **Descargar todo** |
+
+## Exportar CSV
+
+| Botón | Endpoint / origen |
+| ----- | ----------------- |
+| Descargar CSV (feria) | `GET action=admin_export&dataset=feria` o cache local |
+| Descargar CSV (competencia) | `dataset=competencia` |
+| Descargar CSV (analytics) | `dataset=analytics` |
+| Descargar todo (CSV) | `dataset=all` → 4 archivos (feria, competencia, analytics, lista de espera) |
+
+Tras editar `Code.gs`, redeploy con `py tools/setup_admin.py`.
 
 ## Flujo técnico (sin login)
 
