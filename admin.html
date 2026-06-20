@@ -5,83 +5,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <meta name="googlebot" content="noindex, nofollow">
-  <title>Panel admin — La Sucursal del Café</title>
-  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
+  <title>Panel admin — Analíticas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/brand.css?v=20260621a">
-  <link rel="stylesheet" href="css/admin.css?v=20260621a">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css?v=20260621b">
 </head>
 <body class="admin-page">
   <header class="admin-header">
-    <img class="admin-header__logo" src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="120" height="48">
-    <h1 class="admin-header__title">Panel de administración</h1>
-    <p class="admin-header__sub">Analíticas e inscripciones — acceso restringido</p>
+    <div class="admin-header__inner">
+      <h1 class="admin-header__title">Panel de analíticas</h1>
+      <p class="admin-header__sub">Visitas · inscripciones · exportación CSV</p>
+    </div>
+    <p class="admin-open-banner" role="status">
+      Acceso interno sin login — no compartas esta URL.
+    </p>
   </header>
 
   <main class="admin-main">
     <div id="adminError" class="admin-error" hidden role="alert"></div>
-    <div id="adminLoading" class="admin-loading" hidden>Cargando panel…</div>
+    <div id="adminLoading" class="admin-loading">Cargando estadísticas…</div>
 
-    <section id="adminStart" class="admin-card admin-start" aria-labelledby="startTitle">
-      <div class="admin-start__inner">
-        <h2 id="startTitle" class="admin-card__title">Resumen del festival</h2>
-        <p class="admin-start__lead">Visitas al sitio, registros de feria e inscripciones Switch Championship.</p>
-        <p class="admin-open-banner" role="status">
-          Panel interno — URL no publicada en el sitio. No compartas este enlace.
-        </p>
-        <button type="button" id="loadDashboardBtn" class="admin-btn admin-btn--primary admin-start__cta">
-          Ver panel de analíticas
-        </button>
-      </div>
-    </section>
-
-    <section id="adminDashboard" hidden aria-labelledby="dashTitle">
+    <section id="adminDashboard" aria-labelledby="dashTitle">
       <div class="admin-toolbar">
         <div>
-          <h2 id="dashTitle" class="admin-card__title admin-toolbar__title">Resumen</h2>
-          <p id="dashboardUpdated" class="admin-toolbar__user"></p>
+          <h2 id="dashTitle" class="admin-toolbar__title">Resumen</h2>
+          <p id="dashboardUpdated" class="admin-toolbar__meta"></p>
         </div>
         <div class="admin-toolbar__actions">
-          <span id="adminUserLabel" class="admin-toolbar__user"></span>
           <button type="button" id="downloadAllBtn" class="admin-btn admin-btn--secondary">Descargar todo (CSV)</button>
-          <button type="button" id="refreshBtn" class="admin-btn admin-btn--secondary">Actualizar</button>
+          <button type="button" id="refreshBtn" class="admin-btn admin-btn--primary">Actualizar</button>
         </div>
       </div>
 
       <div class="admin-stats">
-        <div class="admin-stat">
+        <div class="admin-stat admin-stat--accent-blue">
           <div class="admin-stat__label">Visitas hoy</div>
-          <div class="admin-stat__value" id="statVisitsToday">0</div>
+          <div class="admin-stat__value" id="statVisitsToday">—</div>
         </div>
-        <div class="admin-stat">
+        <div class="admin-stat admin-stat--accent-blue">
           <div class="admin-stat__label">Visitas totales</div>
-          <div class="admin-stat__value" id="statVisitsTotal">0</div>
+          <div class="admin-stat__value" id="statVisitsTotal">—</div>
         </div>
-        <div class="admin-stat">
+        <div class="admin-stat admin-stat--accent-green">
           <div class="admin-stat__label">Registros feria</div>
-          <div class="admin-stat__value" id="statFeria">0</div>
+          <div class="admin-stat__value" id="statFeria">—</div>
         </div>
-        <div class="admin-stat">
+        <div class="admin-stat admin-stat--accent-amber">
           <div class="admin-stat__label">Inscripciones Switch</div>
-          <div class="admin-stat__value" id="statCompetencia">0</div>
+          <div class="admin-stat__value" id="statCompetencia">—</div>
         </div>
         <div class="admin-stat">
           <div class="admin-stat__label">Lista de espera</div>
-          <div class="admin-stat__value" id="statLista">0</div>
+          <div class="admin-stat__value" id="statLista">—</div>
         </div>
         <div class="admin-stat">
           <div class="admin-stat__label">Cupo competencia</div>
-          <div class="admin-stat__value" id="statCupo">0 / 36</div>
+          <div class="admin-stat__value" id="statCupo">— / 36</div>
         </div>
-        <div class="admin-stat">
+        <div class="admin-stat admin-stat--accent-green">
           <div class="admin-stat__label">Conv. feria (aprox.)</div>
-          <div class="admin-stat__value" id="statConvFeria">0%</div>
+          <div class="admin-stat__value" id="statConvFeria">—</div>
         </div>
-        <div class="admin-stat">
+        <div class="admin-stat admin-stat--accent-amber">
           <div class="admin-stat__label">Conv. competencia (aprox.)</div>
-          <div class="admin-stat__value" id="statConvComp">0%</div>
+          <div class="admin-stat__value" id="statConvComp">—</div>
         </div>
       </div>
 
@@ -112,6 +100,6 @@
   </main>
 
   <script src="js/sheets-config.js"></script>
-  <script src="js/admin-dashboard.js?v=20260621a"></script>
+  <script src="js/admin-dashboard.js?v=20260621b"></script>
 </body>
 </html>

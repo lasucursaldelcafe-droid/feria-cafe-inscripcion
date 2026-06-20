@@ -1,10 +1,9 @@
 /**
- * Panel admin — Apps Script (modo público sin login mientras OAuth esté roto).
+ * Panel admin — carga directa sin autenticación (Apps Script + Sheets).
  */
 (function (global) {
   'use strict';
 
-  var PUBLIC_ADMIN = true;
   var lastDashboardData = null;
   var exportInFlight = false;
 
@@ -63,6 +62,12 @@
         return {
           ok: false,
           error: 'Apps Script desactualizado: falta action=admin_dashboard. Ejecuta py tools/setup_admin.py'
+        };
+      }
+      if (!data.ok && (data.error || '').indexOf('autorizado') !== -1) {
+        return {
+          ok: false,
+          error: 'Backend bloquea el panel. Ejecuta py tools/setup_admin.py para redeploy con acceso público.'
         };
       }
       return data;
@@ -166,7 +171,7 @@
   }
 
   function setExportButtonsDisabled(disabled) {
-    document.querySelectorAll('[data-export], #downloadAllBtn').forEach(function (btn) {
+    document.querySelectorAll('[data-export], #downloadAllBtn, #refreshBtn').forEach(function (btn) {
       btn.disabled = disabled;
     });
   }
@@ -228,25 +233,9 @@
     });
   }
 
-  function showStart() {
-    var start = document.getElementById('adminStart');
-    var dash = document.getElementById('adminDashboard');
-    if (start) start.hidden = false;
-    if (dash) dash.hidden = true;
-  }
-
-  function showDashboardView() {
-    var start = document.getElementById('adminStart');
-    var dash = document.getElementById('adminDashboard');
-    if (start) start.hidden = true;
-    if (dash) dash.hidden = false;
-  }
-
   function setLoading(isLoading) {
     var el = document.getElementById('adminLoading');
     if (el) el.hidden = !isLoading;
-    var btn = document.getElementById('loadDashboardBtn');
-    if (btn) btn.disabled = isLoading;
   }
 
   function showError(msg) {
@@ -280,7 +269,7 @@
 
     var cupo = stats.competenciaCupo || {};
     document.getElementById('statCupo').textContent =
-      formatNumber(cupo.count) + ' / ' + formatNumber(cupo.max) +
+      formatNumber(cupo.count) + ' / ' + formatNumber(cupo.max || 36) +
       (cupo.completo ? ' (completo)' : '');
 
     document.getElementById('statConvFeria').textContent = (stats.conversionFeriaPct || 0) + '%';
@@ -316,9 +305,6 @@
     if (updated && data.generatedAt) {
       updated.textContent = 'Actualizado: ' + new Date(data.generatedAt).toLocaleString('es-CO');
     }
-
-    var userEl = document.getElementById('adminUserLabel');
-    if (userEl) userEl.textContent = 'Panel interno';
   }
 
   function loadDashboard() {
@@ -329,22 +315,16 @@
       setLoading(false);
       if (!data.ok) {
         showError(data.error || 'No se pudo cargar el panel.');
-        showStart();
         return;
       }
-      showDashboardView();
       renderDashboard(data);
     }).catch(function (err) {
       setLoading(false);
       showError(err.message || 'Error al cargar el panel.');
-      showStart();
     });
   }
 
   function bindEvents() {
-    var loadBtn = document.getElementById('loadDashboardBtn');
-    if (loadBtn) loadBtn.addEventListener('click', loadDashboard);
-
     var refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) refreshBtn.addEventListener('click', loadDashboard);
 
@@ -363,11 +343,11 @@
   function init() {
     if (!getWebAppUrl()) {
       showError('Configura js/sheets-config.js con la URL de Apps Script.');
-      showStart();
+      setLoading(false);
       return;
     }
     bindEvents();
-    if (PUBLIC_ADMIN) loadDashboard();
+    loadDashboard();
   }
 
   if (document.readyState === 'loading') {

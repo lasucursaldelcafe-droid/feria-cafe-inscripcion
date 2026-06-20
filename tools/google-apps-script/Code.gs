@@ -708,9 +708,12 @@ function rowsToCsv_(headers, rows) {
 }
 
 function assertAdminAccess_(idToken) {
-  var adminEmail = idToken ? verifyFirebaseIdToken_(idToken) : null;
-  if (!adminEmail && !isPublicAdminAllowed_()) {
-    return { ok: false, error: 'No autorizado o sesión inválida.' };
+  if (!idToken) {
+    return { ok: true, adminEmail: null };
+  }
+  var adminEmail = verifyFirebaseIdToken_(idToken);
+  if (!adminEmail) {
+    return { ok: false, error: 'Token inválido.' };
   }
   return { ok: true, adminEmail: adminEmail };
 }

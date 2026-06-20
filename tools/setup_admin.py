@@ -277,7 +277,12 @@ def verify_web_app(url: str) -> bool:
         return False
 
     _, dash = http_json(url + ("&" if "?" in url else "?") + "action=admin_dashboard", "GET")
-    if dash.get("ok"):
+    if dash.get("stats"):
+        ok(f"admin_dashboard OK — feria={dash.get('stats', {}).get('feriaRegistrations', '?')}")
+    elif dash.get("ok") and dash.get("message"):
+        error("admin_dashboard NO implementado en el deploy (respuesta genérica). Redeploy Code.gs.")
+        return False
+    elif dash.get("ok"):
         warn("Dashboard accesible sin token — revisa seguridad.")
     else:
         ok("Dashboard protegido (requiere Firebase ID token).")
@@ -285,6 +290,9 @@ def verify_web_app(url: str) -> bool:
     _, pv = http_json(url, "POST", {"action": "pageview", "path": "/setup-test", "title": "Setup"})
     if pv.get("ok"):
         ok("Pageview tracking OK.")
+    elif pv.get("error") == "formType inválido.":
+        error("Pageview NO implementado en el deploy. Redeploy Code.gs.")
+        return False
     else:
         warn(f"Pageview: {pv}")
     return True
