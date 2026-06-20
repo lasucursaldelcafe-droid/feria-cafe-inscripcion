@@ -7,7 +7,6 @@ var SHEET_FERIA = 'Feria';
 var SHEET_COMPETENCIA = 'Competencia';
 var SHEET_LISTA_ESPERA = 'Lista de espera';
 var SHEET_ANALYTICS = 'Analytics';
-var ADMIN_SESSION_TTL_SEC = 28800; // 8 horas
 
 var HEADERS_ANALYTICS = [
   'Timestamp', 'Path', 'Titulo', 'Referrer', 'Session ID', 'User agent'
@@ -58,7 +57,7 @@ function doGet(e) {
     });
   }
   if (params.action === 'admin_dashboard') {
-    return handleAdminDashboard_(params.token || '');
+    return handleAdminDashboard_(params.idToken || '');
   }
   return jsonResponse({
     ok: true,
@@ -77,13 +76,16 @@ function doPost(e) {
     var action = String(payload.action || '').toLowerCase();
 
     if (action === 'admin_login') {
-      return handleAdminLogin_(payload);
+      return jsonResponse({
+        ok: false,
+        error: 'Login con contraseña deshabilitado. Usa Google Sign-In en /admin.'
+      }, 410);
     }
     if (action === 'pageview') {
       return trackPageview_(payload);
     }
     if (action === 'admin_logout') {
-      return handleAdminLogout_(payload.token || '');
+      return jsonResponse({ ok: true, message: 'Sesión gestionada por Firebase Auth en el cliente.' });
     }
 
     var formType = String(payload.formType || '').toLowerCase();
@@ -561,90 +563,69 @@ function jsonResponse(obj, statusCode) {
   return output;
 }
 
-// —— Admin y analíticas (credenciales en Propiedades del script, nunca en el repo) ——
+// —— Admin y analíticas (Firebase ID token + correo autorizado) ——
 
-function getAdminCredentials_() {
+var ALLOWED_ADMIN_EMAIL = 'lasucursaldelcafe@gmail.com';
+var FIREBASE_PROJECT_ID = 'la-sucursal-del-cafe';
+
+function getAllowedAdminEmail_() {
   var props = PropertiesService.getScriptProperties();
-  var username = String(props.getProperty('ADMIN_USER') || props.getProperty('ADMIN_USERNAME') || '').trim();
-  var password = String(props.getProperty('ADMIN_PASS') || props.getProperty('ADMIN_PASSWORD') || '');
-  return { username: username, password: password };
+  return String(props.getProperty('ALLOWED_ADMIN_EMAIL') || ALLOWED_ADMIN_EMAIL).trim().toLowerCase();
 }
 
 /**
- * Configura credenciales en Propiedades del script (ejecutar desde el editor, no commitear).
- * configurarCredencialesAdmin('tu_usuario', 'tu_contraseña_segura');
+ * Configura el correo admin en Propiedades del script (opcional; el valor por defecto ya está en código).
+ * configurarAdminEmail('lasucursaldelcafe@gmail.com');
  */
-function configurarCredencialesAdmin(username, password) {
-  if (!username || !password) {
-    throw new Error('Usuario y contraseña requeridos.');
+function configurarAdminEmail(email) {
+  if (!email) {
+    throw new Error('Correo admin requerido.');
   }
-  PropertiesService.getScriptProperties().setProperties({
-    ADMIN_USER: String(username).trim(),
-    ADMIN_PASS: String(password)
-  });
-  Logger.log('Credenciales de admin configuradas para: ' + username);
+  PropertiesService.getScriptProperties().setProperty(
+    'ALLOWED_ADMIN_EMAIL',
+    String(email).trim().toLowerCase()
+  );
+  Logger.log('Correo admin configurado: ' + email);
 }
 
-/** Alias público para el editor de Apps Script. */
-function adminLogin(username, password) {
-  return handleAdminLogin_({ username: username, password: password });
+/** @deprecated Login con contraseña eliminado — usar Firebase Google Sign-In. */
+function configurarCredencialesAdmin(username, password) {
+  Logger.log('configurarCredencialesAdmin está obsoleto. Usa Firebase Auth en /admin.');
 }
 
-/** Alias público — requiere token de sesión válido. */
-function adminGetDashboard(token) {
-  return handleAdminDashboard_(token);
+function verifyFirebaseIdToken_(idToken) {
+  if (!idToken) return null;
+  try {
+    var url = 'https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken);
+    var resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    if (resp.getResponseCode() !== 200) return null;
+
+    var data = JSON.parse(resp.getContentText());
+    var aud = String(data.aud || '');
+    if (aud !== FIREBASE_PROJECT_ID) return null;
+
+    var email = String(data.email || '').trim().toLowerCase();
+    if (email !== getAllowedAdminEmail_()) return null;
+    if (String(data.email_verified) !== 'true') return null;
+
+    var now = Math.floor(Date.now() / 1000);
+    if (data.exp && Number(data.exp) < now) return null;
+
+    return email;
+  } catch (err) {
+    Logger.log('verifyFirebaseIdToken_: ' + err);
+    return null;
+  }
+}
+
+/** Alias público — requiere Firebase ID token válido. */
+function adminGetDashboard(idToken) {
+  return handleAdminDashboard_(idToken);
 }
 
 /** Alias público — registra una visita de prueba. */
 function trackPageview(path, title) {
   return trackPageview_({ path: path || '/', title: title || '' });
-}
-
-function generateSessionToken_() {
-  return Utilities.getUuid() + '-' + Utilities.getUuid();
-}
-
-function storeAdminSession_(token, username) {
-  CacheService.getScriptCache().put('admin_' + token, username, ADMIN_SESSION_TTL_SEC);
-}
-
-function validateAdminToken_(token) {
-  if (!token) return false;
-  return !!CacheService.getScriptCache().get('admin_' + token);
-}
-
-function handleAdminLogin_(payload) {
-  var creds = getAdminCredentials_();
-  if (!creds.username || !creds.password) {
-    return jsonResponse({
-      ok: false,
-      error: 'Admin no configurado. Ejecuta configurarCredencialesAdmin en Apps Script.'
-    }, 503);
-  }
-
-  var username = String(payload.username || '').trim();
-  var password = String(payload.password || '');
-
-  if (username !== creds.username || password !== creds.password) {
-    return jsonResponse({ ok: false, error: 'Usuario o contraseña incorrectos.' }, 401);
-  }
-
-  var token = generateSessionToken_();
-  storeAdminSession_(token, username);
-
-  return jsonResponse({
-    ok: true,
-    token: token,
-    expiresIn: ADMIN_SESSION_TTL_SEC,
-    username: username
-  });
-}
-
-function handleAdminLogout_(token) {
-  if (token) {
-    CacheService.getScriptCache().remove('admin_' + token);
-  }
-  return jsonResponse({ ok: true });
 }
 
 function trackPageview_(payload) {
@@ -733,9 +714,25 @@ function getAnalyticsStats_() {
   };
 }
 
-function handleAdminDashboard_(token) {
-  if (!validateAdminToken_(token)) {
-    return jsonResponse({ ok: false, error: 'Sesión inválida o expirada.' }, 401);
+function isPublicAdminAllowed_() {
+  var flag = PropertiesService.getScriptProperties().getProperty('ALLOW_PUBLIC_ADMIN');
+  if (flag === 'false') return false;
+  return true;
+}
+
+/** Activa/desactiva dashboard sin token (fallback cuando OAuth no funciona). */
+function configurarAdminPublico(permitir) {
+  PropertiesService.getScriptProperties().setProperty(
+    'ALLOW_PUBLIC_ADMIN',
+    permitir ? 'true' : 'false'
+  );
+  Logger.log('ALLOW_PUBLIC_ADMIN=' + (permitir ? 'true' : 'false'));
+}
+
+function handleAdminDashboard_(idToken) {
+  var adminEmail = idToken ? verifyFirebaseIdToken_(idToken) : null;
+  if (!adminEmail && !isPublicAdminAllowed_()) {
+    return jsonResponse({ ok: false, error: 'No autorizado o sesión inválida.' }, 401);
   }
 
   var feriaCount = getSheetRowCount_(SHEET_FERIA, HEADERS_FERIA);

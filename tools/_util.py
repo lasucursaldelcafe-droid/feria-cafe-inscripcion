@@ -236,13 +236,18 @@ def run_command(args: list[str], *, cwd: Path | None = None, env: dict[str, str]
     merged_env = os.environ.copy()
     if env:
         merged_env.update(env)
+    run_kwargs: dict = {
+        "cwd": str(cwd or PROJECT_ROOT),
+        "env": merged_env,
+        "check": True,
+    }
+    if sys.platform == "win32" and args and args[0] in {"npx", "npm", "node"}:
+        run_kwargs["shell"] = True
+        cmd = subprocess.list2cmdline(args)
+    else:
+        cmd = args
     try:
-        subprocess.run(
-            args,
-            cwd=str(cwd or PROJECT_ROOT),
-            env=merged_env,
-            check=True,
-        )
+        subprocess.run(cmd, **run_kwargs)
     except subprocess.CalledProcessError as exc:
         raise RuntimeError(f"El comando falló (código {exc.returncode}): {display}") from exc
 

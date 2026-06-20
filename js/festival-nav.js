@@ -110,11 +110,15 @@
       if (modalDismiss) modalDismiss.textContent = modalCfg.dismiss;
     }
 
-    if (fest.instagramUrl) {
+    if (global.SiteChrome && global.SiteChrome.applyInstagramLink) {
+      global.SiteChrome.applyInstagramLink();
+    } else if (fest.instagramUrl) {
       var ig = document.getElementById('igLink');
       if (ig) {
         ig.href = fest.instagramUrl;
-        ig.textContent = fest.instagram || ig.textContent;
+        ig.textContent = fest.instagram || '@lasucursal.delcafe';
+        ig.setAttribute('target', '_blank');
+        ig.setAttribute('rel', 'noopener noreferrer');
       }
     }
 

@@ -9,6 +9,28 @@
   var feria = cfg.feria || {};
   var ev = cfg.evento1 || {};
   var siteUrl = (cfg.siteUrl || '').replace(/\/$/, '');
+  var INSTAGRAM_URL = 'https://www.instagram.com/lasucursal.delcafe/';
+  var INSTAGRAM_HANDLE = '@lasucursal.delcafe';
+
+  function instagramFromConfig() {
+    var fest = cfg.festival || {};
+    return {
+      url: fest.instagramUrl || INSTAGRAM_URL,
+      handle: fest.instagram || INSTAGRAM_HANDLE
+    };
+  }
+
+  function applyInstagramLink() {
+    var igData = instagramFromConfig();
+    if (!igData.url) return;
+    var ig = document.getElementById('igLink');
+    if (!ig) return;
+    ig.href = igData.url;
+    ig.textContent = igData.handle;
+    ig.setAttribute('target', '_blank');
+    ig.setAttribute('rel', 'noopener noreferrer');
+    ig.setAttribute('aria-label', 'Instagram ' + igData.handle);
+  }
 
   function detectPage() {
     var path = (global.location.pathname || '').toLowerCase();
@@ -194,7 +216,8 @@
       '<p class="site-footer-crosslink">' + crosslink + '</p>' +
       '<p class="site-footer-note">Feria y competencia organizadas por el mismo equipo. Cada evento tiene fechas, sede e inscripción propias.</p>';
 
-    if (email || waDisplay) {
+    var igData = instagramFromConfig();
+    if (email || waDisplay || igData.url) {
       html += '<p class="site-footer-contact">';
       if (email) {
         html += '<a href="mailto:' + email + '">' + email + '</a>';
@@ -202,6 +225,11 @@
       if (email && waDisplay) html += ' · ';
       if (waDisplay) {
         html += '<a href="' + waLink + '" target="_blank" rel="noopener noreferrer">WhatsApp ' + waDisplay + '</a>';
+      }
+      if (igData.url) {
+        if (email || waDisplay) html += ' · ';
+        html += '<a href="' + igData.url + '" target="_blank" rel="noopener noreferrer" aria-label="Instagram ' +
+          igData.handle + '">' + igData.handle + '</a>';
       }
       html += '</p>';
     }
@@ -293,6 +321,7 @@
     }
     applyFeriaVisitanteNav();
     applyPageCopy();
+    applyInstagramLink();
     ensureOgMeta();
     renderSiteFooter();
     renderWhatsappFloat();
@@ -308,6 +337,8 @@
   global.SiteChrome = {
     whatsappUrl: whatsappUrl,
     feriaLugar: feriaLugar,
-    torneoLugar: torneoLugar
+    torneoLugar: torneoLugar,
+    applyInstagramLink: applyInstagramLink,
+    instagramFromConfig: instagramFromConfig
   };
 })(window);
