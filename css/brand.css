@@ -2885,10 +2885,14 @@ body.page-rules {
 
 .festival-footer__brand img {
   display: block;
-  height: 72px;
+  height: 64px;
   width: auto;
-  margin-bottom: 0.65rem;
-  filter: brightness(1.05);
+  margin-bottom: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  background: var(--cream-pale);
+  border: 1px solid rgba(250, 246, 240, 0.45);
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .festival-footer .festival-social a {

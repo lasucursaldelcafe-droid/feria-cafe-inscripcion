@@ -18,8 +18,8 @@ window.EVENT_CONFIG = {
   festival: {
     slogan: 'Café que conecta',
     lema: 'La Sucursal es de los cafeteros',
-    instagram: '@lasucursaldelcafe_festival',
-    instagramUrl: 'https://www.instagram.com/lasucursaldelcafe_festival',
+    instagram: '@lasucursal.delcafe',
+    instagramUrl: 'https://www.instagram.com/lasucursal.delcafe/',
     mensaje:
       'Dos días para descubrir, probar y conectar con la comunidad cafetera de Cali. La feria no tiene precio de ingreso. El registro como visitante es opcional; si te registras, participas por premios exclusivos para visitantes registrados.',
     modal: {
