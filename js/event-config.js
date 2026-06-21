@@ -80,9 +80,9 @@ window.EVENT_CONFIG = {
       'No es la inscripción al Switch Championship (competencia de pago, formulario aparte).',
     /** Mapa interactivo — reemplaza image por el plano real del venue cuando lo tengas. */
     map: {
-      image: 'assets/stands-map-placeholder.svg',
+      image: '/assets/stands-map.jpg',
       replaceHint:
-        'Sube tu plano real como assets/stands-map.jpg (o .png / .webp) y actualiza map.image en js/event-config.js.',
+        'Plano guía activo. Sube el plano real como assets/stands-map.jpg para reemplazarlo automáticamente.',
       logoMaxBytes: 5 * 1024 * 1024,
       logoTypes: ['image/jpeg', 'image/png', 'image/webp'],
       /** Posiciones en % del contenedor del mapa (left, top, width, height). */
@@ -162,5 +162,38 @@ window.EVENT_CONFIG = {
     { num: 2, estado: 'Por confirmar', fecha: 'Por anunciar', sede: 'Por anunciar' },
     { num: 3, estado: 'Por confirmar', fecha: 'Por anunciar', sede: 'Por anunciar' }
   ],
-  cupoCompetencia: 36
+  cupoCompetencia: 36,
+  /** Patrocinadores confirmados — imagen local o remota; Instagram opcional. */
+  sponsors: [
+    {
+      name: 'Purist',
+      instagramUrl: 'https://www.instagram.com/purist.cafe/',
+      instagramHandle: '@purist.cafe',
+      image: 'assets/sponsors/purist.webp',
+      imageAlt: 'Purist — café de especialidad y pan masa madre'
+    },
+    {
+      name: 'Palmetto Plaza',
+      instagramUrl: 'https://www.instagram.com/palmettoplaza/',
+      instagramHandle: '@palmettoplaza',
+      image: 'assets/sponsors/palmetto-plaza.png',
+      imageAlt: 'Palmetto Plaza — centro comercial, sede del evento'
+    },
+    {
+      name: 'Ghost Specialty Coffee',
+      instagramUrl: 'https://www.instagram.com/ghost_specialty_coffee/',
+      instagramHandle: '@ghost_specialty_coffee'
+    },
+    {
+      name: 'Medium Café',
+      instagramUrl: 'https://www.instagram.com/medium_cafe/',
+      instagramHandle: '@medium_cafe'
+    },
+    {
+      name: 'Elixir Café'
+    },
+    {
+      name: 'Black Coffee Design & Souvenirs'
+    }
+  ]
 };

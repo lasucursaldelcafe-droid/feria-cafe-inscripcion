@@ -112,5 +112,5 @@ Comprobar: tras un push a `main`, en **Actions** el job *Deploy Firebase Hosting
 - [ ] QR apunta a `/inscripcion` y `/competencia`
 - [ ] Inscripción feria envía a Sheets (o modo local si falta URL)
 - [ ] Competencia envía a Sheets y consulta cupo
-- [ ] Patrocinadores: Ghost, Medium Café, Elixir, Black Coffee (sin Pulpo ni Comandante)
+- [ ] Patrocinadores: Purist, Palmetto Plaza, Ghost, Medium Café, Elixir, Black Coffee (sin Pulpo ni Comandante ni Prisma)
 - [ ] Rutas Firebase sin 404: `/`, `/el-evento`, `/actividades`, `/patrocinadores`, `/inscripcion`, `/competencia`, `/como-funciona`, `/reglas`, `/privacidad`, `/qr`, `/festival`
