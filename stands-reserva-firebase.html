@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adquiere tu Stand - Feria de Café La Sucursal 2026</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f1e8 0%, #e8dcc8 100%);
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            color: #2d5016;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header p {
+            color: #6b4423;
+            font-size: 1.1em;
+        }
+        
+        .firebase-status {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #d4a574;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .firebase-status.connected {
+            border-left-color: #28a745;
+        }
+        
+        .firebase-status.disconnected {
+            border-left-color: #dc3545;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.connected {
+            background: #28a745;
+        }
+        
+        .status-dot.disconnected {
+            background: #dc3545;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+        
+        .map-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow-x: auto;
+        }
+        
+        .map-canvas {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            cursor: pointer;
+        }
+        
+        .stand-spot {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: #2d5016;
+        }
+        
+        .stand-spot:hover:not(.reserved) {
+            border-color: #d4a574;
+            box-shadow: 0 0 15px rgba(212, 165, 116, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .stand-spot.selected {
+            border-color: #2d5016;
+            background: rgba(45, 80, 22, 0.1);
+            box-shadow: 0 0 20px rgba(45, 80, 22, 0.6);
+        }
+        
+        .stand-spot.reserved {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: rgba(220, 53, 69, 0.1) !important;
+        }
+        
+        .logo-preview {
+            width: 40px;
+            height: 40px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin-bottom: 3px;
+            border-radius: 4px;
+        }
+        
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .form-section h2 {
+            color: #2d5016;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #d4a574;
+            padding-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #6b4423;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d4a574;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2d5016;
+            box-shadow: 0 0 10px rgba(45, 80, 22, 0.2);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-upload input[type="file"] {
+            display: none;
+        }
+        
+        .file-upload-label {
+            display: block;
+            padding: 12px;
+            background: linear-gradient(135deg, #d4a574 0%, #c89a60 100%);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .file-upload-label:hover {
+            background: linear-gradient(135deg, #c89a60 0%, #b8894f 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .logo-display {
+            margin-top: 15px;
+            text-align: center;
+            padding: 15px;
+            background: #f5f1e8;
+            border-radius: 6px;
+            border: 2px dashed #d4a574;
+        }
+        
+        .logo-display img {
+            max-width: 100%;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        
+        .stand-info {
+            background: #f5f1e8;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #d4a574;
+        }
+        
+        .stand-info h3 {
+            color: #2d5016;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .stand-info p {
+            color: #6b4423;
+            font-size: 0.9em;
+            margin: 4px 0;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #2d5016 0%, #1f3710 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(45, 80, 22, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #d4a574;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #c89a60;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #d4a574;
+            border-top-color: #2d5016;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .legend {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-size: 0.85em;
+            border: 1px solid #d4a574;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            color: #6b4423;
+        }
+        
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            margin-right: 10px;
+            border: 1px solid #999;
+            border-radius: 3px;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .reserved-info {
+            background: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ffeaa7;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        // Configuración de stands
+        const standDefinitions = {
+            '1': { x: 60, y: 520, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '2': { x: 120, y: 520, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '3': { x: 180, y: 520, width: 60, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '4': { x: 250, y: 520, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '5': { x: 310, y: 520, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '6': { x: 370, y: 520, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '7': { x: 430, y: 520, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '8': { x: 490, y: 520, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '10': { x: 490, y: 470, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '11': { x: 430, y: 470, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '12': { x: 370, y: 470, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '13': { x: 310, y: 470, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '14': { x: 250, y: 470, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '15': { x: 180, y: 470, width: 60, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '16': { x: 120, y: 470, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '17': { x: 60, y: 470, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '18': { x: 220, y: 310, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '19': { x: 280, y: 310, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '20': { x: 340, y: 310, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '21': { x: 400, y: 310, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '22': { x: 460, y: 310, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '23': { x: 520, y: 310, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '24': { x: 580, y: 310, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '25': { x: 640, y: 310, width: 50, height: 40, type: 'small', zone: 'Origen', area: '0.72' },
+            '7D': { x: 820, y: 440, width: 60, height: 50, type: 'medium', zone: 'Gran Reserva', area: '6' },
+            '8D': { x: 900, y: 440, width: 60, height: 50, type: 'medium', zone: 'Gran Reserva', area: '6' },
+            '9D': { x: 980, y: 440, width: 60, height: 50, type: 'medium', zone: 'Gran Reserva', area: '6' },
+            '10D': { x: 1060, y: 440, width: 60, height: 50, type: 'medium', zone: 'Gran Reserva', area: '6' },
+            '11D': { x: 1150, y: 440, width: 60, height: 50, type: 'medium', zone: 'Gran Reserva', area: '6' },
+            '12D': { x: 1230, y: 310, width: 60, height: 50, type: 'medium', zone: 'Gran Reserva', area: '6' },
+            '1FP': { x: 820, y: 570, width: 60, height: 50, type: 'medium', zone: 'Frente Principal', area: '6' },
+            '2FP': { x: 900, y: 570, width: 60, height: 50, type: 'medium', zone: 'Frente Principal', area: '6' },
+            '3FP': { x: 980, y: 570, width: 60, height: 50, type: 'medium', zone: 'Frente Principal', area: '6' },
+            '4FP': { x: 1060, y: 570, width: 60, height: 50, type: 'medium', zone: 'Frente Principal', area: '6' },
+            '5FP': { x: 1140, y: 570, width: 60, height: 50, type: 'medium', zone: 'Frente Principal', area: '6' },
+            '6FP': { x: 1220, y: 570, width: 60, height: 50, type: 'medium', zone: 'Frente Principal', area: '6' },
+        };
+
+        const StandReservationApp = () => {
+            const [firebaseReady, setFirebaseReady] = React.useState(false);
+            const [selectedStand, setSelectedStand] = React.useState(null);
+            const [formData, setFormData] = React.useState({
+                empresa: '',
+                contacto: '',
+                email: '',
+                telefono: '',
+                descripcion: '',
+                logo: null
+            });
+            const [logoPreview, setLogoPreview] = React.useState(null);
+            const [reservations, setReservations] = React.useState({});
+            const [message, setMessage] = React.useState(null);
+            const [loading, setLoading] = React.useState(false);
+            const [fbApp, setFbApp] = React.useState(null);
+
+            // Inicializar Firebase
+            React.useEffect(() => {
+                try {
+                    // Detectar si window.FIREBASE_CONFIG existe (se carga desde js/firebase-config.js)
+                    if (window.FIREBASE_CONFIG) {
+                        const app = firebase.initializeApp(window.FIREBASE_CONFIG);
+                        setFbApp(app);
+                        setFirebaseReady(true);
+                        
+                        // Cargar reservas existentes de Firestore
+                        const db = firebase.firestore();
+                        db.collection('stands_reserva').onSnapshot((snapshot) => {
+                            const reservas = {};
+                            snapshot.forEach((doc) => {
+                                reservas[doc.data().standId] = doc.data();
+                            });
+                            setReservations(reservas);
+                        });
+                    } else {
+                        setMessage({ 
+                            type: 'error', 
+                            text: '⚠️ Firebase no está configurado. Incluye js/firebase-config.js en el HTML.' 
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error inicializando Firebase:', error);
+                    setMessage({ 
+                        type: 'error', 
+                        text: 'Error conectando con Firebase: ' + error.message 
+                    });
+                }
+            }, []);
+
+            const handleStandClick = (standId) => {
+                if (reservations[standId]) {
+                    setMessage({ type: 'error', text: '❌ Este stand ya está reservado' });
+                    return;
+                }
+                setSelectedStand(standId);
+                setFormData({
+                    empresa: '',
+                    contacto: '',
+                    email: '',
+                    telefono: '',
+                    descripcion: '',
+                    logo: null
+                });
+                setLogoPreview(null);
+                setMessage(null);
+            };
+
+            const handleInputChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            };
+
+            const handleLogoChange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 5 * 1024 * 1024) {
+                        setMessage({ type: 'error', text: 'El logo no debe exceder 5MB' });
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        setFormData(prev => ({
+                            ...prev,
+                            logo: event.target.result
+                        }));
+                        setLogoPreview(event.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+
+                if (!selectedStand) {
+                    setMessage({ type: 'error', text: 'Por favor selecciona un stand' });
+                    return;
+                }
+
+                if (!formData.empresa || !formData.email) {
+                    setMessage({ type: 'error', text: 'Completa los campos obligatorios' });
+                    return;
+                }
+
+                if (!firebaseReady) {
+                    setMessage({ type: 'error', text: 'Firebase no está listo. Intenta de nuevo.' });
+                    return;
+                }
+
+                setLoading(true);
+
+                try {
+                    const db = firebase.firestore();
+                    const storage = firebase.storage();
+                    let logoUrl = null;
+
+                    // Subir logo a Storage si existe
+                    if (formData.logo) {
+                        const logoFile = new File([formData.logo], `${selectedStand}_${Date.now()}.jpg`);
+                        const storageRef = storage.ref(`stands_logos/${selectedStand}`);
+                        await storageRef.put(logoFile);
+                        logoUrl = await storageRef.getDownloadURL();
+                    }
+
+                    // Guardar en Firestore
+                    const reservationData = {
+                        standId: selectedStand,
+                        empresa: formData.empresa,
+                        contacto: formData.contacto,
+                        email: formData.email,
+                        telefono: formData.telefono,
+                        descripcion: formData.descripcion,
+                        logoUrl: logoUrl,
+                        standInfo: standDefinitions[selectedStand],
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: 'pending'
+                    };
+
+                    await db.collection('stands_reserva').doc(selectedStand).set(reservationData);
+
+                    setMessage({ 
+                        type: 'success', 
+                        text: `✅ ¡Stand ${selectedStand} reservado exitosamente! Se enviará confirmación a ${formData.email}` 
+                    });
+
+                    setTimeout(() => {
+                        setSelectedStand(null);
+                        setFormData({
+                            empresa: '',
+                            contacto: '',
+                            email: '',
+                            telefono: '',
+                            descripcion: '',
+                            logo: null
+                        });
+                        setLogoPreview(null);
+                    }, 2000);
+                } catch (error) {
+                    console.error('Error guardando reserva:', error);
+                    setMessage({ 
+                        type: 'error', 
+                        text: 'Error al guardar la reserva: ' + error.message 
+                    });
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const handleReset = () => {
+                setSelectedStand(null);
+                setFormData({
+                    empresa: '',
+                    contacto: '',
+                    email: '',
+                    telefono: '',
+                    descripcion: '',
+                    logo: null
+                });
+                setLogoPreview(null);
+                setMessage(null);
+            };
+
+            return (
+                <div className="container">
+                    <div className="header">
+                        <h1>🎉 Feria de Café La Sucursal 2026</h1>
+                        <p>Adquiere tu stand - 29 y 30 de agosto en Palmetto Plaza, Cali</p>
+                    </div>
+
+                    <div className="firebase-status" style={{
+                        borderLeftColor: firebaseReady ? '#28a745' : '#dc3545'
+                    }}>
+                        <div className={`status-dot ${firebaseReady ? 'connected' : 'disconnected'}`}></div>
+                        <span>
+                            {firebaseReady ? '✓ Conectado a Firebase Firestore' : '⚠️ Firebase desconectado - Modo local'}
+                        </span>
+                    </div>
+
+                    <div className="content">
+                        {/* MAPA INTERACTIVO */}
+                        <div className="map-section">
+                            <h3 style={{ color: '#2d5016', marginBottom: '15px', textAlign: 'center' }}>
+                                Plano Oficial de Stands
+                            </h3>
+                            <div className="map-canvas" style={{ position: 'relative', width: '100%', paddingBottom: '150%', backgroundColor: '#f5f1e8' }}>
+                                {Object.entries(standDefinitions).map(([standId, stand]) => (
+                                    <div
+                                        key={standId}
+                                        className={`stand-spot ${selectedStand === standId ? 'selected' : ''} ${reservations[standId] ? 'reserved' : ''}`}
+                                        style={{
+                                            left: `${(stand.x / 1300) * 100}%`,
+                                            top: `${(stand.y / 800) * 100}%`,
+                                            width: `${(stand.width / 1300) * 100}%`,
+                                            height: `${(stand.height / 800) * 100}%`,
+                                            backgroundColor: reservations[standId] 
+                                                ? 'rgba(220, 53, 69, 0.2)' 
+                                                : stand.type === 'small' 
+                                                    ? 'rgba(212, 165, 116, 0.15)' 
+                                                    : 'rgba(45, 80, 22, 0.15)',
+                                        }}
+                                        onClick={() => handleStandClick(standId)}
+                                    >
+                                        {reservations[standId] && reservations[standId].logoUrl && (
+                                            <div className="logo-preview" style={{
+                                                backgroundImage: `url(${reservations[standId].logoUrl})`
+                                            }} />
+                                        )}
+                                        <span>
+                                            {reservations[standId] ? reservations[standId].empresa : `Stand ${standId}`}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="legend">
+                                <div className="legend-item">
+                                    <div className="legend-color" style={{ backgroundColor: 'rgba(212, 165, 116, 0.15)', borderColor: '#d4a574' }} />
+                                    <span>Disponible</span>
+                                </div>
+                                <div className="legend-item">
+                                    <div className="legend-color" style={{ backgroundColor: 'rgba(220, 53, 69, 0.2)', borderColor: '#dc3545' }} />
+                                    <span>Reservado</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* FORMULARIO */}
+                        <div className="form-section">
+                            <h2>Información del Stand</h2>
+
+                            {selectedStand && (
+                                <div className="stand-info">
+                                    <h3>Stand Seleccionado</h3>
+                                    <p><strong>ID:</strong> {selectedStand}</p>
+                                    <p><strong>Zona:</strong> {standDefinitions[selectedStand].zone}</p>
+                                    <p><strong>Tipo:</strong> {standDefinitions[selectedStand].type === 'small' ? '1.2 x 0.6 m' : '3 x 2 m'}</p>
+                                    <p><strong>Área:</strong> {standDefinitions[selectedStand].area} m²</p>
+                                </div>
+                            )}
+
+                            {!selectedStand && (
+                                <div className="stand-info" style={{ backgroundColor: '#fff3cd', borderColor: '#d4a574' }}>
+                                    <p style={{ color: '#6b4423' }}>👈 Selecciona un stand en el mapa para comenzar</p>
+                                </div>
+                            )}
+
+                            <form onSubmit={handleSubmit}>
+                                <div className="form-group">
+                                    <label>Nombre de Empresa *</label>
+                                    <input
+                                        type="text"
+                                        name="empresa"
+                                        value={formData.empresa}
+                                        onChange={handleInputChange}
+                                        placeholder="Tu empresa o marca de café"
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Persona de Contacto</label>
+                                    <input
+                                        type="text"
+                                        name="contacto"
+                                        value={formData.contacto}
+                                        onChange={handleInputChange}
+                                        placeholder="Nombre completo"
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Email *</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                        placeholder="correo@empresa.com"
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Teléfono</label>
+                                    <input
+                                        type="tel"
+                                        name="telefono"
+                                        value={formData.telefono}
+                                        onChange={handleInputChange}
+                                        placeholder="+57 3XX XXX XXXX"
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Descripción / Productos</label>
+                                    <textarea
+                                        name="descripcion"
+                                        value={formData.descripcion}
+                                        onChange={handleInputChange}
+                                        placeholder="Cuéntanos sobre tu negocio, especialidades, etc."
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Logo de tu Marca</label>
+                                    <div className="file-upload">
+                                        <input
+                                            type="file"
+                                            id="logo-input"
+                                            accept="image/*"
+                                            onChange={handleLogoChange}
+                                        />
+                                        <label htmlFor="logo-input" className="file-upload-label">
+                                            📸 Sube tu logo (PNG, JPG)
+                                        </label>
+                                    </div>
+
+                                    {logoPreview && (
+                                        <div className="logo-display">
+                                            <img src={logoPreview} alt="Preview logo" />
+                                            <p style={{ fontSize: '0.85em', color: '#6b4423' }}>Logo listo para guardar</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="button-group">
+                                    <button 
+                                        type="submit" 
+                                        className="btn btn-primary" 
+                                        disabled={!selectedStand || loading}
+                                    >
+                                        {loading ? (
+                                            <>
+                                                Guardando
+                                                <span className="loading"></span>
+                                            </>
+                                        ) : (
+                                            '✓ Reservar Stand'
+                                        )}
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-secondary" 
+                                        onClick={handleReset}
+                                        disabled={loading}
+                                    >
+                                        ↻ Limpiar
+                                    </button>
+                                </div>
+                            </form>
+
+                            {message && (
+                                <div className={message.type === 'success' ? 'success-message' : 'error-message'}>
+                                    {message.text}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<StandReservationApp />);
+    </script>
+</body>
+</html>
