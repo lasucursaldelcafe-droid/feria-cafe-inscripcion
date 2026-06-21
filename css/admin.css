@@ -26,7 +26,7 @@
   margin: 0;
   background: var(--admin-bg);
   color: var(--admin-text);
-  font-family: var(--admin-font);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   font-size: 15px;
   line-height: 1.5;
 }
@@ -98,6 +98,34 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+}
+
+.admin-section {
+  margin-bottom: 2rem;
+}
+
+.admin-section__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.admin-section__title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.admin-data-source {
+  font-size: 0.78rem;
+  color: var(--admin-accent-blue);
+  background: rgba(91, 159, 212, 0.12);
+  border: 1px solid rgba(91, 159, 212, 0.25);
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
 }
 
 .admin-stats {

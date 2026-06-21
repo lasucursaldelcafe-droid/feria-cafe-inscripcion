@@ -48,6 +48,7 @@
       action: 'pageview',
       path: path,
       title: document.title || '',
+      timestamp: new Date().toISOString(),
       referrer: document.referrer || '',
       sessionId: getSessionId(),
       userAgent: (navigator.userAgent || '').substring(0, 120)

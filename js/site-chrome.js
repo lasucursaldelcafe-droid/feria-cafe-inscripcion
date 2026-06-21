@@ -289,7 +289,7 @@
     function loadAnalyticsScript() {
       if (document.querySelector('script[data-page-analytics]')) return;
       var a = document.createElement('script');
-      a.src = 'js/analytics-tracker.js';
+      a.src = 'js/analytics-tracker.js?v=20260621a';
       a.setAttribute('data-page-analytics', '1');
       document.body.appendChild(a);
     }

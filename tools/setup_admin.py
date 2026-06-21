@@ -336,6 +336,18 @@ def main() -> int:
 
     script_id = (args.script_id or read_script_id() or discover_script_id_clasp()).strip()
     if not script_id:
+        sheet_id = env.get("GOOGLE_SHEET_ID", "").strip()
+        if sheet_id:
+            try:
+                from _find_script_id import find_script_id_for_sheet
+
+                info("Buscando Apps Script vinculado a la hoja…")
+                script_id = find_script_id_for_sheet(sheet_id).strip()
+                if script_id:
+                    ok(f"Script detectado vía Drive API: {script_id}")
+            except Exception as exc:  # noqa: BLE001
+                warn(f"No se pudo auto-detectar script: {exc}")
+    if not script_id:
         error("Falta APPS_SCRIPT_ID.")
         info("Hoja → Extensiones → Apps Script → ⚙ → ID del script")
         info(f"https://docs.google.com/spreadsheets/d/{env.get('GOOGLE_SHEET_ID', '')}/edit")

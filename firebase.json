@@ -1,17 +1,4 @@
 {
-  "auth": {
-    "providers": {
-      "googleSignIn": {
-        "oAuthBrandDisplayName": "La Sucursal del Café",
-        "supportEmail": "lasucursaldelcafe@gmail.com"
-      }
-    },
-    "authorizedDomains": [
-      "localhost",
-      "la-sucursal-del-cafe.web.app",
-      "la-sucursal-del-cafe.firebaseapp.com"
-    ]
-  },
   "hosting": {
     "public": ".",
     "ignore": [
@@ -20,7 +7,8 @@
       "**/node_modules/**",
       ".git/**",
       ".github/**",
-      "tools/**"
+      "tools/**",
+      "js/firebase-config.js"
     ],
     "rewrites": [
       {
@@ -118,7 +106,20 @@
           },
           {
             "key": "Cache-Control",
-            "value": "no-store"
+            "value": "no-store, no-cache, must-revalidate, max-age=0"
+          },
+          {
+            "key": "Pragma",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/js/admin-dashboard.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-store, no-cache, must-revalidate, max-age=0"
           }
         ]
       }

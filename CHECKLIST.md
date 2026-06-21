@@ -15,10 +15,17 @@
 | Privacidad | `privacidad.html` | https://la-sucursal-del-cafe.web.app/privacidad |
 | QR inscripción | `qr-inscripcion.html` | https://la-sucursal-del-cafe.web.app/qr |
 | Alias festival | `festival.html` → inicio | https://la-sucursal-del-cafe.web.app/festival |
+| Panel admin (interno) | `admin.html` | https://la-sucursal-del-cafe.web.app/admin |
 
-Enlaces internos usan `data-link` + `js/site-links.js` (`.html` en local, URLs limpias en producción).
+Claves de ruta en `SiteLinks`: `festival`, `evento`, `actividades`, `patrocinadores`, `feria`, `competencia`, `privacidad`, `comoFunciona` (alias `como-funciona`), `reglas`, `reglasPdf`, `qr`, `admin`.
 
-Claves de ruta en `SiteLinks`: `festival`, `evento`, `actividades`, `patrocinadores`, `feria`, `competencia`, `privacidad`, `comoFunciona` (alias `como-funciona`), `reglas`, `reglasPdf`, `qr`.
+### Contacto y redes (desde `js/event-config.js`)
+
+| Canal | Valor |
+|-------|-------|
+| Instagram | https://www.instagram.com/lasucursal.delcafe/ |
+| WhatsApp | https://wa.me/573116699638 (+57 311 669 9638) |
+| Correo | lasucursaldelcafe@gmail.com |
 
 ## Correr en local
 

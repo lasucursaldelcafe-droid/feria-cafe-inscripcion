@@ -121,13 +121,14 @@
     return html;
   }
 
-  function renderTopPages(topPages) {
+  function renderTopPages(topPages, limit) {
+    var max = limit || 10;
     if (!topPages || !Object.keys(topPages).length) {
-      return '<p class="admin-empty">Sin visitas hoy.</p>';
+      return '<p class="admin-empty">Sin visitas registradas.</p>';
     }
     var entries = Object.keys(topPages).map(function (k) {
       return { path: k, count: topPages[k] };
-    }).sort(function (a, b) { return b.count - a.count; }).slice(0, 8);
+    }).sort(function (a, b) { return b.count - a.count; }).slice(0, max);
 
     var html = '<ul class="admin-top-pages">';
     entries.forEach(function (e) {
@@ -263,6 +264,10 @@
 
     document.getElementById('statVisitsToday').textContent = formatNumber(stats.visitsToday);
     document.getElementById('statVisitsTotal').textContent = formatNumber(stats.visitsTotal);
+    var uniqueToday = document.getElementById('statUniquePathsToday');
+    if (uniqueToday) uniqueToday.textContent = formatNumber(stats.uniquePathsToday);
+    var uniqueTotal = document.getElementById('statUniquePathsTotal');
+    if (uniqueTotal) uniqueTotal.textContent = formatNumber(stats.uniquePathsTotal);
     document.getElementById('statFeria').textContent = formatNumber(stats.feriaRegistrations);
     document.getElementById('statCompetencia').textContent = formatNumber(stats.competenciaRegistrations);
     document.getElementById('statLista').textContent = formatNumber(stats.listaEspera);
@@ -275,7 +280,15 @@
     document.getElementById('statConvFeria').textContent = (stats.conversionFeriaPct || 0) + '%';
     document.getElementById('statConvComp').textContent = (stats.conversionCompetenciaPct || 0) + '%';
 
-    document.getElementById('topPagesToday').innerHTML = renderTopPages(stats.topPagesToday);
+    document.getElementById('topPagesToday').innerHTML = renderTopPages(stats.topPagesToday, 10);
+    var topAllEl = document.getElementById('topPagesAll');
+    if (topAllEl) topAllEl.innerHTML = renderTopPages(stats.topPagesAll, 10);
+    var sourceEl = document.getElementById('analyticsSource');
+    if (sourceEl) {
+      sourceEl.textContent = stats.analyticsSource === 'sheet_pageviews'
+        ? 'Analítica propia (pageviews en Google Sheets)'
+        : 'Analítica propia (pageviews)';
+    }
 
     var feriaRows = pickRows(data, 'allFeria');
     var feriaCols = data.feriaColumns || DEFAULT_FERIA_COLS;

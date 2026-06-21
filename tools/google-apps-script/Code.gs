@@ -725,6 +725,16 @@ function sanitizeCompetenciaRow_(row) {
   return row;
 }
 
+function parseAnalyticsTimestamp_(ts) {
+  if (ts instanceof Date && !isNaN(ts.getTime())) return ts;
+  if (typeof ts === 'number' && !isNaN(ts)) return new Date(ts);
+  if (typeof ts === 'string' && ts) {
+    var parsed = new Date(ts);
+    if (!isNaN(parsed.getTime())) return parsed;
+  }
+  return null;
+}
+
 function getAnalyticsStats_() {
   var sheet = getOrCreateSheet_(SHEET_ANALYTICS, HEADERS_ANALYTICS);
   var lastRow = sheet.getLastRow();
@@ -736,18 +746,27 @@ function getAnalyticsStats_() {
   var visitsFeriaPageToday = 0;
   var visitsCompetenciaPageToday = 0;
   var pageCountsToday = {};
+  var pageCountsAll = {};
+  var uniquePathsToday = {};
+  var uniquePathsAll = {};
 
   if (lastRow >= 2) {
     var data = sheet.getRange(2, 1, lastRow, 2).getValues();
     for (var i = 0; i < data.length; i++) {
-      var ts = data[i][0];
-      var path = String(data[i][1] || '').toLowerCase();
-      if (!(ts instanceof Date) || ts < todayStart) continue;
+      var ts = parseAnalyticsTimestamp_(data[i][0]);
+      var path = String(data[i][1] || '/').toLowerCase();
+      var key = path || '/';
+
+      pageCountsAll[key] = (pageCountsAll[key] || 0) + 1;
+      uniquePathsAll[key] = true;
+
+      if (!ts || ts < todayStart) continue;
+
       visitsToday++;
       if (path.indexOf('inscripcion') !== -1) visitsFeriaPageToday++;
       if (path.indexOf('competencia') !== -1) visitsCompetenciaPageToday++;
-      var key = path || '/';
       pageCountsToday[key] = (pageCountsToday[key] || 0) + 1;
+      uniquePathsToday[key] = true;
     }
   }
 
@@ -756,7 +775,10 @@ function getAnalyticsStats_() {
     today: visitsToday,
     feriaPageToday: visitsFeriaPageToday,
     competenciaPageToday: visitsCompetenciaPageToday,
-    topPagesToday: pageCountsToday
+    uniquePathsToday: Object.keys(uniquePathsToday).length,
+    uniquePathsTotal: Object.keys(uniquePathsAll).length,
+    topPagesToday: pageCountsToday,
+    topPagesAll: pageCountsAll
   };
 }
 
@@ -822,7 +844,11 @@ function handleAdminDashboard_(idToken) {
       competenciaPageViewsToday: analytics.competenciaPageToday,
       conversionFeriaPct: feriaConv,
       conversionCompetenciaPct: compConv,
-      topPagesToday: analytics.topPagesToday
+      uniquePathsToday: analytics.uniquePathsToday,
+      uniquePathsTotal: analytics.uniquePathsTotal,
+      topPagesToday: analytics.topPagesToday,
+      topPagesAll: analytics.topPagesAll,
+      analyticsSource: 'sheet_pageviews'
     },
     feriaColumns: HEADERS_FERIA,
     competenciaColumns: competenciaDisplayHeaders_(),

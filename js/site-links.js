@@ -15,7 +15,8 @@
     reglasPdf: 'assets/reglas-switch-championship.pdf',
     comoFunciona: 'como-funciona-evento.html',
     privacidad: 'privacidad.html',
-    qr: 'qr-inscripcion.html'
+    qr: 'qr-inscripcion.html',
+    admin: 'admin.html'
   };
 
   var HOSTED = {
@@ -29,7 +30,8 @@
     reglasPdf: '/assets/reglas-switch-championship.pdf',
     comoFunciona: '/como-funciona',
     privacidad: '/privacidad',
-    qr: '/qr'
+    qr: '/qr',
+    admin: '/admin'
   };
 
   /** Alias legibles (p. ej. data-link="como-funciona"). */

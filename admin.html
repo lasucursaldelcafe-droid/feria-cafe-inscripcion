@@ -3,19 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
   <meta name="robots" content="noindex, nofollow">
   <meta name="googlebot" content="noindex, nofollow">
   <title>Panel admin — Analíticas</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/admin.css?v=20260621b">
 </head>
 <body class="admin-page">
   <header class="admin-header">
     <div class="admin-header__inner">
       <h1 class="admin-header__title">Panel de analíticas</h1>
-      <p class="admin-header__sub">Visitas · inscripciones · exportación CSV</p>
+      <p class="admin-header__sub">Tráfico del sitio · inscripciones · exportación CSV</p>
     </div>
     <p class="admin-open-banner" role="status">
       Acceso interno sin login — no compartas esta URL.
@@ -38,68 +37,99 @@
         </div>
       </div>
 
-      <div class="admin-stats">
-        <div class="admin-stat admin-stat--accent-blue">
-          <div class="admin-stat__label">Visitas hoy</div>
-          <div class="admin-stat__value" id="statVisitsToday">—</div>
+      <section class="admin-section" aria-labelledby="trafficTitle">
+        <div class="admin-section__head">
+          <h3 id="trafficTitle" class="admin-section__title">Tráfico del sitio</h3>
+          <span id="analyticsSource" class="admin-data-source">Analítica propia (pageviews)</span>
         </div>
-        <div class="admin-stat admin-stat--accent-blue">
-          <div class="admin-stat__label">Visitas totales</div>
-          <div class="admin-stat__value" id="statVisitsTotal">—</div>
-        </div>
-        <div class="admin-stat admin-stat--accent-green">
-          <div class="admin-stat__label">Registros feria</div>
-          <div class="admin-stat__value" id="statFeria">—</div>
-        </div>
-        <div class="admin-stat admin-stat--accent-amber">
-          <div class="admin-stat__label">Inscripciones Switch</div>
-          <div class="admin-stat__value" id="statCompetencia">—</div>
-        </div>
-        <div class="admin-stat">
-          <div class="admin-stat__label">Lista de espera</div>
-          <div class="admin-stat__value" id="statLista">—</div>
-        </div>
-        <div class="admin-stat">
-          <div class="admin-stat__label">Cupo competencia</div>
-          <div class="admin-stat__value" id="statCupo">— / 36</div>
-        </div>
-        <div class="admin-stat admin-stat--accent-green">
-          <div class="admin-stat__label">Conv. feria (aprox.)</div>
-          <div class="admin-stat__value" id="statConvFeria">—</div>
-        </div>
-        <div class="admin-stat admin-stat--accent-amber">
-          <div class="admin-stat__label">Conv. competencia (aprox.)</div>
-          <div class="admin-stat__value" id="statConvComp">—</div>
-        </div>
-      </div>
 
-      <div class="admin-card">
-        <div class="admin-card__head">
-          <h3 class="admin-card__title">Páginas más visitadas hoy</h3>
-          <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-export="analytics">Descargar CSV</button>
+        <div class="admin-stats">
+          <div class="admin-stat admin-stat--accent-blue">
+            <div class="admin-stat__label">Visitas hoy</div>
+            <div class="admin-stat__value" id="statVisitsToday">—</div>
+          </div>
+          <div class="admin-stat admin-stat--accent-blue">
+            <div class="admin-stat__label">Visitas totales</div>
+            <div class="admin-stat__value" id="statVisitsTotal">—</div>
+          </div>
+          <div class="admin-stat admin-stat--accent-blue">
+            <div class="admin-stat__label">Rutas únicas hoy</div>
+            <div class="admin-stat__value" id="statUniquePathsToday">—</div>
+          </div>
+          <div class="admin-stat admin-stat--accent-blue">
+            <div class="admin-stat__label">Rutas únicas total</div>
+            <div class="admin-stat__value" id="statUniquePathsTotal">—</div>
+          </div>
         </div>
-        <div id="topPagesToday"></div>
-      </div>
 
-      <div class="admin-card">
-        <div class="admin-card__head">
-          <h3 class="admin-card__title"><span id="feriaTableTitle">Inscritos — Feria (visitantes)</span></h3>
-          <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-export="feria">Descargar CSV</button>
+        <div class="admin-card">
+          <div class="admin-card__head">
+            <h4 class="admin-card__title">Top 10 páginas hoy</h4>
+            <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-export="analytics">Descargar CSV</button>
+          </div>
+          <div id="topPagesToday"></div>
         </div>
-        <div id="tableFeria"></div>
-      </div>
 
-      <div class="admin-card">
-        <div class="admin-card__head">
-          <h3 class="admin-card__title"><span id="competenciaTableTitle">Inscritos — Switch Championship</span></h3>
-          <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-export="competencia">Descargar CSV</button>
+        <div class="admin-card">
+          <div class="admin-card__head">
+            <h4 class="admin-card__title">Top 10 páginas (histórico)</h4>
+          </div>
+          <div id="topPagesAll"></div>
         </div>
-        <div id="tableCompetencia"></div>
-      </div>
+      </section>
+
+      <section class="admin-section" aria-labelledby="registrationsTitle">
+        <div class="admin-section__head">
+          <h3 id="registrationsTitle" class="admin-section__title">Inscripciones</h3>
+        </div>
+
+        <div class="admin-stats">
+          <div class="admin-stat admin-stat--accent-green">
+            <div class="admin-stat__label">Registros feria</div>
+            <div class="admin-stat__value" id="statFeria">—</div>
+          </div>
+          <div class="admin-stat admin-stat--accent-amber">
+            <div class="admin-stat__label">Inscripciones Switch</div>
+            <div class="admin-stat__value" id="statCompetencia">—</div>
+          </div>
+          <div class="admin-stat">
+            <div class="admin-stat__label">Lista de espera</div>
+            <div class="admin-stat__value" id="statLista">—</div>
+          </div>
+          <div class="admin-stat">
+            <div class="admin-stat__label">Cupo competencia</div>
+            <div class="admin-stat__value" id="statCupo">— / 36</div>
+          </div>
+          <div class="admin-stat admin-stat--accent-green">
+            <div class="admin-stat__label">Conv. feria (aprox.)</div>
+            <div class="admin-stat__value" id="statConvFeria">—</div>
+          </div>
+          <div class="admin-stat admin-stat--accent-amber">
+            <div class="admin-stat__label">Conv. competencia (aprox.)</div>
+            <div class="admin-stat__value" id="statConvComp">—</div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card__head">
+            <h4 class="admin-card__title"><span id="feriaTableTitle">Inscritos — Feria (visitantes)</span></h4>
+            <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-export="feria">Descargar CSV</button>
+          </div>
+          <div id="tableFeria"></div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card__head">
+            <h4 class="admin-card__title"><span id="competenciaTableTitle">Inscritos — Switch Championship</span></h4>
+            <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-export="competencia">Descargar CSV</button>
+          </div>
+          <div id="tableCompetencia"></div>
+        </div>
+      </section>
     </section>
   </main>
 
-  <script src="js/sheets-config.js"></script>
+  <script src="js/sheets-config.js?v=20260621b"></script>
   <script src="js/admin-dashboard.js?v=20260621b"></script>
 </body>
 </html>
