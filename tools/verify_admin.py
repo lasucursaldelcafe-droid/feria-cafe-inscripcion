@@ -18,7 +18,9 @@ from datetime import UTC, datetime
 
 from _util import error, info, load_dotenv, ok, read_web_app_url, warn
 
-SITE_ADMIN = "https://la-sucursal-del-cafe.web.app/admin"
+SITE_BASE = "https://la-sucursal-del-cafe.web.app"
+SITE_ADMIN = SITE_BASE + "/admin"
+SITE_STANDS = SITE_BASE + "/stands"
 
 
 def http_json(url: str, method: str = "GET", payload: dict | None = None, timeout: int = 60) -> tuple[int, dict]:
@@ -107,6 +109,41 @@ def verify_pageview(web_url: str) -> bool:
     return False
 
 
+def verify_stands_map(web_url: str) -> bool:
+    map_url = web_url + ("&" if "?" in web_url else "?") + "action=stands_map"
+    status, data = http_json(map_url, "GET")
+    if status != 200:
+        error(f"stands_map HTTP {status}")
+        return False
+    if not data.get("ok"):
+        error(f"stands_map falló: {data.get('error', data)}")
+        return False
+    occupied = data.get("occupied")
+    if not isinstance(occupied, list):
+        error("stands_map sin lista occupied")
+        return False
+    ok(f"stands_map OK — {len(occupied)} stand(s) ocupado(s)")
+    return True
+
+
+def verify_stands_page() -> bool:
+    status, html = http_text(SITE_STANDS)
+    if status != 200:
+        error(f"/stands HTTP {status}")
+        return False
+    required = ["stands-map.js", "standsMapRoot"]
+    missing = [token for token in required if token not in html]
+    if missing:
+        error(f"/stands falta contenido del mapa: {', '.join(missing)}")
+        return False
+    asset_status, _ = http_text(SITE_BASE + "/assets/stands-map-placeholder.svg")
+    if asset_status != 200:
+        error(f"Asset del mapa HTTP {asset_status}: /assets/stands-map-placeholder.svg")
+        return False
+    ok(f"Página de stands accesible: {SITE_STANDS}")
+    return True
+
+
 def verify_admin_page() -> bool:
     status, html = http_text(SITE_ADMIN)
     if status != 200:
@@ -146,6 +183,8 @@ def main() -> int:
     info(f"Apps Script: {web_url[:70]}…")
     results = {
         "health": verify_health(web_url),
+        "stands_map": verify_stands_map(web_url),
+        "stands": verify_stands_page(),
         "dashboard": verify_dashboard(web_url),
         "pageview": verify_pageview(web_url),
     }

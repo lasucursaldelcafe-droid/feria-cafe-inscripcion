@@ -15,6 +15,7 @@
       { "source": "/el-evento/", "destination": "/el-evento", "type": 301 },
       { "source": "/actividades/", "destination": "/actividades", "type": 301 },
       { "source": "/patrocinadores/", "destination": "/patrocinadores", "type": 301 },
+      { "source": "/marcas/", "destination": "/marcas", "type": 301 },
       { "source": "/stands/", "destination": "/stands", "type": 301 },
       { "source": "/inscripcion/", "destination": "/inscripcion", "type": 301 },
       { "source": "/competencia/", "destination": "/competencia", "type": 301 },
@@ -46,6 +47,10 @@
       {
         "source": "/patrocinadores",
         "destination": "/patrocinadores.html"
+      },
+      {
+        "source": "/marcas",
+        "destination": "/marcas.html"
       },
       {
         "source": "/stands",

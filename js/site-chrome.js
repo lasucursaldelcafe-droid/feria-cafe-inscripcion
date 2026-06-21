@@ -37,7 +37,7 @@
     var path = (global.location.pathname || '').toLowerCase();
     if (path.indexOf('festival') !== -1 || path === '/' || path === '' ||
         path.indexOf('el-evento') !== -1 || path.indexOf('actividades') !== -1 ||
-        path.indexOf('patrocinadores') !== -1) return 'festival';
+        path.indexOf('patrocinadores') !== -1 || path.indexOf('marcas') !== -1) return 'festival';
     if (path.indexOf('competencia') !== -1) return 'torneo';
     if (path.indexOf('stands') !== -1) return 'stands';
     if (path.indexOf('inscripcion') !== -1) return 'feria';
@@ -147,6 +147,7 @@
     if (path.indexOf('el-evento') !== -1) return 'evento';
     if (path.indexOf('actividades') !== -1) return 'actividades';
     if (path.indexOf('patrocinadores') !== -1) return 'patrocinadores';
+    if (path.indexOf('marcas') !== -1) return 'marcas';
     if (path.indexOf('stands') !== -1) return 'stands';
     if (path.indexOf('competencia') !== -1) return 'competencia';
     if (path.indexOf('reglas') !== -1) return 'reglas';
@@ -308,6 +309,33 @@
     });
   }
 
+  function injectMarcasNav() {
+    document.querySelectorAll('.festival-nav__menu').forEach(function (menu) {
+      if (menu.querySelector('[data-nav="marcas"]')) return;
+      var ref = menu.querySelector('[data-nav="patrocinadores"]');
+      if (!ref || !ref.parentElement) return;
+      var li = document.createElement('li');
+      var link = document.createElement('a');
+      link.setAttribute('data-link', 'marcas');
+      link.setAttribute('data-nav', 'marcas');
+      link.setAttribute('href', 'marcas.html');
+      link.textContent = 'Marcas';
+      li.appendChild(link);
+      ref.parentElement.insertAdjacentElement('afterend', li);
+    });
+
+    document.querySelectorAll('.festival-footer__nav').forEach(function (nav) {
+      if (nav.querySelector('a[data-link="marcas"]')) return;
+      var ref = nav.querySelector('a[data-link="patrocinadores"]');
+      if (!ref) return;
+      var link = document.createElement('a');
+      link.setAttribute('data-link', 'marcas');
+      link.setAttribute('href', 'marcas.html');
+      link.textContent = 'Marcas';
+      ref.insertAdjacentElement('afterend', link);
+    });
+  }
+
   function isAdminPage() {
     var path = (global.location.pathname || '').toLowerCase();
     return path.indexOf('admin') !== -1;
@@ -367,6 +395,10 @@
   }
 
   function init() {
+    if (global.SiteLinks && global.SiteLinks.apply) {
+      global.SiteLinks.apply(document);
+    }
+    injectMarcasNav();
     if (global.SiteLinks && global.SiteLinks.apply) {
       global.SiteLinks.apply(document);
     }

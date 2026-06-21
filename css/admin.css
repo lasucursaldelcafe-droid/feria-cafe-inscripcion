@@ -331,6 +331,18 @@
   font-variant-numeric: tabular-nums;
 }
 
+.admin-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.admin-toggle input {
+  accent-color: var(--admin-accent-green);
+}
+
 @media (max-width: 600px) {
   .admin-main {
     padding: 1rem;

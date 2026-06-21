@@ -17,6 +17,7 @@
     comoFunciona: 'como-funciona-evento.html',
     privacidad: 'privacidad.html',
     qr: 'qr-inscripcion.html',
+    marcas: 'marcas.html',
     admin: 'admin.html',
     expositor: 'expositor.html',
     miStand: 'expositor.html'
@@ -35,6 +36,7 @@
     comoFunciona: '/como-funciona',
     privacidad: '/privacidad',
     qr: '/qr',
+    marcas: '/marcas',
     admin: '/admin',
     expositor: '/expositor',
     miStand: '/mi-stand'

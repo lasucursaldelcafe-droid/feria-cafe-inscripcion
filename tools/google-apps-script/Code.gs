@@ -49,7 +49,9 @@ var HEADERS_COMPETENCIA = [
 var HEADERS_STANDS = [
   'Fecha registro', 'ID', 'Stand ID', 'Marca o negocio', 'Persona contacto', 'Celular', 'Correo',
   'Plan stand', 'Ciudad', 'Descripción exhibición',
+  'Tipo participante', 'Red social preferida', 'Red social enlace', 'Logos directorio (JSON)', 'Visible directorio público',
   'Logo nombre', 'Logo tipo', 'Logo enlace Drive',
+  'Comparte stand', 'Marcas adicionales (JSON)',
   'Acepta voluntaria', 'Acepta pertenencias', 'Acepta datos', 'Acepta imagen',
   'Estado solicitud', 'Notas admin', 'Código acceso (hash)'
 ];
@@ -87,10 +89,13 @@ function doGet(e) {
   if (params.action === 'expositor_feed') {
     return jsonResponse(getExpositorFeed_());
   }
+  if (params.action === 'participantes_publico') {
+    return jsonResponse(getParticipantesPublico_());
+  }
   return jsonResponse({
     ok: true,
     message: 'API de inscripciones — La Sucursal del Café',
-    forms: ['feria', 'competencia', 'stands', 'lista_espera', 'admin', 'analytics']
+    forms: ['feria', 'competencia', 'stands', 'lista_espera', 'participantes_publico', 'admin', 'analytics']
   });
 }
 
@@ -118,6 +123,9 @@ function doPost(e) {
     if (action === 'expositor_login') {
       return jsonResponse(handleExpositorLogin_(payload.email || '', payload.accessCode || ''));
     }
+    if (action === 'admin_patch_stand') {
+      return jsonResponse(handleAdminPatchStand_(payload));
+    }
 
     var formType = String(payload.formType || '').toLowerCase();
     var data = payload.data || payload;
@@ -135,6 +143,7 @@ function doPost(e) {
       var standsResult = appendStands_(data);
       id = standsResult.id;
       extra.logoEnlace = standsResult.logoEnlace || '';
+      extra.logos = standsResult.logos || [];
       extra.accessCode = standsResult.accessCode || '';
       extra.expositorPanelUrl = standsResult.expositorPanelUrl || '';
     } else if (formType === 'lista_espera') {
@@ -331,6 +340,13 @@ function standRowToExpositorData_(sheet, rowNum) {
     ciudad: row['Ciudad'] || '',
     descripcion: row['Descripción exhibición'] || '',
     logoEnlace: row['Logo enlace Drive'] || '',
+    comparteStand: row['Comparte stand'] || 'No',
+    marcasAdicionales: parseMarcasAdicionalesJson_(row['Marcas adicionales (JSON)']),
+    logos: buildStandLogosFromRow_(
+      row['Marca o negocio'],
+      row['Logo enlace Drive'],
+      row['Marcas adicionales (JSON)']
+    ),
     estado: row['Estado solicitud'] || ''
   };
 }
@@ -383,6 +399,221 @@ function findStandOccupied_(standId) {
   return false;
 }
 
+function parseMarcasAdicionalesJson_(raw) {
+  if (!raw) return [];
+  try {
+    var parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function tipoParticipanteFromPlan_(plan) {
+  var p = String(plan || '').trim();
+  if (p === 'Zona Origen') return 'expositor';
+  if (p === 'Zona Gran Reserva') return 'patrocinador';
+  if (p === 'Aliado Patrocinador') return 'aliado';
+  return '';
+}
+
+function normalizeRedSocialEnlace_(redSocial, raw) {
+  var input = String(raw || '').trim();
+  if (!input) return '';
+  if (/^https?:\/\//i.test(input)) return input;
+
+  var handle = input.replace(/^@/, '');
+  var social = String(redSocial || '').trim().toLowerCase();
+
+  if (social === 'instagram') {
+    return 'https://www.instagram.com/' + handle.replace(/^@/, '');
+  }
+  if (social === 'facebook') {
+    if (handle.indexOf('facebook.com') >= 0) {
+      return handle.indexOf('://') >= 0 ? handle : 'https://' + handle.replace(/^\/\//, '');
+    }
+    return 'https://www.facebook.com/' + handle;
+  }
+  if (social === 'tiktok') {
+    return 'https://www.tiktok.com/@' + handle.replace(/^@/, '');
+  }
+  if (social === 'whatsapp') {
+    var digits = handle.replace(/\D/g, '');
+    return digits ? 'https://wa.me/' + digits : input;
+  }
+  if (social === 'web') {
+    if (input.indexOf(' ') >= 0) return input;
+    return input.indexOf('://') >= 0 ? input : 'https://' + input;
+  }
+  return input;
+}
+
+function isVisiblePublico_(val) {
+  var v = String(val || '').trim().toLowerCase();
+  if (!v) return true;
+  return v === 'sí' || v === 'si' || v === 'yes' || v === 'true' || v === '1';
+}
+
+function logosDirectorioJsonFromRow_(marca, logoEnlace, marcasJsonRaw) {
+  return JSON.stringify(buildStandLogosFromRow_(marca, logoEnlace, marcasJsonRaw));
+}
+
+function parseLogosDirectorioJson_(raw, marca, logoEnlace, marcasJsonRaw) {
+  var parsed = [];
+  try {
+    parsed = JSON.parse(String(raw || '[]'));
+  } catch (e) {
+    parsed = [];
+  }
+  if (!Array.isArray(parsed) || !parsed.length) {
+    parsed = buildStandLogosFromRow_(marca, logoEnlace, marcasJsonRaw);
+  }
+  return parsed.map(function (item) {
+    return {
+      marca: String((item && item.marca) || '').trim(),
+      url: String((item && (item.logoEnlace || item.url)) || '').trim()
+    };
+  }).filter(function (item) {
+    return item.marca || item.url;
+  });
+}
+
+function getParticipantesPublico_() {
+  var sheet = getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS);
+  var lastRow = sheet.getLastRow();
+  var participantes = [];
+
+  if (lastRow >= 2) {
+    var values = sheet.getRange(2, 1, lastRow, HEADERS_STANDS.length).getValues();
+    for (var i = 0; i < values.length; i++) {
+      var row = rowObjectFromValues_(HEADERS_STANDS, values[i]);
+      if (!isVisiblePublico_(row['Visible directorio público'])) continue;
+
+      var marca = String(row['Marca o negocio'] || '').trim();
+      if (!marca) continue;
+
+      participantes.push({
+        id: String(row['ID'] || '').trim(),
+        marca: marca,
+        tipo: String(row['Tipo participante'] || tipoParticipanteFromPlan_(row['Plan stand']) || '').trim(),
+        descripcion: String(row['Descripción exhibición'] || '').trim(),
+        redSocial: String(row['Red social preferida'] || '').trim(),
+        redUrl: String(row['Red social enlace'] || '').trim(),
+        logos: parseLogosDirectorioJson_(
+          row['Logos directorio (JSON)'],
+          marca,
+          row['Logo enlace Drive'],
+          row['Marcas adicionales (JSON)']
+        ),
+        standId: String(row['Stand ID'] || '').trim()
+      });
+    }
+  }
+
+  return {
+    ok: true,
+    formType: 'participantes_publico',
+    participantes: participantes,
+    total: participantes.length
+  };
+}
+
+function handleAdminPatchStand_(payload) {
+  var access = assertAdminAccess_(payload.idToken || '');
+  if (!access.ok) {
+    return { ok: false, error: access.error };
+  }
+
+  var id = String(payload.id || '').trim();
+  if (!id) {
+    return { ok: false, error: 'ID requerido.' };
+  }
+
+  var sheet = getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS);
+  var idCol = HEADERS_STANDS.indexOf('ID') + 1;
+  var visCol = HEADERS_STANDS.indexOf('Visible directorio público') + 1;
+  if (idCol <= 0 || visCol <= 0) {
+    return { ok: false, error: 'Columnas de stands no configuradas.' };
+  }
+
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) {
+    return { ok: false, error: 'Sin registros de stands.' };
+  }
+
+  var ids = sheet.getRange(2, idCol, lastRow, 1).getValues();
+  for (var i = 0; i < ids.length; i++) {
+    if (String(ids[i][0] || '').trim() !== id) continue;
+    var visible = payload.visiblePublico === true ||
+      payload.visiblePublico === 'Sí' ||
+      payload.visiblePublico === 'Si' ||
+      payload.visiblePublico === 'si';
+    var label = visible ? 'Sí' : 'No';
+    sheet.getRange(i + 2, visCol).setValue(label);
+    return { ok: true, id: id, visiblePublico: label };
+  }
+
+  return { ok: false, error: 'Registro no encontrado.' };
+}
+
+function buildStandLogosFromRow_(marca, logoEnlace, marcasJsonRaw) {
+  var logos = [];
+  var mainMarca = String(marca || '').trim();
+  var mainLogo = String(logoEnlace || '').trim();
+  if (mainLogo || mainMarca) {
+    logos.push({ marca: mainMarca, logoEnlace: mainLogo });
+  }
+  parseMarcasAdicionalesJson_(marcasJsonRaw).forEach(function (item) {
+    var nombre = String((item && item.nombre) || '').trim();
+    var enlace = String((item && item.logoEnlace) || '').trim();
+    if (!nombre && !enlace) return;
+    logos.push({ marca: nombre, logoEnlace: enlace });
+  });
+  return logos;
+}
+
+function parseMarcasAdicionales_(data) {
+  if (!data.comparteStand) {
+    return { comparte: 'No', json: '[]', items: [] };
+  }
+  var raw = Array.isArray(data.marcasAdicionales) ? data.marcasAdicionales : [];
+  var items = [];
+  raw.forEach(function (item, idx) {
+    var nombre = String((item && item.nombre) || '').trim();
+    if (!nombre) return;
+    var logoPayload = item.logo || null;
+    var logoEnlace = '';
+    var logoNombre = '';
+    var logoTipo = '';
+    if (logoPayload && logoPayload.base64) {
+      logoEnlace = saveFileToDriveFolder_(
+        (data.id || 'sin-id') + '-marca-' + (idx + 1),
+        String(logoPayload.nombreArchivo || 'logo-marca-' + (idx + 1) + '.jpg'),
+        String(logoPayload.tipoArchivo || 'image/jpeg'),
+        String(logoPayload.base64),
+        DRIVE_LOGOS_STANDS_FOLDER_NAME,
+        'logo'
+      );
+      logoNombre = String(logoPayload.nombreArchivo || '');
+      logoTipo = String(logoPayload.tipoArchivo || '');
+    }
+    items.push({
+      nombre: nombre,
+      logoNombre: logoNombre,
+      logoTipo: logoTipo,
+      logoEnlace: logoEnlace
+    });
+  });
+  if (!items.length) {
+    throw new Error('Indica al menos una marca adicional si compartes el stand.');
+  }
+  return {
+    comparte: 'Sí',
+    json: JSON.stringify(items),
+    items: items
+  };
+}
+
 function getStandsMapData_() {
   var sheet = getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS);
   var lastRow = sheet.getLastRow();
@@ -391,16 +622,22 @@ function getStandsMapData_() {
     var standCol = HEADERS_STANDS.indexOf('Stand ID') + 1;
     var marcaCol = HEADERS_STANDS.indexOf('Marca o negocio') + 1;
     var logoCol = HEADERS_STANDS.indexOf('Logo enlace Drive') + 1;
+    var marcasJsonCol = HEADERS_STANDS.indexOf('Marcas adicionales (JSON)') + 1;
     var standVals = standCol > 0 ? sheet.getRange(2, standCol, lastRow, standCol).getValues() : [];
     var marcaVals = marcaCol > 0 ? sheet.getRange(2, marcaCol, lastRow, marcaCol).getValues() : [];
     var logoVals = logoCol > 0 ? sheet.getRange(2, logoCol, lastRow, logoCol).getValues() : [];
+    var marcasJsonVals = marcasJsonCol > 0 ? sheet.getRange(2, marcasJsonCol, lastRow, marcasJsonCol).getValues() : [];
     for (var i = 0; i < standVals.length; i++) {
       var sid = normalizeStandId_(standVals[i][0]);
       if (!sid) continue;
+      var marca = String(marcaVals[i][0] || '');
+      var logoEnlace = String(logoVals[i][0] || '');
+      var logos = buildStandLogosFromRow_(marca, logoEnlace, marcasJsonVals[i][0]);
       occupied.push({
         standId: sid,
-        marca: String(marcaVals[i][0] || ''),
-        logoEnlace: String(logoVals[i][0] || '')
+        marca: marca,
+        logoEnlace: logoEnlace,
+        logos: logos
       });
     }
   }
@@ -462,11 +699,20 @@ function appendStands_(data) {
     throw new Error('El logo de tu negocio es obligatorio.');
   }
 
+  var marcasExtra = parseMarcasAdicionales_(data);
+  data.comparteStandLabel = marcasExtra.comparte;
+  data.marcasAdicionalesGuardadas = marcasExtra.items;
+
   var legalCols = parseFeriaLegalAcceptances_(data);
   var estado = 'Solicitud recibida';
   var contacto = data.contacto || data.nombre || '';
   var accessCode = generateAccessCode_();
   var accessHash = hashAccessCode_(accessCode);
+  var tipoParticipante = String(data.tipoParticipante || tipoParticipanteFromPlan_(plan) || '').trim();
+  var redSocial = String(data.redSocial || '').trim();
+  var redEnlace = normalizeRedSocialEnlace_(redSocial, data.redEnlace || '');
+  var visiblePublico = data.visiblePublico === false || data.visiblePublico === 'No' ? 'No' : 'Sí';
+  var logosDirectorioJson = logosDirectorioJsonFromRow_(data.marca, logo.enlace, marcasExtra.json);
 
   sheet.appendRow([
     data.fecha || new Date().toISOString(),
@@ -479,18 +725,27 @@ function appendStands_(data) {
     plan,
     data.ciudad || '',
     data.descripcion || '',
+    tipoParticipante,
+    redSocial,
+    redEnlace,
+    logosDirectorioJson,
+    visiblePublico,
     logo.nombre,
     logo.tipo,
-    logo.enlace
+    logo.enlace,
+    marcasExtra.comparte,
+    marcasExtra.json
   ].concat(legalCols).concat([estado, '', accessHash]));
 
   data.accessCode = accessCode;
   data.expositorPanelUrl = getExpositorPanelUrl_();
   sendConfirmationEmail_('stands', data);
   sendOrganizerNotificationEmail_('stands', data);
+  var logosMapa = buildStandLogosFromRow_(data.marca, logo.enlace, marcasExtra.json);
   return {
     id: data.id || '',
     logoEnlace: logo.enlace || '',
+    logos: logosMapa,
     accessCode: accessCode,
     expositorPanelUrl: data.expositorPanelUrl
   };
@@ -842,6 +1097,13 @@ function buildEmailBody_(formType, data) {
     lines.push('Referencia: ' + id);
     lines.push('Marca o negocio: ' + (data.marca || ''));
     if (data.standId) lines.push('Stand seleccionado: ' + data.standId);
+    if (data.comparteStandLabel === 'Sí' || data.comparteStand) {
+      lines.push('Comparte stand con otras marcas: Sí');
+      var extras = data.marcasAdicionalesGuardadas || data.marcasAdicionales || [];
+      if (extras.length) {
+        lines.push('Marcas adicionales: ' + extras.map(function (m) { return m.nombre; }).join(', '));
+      }
+    }
     lines.push('Plan solicitado: ' + (data.plan || ''));
     lines.push('Fechas: 29 y 30 de agosto de 2026');
     lines.push('Sede: Palmetto Plaza, Cali');
@@ -928,6 +1190,13 @@ function buildOrganizerAlertBody_(formType, data) {
     lines.push('Celular: ' + (data.celular || ''));
     lines.push('Plan: ' + (data.plan || ''));
     if (data.standId) lines.push('Stand ID: ' + data.standId);
+    if (data.comparteStandLabel === 'Sí' || data.comparteStand) {
+      lines.push('Comparte stand: Sí');
+      var marcasAlert = data.marcasAdicionalesGuardadas || data.marcasAdicionales || [];
+      if (marcasAlert.length) {
+        lines.push('Marcas adicionales: ' + marcasAlert.map(function (m) { return m.nombre; }).join(', '));
+      }
+    }
     lines.push('Ciudad: ' + (data.ciudad || ''));
     lines.push('Descripción: ' + (data.descripcion || ''));
     lines.push('');
