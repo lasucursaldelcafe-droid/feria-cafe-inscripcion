@@ -68,17 +68,31 @@ npx -y firebase-tools@latest deploy --only hosting
 
 Push a `main` → despliegue automático vía `.github/workflows/deploy-firebase.yml`.
 
+### Automatización (recomendado)
+
+Tras cambiar `Code.gs`, actualizar secretos o desplegar:
+
+```powershell
+py tools/automatizar_manual.py --todo
+```
+
+Orquesta Apps Script, `sheets-config.js`, secretos GitHub, Firebase Hosting y `verify_admin.py`. Ver [`tools/PLANTILLA-ENV.md`](tools/PLANTILLA-ENV.md).
+
 ### Sincronizar secretos desde tu PC
 
 Si el deploy falla con *FIREBASE_SERVICE_ACCOUNT no es JSON válido* o *Failed to authenticate*:
 
 1. Descarga la clave en Firebase Console → **Generate new private key**.
 2. Guárdala como `tools/credentials/firebase-hosting-sa.json` (no la subas al repo).
-3. Ejecuta:
+3. Ejecuta (Python, cross-platform):
 
 ```powershell
-.\tools\sync_github_secrets.ps1
+py tools/setup_github_ci.py --wait-sa
 ```
+
+Equivalente PowerShell: `.\tools\sync_github_secrets.ps1`
+
+Diagnóstico: `py tools/validate_ci_secrets.py`
 
 El script valida el JSON, sube `FIREBASE_SERVICE_ACCOUNT` (y `SHEETS_WEB_APP_URL` si está en `tools/.env`) y sugiere relanzar el workflow.
 

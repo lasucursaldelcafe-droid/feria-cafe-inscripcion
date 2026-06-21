@@ -3,6 +3,9 @@
 Script maestro: verifica credenciales, despliega Apps Script + Firebase Hosting,
 y comprueba panel admin y endpoints.
 
+Preferir para mantenimiento completo (CI + recordatorios):
+  py tools/automatizar_manual.py --todo
+
 Uso:
   py tools/fix_all.py
   py tools/fix_all.py --solo-verificar
