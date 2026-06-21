@@ -80,21 +80,24 @@ Orquesta Apps Script, `sheets-config.js`, secretos GitHub, Firebase Hosting y `v
 
 ### Sincronizar secretos desde tu PC
 
-Si el deploy falla con *FIREBASE_SERVICE_ACCOUNT no es JSON válido* o *Failed to authenticate*:
-
-1. Descarga la clave en Firebase Console → **Generate new private key**.
-2. Guárdala como `tools/credentials/firebase-hosting-sa.json` (no la subas al repo).
-3. Ejecuta (Python, cross-platform):
+Si el deploy falla con *FIREBASE_SERVICE_ACCOUNT no es JSON valido*, *Unexpected token 'e', "necesitamos"...* o *Failed to authenticate*:
 
 ```powershell
-py tools/setup_github_ci.py --wait-sa
+cd D:\Desarrollo\02_Proyectos\Feria-Cafe-Inscripcion
+gh auth login
+# 1) Firebase Console -> la-sucursal-del-cafe -> Service accounts -> Generate new private key
+# 2) Guardar como tools\credentials\firebase-hosting-sa.json (gitignored)
+py tools\validate_ci_secrets.py --print-commands
+py tools\setup_github_ci.py
+# equivalente PowerShell:
+# .\tools\sync_github_secrets.ps1
+gh workflow run "Deploy Firebase Hosting"
+gh run list --workflow deploy-firebase.yml --limit 3
 ```
 
-Equivalente PowerShell: `.\tools\sync_github_secrets.ps1`
+Diagnostico sin subir secretos: `py tools/validate_ci_secrets.py`
 
-Diagnóstico: `py tools/validate_ci_secrets.py`
-
-El script valida el JSON, sube `FIREBASE_SERVICE_ACCOUNT` (y `SHEETS_WEB_APP_URL` si está en `tools/.env`) y sugiere relanzar el workflow.
+El script valida el JSON, sube `FIREBASE_SERVICE_ACCOUNT` (y `SHEETS_WEB_APP_URL` si esta en `tools/.env`) y sugiere relanzar el workflow.
 
 ### Configurar secretos en GitHub
 

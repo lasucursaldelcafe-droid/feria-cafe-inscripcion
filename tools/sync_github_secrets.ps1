@@ -47,7 +47,14 @@ if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
-Write-Info "Validando JSON con deploy_firebase.py --dry-run..."
+Write-Info "Validando secretos localmente..."
+py tools\validate_ci_secrets.py --print-commands
+if ($LASTEXITCODE -ne 0) {
+    Write-Err "Corrige firebase-hosting-sa.json o tools\.env antes de subir secretos."
+    exit $LASTEXITCODE
+}
+
+Write-Info "Validacion extendida con deploy_firebase.py --dry-run..."
 py tools/deploy_firebase.py --service-account $SaPath --dry-run
 if ($LASTEXITCODE -ne 0) {
     Write-Err "El JSON no pasó la validación. Corrige el archivo antes de subir secretos."
