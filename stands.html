@@ -69,12 +69,14 @@
           </p>
         </div>
         <form id="standsForm" novalidate>
-          <ol class="stands-map-steps" aria-label="Pasos para reservar tu stand">
-            <li><strong>Elige tu plan</strong> — define la zona del mapa.</li>
-            <li><strong>Toca un stand verde</strong> — disponible en tu zona.</li>
-            <li><strong>Sube tu logo</strong> — aparecerá en el mapa al confirmar.</li>
-            <li><strong>Opcional:</strong> indica si compartes el stand con otras marcas.</li>
-            <li><strong>Envía la solicitud</strong> — te contactamos para confirmar.</li>
+          <ol id="standsFormSteps" class="stands-map-steps" aria-label="Pasos para reservar tu stand">
+            <li data-step-map><strong>Elige tu plan</strong> — define la zona del mapa.</li>
+            <li data-step-map><strong>Toca un stand verde</strong> — disponible en tu zona.</li>
+            <li><strong>Sube tu logo</strong> — aparecerá en el mapa o directorio al confirmar.</li>
+            <li data-step-map data-step-share><strong>Opcional:</strong> indica si compartes el stand con otras marcas.</li>
+            <li data-step-aliado hidden><strong>Completa tus datos</strong> — marca, contacto y logo(s).</li>
+            <li data-step-aliado hidden><strong>Envía la solicitud</strong> — el equipo validará tu patrocinio.</li>
+            <li data-step-map><strong>Envía la solicitud</strong> — te contactamos para confirmar.</li>
           </ol>
 
           <h2 class="section-title">1. Elige tu plan</h2>
@@ -87,10 +89,16 @@
               <option value="Aliado Patrocinador">Aliado Patrocinador — visibilidad (a convenir)</option>
               <option value="Quiero asesoría">Aún no sé / Quiero asesoría</option>
             </select>
-            <p id="plan-hint" class="hint">Primero elige el plan; luego podrás seleccionar un stand disponible en el mapa.</p>
+            <p id="plan-hint" class="hint">Expositores (Zona Origen o Gran Reserva): elige plan y luego un stand en el mapa. Aliado Patrocinador: solo datos básicos — la negociación ya está cerrada con el equipo.</p>
             <span id="plan-error" class="error-msg" role="alert"></span>
           </div>
 
+          <div id="aliadoPatrocinadorNotice" class="info-box" role="note" hidden>
+            <strong>Aliado / patrocinador</strong>
+            <p style="margin:0.5rem 0 0">No necesitas elegir stand en el mapa. Completa tus datos y logo(s). <strong>Tu solicitud será validada por el equipo — te contactaremos sobre el tipo de patrocinio.</strong></p>
+          </div>
+
+          <div id="standsMapSection">
           <h2 class="section-title">2. Selecciona tu stand en el mapa</h2>
           <p class="hint" style="margin:0 0 0.75rem">Los stands <span class="stands-map-legend-inline stands-map-legend-inline--free">verdes</span> están disponibles. Los <span class="stands-map-legend-inline stands-map-legend-inline--occupied">rojos/oscuros</span> ya están reservados y no se pueden elegir.</p>
           <p id="standsMapStatus" class="stands-map-status" aria-live="polite"></p>
@@ -103,8 +111,9 @@
             Stand seleccionado: <strong id="standSelectionLabel">Ninguno</strong>
           </p>
           <span id="standId-error" class="error-msg" role="alert"></span>
+          </div>
 
-          <h2 class="section-title">3. Datos del expositor</h2>
+          <h2 class="section-title" id="datosExpositorTitle">3. Datos del expositor</h2>
           <div class="field">
             <label for="marca">Nombre de marca o negocio <span class="required" aria-hidden="true">*</span></label>
             <input
@@ -168,9 +177,9 @@
             </div>
           </div>
 
-          <div class="field-row">
+          <div class="field-row" id="ciudadFieldRow">
             <div class="field">
-              <label for="ciudad">Ciudad <span class="required" aria-hidden="true">*</span></label>
+              <label for="ciudad">Ciudad <span class="required" id="ciudadRequiredMark" aria-hidden="true">*</span></label>
               <input
                 type="text"
                 id="ciudad"
@@ -194,11 +203,12 @@
               accept="image/jpeg,image/png,image/webp"
               aria-describedby="logo-hint logo-error logoPreview"
             >
-            <p id="logo-hint" class="hint">Sube el logo que aparecerá en el mapa y materiales del evento. JPG, PNG o WebP · máx. 5 MB.</p>
+            <p id="logo-hint" class="hint">Sube el logo de tu marca. JPG, PNG o WebP · máx. 5 MB. En expositores aparece en el mapa; en aliados/patrocinadores en el directorio público.</p>
             <div id="logoPreview" class="comprobante-preview" aria-live="polite"></div>
             <span id="logo-error" class="error-msg" role="alert"></span>
           </div>
 
+          <div id="comparteStandSection">
           <h2 class="section-title">5. ¿Compartes el stand con otras marcas?</h2>
           <div class="field stands-shared-brands">
             <label class="choice-item">
@@ -212,6 +222,7 @@
               <button type="button" id="btnAddMarcaCompartida" class="btn-secondary btn-add-marca" hidden>Añadir otra marca</button>
               <span id="marcasCompartidas-error" class="error-msg" role="alert"></span>
             </div>
+          </div>
           </div>
 
           <div class="field">
@@ -401,7 +412,7 @@
   <script src="js/seo-structured-data.js"></script>
   <script src="js/sheets-config.js"></script>
   <script src="js/form-submit.js"></script>
-  <script src="js/stands-map.js?v=20260621a"></script>
+  <script src="js/stands-map.js?v=20260621b"></script>
   <script src="js/terms-disclosure.js"></script>
   <script src="js/site-chrome.js?v=20260621b"></script>
   <script src="js/festival-nav.js?v=20260620ig"></script>
@@ -418,6 +429,12 @@
       const syncNote = document.getElementById("syncNote");
       const planSelect = document.getElementById("plan");
       const logoRequiredMark = document.getElementById("logoRequiredMark");
+      const ciudadRequiredMark = document.getElementById("ciudadRequiredMark");
+      const ciudadInput = document.getElementById("ciudad");
+      const mapSection = document.getElementById("standsMapSection");
+      const aliadoNotice = document.getElementById("aliadoPatrocinadorNotice");
+      const comparteSection = document.getElementById("comparteStandSection");
+      const datosTitle = document.getElementById("datosExpositorTitle");
 
       var standsMap = new StandsMap({
         storageKey: STORAGE_KEY,
@@ -445,11 +462,31 @@
 
       function updatePlanUi() {
         var plan = planSelect.value;
-        standsMap.setPlan(plan);
+        var isAliado = StandsMapUtils.planIsAliadoPatrocinador(plan);
         var needsStand = StandsMapUtils.planRequiresStand(plan);
+        standsMap.setPlan(plan);
+        if (mapSection) mapSection.hidden = isAliado;
+        if (aliadoNotice) aliadoNotice.hidden = !isAliado;
+        if (comparteSection) comparteSection.hidden = isAliado;
+        if (datosTitle) {
+          datosTitle.textContent = isAliado ? "2. Datos de tu marca" : "3. Datos del expositor";
+        }
+        document.querySelectorAll("[data-step-map]").forEach(function (el) {
+          el.hidden = isAliado;
+        });
+        document.querySelectorAll("[data-step-aliado]").forEach(function (el) {
+          el.hidden = !isAliado;
+        });
+        if (isAliado) {
+          standsMap.selectStand("");
+        }
         if (logoRequiredMark) logoRequiredMark.style.display = needsStand ? "" : "none";
         if (logoUpload.input) {
           logoUpload.input.required = needsStand;
+        }
+        if (ciudadRequiredMark) ciudadRequiredMark.style.display = needsStand ? "" : "none";
+        if (ciudadInput) {
+          ciudadInput.required = needsStand;
         }
       }
 
@@ -523,6 +560,7 @@
           el: document.getElementById("ciudad"),
           error: document.getElementById("ciudad-error"),
           validate: function (value) {
+            if (!StandsMapUtils.planRequiresStand(planSelect.value)) return "";
             if (!value.trim()) return "La ciudad es obligatoria.";
             return "";
           }
@@ -699,15 +737,24 @@
           standsMap.applyOptimisticOccupied(entry);
           standsMap.refresh();
           var note = document.getElementById("successEmailNoteStands");
+          var isAliadoSuccess = StandsMapUtils.planIsAliadoPatrocinador(entry.plan);
           var standLine = entry.standId ? " Stand reservado: <strong>" + entry.standId + "</strong>." : "";
           var mapLine = entry.standId ? " Tu logo" +
             (entry.comparteStand && entry.marcasAdicionales && entry.marcasAdicionales.length
               ? "s y los de las marcas compartidas aparecen"
               : " aparece") +
             " ya en el mapa de stands." : "";
+          var aliadoLine = isAliadoSuccess
+            ? " <strong>Tu solicitud será validada por el equipo — te contactaremos sobre el tipo de patrocinio.</strong>"
+            : "";
           if (note) {
             note.innerHTML = "Enviamos un correo de confirmación a " + entry.correo + "." + standLine +
-              mapLine + " Revisa spam si no lo ves.";
+              mapLine + aliadoLine + " Revisa spam si no lo ves.";
+          }
+          var successLead = document.getElementById("successLeadStands");
+          if (successLead && isAliadoSuccess) {
+            successLead.innerHTML = "Gracias por tu interés en ser aliado o patrocinador de <strong>La Sucursal del Café</strong>. " +
+              "<strong>Tu solicitud será validada por el equipo — te contactaremos sobre el tipo de patrocinio.</strong>";
           }
           var accessBlock = document.getElementById("successAccessBlock");
           var accessCodeEl = document.getElementById("successAccessCode");
@@ -738,7 +785,7 @@
         if (!validatePlan()) valid = false;
         if (!validateStandSelection()) valid = false;
         if (!validateLogo()) valid = false;
-        if (!marcasCompartidas.validate()) valid = false;
+        if (!StandsMapUtils.planIsAliadoPatrocinador(planSelect.value) && !marcasCompartidas.validate()) valid = false;
         if (!validateTerms()) valid = false;
 
         if (!valid) {

@@ -4,7 +4,8 @@
 (function (global) {
   'use strict';
 
-  var PLANS_WITH_STAND = ['Zona Origen', 'Zona Gran Reserva', 'Aliado Patrocinador'];
+  var PLANS_WITH_STAND = ['Zona Origen', 'Zona Gran Reserva'];
+  var PLAN_ALIADO_PATROCINADOR = 'Aliado Patrocinador';
   var MAP_FALLBACK = '/assets/stands-map-placeholder.svg';
   var MAP_REAL = '/assets/stands-map.jpg';
   /** SVG embebido — último recurso si fallan todos los assets externos. */
@@ -89,6 +90,10 @@
 
   function planRequiresStand(plan) {
     return PLANS_WITH_STAND.indexOf(plan) !== -1;
+  }
+
+  function planIsAliadoPatrocinador(plan) {
+    return String(plan || '').trim() === PLAN_ALIADO_PATROCINADOR;
   }
 
   function compressImageFile(file, maxDim, quality) {
@@ -704,34 +709,6 @@
     });
   };
 
-  LogoUpload.prototype.bindEvents = function () {
-    var self = this;
-    if (!this.input) return;
-    this.input.addEventListener('change', function () {
-      var file = self.input.files && self.input.files[0];
-      self.clear(false);
-      if (!file) return;
-      var msg = self.validateFile(file, false);
-      if (msg) {
-        self.showError(msg);
-        self.clear(true);
-        return;
-      }
-      if (self.preview) {
-        self.preview.innerHTML = '<p class="hint">Procesando logo…</p>';
-        self.preview.classList.add('visible');
-      }
-      compressImageFile(file).then(function (payload) {
-        self.data = payload;
-        self.renderPreview(payload);
-        self.showError('');
-      }).catch(function () {
-        self.showError('No se pudo cargar el logo. Intenta con otra imagen.');
-        self.clear(true);
-      });
-    });
-  };
-
   function MarcasCompartidasUpload(options) {
     options = options || {};
     this.mapConfig = getMapConfig();
@@ -965,6 +942,7 @@
   global.StandsMarcasCompartidas = MarcasCompartidasUpload;
   global.StandsMapUtils = {
     planRequiresStand: planRequiresStand,
+    planIsAliadoPatrocinador: planIsAliadoPatrocinador,
     normalizeStandId: normalizeStandId,
     compressImageFile: compressImageFile,
     resolveAssetUrl: resolveAssetUrl

@@ -32,6 +32,14 @@ FIREBASE_HOSTING_SA = TOOLS_DIR / "credentials" / "firebase-hosting-sa.json"
 ENV_PATH = TOOLS_DIR / ".env"
 
 
+PLACEHOLDER_MARKERS = ("necesitamos", "placeholder", "pega aqu", "todo el json")
+
+
+def looks_like_placeholder(raw: str) -> bool:
+    lower = raw.lower()
+    return any(marker in lower for marker in PLACEHOLDER_MARKERS)
+
+
 def read_env_var(key: str) -> str:
     if not ENV_PATH.is_file():
         return ""
@@ -147,6 +155,8 @@ def validate_firebase_sa_json(raw: str) -> tuple[bool, str]:
     raw = raw.strip()
     if not raw:
         return False, "Falta FIREBASE_SERVICE_ACCOUNT."
+    if looks_like_placeholder(raw):
+        return False, "FIREBASE_SERVICE_ACCOUNT parece texto de ejemplo (p. ej. necesitamos...), no JSON."
     try:
         data = json.loads(raw)
     except json.JSONDecodeError as exc:
@@ -175,9 +185,29 @@ def check_ci_env_secrets() -> tuple[bool, str]:
     return True, "FIREBASE_SERVICE_ACCOUNT OK; SHEETS_WEB_APP_URL opcional ausente"
 
 
+
+
+def print_gh_secret_commands() -> None:
+    sa = FIREBASE_HOSTING_SA
+    url = read_web_app_url() or read_env_var("SHEETS_WEB_APP_URL")
+    print()
+    info("Comandos manuales (PowerShell):")
+    print(f"  Get-Content -Raw -Encoding UTF8 '{sa}' | gh secret set FIREBASE_SERVICE_ACCOUNT")
+    if url:
+        print(f"  gh secret set SHEETS_WEB_APP_URL --body '{url}'")
+    else:
+        print("  # Opcional: gh secret set SHEETS_WEB_APP_URL --body 'https://script.google.com/.../exec'")
+    print('  gh workflow run "Deploy Firebase Hosting"')
+    print()
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Valida secretos y requisitos de CI.")
     parser.add_argument("--fix-hint", action="store_true", help="Mostrar comandos de corrección al final.")
+    parser.add_argument(
+        "--print-commands",
+        action="store_true",
+        help="Muestra comandos gh secret set (modo local).",
+    )
     parser.add_argument(
         "--ci",
         action="store_true",
@@ -193,6 +223,9 @@ def main() -> int:
 
     load_dotenv()
     args = parse_args()
+
+    if args.print_commands and not args.ci:
+        print_gh_secret_commands()
 
     if args.ci:
         print("=== validate_ci_secrets.py (CI) ===\n")
