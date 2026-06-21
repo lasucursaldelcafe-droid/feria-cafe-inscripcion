@@ -1,10 +1,11 @@
 // Web App de Google Apps Script - La Sucursal del Cafe
-// Recibe inscripciones JSON y las guarda en hojas Feria, Competencia y Lista de espera.
+// Recibe inscripciones JSON y las guarda en hojas Feria, Competencia, Stands y Lista de espera.
 // Tras cada inscripcion valida envia confirmacion al participante y alerta a ORGANIZER_EMAIL.
 // Redespliega la Web App tras editar este archivo (Implementar > Nueva implementacion).
 
 var SHEET_FERIA = 'Feria';
 var SHEET_COMPETENCIA = 'Competencia';
+var SHEET_STANDS = 'Stands';
 var SHEET_LISTA_ESPERA = 'Lista de espera';
 var SHEET_ANALYTICS = 'Analytics';
 
@@ -39,6 +40,13 @@ var HEADERS_COMPETENCIA = [
   'Observaciones', 'Estado pago', 'Cupo confirmado', 'Notas admin'
 ];
 
+var HEADERS_STANDS = [
+  'Fecha registro', 'ID', 'Marca o negocio', 'Persona contacto', 'Celular', 'Correo',
+  'Plan stand', 'Ciudad', 'Descripción exhibición',
+  'Acepta voluntaria', 'Acepta pertenencias', 'Acepta datos', 'Acepta imagen',
+  'Estado solicitud', 'Notas admin'
+];
+
 var HEADERS_LISTA_ESPERA = [
   'Fecha registro', 'ID', 'Formulario', 'Nombre', 'Documento', 'Correo', 'Celular', 'Motivo', 'Notas admin'
 ];
@@ -65,7 +73,7 @@ function doGet(e) {
   return jsonResponse({
     ok: true,
     message: 'API de inscripciones — La Sucursal del Café',
-    forms: ['feria', 'competencia', 'lista_espera', 'admin', 'analytics']
+    forms: ['feria', 'competencia', 'stands', 'lista_espera', 'admin', 'analytics']
   });
 }
 
@@ -103,6 +111,8 @@ function doPost(e) {
       id = competenciaResult.id;
       extra.whatsappGrupoUrl = WHATSAPP_GRUPO_COMPETENCIA;
       extra.fotoEnlace = competenciaResult.fotoEnlace || '';
+    } else if (formType === 'stands') {
+      id = appendStands_(data);
     } else if (formType === 'lista_espera') {
       id = appendListaEspera_(data);
     } else {
@@ -145,9 +155,10 @@ function sincronizarEncabezados() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   applyHeaders_(getOrCreateSheet_(SHEET_FERIA, HEADERS_FERIA), HEADERS_FERIA);
   applyHeaders_(getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA), HEADERS_COMPETENCIA);
+  applyHeaders_(getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS), HEADERS_STANDS);
   applyHeaders_(getOrCreateSheet_(SHEET_LISTA_ESPERA, HEADERS_LISTA_ESPERA), HEADERS_LISTA_ESPERA);
   applyHeaders_(getOrCreateSheet_(SHEET_ANALYTICS, HEADERS_ANALYTICS), HEADERS_ANALYTICS);
-  Logger.log('Encabezados sincronizados: Feria, Competencia, Lista de espera, Analytics.');
+  Logger.log('Encabezados sincronizados: Feria, Competencia, Stands, Lista de espera, Analytics.');
 }
 
 function applyHeaders_(sheet, headers) {
@@ -222,6 +233,33 @@ function appendFeria_(data) {
 
   sendConfirmationEmail_('feria', data);
   sendOrganizerNotificationEmail_('feria', data);
+  return data.id || '';
+}
+
+function appendStands_(data) {
+  var sheet = getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS);
+  if (findDuplicateInSheet_(sheet, HEADERS_STANDS, data.correo, null)) {
+    throw new Error('Ya existe una solicitud de stand con este correo.');
+  }
+
+  var legalCols = parseFeriaLegalAcceptances_(data);
+  var estado = 'Solicitud recibida';
+  var contacto = data.contacto || data.nombre || '';
+
+  sheet.appendRow([
+    data.fecha || new Date().toISOString(),
+    data.id || '',
+    data.marca || '',
+    contacto,
+    data.celular || '',
+    data.correo || '',
+    data.plan || '',
+    data.ciudad || '',
+    data.descripcion || ''
+  ].concat(legalCols).concat([estado, '']));
+
+  sendConfirmationEmail_('stands', data);
+  sendOrganizerNotificationEmail_('stands', data);
   return data.id || '';
 }
 
@@ -449,6 +487,17 @@ function buildEmailBody_(formType, data) {
     lines.push('Referencia: ' + id);
     lines.push('Te contactaremos si se libera un cupo.');
     lines.push('Dudas: ' + ORGANIZER_EMAIL);
+  } else if (formType === 'stands') {
+    var contacto = data.contacto || nombre;
+    lines.push('Recibimos tu solicitud de stand para la feria de La Sucursal del Café.');
+    lines.push('Referencia: ' + id);
+    lines.push('Marca o negocio: ' + (data.marca || ''));
+    lines.push('Plan solicitado: ' + (data.plan || ''));
+    lines.push('Fechas: 29 y 30 de agosto de 2026');
+    lines.push('Sede: Palmetto Plaza, Cali');
+    lines.push('');
+    lines.push('El equipo organizador revisará disponibilidad y te contactará por correo o WhatsApp para confirmar tu stand.');
+    lines.push('Dudas: ' + ORGANIZER_EMAIL);
   } else {
     lines.push('Recibimos tu inscripción a la feria de La Sucursal del Café.');
     lines.push('Referencia: ' + id);
@@ -470,6 +519,7 @@ function sendConfirmationEmail_(formType, data) {
   var subject = 'Inscripción recibida — La Sucursal del Café';
   if (formType === 'competencia') subject = 'Switch Championship — inscripción ' + (data.id || '');
   if (formType === 'lista_espera') subject = 'Lista de espera — Switch Championship';
+  if (formType === 'stands') subject = 'Solicitud de stand recibida — ' + (data.marca || data.id || '');
 
   try {
     MailApp.sendEmail(correo, subject, buildEmailBody_(formType, data));
@@ -503,6 +553,18 @@ function buildOrganizerAlertBody_(formType, data) {
     lines.push('Tiene comprobante: ' + (data.comprobanteArchivo && data.comprobanteArchivo.tieneComprobante ? 'Sí' : 'No'));
     lines.push('');
     lines.push('Revisa la hoja "' + SHEET_COMPETENCIA + '" en Google Sheets para el detalle completo.');
+  } else if (formType === 'stands') {
+    lines.push('Formulario: Solicitud de stand (expositor)');
+    lines.push('ID: ' + id);
+    lines.push('Marca o negocio: ' + (data.marca || ''));
+    lines.push('Contacto: ' + (data.contacto || nombre));
+    lines.push('Correo: ' + (data.correo || ''));
+    lines.push('Celular: ' + (data.celular || ''));
+    lines.push('Plan: ' + (data.plan || ''));
+    lines.push('Ciudad: ' + (data.ciudad || ''));
+    lines.push('Descripción: ' + (data.descripcion || ''));
+    lines.push('');
+    lines.push('Revisa la hoja "' + SHEET_STANDS + '" en Google Sheets para el detalle completo.');
   } else if (formType === 'lista_espera') {
     lines.push('Formulario: Lista de espera (Switch Championship)');
     lines.push('ID: ' + id);
@@ -536,6 +598,9 @@ function buildOrganizerAlertSubject_(formType, data) {
   var id = data.id || '';
   if (formType === 'competencia') {
     return '[Switch Championship] Nueva inscripción — ' + nombre + (id ? ' (' + id + ')' : '');
+  }
+  if (formType === 'stands') {
+    return '[Stand] Nueva solicitud — ' + (data.marca || nombre) + (id ? ' (' + id + ')' : '');
   }
   if (formType === 'lista_espera') {
     return '[Lista de espera] ' + nombre + (id ? ' (' + id + ')' : '');
@@ -811,6 +876,7 @@ function handleAdminDashboard_(idToken) {
 
   var feriaCount = getSheetRowCount_(SHEET_FERIA, HEADERS_FERIA);
   var competenciaCount = getCompetenciaCount_();
+  var standsCount = getSheetRowCount_(SHEET_STANDS, HEADERS_STANDS);
   var listaCount = getSheetRowCount_(SHEET_LISTA_ESPERA, HEADERS_LISTA_ESPERA);
   var analytics = getAnalyticsStats_();
 
@@ -824,6 +890,7 @@ function handleAdminDashboard_(idToken) {
   var allFeria = readAllSheetRows_(SHEET_FERIA, HEADERS_FERIA, true);
   var allCompetencia = readAllSheetRows_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA, true)
     .map(sanitizeCompetenciaRow_);
+  var allStands = readAllSheetRows_(SHEET_STANDS, HEADERS_STANDS, true);
 
   return jsonResponse({
     ok: true,
@@ -833,6 +900,7 @@ function handleAdminDashboard_(idToken) {
       visitsTotal: analytics.total,
       feriaRegistrations: feriaCount,
       competenciaRegistrations: competenciaCount,
+      standsRegistrations: standsCount,
       listaEspera: listaCount,
       competenciaCupo: {
         count: competenciaCount,
@@ -852,8 +920,10 @@ function handleAdminDashboard_(idToken) {
     },
     feriaColumns: HEADERS_FERIA,
     competenciaColumns: competenciaDisplayHeaders_(),
+    standsColumns: HEADERS_STANDS,
     allFeria: allFeria,
-    allCompetencia: allCompetencia
+    allCompetencia: allCompetencia,
+    allStands: allStands
   });
 }
 
@@ -884,6 +954,16 @@ function handleAdminExport_(idToken, dataset) {
       dataset: 'competencia',
       filename: 'switch-championship-' + stamp + '.csv',
       csv: rowsToCsv_(HEADERS_COMPETENCIA, compRows)
+    });
+  }
+
+  if (dataset === 'stands') {
+    var standsRows = readAllSheetRows_(SHEET_STANDS, HEADERS_STANDS, false);
+    return jsonResponse({
+      ok: true,
+      dataset: 'stands',
+      filename: 'stands-expositores-' + stamp + '.csv',
+      csv: rowsToCsv_(HEADERS_STANDS, standsRows)
     });
   }
 
@@ -924,6 +1004,10 @@ function handleAdminExport_(idToken, dataset) {
           )
         },
         {
+          filename: 'stands-expositores-' + stamp + '.csv',
+          csv: rowsToCsv_(HEADERS_STANDS, readAllSheetRows_(SHEET_STANDS, HEADERS_STANDS, false))
+        },
+        {
           filename: 'analytics-' + stamp + '.csv',
           csv: rowsToCsv_(HEADERS_ANALYTICS, readAllSheetRows_(SHEET_ANALYTICS, HEADERS_ANALYTICS, false))
         },
@@ -937,7 +1021,7 @@ function handleAdminExport_(idToken, dataset) {
 
   return jsonResponse({
     ok: false,
-    error: 'dataset inválido. Usa: feria, competencia, analytics, lista_espera, all'
+    error: 'dataset inválido. Usa: feria, competencia, stands, analytics, lista_espera, all'
   }, 400);
 }
 

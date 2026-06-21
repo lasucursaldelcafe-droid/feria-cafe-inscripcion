@@ -17,6 +17,11 @@
     'Estado pago', 'Cupo confirmado', 'Comprobante enlace Drive'
   ];
 
+  var DEFAULT_STANDS_COLS = [
+    'Fecha registro', 'ID', 'Marca o negocio', 'Persona contacto', 'Celular', 'Correo',
+    'Plan stand', 'Ciudad', 'Descripción exhibición', 'Estado solicitud', 'Notas admin'
+  ];
+
   function getWebAppUrl() {
     var cfg = global.SHEETS_CONFIG || {};
     var url = (cfg.WEB_APP_URL || '').trim();
@@ -195,6 +200,13 @@
       );
       return true;
     }
+    if (dataset === 'stands') {
+      downloadCsvText(
+        stampFilename('stands-expositores'),
+        rowsToCsv(data.standsColumns || DEFAULT_STANDS_COLS, data.allStands || data.recentStands || [])
+      );
+      return true;
+    }
     return false;
   }
 
@@ -255,6 +267,7 @@
     if (data[key]) return data[key];
     if (key === 'allFeria' && data.recentFeria) return data.recentFeria;
     if (key === 'allCompetencia' && data.recentCompetencia) return data.recentCompetencia;
+    if (key === 'allStands' && data.recentStands) return data.recentStands;
     return [];
   }
 
@@ -270,6 +283,8 @@
     if (uniqueTotal) uniqueTotal.textContent = formatNumber(stats.uniquePathsTotal);
     document.getElementById('statFeria').textContent = formatNumber(stats.feriaRegistrations);
     document.getElementById('statCompetencia').textContent = formatNumber(stats.competenciaRegistrations);
+    var statStands = document.getElementById('statStands');
+    if (statStands) statStands.textContent = formatNumber(stats.standsRegistrations);
     document.getElementById('statLista').textContent = formatNumber(stats.listaEspera);
 
     var cupo = stats.competenciaCupo || {};
@@ -313,6 +328,21 @@
       compCols,
       compRows.length ? 'Todos los registros, más recientes primero.' : ''
     );
+
+    var standsRows = pickRows(data, 'allStands');
+    var standsCols = data.standsColumns || DEFAULT_STANDS_COLS;
+    var standsTitle = document.getElementById('standsTableTitle');
+    if (standsTitle) {
+      standsTitle.textContent = 'Solicitudes — Stands (expositores) — ' + formatNumber(standsRows.length) + ' total';
+    }
+    var tableStands = document.getElementById('tableStands');
+    if (tableStands) {
+      tableStands.innerHTML = renderTable(
+        standsRows,
+        standsCols,
+        standsRows.length ? 'Todos los registros, más recientes primero.' : ''
+      );
+    }
 
     var updated = document.getElementById('dashboardUpdated');
     if (updated && data.generatedAt) {

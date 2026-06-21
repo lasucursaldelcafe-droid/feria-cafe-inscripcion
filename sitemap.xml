@@ -19,6 +19,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://la-sucursal-del-cafe.web.app/stands</loc>
+    <lastmod>2026-06-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://la-sucursal-del-cafe.web.app/inscripcion</loc>
     <lastmod>2026-06-20</lastmod>
     <changefreq>weekly</changefreq>

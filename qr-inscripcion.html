@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
   <link rel="apple-touch-icon" href="assets/logo-la-sucursal-del-cafe.png">
-  <meta name="description" content="Códigos QR de inscripción para la feria de café La Sucursal del Café y el Switch Championship en Cali. Escanea y regístrate.">
+  <meta name="description" content="Códigos QR de inscripción para la feria de café La Sucursal del Café: visitantes, stands y Switch Championship en Cali. Escanea y regístrate.">
   <link rel="canonical" href="https://la-sucursal-del-cafe.web.app/qr">
   <meta property="og:title" content="QR inscripción | La Sucursal del Café — Cali">
-  <meta property="og:description" content="Enlaces QR para registro de visitante en la feria y inscripción al Switch Championship.">
+  <meta property="og:description" content="Enlaces QR para registro de visitante, solicitud de stand y Switch Championship.">
   <meta property="og:url" content="https://la-sucursal-del-cafe.web.app/qr">
   <meta property="og:image" content="https://la-sucursal-del-cafe.web.app/assets/logo-la-sucursal-del-cafe.png">
   <meta property="og:locale" content="es_CO">
@@ -30,9 +30,14 @@
       <article class="content-card">
         <div class="card-body qr-grid">
           <section class="qr-card">
-            <h2>Feria general</h2>
-            <div id="qrFeria" class="qr-box" aria-label="QR feria"></div>
+            <h2>Feria — visitantes</h2>
+            <div id="qrFeria" class="qr-box" aria-label="QR feria visitantes"></div>
             <p class="hint" id="urlFeria"></p>
+          </section>
+          <section class="qr-card">
+            <h2>Stands — expositores</h2>
+            <div id="qrStands" class="qr-box" aria-label="QR stands expositores"></div>
+            <p class="hint" id="urlStands"></p>
           </section>
           <section class="qr-card">
             <h2>Switch Championship</h2>
@@ -43,6 +48,7 @@
         <p class="footer-note">
           <a data-link="festival" href="index.html">Inicio</a> ·
           <a data-link="feria" href="inscripcion.html">Registro visitante (feria)</a> ·
+          <a data-link="stands" href="stands.html">Adquiere tu stand</a> ·
           <a data-link="competencia" href="competencia.html">Switch Championship</a> ·
           <a data-link="privacidad" href="privacidad.html">Privacidad</a> ·
           <a data-link="qr" href="qr-inscripcion.html">QR</a>
@@ -75,12 +81,15 @@
 
       var urls = {
         feria: abs('feria'),
+        stands: abs('stands'),
         competencia: abs('competencia')
       };
 
       document.getElementById('urlFeria').innerHTML = '<a href="' + urls.feria + '">' + urls.feria + '</a>';
+      document.getElementById('urlStands').innerHTML = '<a href="' + urls.stands + '">' + urls.stands + '</a>';
       document.getElementById('urlCompetencia').innerHTML = '<a href="' + urls.competencia + '">' + urls.competencia + '</a>';
       renderQr('qrFeria', urls.feria);
+      renderQr('qrStands', urls.stands);
       renderQr('qrCompetencia', urls.competencia);
     })();
   </script>

@@ -67,6 +67,18 @@ window.EVENT_CONFIG = {
     notaIndependencia:
       'Organizado por el mismo equipo de La Sucursal del Café. El registro de visitante en la feria es independiente de la inscripción al Switch Championship.'
   },
+  stands: {
+    nav: 'Adquiere tu stand',
+    titulo: 'Adquiere tu stand',
+    resumen: 'Exhibe tu marca en la feria de café especial · solicitud en línea',
+    cta: 'Enviar solicitud de stand',
+    intro:
+      'Reserva o solicita un stand como expositor en Palmetto Plaza. Planes Zona Origen, Zona Gran Reserva o Aliado Patrocinador.',
+    noEsVisitante:
+      'Este formulario es para expositores y marcas. Si solo asistes como visitante, usa el registro de visitante (opcional, sin costo).',
+    noEsCompetencia:
+      'No es la inscripción al Switch Championship (competencia de pago, formulario aparte).'
+  },
   circuito: {
     clasificatoriasTotal: 3,
     clasificatoriaActual: 1,

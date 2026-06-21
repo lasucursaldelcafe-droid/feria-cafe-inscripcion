@@ -32,6 +32,10 @@
         "destination": "/patrocinadores.html"
       },
       {
+        "source": "/stands",
+        "destination": "/stands.html"
+      },
+      {
         "source": "/inscripcion",
         "destination": "/inscripcion.html"
       },

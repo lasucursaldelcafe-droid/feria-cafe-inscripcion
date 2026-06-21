@@ -17,6 +17,7 @@
     if (path.indexOf('admin') !== -1) return null;
     if (path.indexOf('competencia') !== -1 || path.indexOf('reglas') !== -1 ||
         path.indexOf('como-funciona') !== -1) return 'torneo';
+    if (path.indexOf('stands') !== -1) return 'stands';
     if (path.indexOf('privacidad') !== -1 || path.indexOf('qr') !== -1) return 'support';
     return 'feria';
   }
@@ -106,6 +107,26 @@
     };
   }
 
+  function standsEvent() {
+    return {
+      '@type': 'Event',
+      name: brand + ' — Stands para expositores',
+      description:
+        (cfg.stands && cfg.stands.intro) ||
+        'Solicitud de stand para expositores en la feria de café especial en Cali.',
+      startDate: feria.fechaIso || '2026-08-29',
+      endDate: '2026-08-30',
+      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+      eventStatus: 'https://schema.org/EventScheduled',
+      isAccessibleForFree: false,
+      inLanguage: 'es-CO',
+      location: place(feria.sede, feria.ciudad, feria.mapsQuery),
+      organizer: organizer(),
+      url: absUrl('stands'),
+      image: siteUrl + '/assets/logo-la-sucursal-del-cafe.png'
+    };
+  }
+
   function websiteNode() {
     return {
       '@type': 'WebSite',
@@ -142,6 +163,8 @@
       if (path === '/' || path === '' || path.indexOf('index') !== -1 || path.indexOf('festival') !== -1) {
         nodes.push(websiteNode());
       }
+    } else if (kind === 'stands') {
+      nodes.push(standsEvent());
     } else if (kind === 'torneo') {
       nodes.push(torneoEvent());
     }

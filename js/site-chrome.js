@@ -7,6 +7,7 @@
   var cfg = global.EVENT_CONFIG || {};
   var contact = cfg.contact || {};
   var feria = cfg.feria || {};
+  var stands = cfg.stands || {};
   var ev = cfg.evento1 || {};
   var siteUrl = (cfg.siteUrl || '').replace(/\/$/, '');
   var INSTAGRAM_URL = 'https://www.instagram.com/lasucursal.delcafe/';
@@ -38,6 +39,7 @@
         path.indexOf('el-evento') !== -1 || path.indexOf('actividades') !== -1 ||
         path.indexOf('patrocinadores') !== -1) return 'festival';
     if (path.indexOf('competencia') !== -1) return 'torneo';
+    if (path.indexOf('stands') !== -1) return 'stands';
     if (path.indexOf('inscripcion') !== -1) return 'feria';
     return 'general';
   }
@@ -103,6 +105,33 @@
       if (btnSubmit) btnSubmit.textContent = 'Enviar registro de visitante';
     }
 
+    if (page === 'stands') {
+      setText(
+        'heroSubtitle',
+        (stands.resumen || 'Exhibe tu marca en la feria de café especial') +
+          ' · ' +
+          feria.fecha +
+          ' · ' +
+          feriaLugar()
+      );
+      setText('badgeStandsFecha', '📅 ' + (feria.fechaCorta || feria.fecha));
+      setText('badgeStandsSede', '📍 ' + feriaLugar());
+      setHtml(
+        'infoStandsDetalle',
+        '<strong>' + (feria.fecha || '') + '</strong> · <strong>' + feriaLugar() + '</strong>'
+      );
+      setHtml(
+        'successLeadStands',
+        'Gracias por tu interés en exponer en <strong>La Sucursal del Café</strong>. ' +
+          'El equipo revisará tu solicitud de stand y te contactará para confirmar disponibilidad. ' +
+          'Te esperamos el <strong>' + feria.fecha + '</strong> (' + feriaLugar() + ').'
+      );
+      var standsTitle = document.getElementById('form-title');
+      if (standsTitle && stands.titulo) standsTitle.textContent = stands.titulo;
+      var standsBtn = document.getElementById('btnSubmit');
+      if (standsBtn && stands.cta) standsBtn.textContent = stands.cta;
+    }
+
     document.querySelectorAll('[data-bind]').forEach(function (el) {
       var key = el.getAttribute('data-bind');
       if (key === 'feria.fecha' && feria.fecha) el.textContent = feria.fecha;
@@ -118,6 +147,7 @@
     if (path.indexOf('el-evento') !== -1) return 'evento';
     if (path.indexOf('actividades') !== -1) return 'actividades';
     if (path.indexOf('patrocinadores') !== -1) return 'patrocinadores';
+    if (path.indexOf('stands') !== -1) return 'stands';
     if (path.indexOf('competencia') !== -1) return 'competencia';
     if (path.indexOf('reglas') !== -1) return 'reglas';
     if (path.indexOf('como-funciona') !== -1) return 'comoFunciona';
@@ -187,26 +217,36 @@
 
     if (page === 'festival') {
       crosslink =
+        '<a href="' + href('stands') + '">Adquiere tu stand</a> · ' +
         '<a href="' + href('feria') + '">Registro visitante</a> · ' +
+        '<a href="' + href('competencia') + '">Switch Championship</a>' +
+        '<span class="site-footer-dates">' + (feria.fechaCorta || feria.fecha || '') +
+        ' · ' + feriaLugar() + '</span>';
+    } else if (page === 'stands') {
+      crosslink =
+        '¿Vienes como visitante? <a href="' + href('feria') + '">Registro de visitante (opcional)</a> · ' +
         '<a href="' + href('competencia') + '">Switch Championship</a>' +
         '<span class="site-footer-dates">' + (feria.fechaCorta || feria.fecha || '') +
         ' · ' + feriaLugar() + '</span>';
     } else if (page === 'feria') {
       crosslink =
+        '¿Expones una marca? <a href="' + href('stands') + '">Adquiere tu stand</a> · ' +
         '¿Compites en café filtrado? <a href="' + href('competencia') + '">Inscripción Switch Championship</a>' +
         '<span class="site-footer-dates">' + (ev.fechaCorta || ev.fecha || '') +
         ' · ' + torneoLugar() + '</span>';
     } else if (page === 'torneo') {
       crosslink =
+        '¿Expones en la feria? <a href="' + href('stands') + '">Adquiere tu stand</a> · ' +
         '¿Vienes a la feria? <a href="' + href('feria') + '">Registro de visitante (opcional)</a>' +
         '<span class="site-footer-dates">' + (feria.fechaCorta || feria.fecha || '') +
         ' · ' + feriaLugar() + '</span>';
     } else {
       crosslink =
         '<a href="' + href('festival') + '">Inicio</a> · ' +
+        '<a href="' + href('stands') + '">Stands</a> · ' +
         '<a href="' + href('feria') + '">Feria</a> · ' +
         '<a href="' + href('competencia') + '">Switch Championship</a>' +
-        '<span class="site-footer-dates">Dos eventos · inscripciones independientes</span>';
+        '<span class="site-footer-dates">Tres formularios · inscripciones independientes</span>';
     }
 
     var html =
@@ -253,6 +293,17 @@
       el.textContent = label;
     });
     document.querySelectorAll('.festival-footer__nav a[data-link="feria"]').forEach(function (el) {
+      el.textContent = label;
+    });
+  }
+
+  function applyStandsNav() {
+    var standsCfg = cfg.stands || {};
+    var label = standsCfg.nav || 'Adquiere tu stand';
+    document.querySelectorAll('[data-nav="stands"]').forEach(function (el) {
+      el.textContent = label;
+    });
+    document.querySelectorAll('.festival-footer__nav a[data-link="stands"]').forEach(function (el) {
       el.textContent = label;
     });
   }
@@ -320,6 +371,7 @@
       global.SiteLinks.apply(document);
     }
     applyFeriaVisitanteNav();
+    applyStandsNav();
     applyPageCopy();
     applyInstagramLink();
     ensureOgMeta();

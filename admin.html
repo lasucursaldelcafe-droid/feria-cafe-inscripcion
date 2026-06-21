@@ -92,6 +92,10 @@
             <div class="admin-stat__label">Inscripciones Switch</div>
             <div class="admin-stat__value" id="statCompetencia">—</div>
           </div>
+          <div class="admin-stat admin-stat--accent-green">
+            <div class="admin-stat__label">Solicitudes stands</div>
+            <div class="admin-stat__value" id="statStands">—</div>
+          </div>
           <div class="admin-stat">
             <div class="admin-stat__label">Lista de espera</div>
             <div class="admin-stat__value" id="statLista">—</div>
@@ -124,6 +128,14 @@
             <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-export="competencia">Descargar CSV</button>
           </div>
           <div id="tableCompetencia"></div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card__head">
+            <h4 class="admin-card__title"><span id="standsTableTitle">Solicitudes — Stands (expositores)</span></h4>
+            <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-export="stands">Descargar CSV</button>
+          </div>
+          <div id="tableStands"></div>
         </div>
       </section>
     </section>
