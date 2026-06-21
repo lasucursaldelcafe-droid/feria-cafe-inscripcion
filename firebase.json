@@ -10,6 +10,22 @@
       "tools/**",
       "js/firebase-config.js"
     ],
+    "redirects": [
+      { "source": "/festival/", "destination": "/festival", "type": 301 },
+      { "source": "/el-evento/", "destination": "/el-evento", "type": 301 },
+      { "source": "/actividades/", "destination": "/actividades", "type": 301 },
+      { "source": "/patrocinadores/", "destination": "/patrocinadores", "type": 301 },
+      { "source": "/stands/", "destination": "/stands", "type": 301 },
+      { "source": "/inscripcion/", "destination": "/inscripcion", "type": 301 },
+      { "source": "/competencia/", "destination": "/competencia", "type": 301 },
+      { "source": "/reglas/", "destination": "/reglas", "type": 301 },
+      { "source": "/como-funciona/", "destination": "/como-funciona", "type": 301 },
+      { "source": "/privacidad/", "destination": "/privacidad", "type": 301 },
+      { "source": "/qr/", "destination": "/qr", "type": 301 },
+      { "source": "/admin/", "destination": "/admin", "type": 301 },
+      { "source": "/mi-stand/", "destination": "/mi-stand", "type": 301 },
+      { "source": "/expositor/", "destination": "/expositor", "type": 301 }
+    ],
     "rewrites": [
       {
         "source": "/festival",

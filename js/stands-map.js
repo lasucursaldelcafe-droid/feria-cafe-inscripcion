@@ -6,17 +6,42 @@
 
   var PLANS_WITH_STAND = ['Zona Origen', 'Zona Gran Reserva', 'Aliado Patrocinador'];
   var MAP_FALLBACK = '/assets/stands-map-placeholder.svg';
+  var MAP_REAL = '/assets/stands-map.jpg';
+  /** SVG embebido — último recurso si fallan todos los assets externos. */
+  var MAP_INLINE =
+    'data:image/svg+xml,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Plano de stands">' +
+      '<defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">' +
+      '<stop offset="0%" stop-color="#F5EDE4"/><stop offset="100%" stop-color="#E8D9C8"/></linearGradient></defs>' +
+      '<rect width="800" height="500" fill="url(#bg)"/>' +
+      '<rect x="280" y="52" width="240" height="70" rx="6" fill="#BB5E3C" opacity="0.18" stroke="#BB5E3C" stroke-width="2"/>' +
+      '<text x="400" y="72" text-anchor="middle" fill="#4B352A" font-family="Inter,sans-serif" font-size="11" font-weight="700">ALIADO PATROCINADOR</text>' +
+      '<rect x="24" y="130" width="340" height="340" rx="8" fill="#8B6914" opacity="0.12" stroke="#8B6914" stroke-width="2"/>' +
+      '<text x="194" y="155" text-anchor="middle" fill="#4B352A" font-family="Inter,sans-serif" font-size="12" font-weight="700">ZONA ORIGEN</text>' +
+      '<rect x="400" y="130" width="376" height="340" rx="8" fill="#4B352A" opacity="0.10" stroke="#4B352A" stroke-width="2"/>' +
+      '<text x="588" y="155" text-anchor="middle" fill="#4B352A" font-family="Inter,sans-serif" font-size="12" font-weight="700">ZONA GRAN RESERVA</text>' +
+      '<text x="400" y="488" text-anchor="middle" fill="#6B5344" font-family="Inter,sans-serif" font-size="11">Plano guía · Palmetto Plaza</text>' +
+      '</svg>'
+    );
 
-  /** Rutas desde la raíz del sitio (/assets/…) — válidas en /stands y /stands/. */
+  function getAssetBase() {
+    if (typeof document !== 'undefined' && document.body) {
+      var dataBase = document.body.getAttribute('data-asset-base');
+      if (dataBase) return dataBase.replace(/\/?$/, '/');
+    }
+    return '/';
+  }
+
+  /** Rutas desde la raíz del sitio — válidas en /stands, /stands/ y stands.html. */
   function resolveAssetUrl(path) {
     if (!path) return MAP_FALLBACK;
     var s = String(path).trim();
     if (/^https?:\/\//i.test(s) || s.indexOf('data:') === 0) return s;
     if (s.charAt(0) === '/') return s;
-    return '/' + s.replace(/^\.\//, '');
+    return getAssetBase() + s.replace(/^\.\//, '');
   }
 
-  function setupMapImage(img, configuredPath) {
+  function setupMapImage(img, configuredPath, stage) {
     if (!img) return;
     var seen = {};
     var candidates = [];
@@ -26,13 +51,29 @@
       candidates.push(url);
     }
     add(resolveAssetUrl(configuredPath));
-    add('/assets/stands-map.jpg');
+    if (resolveAssetUrl(configuredPath) !== MAP_REAL) add(MAP_REAL);
     add(MAP_FALLBACK);
+    add(MAP_INLINE);
+
     var idx = 0;
+    img.removeAttribute('loading');
+    img.setAttribute('decoding', 'async');
+    img.setAttribute('width', '800');
+    img.setAttribute('height', '500');
+
+    function markReady() {
+      if (stage) stage.classList.add('stands-map-stage--ready');
+    }
+
     img.onerror = function () {
       idx += 1;
-      if (idx < candidates.length) img.src = candidates[idx];
+      if (idx < candidates.length) {
+        img.src = candidates[idx];
+        return;
+      }
+      markReady();
     };
+    img.onload = markReady;
     img.src = candidates[0];
   }
 
@@ -200,7 +241,10 @@
 
   StandsMap.prototype.refresh = function () {
     var self = this;
-    if (self.statusEl) self.statusEl.textContent = 'Consultando disponibilidad…';
+    var hadMap = !!(self.root && self.root.querySelector('.stands-map-stage'));
+    if (self.statusEl && hadMap) {
+      self.statusEl.textContent = 'Consultando disponibilidad…';
+    }
 
     var configured = global.FormSubmit && FormSubmit.isConfigured && FormSubmit.isConfigured();
     if (configured && FormSubmit.fetchStandsMap) {
@@ -212,19 +256,28 @@
           self.fetchError = true;
           self.occupied = self.getLocalOccupied();
         }
-        self.render();
+        self.renderSpots();
+        self.renderLegend();
+        self.renderStatus();
+        self.updateSelectionLabel();
         return self.occupied;
       }).catch(function () {
         self.fetchError = true;
         self.occupied = self.getLocalOccupied();
-        self.render();
+        self.renderSpots();
+        self.renderLegend();
+        self.renderStatus();
+        self.updateSelectionLabel();
         return self.occupied;
       });
     }
 
     self.fetchError = false;
     self.occupied = self.getLocalOccupied();
-    self.render();
+    self.renderSpots();
+    self.renderLegend();
+    self.renderStatus();
+    self.updateSelectionLabel();
     return Promise.resolve(self.occupied);
   };
 
@@ -355,11 +408,12 @@
 
     this.root.innerHTML =
       '<div class="stands-map-stage">' +
-      '<img class="stands-map-image" alt="Plano de stands en Palmetto Plaza" loading="lazy">' +
+      '<img class="stands-map-image" alt="Plano de stands en Palmetto Plaza">' +
       '<div class="stands-map-overlay" role="group" aria-label="Selección de stand"></div>' +
       '</div>';
 
-    setupMapImage(this.root.querySelector('.stands-map-image'), this.mapConfig.image);
+    var stage = this.root.querySelector('.stands-map-stage');
+    setupMapImage(this.root.querySelector('.stands-map-image'), this.mapConfig.image, stage);
 
     var overlay = this.root.querySelector('.stands-map-overlay');
     this.positions.forEach(function (pos) {
@@ -431,6 +485,10 @@
 
   StandsMap.prototype.init = function () {
     this.buildDom();
+    this.renderLegend();
+    this.renderStatus();
+    this.renderSpots();
+    this.updateSelectionLabel();
     return this.refresh();
   };
 
@@ -565,6 +623,7 @@
   global.StandsMapUtils = {
     planRequiresStand: planRequiresStand,
     normalizeStandId: normalizeStandId,
-    compressImageFile: compressImageFile
+    compressImageFile: compressImageFile,
+    resolveAssetUrl: resolveAssetUrl
   };
 })(window);
