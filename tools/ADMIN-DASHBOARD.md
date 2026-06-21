@@ -109,3 +109,23 @@ py tools/verify_admin.py
 ```
 
 Debe mostrar `[OK] admin_dashboard` y `[OK] Pageview POST OK.`
+
+## Novedades para expositores (hoja «Novedades»)
+
+El panel del expositor (`/mi-stand`) muestra actualizaciones desde la hoja **Novedades** del mismo Google Spreadsheet.
+
+| Columna | Descripción |
+| ------- | ----------- |
+| Timestamp | Fecha/hora de publicación (ISO o fecha Sheets) |
+| Titulo | Título breve |
+| Cuerpo | Texto de la novedad |
+| Audiencia | `todos` (visible en feed) o `expositores` (solo panel expositor) |
+
+Para crear la hoja y encabezados, ejecuta **`sincronizarEncabezados`** una vez en el editor de Apps Script (o redeploy con `Code.gs` actualizado).
+
+Los expositores ingresan con **correo + código de acceso** de 8 caracteres (generado al enviar solicitud de stand; hash guardado en columna «Código acceso (hash)» de la hoja Stands).
+
+| Panel expositor | URL |
+| --------------- | --- |
+| Producción | https://la-sucursal-del-cafe.web.app/mi-stand |
+| Alternativa | https://la-sucursal-del-cafe.web.app/expositor |

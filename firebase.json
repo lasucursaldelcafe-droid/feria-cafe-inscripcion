@@ -62,6 +62,14 @@
       {
         "source": "/admin",
         "destination": "/admin.html"
+      },
+      {
+        "source": "/mi-stand",
+        "destination": "/expositor.html"
+      },
+      {
+        "source": "/expositor",
+        "destination": "/expositor.html"
       }
     ],
     "headers": [
@@ -121,6 +129,32 @@
       {
         "source": "/js/admin-dashboard.js",
         "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-store, no-cache, must-revalidate, max-age=0"
+          }
+        ]
+      },
+      {
+        "source": "/mi-stand**",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-store, no-cache, must-revalidate, max-age=0"
+          }
+        ]
+      },
+      {
+        "source": "/expositor**",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          },
           {
             "key": "Cache-Control",
             "value": "no-store, no-cache, must-revalidate, max-age=0"

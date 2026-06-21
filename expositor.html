@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
+  <title>Mi stand — Panel expositor | La Sucursal del Café</title>
+  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/expositor.css?v=20260620a">
+</head>
+<body class="expositor-page">
+  <header class="expositor-header">
+    <div class="expositor-header__inner">
+      <a class="expositor-header__brand" href="index.html" aria-label="La Sucursal del Café">
+        <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="120" height="48">
+      </a>
+      <div class="expositor-header__text">
+        <h1>Panel del expositor</h1>
+        <p>Tu stand · novedades de la feria · contacto organizador</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="expositor-main">
+    <section id="expositorLogin" class="expositor-login" aria-labelledby="loginTitle">
+      <div class="expositor-card">
+        <h2 id="loginTitle">Ingresa a tu panel</h2>
+        <p>Usa el correo con el que enviaste la solicitud y el código de acceso de 8 caracteres que recibiste al confirmar.</p>
+        <form id="expositorLoginForm" novalidate>
+          <div class="expositor-field">
+            <label for="loginEmail">Correo electrónico</label>
+            <input type="email" id="loginEmail" name="email" autocomplete="email" required placeholder="nombre@correo.com">
+          </div>
+          <div class="expositor-field">
+            <label for="loginAccessCode">Código de acceso</label>
+            <input type="text" id="loginAccessCode" name="accessCode" autocomplete="one-time-code" required minlength="6" maxlength="12" placeholder="Ej. AB12CD34" autocapitalize="characters" spellcheck="false">
+            <p class="expositor-hint">Lo encontrarás en el correo de confirmación y en la pantalla de éxito al enviar tu solicitud.</p>
+          </div>
+          <span id="loginError" class="expositor-error" role="alert"></span>
+          <button type="submit" id="loginSubmit" class="expositor-btn expositor-btn--primary">Entrar a mi panel</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="expositorPanel" class="expositor-panel" hidden aria-labelledby="panelTitle">
+      <div class="expositor-toolbar">
+        <p class="expositor-toolbar__email">Sesión: <strong id="sessionEmail"></strong></p>
+        <button type="button" id="logoutBtn" class="expositor-btn expositor-btn--secondary">Cerrar sesión</button>
+      </div>
+
+      <article class="expositor-card" aria-labelledby="standTitle">
+        <h2 id="standTitle">Mi stand</h2>
+        <div id="standDetails"></div>
+      </article>
+
+      <article class="expositor-card" aria-labelledby="feedTitle">
+        <div class="expositor-toolbar" style="margin-bottom:0.5rem">
+          <h2 id="feedTitle" style="margin:0">Novedades de la feria</h2>
+          <button type="button" id="refreshFeedBtn" class="expositor-btn expositor-btn--secondary">Actualizar</button>
+        </div>
+        <p id="feedStatus" class="expositor-hint" aria-live="polite"></p>
+        <div id="feedList"></div>
+      </article>
+
+      <article class="expositor-card" aria-labelledby="contactTitle">
+        <h2 id="contactTitle">Contacto organizador</h2>
+        <p>¿Dudas sobre tu stand, pago o logística? Escríbenos:</p>
+        <div class="expositor-contact-actions">
+          <a id="expWaContact" class="expositor-btn expositor-btn--primary" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a id="expEmailContact" class="expositor-btn expositor-btn--secondary" href="mailto:lasucursaldelcafe@gmail.com">lasucursaldelcafe@gmail.com</a>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script src="js/event-config.js"></script>
+  <script src="js/sheets-config.js"></script>
+  <script src="js/form-submit.js"></script>
+  <script src="js/expositor-panel.js?v=20260620a"></script>
+</body>
+</html>

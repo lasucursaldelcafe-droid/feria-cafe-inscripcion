@@ -1,0 +1,335 @@
+/* Panel expositor — tema oscuro con branding café */
+
+:root {
+  --exp-bg: #1a1410;
+  --exp-surface: #2a211a;
+  --exp-surface-2: #352920;
+  --exp-border: rgba(233, 230, 221, 0.1);
+  --exp-text: #f5f0e8;
+  --exp-text-muted: #b8a99a;
+  --exp-accent: #bb5e3c;
+  --exp-accent-green: #6bbf8a;
+  --exp-accent-red: #e07070;
+  --exp-radius: 10px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.expositor-page {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--exp-bg);
+  color: var(--exp-text);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.expositor-header {
+  background: linear-gradient(155deg, #2a1f18 0%, #4b352a 100%);
+  border-bottom: 1px solid var(--exp-border);
+  padding: 1.25rem 1.5rem;
+}
+
+.expositor-header__inner {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.expositor-header__brand img {
+  height: 52px;
+  padding: 0.4rem 0.65rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.expositor-header__text h1 {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
+  font-weight: 700;
+}
+
+.expositor-header__text p {
+  margin: 0.15rem 0 0;
+  font-size: 0.88rem;
+  color: var(--exp-text-muted);
+}
+
+.expositor-main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.expositor-card {
+  background: var(--exp-surface);
+  border: 1px solid var(--exp-border);
+  border-radius: var(--exp-radius);
+  padding: 1.35rem;
+  margin-bottom: 1.25rem;
+}
+
+.expositor-card h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--exp-text);
+}
+
+.expositor-card p {
+  margin: 0 0 0.65rem;
+  color: var(--exp-text-muted);
+}
+
+.expositor-field {
+  margin-bottom: 1rem;
+}
+
+.expositor-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  color: var(--exp-text);
+}
+
+.expositor-field input {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 2px solid rgba(233, 230, 221, 0.15);
+  border-radius: 8px;
+  background: var(--exp-surface-2);
+  color: var(--exp-text);
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.expositor-field input:focus {
+  outline: none;
+  border-color: var(--exp-accent);
+  box-shadow: 0 0 0 3px rgba(187, 94, 60, 0.25);
+}
+
+.expositor-field input[aria-invalid="true"] {
+  border-color: var(--exp-accent-red);
+}
+
+.expositor-hint {
+  font-size: 0.8rem;
+  color: var(--exp-text-muted);
+  margin-top: 0.3rem;
+}
+
+.expositor-error {
+  display: none;
+  font-size: 0.82rem;
+  color: var(--exp-accent-red);
+  font-weight: 600;
+  margin-top: 0.35rem;
+}
+
+.expositor-error.visible {
+  display: block;
+}
+
+.expositor-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  border: 2px solid transparent;
+  text-decoration: none;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.expositor-btn--primary {
+  width: 100%;
+  background: #c1272d;
+  border-color: #a82026;
+  color: #fff;
+}
+
+.expositor-btn--primary:hover:not(:disabled) {
+  background: #a82026;
+}
+
+.expositor-btn--secondary {
+  background: transparent;
+  border-color: rgba(233, 230, 221, 0.25);
+  color: var(--exp-text);
+}
+
+.expositor-btn--secondary:hover {
+  border-color: var(--exp-accent);
+  color: var(--exp-accent);
+}
+
+.expositor-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.expositor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.expositor-toolbar__email {
+  font-size: 0.85rem;
+  color: var(--exp-text-muted);
+}
+
+.expositor-stand-grid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.expositor-stand-row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 38%) 1fr;
+  gap: 0.5rem 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--exp-border);
+  font-size: 0.92rem;
+}
+
+.expositor-stand-row:last-child {
+  border-bottom: none;
+}
+
+.expositor-stand-row dt {
+  margin: 0;
+  font-weight: 600;
+  color: var(--exp-text-muted);
+}
+
+.expositor-stand-row dd {
+  margin: 0;
+  color: var(--exp-text);
+  word-break: break-word;
+}
+
+.expositor-stand-row dd a {
+  color: var(--exp-accent-green);
+}
+
+.expositor-status {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: rgba(107, 191, 138, 0.15);
+  color: var(--exp-accent-green);
+}
+
+.expositor-logo-preview {
+  margin-top: 0.75rem;
+}
+
+.expositor-logo-preview img {
+  max-width: 120px;
+  max-height: 80px;
+  border-radius: 6px;
+  border: 1px solid var(--exp-border);
+  background: #fff;
+  padding: 4px;
+}
+
+.expositor-feed {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.expositor-feed-item {
+  padding: 1rem;
+  background: var(--exp-surface-2);
+  border: 1px solid var(--exp-border);
+  border-radius: 8px;
+}
+
+.expositor-feed-item h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.98rem;
+  color: var(--exp-text);
+}
+
+.expositor-feed-item time {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--exp-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.expositor-feed-item p {
+  margin: 0;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
+
+.expositor-feed-empty {
+  font-size: 0.9rem;
+  color: var(--exp-text-muted);
+  font-style: italic;
+}
+
+.expositor-contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.expositor-contact-actions .expositor-btn {
+  flex: 1 1 140px;
+}
+
+.expositor-loading {
+  text-align: center;
+  color: var(--exp-text-muted);
+  padding: 2rem;
+}
+
+.expositor-panel[hidden],
+.expositor-login[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 560px) {
+  .expositor-main {
+    padding: 1rem;
+  }
+
+  .expositor-stand-row {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+
+  .expositor-contact-actions {
+    flex-direction: column;
+  }
+
+  .expositor-contact-actions .expositor-btn {
+    width: 100%;
+  }
+}

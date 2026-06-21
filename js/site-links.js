@@ -17,7 +17,9 @@
     comoFunciona: 'como-funciona-evento.html',
     privacidad: 'privacidad.html',
     qr: 'qr-inscripcion.html',
-    admin: 'admin.html'
+    admin: 'admin.html',
+    expositor: 'expositor.html',
+    miStand: 'expositor.html'
   };
 
   var HOSTED = {
@@ -33,7 +35,9 @@
     comoFunciona: '/como-funciona',
     privacidad: '/privacidad',
     qr: '/qr',
-    admin: '/admin'
+    admin: '/admin',
+    expositor: '/expositor',
+    miStand: '/mi-stand'
   };
 
   /** Alias legibles (p. ej. data-link="como-funciona"). */

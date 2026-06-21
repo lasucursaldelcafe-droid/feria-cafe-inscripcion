@@ -2782,6 +2782,101 @@ body.page-rules {
   box-shadow: var(--shadow-soft);
 }
 
+.festival-sponsors--cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.festival-sponsor-card {
+  list-style: none;
+}
+
+.festival-sponsor-card__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 1.15rem 1rem;
+  background: var(--surface-warm);
+  border: 1px solid var(--border-coffee-subtle);
+  border-radius: var(--radius);
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+a.festival-sponsor-card__link:hover,
+a.festival-sponsor-card__link:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--coffee-warm);
+  box-shadow: var(--shadow-card);
+}
+
+.festival-sponsor-card__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-coffee-subtle);
+  background: var(--cream-pale);
+}
+
+.festival-sponsor-card__avatar--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brown-deep);
+  background: linear-gradient(145deg, var(--cream-pale) 0%, var(--surface-warm) 100%);
+}
+
+.festival-sponsor-card__name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--brown-deep);
+  line-height: 1.3;
+}
+
+.festival-sponsor-card__handle {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.festival-sponsors--strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.festival-sponsors--strip .festival-sponsor-card__link {
+  flex-direction: row;
+  padding: 0.65rem 1rem;
+  gap: 0.75rem;
+}
+
+.festival-sponsors--strip .festival-sponsor-card__avatar,
+.festival-sponsors--strip .festival-sponsor-card__avatar--placeholder {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.festival-sponsors--strip .festival-sponsor-card__name {
+  font-size: 0.85rem;
+}
+
+.festival-sponsors--strip .festival-sponsor-card__handle {
+  display: block;
+}
+
 .festival-tiers {
   display: grid;
   grid-template-columns: 1fr;
