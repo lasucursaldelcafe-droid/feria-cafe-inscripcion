@@ -143,9 +143,46 @@ def print_fix_hints(failures: list[str]) -> None:
         print('  py tools/conectar_sheets.py --configurar-url "https://script.google.com/.../exec"')
 
 
+def validate_firebase_sa_json(raw: str) -> tuple[bool, str]:
+    raw = raw.strip()
+    if not raw:
+        return False, "Falta FIREBASE_SERVICE_ACCOUNT."
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        return False, f"FIREBASE_SERVICE_ACCOUNT no es JSON valido: {exc}"
+    missing = [k for k in ("client_email", "private_key", "project_id") if k not in data]
+    if missing:
+        return False, f"Faltan campos en FIREBASE_SERVICE_ACCOUNT: {', '.join(missing)}"
+    if data.get("project_id") != DEFAULT_FIREBASE_PROJECT:
+        return False, f"project_id={data.get('project_id')} (esperado {DEFAULT_FIREBASE_PROJECT})"
+    return True, data.get("client_email", "cuenta de servicio")
+
+
+def check_ci_env_secrets() -> tuple[bool, str]:
+    import os
+
+    ok_sa, msg_sa = validate_firebase_sa_json(os.environ.get("FIREBASE_SERVICE_ACCOUNT", ""))
+    if not ok_sa:
+        return False, msg_sa
+
+    sheets = os.environ.get("SHEETS_WEB_APP_URL", "").strip()
+    if sheets and "/exec" not in sheets:
+        return False, "SHEETS_WEB_APP_URL debe terminar en /exec"
+
+    if sheets:
+        return True, f"FIREBASE_SERVICE_ACCOUNT OK; SHEETS_WEB_APP_URL presente"
+    return True, "FIREBASE_SERVICE_ACCOUNT OK; SHEETS_WEB_APP_URL opcional ausente"
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Valida secretos y requisitos de CI.")
     parser.add_argument("--fix-hint", action="store_true", help="Mostrar comandos de corrección al final.")
+    parser.add_argument(
+        "--ci",
+        action="store_true",
+        help="Modo GitHub Actions: valida secretos desde variables de entorno.",
+    )
     return parser.parse_args()
 
 
@@ -156,6 +193,18 @@ def main() -> int:
 
     load_dotenv()
     args = parse_args()
+
+    if args.ci:
+        print("=== validate_ci_secrets.py (CI) ===\n")
+        ok_ci, detail = check_ci_env_secrets()
+        if ok_ci:
+            ok(detail)
+            return 0
+        error(detail)
+        print()
+        info("Regenera la clave en Firebase Console y ejecuta:")
+        print("  .\\tools\\sync_github_secrets.ps1")
+        return 1
 
     print("=== validate_ci_secrets.py ===\n")
 
