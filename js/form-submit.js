@@ -42,6 +42,19 @@
         base64OmitidoEnLocal: true
       };
     }
+    if (Array.isArray(copy.marcasAdicionales)) {
+      copy.marcasAdicionales = copy.marcasAdicionales.map(function (item) {
+        var out = { nombre: item.nombre };
+        if (item.logo && item.logo.base64) {
+          out.logo = {
+            nombreArchivo: item.logo.nombreArchivo,
+            tipoArchivo: item.logo.tipoArchivo,
+            base64OmitidoEnLocal: true
+          };
+        }
+        return out;
+      });
+    }
     return copy;
   }
 
@@ -80,6 +93,7 @@
           whatsappGrupoUrl: body && body.whatsappGrupoUrl,
           fotoEnlace: body && body.fotoEnlace,
           logoEnlace: body && body.logoEnlace,
+          logos: body && body.logos,
           accessCode: body && body.accessCode,
           expositorPanelUrl: body && body.expositorPanelUrl,
           status: res.status
@@ -121,6 +135,7 @@
         whatsappGrupoUrl: remoteResult.whatsappGrupoUrl,
         fotoEnlace: remoteResult.fotoEnlace,
         logoEnlace: remoteResult.logoEnlace,
+        logos: remoteResult.logos,
         accessCode: remoteResult.accessCode,
         expositorPanelUrl: remoteResult.expositorPanelUrl
       };
@@ -210,6 +225,24 @@
     });
   }
 
+  function fetchParticipantesPublico() {
+    var url = getWebAppUrl();
+    if (!url) {
+      return Promise.resolve({ ok: false, reason: 'no_url' });
+    }
+
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    return fetch(url + sep + 'action=participantes_publico&_=' + Date.now(), {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-store'
+    }).then(function (res) {
+      return res.json();
+    }).catch(function (err) {
+      return { ok: false, error: err.message || String(err) };
+    });
+  }
+
   function expositorLogin(email, accessCode) {
     return postAction('expositor_login', {
       email: String(email || '').trim().toLowerCase(),
@@ -224,6 +257,7 @@
     fetchCupoCount: fetchCupoCount,
     fetchStandsMap: fetchStandsMap,
     fetchExpositorFeed: fetchExpositorFeed,
+    fetchParticipantesPublico: fetchParticipantesPublico,
     expositorLogin: expositorLogin
   };
 })(window);

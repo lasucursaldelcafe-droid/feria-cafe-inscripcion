@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <base href="/">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Adquiere tu stand en la feria de café especial La Sucursal del Café, Cali. Expositores y marcas: Zona Origen, Zona Gran Reserva y Aliado Patrocinador. 29–30 agosto 2026, Palmetto Plaza.">
@@ -18,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/brand.css?v=20260620e">
+  <link rel="stylesheet" href="css/brand.css?v=20260621a">
 </head>
 <body class="page-festival page-form" data-festival-page="stands">
   <header class="site-header">
@@ -73,7 +72,8 @@
           <ol class="stands-map-steps" aria-label="Pasos para reservar tu stand">
             <li><strong>Elige tu plan</strong> — define la zona del mapa.</li>
             <li><strong>Toca un stand verde</strong> — disponible en tu zona.</li>
-            <li><strong>Sube tu logo</strong> — aparecerá en el mapa.</li>
+            <li><strong>Sube tu logo</strong> — aparecerá en el mapa al confirmar.</li>
+            <li><strong>Opcional:</strong> indica si compartes el stand con otras marcas.</li>
             <li><strong>Envía la solicitud</strong> — te contactamos para confirmar.</li>
           </ol>
 
@@ -92,7 +92,7 @@
           </div>
 
           <h2 class="section-title">2. Selecciona tu stand en el mapa</h2>
-          <p class="hint" style="margin:0 0 0.75rem">Los stands <span class="stands-map-legend-inline stands-map-legend-inline--free">verdes</span> están disponibles. Los <span class="stands-map-legend-inline stands-map-legend-inline--occupied">oscuros</span> ya están ocupados.</p>
+          <p class="hint" style="margin:0 0 0.75rem">Los stands <span class="stands-map-legend-inline stands-map-legend-inline--free">verdes</span> están disponibles. Los <span class="stands-map-legend-inline stands-map-legend-inline--occupied">rojos/oscuros</span> ya están reservados y no se pueden elegir.</p>
           <p id="standsMapStatus" class="stands-map-status" aria-live="polite"></p>
           <div id="standsMapRoot" class="stands-map-root" aria-label="Mapa de stands"></div>
           <div id="standsMapLegend" class="stands-map-legend"></div>
@@ -199,8 +199,23 @@
             <span id="logo-error" class="error-msg" role="alert"></span>
           </div>
 
+          <h2 class="section-title">5. ¿Compartes el stand con otras marcas?</h2>
+          <div class="field stands-shared-brands">
+            <label class="choice-item">
+              <input type="checkbox" id="comparteStand" name="comparteStand" aria-controls="marcasCompartidasWrap" aria-expanded="false">
+              <span>Sí, compartiré el stand con otra(s) marca(s) en la misma posición</span>
+            </label>
+            <p class="hint">Si varias marcas ocupan el mismo stand físico, indícalas aquí. Cada una puede tener logo propio y todos aparecerán juntos en el mapa.</p>
+            <div id="marcasCompartidasWrap" class="marcas-compartidas-wrap" hidden>
+              <p class="hint marcas-compartidas-intro">Añade entre 1 y 3 marcas adicionales (nombre obligatorio, logo opcional).</p>
+              <div id="marcasCompartidasSlots" class="marcas-compartidas-slots"></div>
+              <button type="button" id="btnAddMarcaCompartida" class="btn-secondary btn-add-marca" hidden>Añadir otra marca</button>
+              <span id="marcasCompartidas-error" class="error-msg" role="alert"></span>
+            </div>
+          </div>
+
           <div class="field">
-            <label for="descripcion">Descripción breve de lo que exhibirás o venderás <span class="required" aria-hidden="true">*</span></label>
+            <label for="descripcion">Texto para el directorio público <span class="required" aria-hidden="true">*</span></label>
             <textarea
               id="descripcion"
               name="descripcion"
@@ -211,11 +226,50 @@
               placeholder="Ej. Café de origen Huila, equipos de filtrado y degustaciones guiadas."
               aria-describedby="descripcion-error descripcion-hint"
             ></textarea>
-            <p id="descripcion-hint" class="hint">Mínimo 10 caracteres. Ayuda al equipo a ubicar tu stand.</p>
+            <p id="descripcion-hint" class="hint">Mínimo 10 caracteres. Aparecerá en la página <a data-link="marcas" href="marcas.html">Marcas en la feria</a> si aceptas mostrar tu perfil.</p>
             <span id="descripcion-error" class="error-msg" role="alert"></span>
           </div>
 
-          <h2 class="section-title">5. Términos y condiciones</h2>
+          <h2 class="section-title">6. Perfil público y red social</h2>
+          <div class="field-row">
+            <div class="field">
+              <label for="redSocial">Red social preferida <span class="required" aria-hidden="true">*</span></label>
+              <select id="redSocial" name="redSocial" required aria-describedby="redSocial-error">
+                <option value="">Selecciona…</option>
+                <option value="Instagram">Instagram</option>
+                <option value="Facebook">Facebook</option>
+                <option value="TikTok">TikTok</option>
+                <option value="Web">Web</option>
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="Otro">Otro</option>
+              </select>
+              <span id="redSocial-error" class="error-msg" role="alert"></span>
+            </div>
+            <div class="field">
+              <label for="redEnlace">URL o @usuario <span class="required" aria-hidden="true">*</span></label>
+              <input
+                type="text"
+                id="redEnlace"
+                name="redEnlace"
+                required
+                maxlength="200"
+                placeholder="Ej. @tu_marca o https://…"
+                aria-describedby="redEnlace-error redEnlace-hint"
+              >
+              <p id="redEnlace-hint" class="hint">Usaremos este enlace en el directorio público de marcas.</p>
+              <span id="redEnlace-error" class="error-msg" role="alert"></span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="choice-item">
+              <input type="checkbox" id="visiblePublico" name="visiblePublico" checked>
+              <span>Mostrar mi marca en el directorio público de la feria</span>
+            </label>
+            <p class="hint">Puedes desactivarlo si prefieres no aparecer en <a data-link="marcas" href="marcas.html">/marcas</a> hasta confirmar tu participación.</p>
+          </div>
+
+          <h2 class="section-title">7. Términos y condiciones</h2>
 
           <div class="terms-block field">
             <div class="terms-toolbar">
@@ -321,7 +375,9 @@
           <a data-link="patrocinadores" href="patrocinadores.html">Patrocinadores</a>
           <a data-link="stands" href="stands.html">Adquiere tu stand</a>
           <a data-link="feria" href="inscripcion.html">Registro visitante</a>
-          <a data-link="competencia" href="competencia.html">Competencia</a>
+          <a data-link="competencia" href="competencia.html">Switch Championship</a>
+          <a data-link="como-funciona" href="como-funciona-evento.html">Cómo funciona</a>
+          <a data-link="qr" href="qr-inscripcion.html">QR inscripción</a>
           <a data-link="privacidad" href="privacidad.html">Privacidad</a>
         </nav>
         <div class="festival-footer__contact">
@@ -340,15 +396,15 @@
     </footer>
   </div>
 
-  <script src="/js/event-config.js?v=20260620k"></script>
-  <script src="/js/site-links.js"></script>
-  <script src="/js/seo-structured-data.js"></script>
-  <script src="/js/sheets-config.js"></script>
-  <script src="/js/form-submit.js"></script>
-  <script src="/js/stands-map.js?v=20260620k"></script>
-  <script src="/js/terms-disclosure.js"></script>
-  <script src="/js/site-chrome.js?v=20260620ig"></script>
-  <script src="/js/festival-nav.js?v=20260620ig"></script>
+  <script src="js/event-config.js?v=20260620k"></script>
+  <script src="js/site-links.js"></script>
+  <script src="js/seo-structured-data.js"></script>
+  <script src="js/sheets-config.js"></script>
+  <script src="js/form-submit.js"></script>
+  <script src="js/stands-map.js?v=20260621a"></script>
+  <script src="js/terms-disclosure.js"></script>
+  <script src="js/site-chrome.js?v=20260621b"></script>
+  <script src="js/festival-nav.js?v=20260620ig"></script>
   <script>
     (function () {
       const STORAGE_KEY = "feria_cafe_stands";
@@ -381,6 +437,7 @@
         }
       });
       var logoUpload = new StandsLogoUpload();
+      var marcasCompartidas = new StandsMarcasCompartidas();
 
       standsMap.init().then(function () {
         standsMap.setPlan(planSelect.value);
@@ -475,12 +532,37 @@
           error: document.getElementById("descripcion-error"),
           validate: function (value) {
             const trimmed = value.trim();
-            if (!trimmed) return "La descripción es obligatoria.";
+            if (!trimmed) return "El texto para el directorio es obligatorio.";
             if (trimmed.length < 10) return "Describe en al menos 10 caracteres lo que exhibirás.";
+            return "";
+          }
+        },
+        redSocial: {
+          el: document.getElementById("redSocial"),
+          error: document.getElementById("redSocial-error"),
+          validate: function (value) {
+            if (!value) return "Selecciona tu red social preferida.";
+            return "";
+          }
+        },
+        redEnlace: {
+          el: document.getElementById("redEnlace"),
+          error: document.getElementById("redEnlace-error"),
+          validate: function (value) {
+            const trimmed = value.trim();
+            if (!trimmed) return "Indica la URL o el usuario de tu red social.";
+            if (trimmed.length < 3) return "Mínimo 3 caracteres.";
             return "";
           }
         }
       };
+
+      function tipoFromPlan(plan) {
+        if (plan === "Zona Origen") return "expositor";
+        if (plan === "Zona Gran Reserva") return "patrocinador";
+        if (plan === "Aliado Patrocinador") return "aliado";
+        return "";
+      }
 
       function showFieldError(field, message) {
         field.error.textContent = message;
@@ -567,6 +649,7 @@
         document.getElementById("standId-error").classList.remove("visible");
         standsMap.selectStand("");
         logoUpload.clear(true);
+        marcasCompartidas.clear();
         updatePlanUi();
         standsMap.refresh();
         const terminosError = document.getElementById("terminos-error");
@@ -578,6 +661,8 @@
           termsUi.collapseAll();
           termsUi.resetCheckedState();
         }
+        var visiblePublico = document.getElementById("visiblePublico");
+        if (visiblePublico) visiblePublico.checked = true;
         successPanel.classList.remove("visible");
         formPanel.classList.remove("hidden");
         var accessBlock = document.getElementById("successAccessBlock");
@@ -610,11 +695,19 @@
             return;
           }
           if (result.logoEnlace) entry.logoEnlace = result.logoEnlace;
+          if (result.logos && result.logos.length) entry.logos = result.logos;
+          standsMap.applyOptimisticOccupied(entry);
           standsMap.refresh();
           var note = document.getElementById("successEmailNoteStands");
           var standLine = entry.standId ? " Stand reservado: <strong>" + entry.standId + "</strong>." : "";
+          var mapLine = entry.standId ? " Tu logo" +
+            (entry.comparteStand && entry.marcasAdicionales && entry.marcasAdicionales.length
+              ? "s y los de las marcas compartidas aparecen"
+              : " aparece") +
+            " ya en el mapa de stands." : "";
           if (note) {
-            note.innerHTML = "Enviamos un correo de confirmación a " + entry.correo + "." + standLine + " Revisa spam si no lo ves.";
+            note.innerHTML = "Enviamos un correo de confirmación a " + entry.correo + "." + standLine +
+              mapLine + " Revisa spam si no lo ves.";
           }
           var accessBlock = document.getElementById("successAccessBlock");
           var accessCodeEl = document.getElementById("successAccessCode");
@@ -645,6 +738,7 @@
         if (!validatePlan()) valid = false;
         if (!validateStandSelection()) valid = false;
         if (!validateLogo()) valid = false;
+        if (!marcasCompartidas.validate()) valid = false;
         if (!validateTerms()) valid = false;
 
         if (!valid) {
@@ -658,6 +752,7 @@
 
         var standId = standsMap.getSelectedStandId();
         var logoPayload = logoUpload.getPayload();
+        var marcasPayload = marcasCompartidas.getPayload();
 
         btnSubmit.disabled = true;
         btnSubmit.textContent = "Verificando stand…";
@@ -688,7 +783,13 @@
             standId: standId,
             ciudad: fields.ciudad.el.value.trim(),
             descripcion: fields.descripcion.el.value.trim(),
+            redSocial: fields.redSocial.el.value,
+            redEnlace: fields.redEnlace.el.value.trim(),
+            visiblePublico: document.getElementById("visiblePublico").checked,
+            tipoParticipante: tipoFromPlan(planSelect.value),
             logoStand: logoPayload,
+            comparteStand: marcasPayload.comparteStand,
+            marcasAdicionales: marcasPayload.marcasAdicionales,
             aceptacionesLegales: {
               aceptaVoluntaria: document.getElementById("aceptaVoluntaria").checked,
               aceptaPertenencias: document.getElementById("aceptaPertenencias").checked,

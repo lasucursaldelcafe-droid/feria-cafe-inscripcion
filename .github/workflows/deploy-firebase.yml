@@ -23,6 +23,37 @@ jobs:
             printf "window.SHEETS_CONFIG = {\n  WEB_APP_URL: ''\n};\n" > js/sheets-config.js
           fi
 
+      - name: Validar FIREBASE_SERVICE_ACCOUNT
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+
+          raw = os.environ.get("FIREBASE_SA", "").strip()
+          if not raw:
+              print("ERROR: Falta el secreto FIREBASE_SERVICE_ACCOUNT en GitHub.")
+              print("Descarga la clave JSON y ejecuta: .\\tools\\sync_github_secrets.ps1")
+              sys.exit(1)
+          try:
+              data = json.loads(raw)
+          except json.JSONDecodeError as exc:
+              print("ERROR: FIREBASE_SERVICE_ACCOUNT no es JSON valido.")
+              print(f"Detalle: {exc}")
+              print("Regenera la clave en Firebase Console y ejecuta: .\\tools\\sync_github_secrets.ps1")
+              sys.exit(1)
+          for key in ("client_email", "private_key", "project_id"):
+              if key not in data:
+                  print(f"ERROR: Falta el campo '{key}' en FIREBASE_SERVICE_ACCOUNT.")
+                  sys.exit(1)
+          expected = "la-sucursal-del-cafe"
+          if data.get("project_id") != expected:
+              print(f"AVISO: project_id es '{data.get('project_id')}', se esperaba '{expected}'.")
+          print("OK: FIREBASE_SERVICE_ACCOUNT es JSON valido.")
+          PY
+
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:

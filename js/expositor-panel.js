@@ -77,20 +77,39 @@
     if (!grid || !stand) return;
 
     var logoHtml = '';
-    if (stand.logoEnlace) {
+    var logos = Array.isArray(stand.logos) && stand.logos.length
+      ? stand.logos
+      : (stand.logoEnlace ? [{ marca: stand.marca, logoEnlace: stand.logoEnlace }] : []);
+    if (logos.length) {
       logoHtml =
-        '<div class="expositor-logo-preview"><img src="' +
-        escapeHtml(driveThumb(stand.logoEnlace)) +
-        '" alt="Logo ' +
-        escapeHtml(stand.marca) +
-        '" loading="lazy" referrerpolicy="no-referrer"></div>';
+        '<div class="expositor-logos-grid' + (logos.length > 1 ? ' expositor-logos-grid--multi' : '') + '">' +
+        logos.map(function (logo) {
+          var src = logo.logoEnlace ? driveThumb(logo.logoEnlace) : '';
+          if (!src) return '';
+          return (
+            '<figure class="expositor-logo-preview">' +
+            '<img src="' + escapeHtml(src) + '" alt="Logo ' + escapeHtml(logo.marca || stand.marca) + '" loading="lazy" referrerpolicy="no-referrer">' +
+            (logo.marca ? '<figcaption>' + escapeHtml(logo.marca) + '</figcaption>' : '') +
+            '</figure>'
+          );
+        }).join('') +
+        '</div>';
+    }
+
+    var marcasExtraHtml = '';
+    if (stand.comparteStand === 'Sí' && Array.isArray(stand.marcasAdicionales) && stand.marcasAdicionales.length) {
+      marcasExtraHtml =
+        '<p class="expositor-shared-brands"><strong>Marcas que comparten el stand:</strong> ' +
+        escapeHtml(stand.marcasAdicionales.map(function (m) { return m.nombre; }).join(', ')) +
+        '</p>';
     }
 
     var rows = [
       ['Referencia', stand.id || '—'],
-      ['Marca', stand.marca || '—'],
+      ['Marca principal', stand.marca || '—'],
       ['Stand', stand.standId || 'Sin stand asignado en mapa'],
       ['Plan', stand.plan || '—'],
+      ['Comparte stand', stand.comparteStand || 'No'],
       ['Estado', '<span class="expositor-status">' + escapeHtml(stand.estado || 'Solicitud recibida') + '</span>'],
       ['Contacto', stand.contacto || '—'],
       ['Ciudad', stand.ciudad || '—'],
@@ -109,6 +128,7 @@
         );
       }).join('') +
       '</dl>' +
+      marcasExtraHtml +
       logoHtml;
   }
 

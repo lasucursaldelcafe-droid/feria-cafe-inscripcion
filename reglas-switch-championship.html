@@ -16,8 +16,8 @@
   <title>Reglamento Switch Championship 2026 | La Sucursal del Café — Cali</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/brand.css?v=20260620c">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/brand.css?v=20260621a">
   <style>
     .print-only-logo { display: none; }
     @media print {
@@ -25,7 +25,25 @@
     }
   </style>
 </head>
-<body class="page-rules">
+<body class="page-rules page-festival">
+  <header class="site-header no-print">
+    <nav class="festival-nav" aria-label="Navegación principal">
+      <a class="festival-nav__brand" data-link="festival" href="index.html">
+        <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="120" height="48">
+      </a>
+      <button type="button" class="festival-nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navMenu">Menú</button>
+      <ul class="festival-nav__menu" id="navMenu">
+        <li><a data-link="festival" data-nav="home" href="index.html">Inicio</a></li>
+        <li><a data-link="evento" data-nav="evento" href="el-evento.html">El evento</a></li>
+        <li><a data-link="actividades" data-nav="actividades" href="actividades.html">Actividades</a></li>
+        <li><a data-link="patrocinadores" data-nav="patrocinadores" href="patrocinadores.html">Patrocinadores</a></li>
+        <li><a data-link="stands" data-nav="stands" href="stands.html">Adquiere tu stand</a></li>
+        <li><a data-link="feria" data-nav="inscripcion" href="inscripcion.html">Registro visitante</a></li>
+        <li><a data-link="competencia" data-nav="competencia" href="competencia.html">Competencia</a></li>
+      </ul>
+    </nav>
+  </header>
+
   <header class="site-hero site-hero--coffee no-print">
     <div class="festival-sub-hero">
       <p class="festival-kicker">Documento oficial</p>
@@ -216,10 +234,49 @@
     Documento oficial para participantes, patrocinadores y aliados · © 2026
   </div>
   </div>
+
+  <footer id="contacto" class="festival-footer no-print">
+    <div class="festival-wrap festival-footer__inner">
+      <div class="festival-footer__brand">
+        <p class="festival-footer__col-title">Evento</p>
+        <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="160" height="64" loading="lazy">
+        <p id="festivalInstagram" class="festival-social">
+          <a id="igLink" href="https://www.instagram.com/lasucursal.delcafe/" target="_blank" rel="noopener noreferrer" aria-label="Instagram @lasucursal.delcafe">@lasucursal.delcafe</a>
+        </p>
+      </div>
+      <nav class="festival-footer__nav" aria-label="Enlaces del sitio">
+        <p class="festival-footer__col-title">Navegación</p>
+        <a data-link="festival" href="index.html">Inicio</a>
+        <a data-link="evento" href="el-evento.html">El evento</a>
+        <a data-link="actividades" href="actividades.html">Actividades</a>
+        <a data-link="patrocinadores" href="patrocinadores.html">Patrocinadores</a>
+        <a data-link="stands" href="stands.html">Adquiere tu stand</a>
+        <a data-link="feria" href="inscripcion.html">Registro visitante</a>
+        <a data-link="competencia" href="competencia.html">Switch Championship</a>
+        <a data-link="como-funciona" href="como-funciona-evento.html">Cómo funciona</a>
+        <a data-link="qr" href="qr-inscripcion.html">QR inscripción</a>
+        <a data-link="privacidad" href="privacidad.html">Privacidad</a>
+      </nav>
+      <div class="festival-footer__contact">
+        <p class="festival-footer__col-title">Contacto</p>
+        <p class="festival-footer__dates">
+          Competencia · <span data-bind="torneo.fecha">4 de julio de 2026</span><br>
+          <span data-bind="torneo.lugar">Plaza Marbella, Cali</span>
+        </p>
+        <div class="festival-contact-actions">
+          <a class="btn-submit" id="waContact" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a class="btn-secondary" id="emailContact" href="mailto:lasucursaldelcafe@gmail.com">Correo</a>
+        </div>
+      </div>
+      <p class="festival-footer__copy">© 2026 La Sucursal del Café · Apoya lo nuestro, toma café colombiano.</p>
+    </div>
+  </footer>
+
   <script src="js/event-config.js?v=20260620ig"></script>
   <script src="js/site-links.js"></script>
   <script src="js/seo-structured-data.js"></script>
   <script src="js/site-chrome.js?v=20260620ig"></script>
+  <script src="js/festival-nav.js?v=20260620ig"></script>
   <script>
     (function () {
       var href = SiteLinks && SiteLinks.href ? SiteLinks.href : function (k) {

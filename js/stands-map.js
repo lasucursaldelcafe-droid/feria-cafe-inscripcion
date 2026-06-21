@@ -140,6 +140,42 @@
     });
   }
 
+  function buildLogosFromOccupiedItem(item) {
+    if (!item) return [];
+    if (Array.isArray(item.logos) && item.logos.length) {
+      return item.logos.filter(function (logo) {
+        return logo && (logo.logoEnlace || logo.marca);
+      });
+    }
+    var mainLogo = item.logoEnlace || '';
+    var mainMarca = item.marca || '';
+    if (!mainLogo && !mainMarca) return [];
+    return [{ marca: mainMarca, logoEnlace: mainLogo }];
+  }
+
+  function buildLogosFromLocalEntry(entry) {
+    if (!entry) return [];
+    if (entry.logos && Array.isArray(entry.logos) && entry.logos.length) {
+      return entry.logos;
+    }
+    var logos = buildLogosFromOccupiedItem({
+      marca: entry.marca,
+      logoEnlace: entry.logoEnlace || (entry.logoStand && entry.logoStand.base64) || ''
+    });
+    if (entry.comparteStand && Array.isArray(entry.marcasAdicionales)) {
+      entry.marcasAdicionales.forEach(function (extra) {
+        var nombre = String((extra && extra.nombre) || '').trim();
+        if (!nombre) return;
+        var extraLogo = (extra.logo && extra.logo.base64) ||
+          extra.logoEnlace ||
+          (extra.logo && extra.logoEnlace) ||
+          '';
+        logos.push({ marca: nombre, logoEnlace: extraLogo });
+      });
+    }
+    return logos;
+  }
+
   function StandsMap(options) {
     options = options || {};
     this.storageKey = options.storageKey || 'feria_cafe_stands';
@@ -182,8 +218,12 @@
   StandsMap.prototype.spotTooltipText = function (pos, sid, occupied, zoneMatch) {
     if (occupied) {
       var occ = this.occupied[sid];
+      var marcas = buildLogosFromOccupiedItem(occ).map(function (logo) {
+        return logo.marca;
+      }).filter(Boolean);
+      var marcasText = marcas.length ? marcas.join(' · ') : (occ && occ.marca) || '';
       return 'Stand ' + pos.label + ' · ' + pos.zone + ' — Ocupado' +
-        (occ && occ.marca ? ' (' + occ.marca + ')' : '');
+        (marcasText ? ' (' + marcasText + ')' : '');
     }
     if (!zoneMatch && planRequiresStand(this.currentPlan)) {
       return 'Stand ' + pos.label + ' · ' + pos.zone + ' — No corresponde a tu plan';
@@ -213,10 +253,12 @@
       list.forEach(function (entry) {
         var sid = normalizeStandId(entry.standId);
         if (!sid) return;
+        var logos = buildLogosFromLocalEntry(entry);
         map[sid] = {
           standId: sid,
           marca: entry.marca || '',
-          logoEnlace: entry.logoEnlace || (entry.logoStand && entry.logoStand.base64) || ''
+          logoEnlace: entry.logoEnlace || (entry.logoStand && entry.logoStand.base64) || '',
+          logos: logos
         };
       });
       return map;
@@ -230,10 +272,12 @@
     (items || []).forEach(function (item) {
       var sid = normalizeStandId(item.standId);
       if (!sid) return;
+      var logos = buildLogosFromOccupiedItem(item);
       map[sid] = {
         standId: sid,
         marca: item.marca || '',
-        logoEnlace: item.logoEnlace || ''
+        logoEnlace: item.logoEnlace || (logos[0] && logos[0].logoEnlace) || '',
+        logos: logos
       };
     });
     return map;
@@ -361,6 +405,36 @@
     this.statusEl.textContent = 'Toca un stand verde de «' + this.currentPlan + '» para reservarlo.';
   };
 
+  StandsMap.prototype.renderSpotLogos = function (logoWrap, occ) {
+    if (!logoWrap) return;
+    var self = this;
+    var logos = buildLogosFromOccupiedItem(occ);
+    if (!logos.length) {
+      logoWrap.innerHTML = '';
+      logoWrap.hidden = true;
+      return;
+    }
+
+    var multi = logos.length > 1;
+    logoWrap.className = 'stands-map-spot__logos' + (multi ? ' stands-map-spot__logos--multi' : '');
+    logoWrap.innerHTML = logos.map(function (logo) {
+      var src = logo.logoEnlace ? self.driveImageUrl(logo.logoEnlace) : logo.logoEnlace;
+      var alt = 'Logo ' + (logo.marca || '');
+      if (src && String(src).indexOf('data:') === 0) {
+        return '<img src="' + src + '" alt="' + alt + '">';
+      }
+      if (src) {
+        return '<img src="' + src + '" alt="' + alt + '" loading="lazy" referrerpolicy="no-referrer">';
+      }
+      if (logo.marca) {
+        return '<span class="stands-map-spot__initial" title="' + logo.marca + '">' +
+          logo.marca.charAt(0).toUpperCase() + '</span>';
+      }
+      return '';
+    }).join('');
+    logoWrap.hidden = !logoWrap.innerHTML;
+  };
+
   StandsMap.prototype.renderSpots = function () {
     if (!this.root) return;
     var self = this;
@@ -378,26 +452,17 @@
       el.classList.toggle('stands-map-spot--occupied', occupied);
       el.classList.toggle('stands-map-spot--selected', selected && !occupied);
       el.classList.toggle('stands-map-spot--disabled', disabled && !occupied);
+      el.disabled = occupied;
       el.setAttribute('aria-disabled', disabled ? 'true' : 'false');
       el.setAttribute('aria-pressed', selected ? 'true' : 'false');
 
-      var logoWrap = el.querySelector('.stands-map-spot__logo');
-      if (logoWrap) {
-        var occ = self.occupied[sid];
-        var logoSrc = occ && (occ.logoEnlace ? self.driveImageUrl(occ.logoEnlace) : occ.logoEnlace);
-        if (logoSrc && String(logoSrc).indexOf('data:') === 0) {
-          logoWrap.innerHTML = '<img src="' + logoSrc + '" alt="Logo ' + (occ.marca || sid) + '">';
-          logoWrap.hidden = false;
-        } else if (logoSrc) {
-          logoWrap.innerHTML = '<img src="' + logoSrc + '" alt="Logo ' + (occ.marca || sid) + '" loading="lazy" referrerpolicy="no-referrer">';
-          logoWrap.hidden = false;
-        } else if (occupied && occ && occ.marca) {
-          logoWrap.innerHTML = '<span class="stands-map-spot__initial" title="' + occ.marca + '">' + occ.marca.charAt(0).toUpperCase() + '</span>';
-          logoWrap.hidden = false;
-        } else {
-          logoWrap.innerHTML = '';
-          logoWrap.hidden = true;
-        }
+      var logoWrap = el.querySelector('.stands-map-spot__logos') ||
+        el.querySelector('.stands-map-spot__logo');
+      if (logoWrap && occupied) {
+        self.renderSpotLogos(logoWrap, self.occupied[sid]);
+      } else if (logoWrap) {
+        logoWrap.innerHTML = '';
+        logoWrap.hidden = true;
       }
     });
   };
@@ -428,8 +493,9 @@
       btn.style.height = pos.height + '%';
       btn.innerHTML =
         '<span class="stands-map-spot__label">' + pos.label + '</span>' +
-        '<span class="stands-map-spot__logo" hidden></span>';
+        '<span class="stands-map-spot__logos" hidden></span>';
       btn.addEventListener('click', function () {
+        if (btn.disabled) return;
         var sid = normalizeStandId(pos.id);
         if (self.occupied[sid]) {
           if (self.onOccupiedClick) {
@@ -490,6 +556,26 @@
     this.renderSpots();
     this.updateSelectionLabel();
     return this.refresh();
+  };
+
+  StandsMap.prototype.applyOptimisticOccupied = function (entry) {
+    var sid = normalizeStandId(entry && entry.standId);
+    if (!sid) return;
+    var logos = buildLogosFromLocalEntry(entry);
+    if (entry.logos && Array.isArray(entry.logos) && entry.logos.length) {
+      logos = entry.logos;
+    }
+    this.occupied[sid] = {
+      standId: sid,
+      marca: entry.marca || '',
+      logoEnlace: entry.logoEnlace || (logos[0] && logos[0].logoEnlace) || '',
+      logos: logos
+    };
+    if (this.getSelectedStandId() === sid) {
+      this.selectStand('');
+    }
+    this.renderSpots();
+    this.renderLegend();
   };
 
   StandsMap.prototype.validateSelection = function (plan) {
@@ -618,8 +704,265 @@
     });
   };
 
+  LogoUpload.prototype.bindEvents = function () {
+    var self = this;
+    if (!this.input) return;
+    this.input.addEventListener('change', function () {
+      var file = self.input.files && self.input.files[0];
+      self.clear(false);
+      if (!file) return;
+      var msg = self.validateFile(file, false);
+      if (msg) {
+        self.showError(msg);
+        self.clear(true);
+        return;
+      }
+      if (self.preview) {
+        self.preview.innerHTML = '<p class="hint">Procesando logo…</p>';
+        self.preview.classList.add('visible');
+      }
+      compressImageFile(file).then(function (payload) {
+        self.data = payload;
+        self.renderPreview(payload);
+        self.showError('');
+      }).catch(function () {
+        self.showError('No se pudo cargar el logo. Intenta con otra imagen.');
+        self.clear(true);
+      });
+    });
+  };
+
+  function MarcasCompartidasUpload(options) {
+    options = options || {};
+    this.mapConfig = getMapConfig();
+    this.checkbox = document.getElementById(options.checkboxId || 'comparteStand');
+    this.wrap = document.getElementById(options.wrapId || 'marcasCompartidasWrap');
+    this.slotsRoot = document.getElementById(options.slotsId || 'marcasCompartidasSlots');
+    this.addBtn = document.getElementById(options.addBtnId || 'btnAddMarcaCompartida');
+    this.errorEl = document.getElementById(options.errorId || 'marcasCompartidas-error');
+    this.maxMarcas = options.maxMarcas || 3;
+    this.slots = [];
+    this.bindEvents();
+    this.syncVisibility();
+  }
+
+  MarcasCompartidasUpload.prototype.showError = function (msg) {
+    if (!this.errorEl) return;
+    this.errorEl.textContent = msg || '';
+    this.errorEl.classList.toggle('visible', !!msg);
+  };
+
+  MarcasCompartidasUpload.prototype.syncVisibility = function () {
+    var active = !!(this.checkbox && this.checkbox.checked);
+    if (this.wrap) this.wrap.hidden = !active;
+    if (this.checkbox) {
+      this.checkbox.setAttribute('aria-expanded', active ? 'true' : 'false');
+    }
+    if (active && !this.slots.length) {
+      this.addSlot();
+    }
+    if (!active) {
+      this.showError('');
+    }
+  };
+
+  MarcasCompartidasUpload.prototype.createSlotElement = function (index) {
+    var slotId = 'marcaCompartida' + (index + 1);
+    var row = document.createElement('div');
+    row.className = 'marca-compartida-row field';
+    row.setAttribute('data-slot-index', String(index));
+    row.innerHTML =
+      '<div class="marca-compartida-row__header">' +
+      '<strong>Marca adicional ' + (index + 1) + '</strong>' +
+      (index > 0 ? '<button type="button" class="btn-clear-file marca-compartida-row__remove">Quitar</button>' : '') +
+      '</div>' +
+      '<label for="' + slotId + 'Nombre">Nombre de la marca <span class="required" aria-hidden="true">*</span></label>' +
+      '<input type="text" id="' + slotId + 'Nombre" name="' + slotId + 'Nombre" maxlength="120" ' +
+      'placeholder="Ej. Tostadora del Valle" autocomplete="organization">' +
+      '<label for="' + slotId + 'Logo">Logo (opcional)</label>' +
+      '<input type="file" id="' + slotId + 'Logo" name="' + slotId + 'Logo" accept="image/jpeg,image/png,image/webp" ' +
+      'aria-describedby="' + slotId + 'Preview">' +
+      '<div id="' + slotId + 'Preview" class="comprobante-preview marca-compartida-preview" aria-live="polite"></div>';
+    return row;
+  };
+
+  MarcasCompartidasUpload.prototype.addSlot = function () {
+    if (this.slots.length >= this.maxMarcas) return;
+    var index = this.slots.length;
+    var row = this.createSlotElement(index);
+    if (!this.slotsRoot) return;
+    this.slotsRoot.appendChild(row);
+
+    var slot = {
+      row: row,
+      nombreInput: row.querySelector('input[type="text"]'),
+      logoInput: row.querySelector('input[type="file"]'),
+      preview: row.querySelector('.marca-compartida-preview'),
+      logoData: null
+    };
+    this.slots.push(slot);
+    this.bindSlotEvents(slot);
+    this.updateAddButton();
+  };
+
+  MarcasCompartidasUpload.prototype.removeSlot = function (index) {
+    if (index <= 0 || index >= this.slots.length) return;
+    var slot = this.slots[index];
+    if (slot.row && slot.row.parentNode) {
+      slot.row.parentNode.removeChild(slot.row);
+    }
+    this.slots.splice(index, 1);
+    this.reindexSlots();
+    this.updateAddButton();
+    if (this.errorEl && this.errorEl.classList.contains('visible')) {
+      this.validate();
+    }
+  };
+
+  MarcasCompartidasUpload.prototype.reindexSlots = function () {
+    var self = this;
+    this.slots.forEach(function (slot, idx) {
+      slot.row.setAttribute('data-slot-index', String(idx));
+      var header = slot.row.querySelector('.marca-compartida-row__header strong');
+      if (header) header.textContent = 'Marca adicional ' + (idx + 1);
+      var removeBtn = slot.row.querySelector('.marca-compartida-row__remove');
+      if (removeBtn) removeBtn.hidden = idx === 0;
+    });
+    this.updateAddButton();
+  };
+
+  MarcasCompartidasUpload.prototype.updateAddButton = function () {
+    if (!this.addBtn) return;
+    var canAdd = this.slots.length < this.maxMarcas;
+    this.addBtn.hidden = !canAdd;
+    this.addBtn.disabled = !canAdd;
+  };
+
+  MarcasCompartidasUpload.prototype.bindSlotEvents = function (slot) {
+    var self = this;
+    var removeBtn = slot.row.querySelector('.marca-compartida-row__remove');
+    if (removeBtn) {
+      removeBtn.addEventListener('click', function () {
+        var idx = parseInt(slot.row.getAttribute('data-slot-index'), 10);
+        self.removeSlot(idx);
+      });
+    }
+    if (slot.nombreInput) {
+      slot.nombreInput.addEventListener('input', function () {
+        if (self.errorEl && self.errorEl.classList.contains('visible')) {
+          self.validate();
+        }
+      });
+    }
+    if (slot.logoInput) {
+      slot.logoInput.addEventListener('change', function () {
+        var file = slot.logoInput.files && slot.logoInput.files[0];
+        slot.logoData = null;
+        if (slot.preview) {
+          slot.preview.classList.remove('visible');
+          slot.preview.innerHTML = '';
+        }
+        if (!file) return;
+        var types = self.mapConfig.logoTypes || ['image/jpeg', 'image/png', 'image/webp'];
+        if (types.indexOf(file.type) === -1) {
+          self.showError('Formato no permitido en logo adicional. Usa JPG, PNG o WebP.');
+          slot.logoInput.value = '';
+          return;
+        }
+        var max = self.mapConfig.logoMaxBytes || 5 * 1024 * 1024;
+        if (file.size > max) {
+          self.showError('Un logo adicional supera 5 MB.');
+          slot.logoInput.value = '';
+          return;
+        }
+        if (slot.preview) {
+          slot.preview.innerHTML = '<p class="hint">Procesando logo…</p>';
+          slot.preview.classList.add('visible');
+        }
+        compressImageFile(file).then(function (payload) {
+          slot.logoData = payload;
+          if (slot.preview) {
+            slot.preview.innerHTML =
+              '<img src="' + payload.base64 + '" alt="Vista previa logo marca adicional">' +
+              '<div class="meta">' + payload.nombreArchivo + '</div>';
+            slot.preview.classList.add('visible');
+          }
+          self.showError('');
+        }).catch(function () {
+          self.showError('No se pudo cargar un logo adicional.');
+          slot.logoInput.value = '';
+        });
+      });
+    }
+  };
+
+  MarcasCompartidasUpload.prototype.bindEvents = function () {
+    var self = this;
+    if (this.checkbox) {
+      this.checkbox.addEventListener('change', function () {
+        self.syncVisibility();
+        if (self.errorEl && self.errorEl.classList.contains('visible')) {
+          self.validate();
+        }
+      });
+    }
+    if (this.addBtn) {
+      this.addBtn.addEventListener('click', function () {
+        self.addSlot();
+      });
+    }
+  };
+
+  MarcasCompartidasUpload.prototype.validate = function () {
+    if (!this.checkbox || !this.checkbox.checked) {
+      this.showError('');
+      return true;
+    }
+    var filled = this.slots.filter(function (slot) {
+      return slot.nombreInput && slot.nombreInput.value.trim().length >= 2;
+    });
+    if (!filled.length) {
+      this.showError('Indica al menos una marca adicional (mínimo 2 caracteres).');
+      return false;
+    }
+    this.showError('');
+    return true;
+  };
+
+  MarcasCompartidasUpload.prototype.getPayload = function () {
+    var comparte = !!(this.checkbox && this.checkbox.checked);
+    if (!comparte) {
+      return { comparteStand: false, marcasAdicionales: [] };
+    }
+    var marcas = [];
+    this.slots.forEach(function (slot) {
+      var nombre = slot.nombreInput ? slot.nombreInput.value.trim() : '';
+      if (nombre.length < 2) return;
+      var item = { nombre: nombre };
+      if (slot.logoData && slot.logoData.base64) {
+        item.logo = {
+          nombreArchivo: slot.logoData.nombreArchivo,
+          tipoArchivo: slot.logoData.tipoArchivo,
+          tamanoBytes: slot.logoData.tamanoBytes,
+          base64: slot.logoData.base64
+        };
+      }
+      marcas.push(item);
+    });
+    return { comparteStand: true, marcasAdicionales: marcas };
+  };
+
+  MarcasCompartidasUpload.prototype.clear = function () {
+    if (this.checkbox) this.checkbox.checked = false;
+    this.slots = [];
+    if (this.slotsRoot) this.slotsRoot.innerHTML = '';
+    this.syncVisibility();
+    this.showError('');
+  };
+
   global.StandsMap = StandsMap;
   global.StandsLogoUpload = LogoUpload;
+  global.StandsMarcasCompartidas = MarcasCompartidasUpload;
   global.StandsMapUtils = {
     planRequiresStand: planRequiresStand,
     normalizeStandId: normalizeStandId,

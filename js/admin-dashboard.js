@@ -19,7 +19,9 @@
 
   var DEFAULT_STANDS_COLS = [
     'Fecha registro', 'ID', 'Stand ID', 'Marca o negocio', 'Persona contacto', 'Celular', 'Correo',
-    'Plan stand', 'Ciudad', 'Descripción exhibición', 'Logo enlace Drive', 'Estado solicitud', 'Notas admin'
+    'Plan stand', 'Ciudad', 'Descripción exhibición', 'Tipo participante', 'Red social preferida',
+    'Red social enlace', 'Visible directorio público', 'Logo enlace Drive',
+    'Comparte stand', 'Estado solicitud', 'Notas admin'
   ];
 
   function getWebAppUrl() {
@@ -97,6 +99,97 @@
 
   function isLinkColumn(col) {
     return col.toLowerCase().indexOf('enlace') !== -1;
+  }
+
+  function isVisiblePublicoValue(val) {
+    var v = String(val || '').trim().toLowerCase();
+    if (!v) return true;
+    return v === 'sí' || v === 'si' || v === 'yes' || v === 'true' || v === '1';
+  }
+
+  function patchStandVisibility(id, visible) {
+    var url = getWebAppUrl();
+    if (!url) {
+      return Promise.resolve({ ok: false, error: 'URL de Apps Script no configurada.' });
+    }
+    return fetch(url, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'admin_patch_stand',
+        id: id,
+        visiblePublico: visible
+      })
+    }).then(function (res) {
+      return res.json().catch(function () {
+        return { ok: false, error: 'Respuesta inválida del servidor.' };
+      });
+    }).catch(function (err) {
+      return { ok: false, error: err.message || String(err) };
+    });
+  }
+
+  function renderDirectorioTable(rows) {
+    if (!rows || !rows.length) {
+      return '<p class="admin-empty">Sin solicitudes de stand todavía.</p>';
+    }
+
+    var html = '<div class="admin-table-wrap"><table class="admin-table admin-table--directorio"><thead><tr>';
+    html += '<th>Marca</th><th>Tipo</th><th>Stand</th><th>Red social</th><th>Visible en /marcas</th>';
+    html += '</tr></thead><tbody>';
+
+    rows.forEach(function (row) {
+      var id = row['ID'] || '';
+      var visible = isVisiblePublicoValue(row['Visible directorio público']);
+      var redUrl = row['Red social enlace'] || '';
+      var redSocial = row['Red social preferida'] || '';
+      html += '<tr data-stand-id="' + escapeHtml(id) + '">';
+      html += '<td>' + escapeHtml(row['Marca o negocio'] || '') + '</td>';
+      html += '<td>' + escapeHtml(row['Tipo participante'] || '') + '</td>';
+      html += '<td>' + escapeHtml(row['Stand ID'] || '—') + '</td>';
+      html += '<td>';
+      if (redUrl && redUrl.indexOf('http') === 0) {
+        html += '<a href="' + escapeHtml(redUrl) + '" target="_blank" rel="noopener">' +
+          escapeHtml(redSocial || 'Ver') + '</a>';
+      } else {
+        html += escapeHtml(redSocial || '—');
+      }
+      html += '</td>';
+      html += '<td><label class="admin-toggle"><input type="checkbox" class="admin-visibility-toggle" data-stand-id="' +
+        escapeHtml(id) + '"' + (visible ? ' checked' : '') + '> Mostrar</label></td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    html += '<p class="admin-table-meta">Cambia la visibilidad para incluir o excluir marcas del directorio público (/marcas).</p>';
+    return html;
+  }
+
+  function bindDirectorioToggles() {
+    document.querySelectorAll('.admin-visibility-toggle').forEach(function (input) {
+      input.addEventListener('change', function () {
+        var id = input.getAttribute('data-stand-id');
+        if (!id) return;
+        input.disabled = true;
+        patchStandVisibility(id, input.checked).then(function (result) {
+          input.disabled = false;
+          if (!result.ok) {
+            input.checked = !input.checked;
+            showError(result.error || 'No se pudo actualizar la visibilidad.');
+            return;
+          }
+          showError('');
+          if (lastDashboardData && lastDashboardData.allStands) {
+            lastDashboardData.allStands.forEach(function (row) {
+              if (row['ID'] === id) {
+                row['Visible directorio público'] = result.visiblePublico || (input.checked ? 'Sí' : 'No');
+              }
+            });
+          }
+        });
+      });
+    });
   }
 
   function renderTable(rows, columns, metaText) {
@@ -342,6 +435,12 @@
         standsCols,
         standsRows.length ? 'Todos los registros, más recientes primero.' : ''
       );
+    }
+
+    var tableDirectorio = document.getElementById('tableDirectorio');
+    if (tableDirectorio) {
+      tableDirectorio.innerHTML = renderDirectorioTable(standsRows);
+      bindDirectorioToggles();
     }
 
     var updated = document.getElementById('dashboardUpdated');

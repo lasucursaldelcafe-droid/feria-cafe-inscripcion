@@ -68,6 +68,20 @@ npx -y firebase-tools@latest deploy --only hosting
 
 Push a `main` → despliegue automático vía `.github/workflows/deploy-firebase.yml`.
 
+### Sincronizar secretos desde tu PC
+
+Si el deploy falla con *FIREBASE_SERVICE_ACCOUNT no es JSON válido* o *Failed to authenticate*:
+
+1. Descarga la clave en Firebase Console → **Generate new private key**.
+2. Guárdala como `tools/credentials/firebase-hosting-sa.json` (no la subas al repo).
+3. Ejecuta:
+
+```powershell
+.\tools\sync_github_secrets.ps1
+```
+
+El script valida el JSON, sube `FIREBASE_SERVICE_ACCOUNT` (y `SHEETS_WEB_APP_URL` si está en `tools/.env`) y sugiere relanzar el workflow.
+
 ### Configurar secretos en GitHub
 
 1. Abre el repositorio en GitHub → **Settings** → **Secrets and variables** → **Actions**.
