@@ -5,6 +5,36 @@
   'use strict';
 
   var PLANS_WITH_STAND = ['Zona Origen', 'Zona Gran Reserva', 'Aliado Patrocinador'];
+  var MAP_FALLBACK = '/assets/stands-map-placeholder.svg';
+
+  /** Rutas desde la raíz del sitio (/assets/…) — válidas en /stands y /stands/. */
+  function resolveAssetUrl(path) {
+    if (!path) return MAP_FALLBACK;
+    var s = String(path).trim();
+    if (/^https?:\/\//i.test(s) || s.indexOf('data:') === 0) return s;
+    if (s.charAt(0) === '/') return s;
+    return '/' + s.replace(/^\.\//, '');
+  }
+
+  function setupMapImage(img, configuredPath) {
+    if (!img) return;
+    var seen = {};
+    var candidates = [];
+    function add(url) {
+      if (!url || seen[url]) return;
+      seen[url] = true;
+      candidates.push(url);
+    }
+    add(resolveAssetUrl(configuredPath));
+    add('/assets/stands-map.jpg');
+    add(MAP_FALLBACK);
+    var idx = 0;
+    img.onerror = function () {
+      idx += 1;
+      if (idx < candidates.length) img.src = candidates[idx];
+    };
+    img.src = candidates[0];
+  }
 
   function getMapConfig() {
     var cfg = global.EVENT_CONFIG || {};
@@ -322,13 +352,14 @@
   StandsMap.prototype.buildDom = function () {
     if (!this.root) return;
     var self = this;
-    var imageSrc = this.mapConfig.image || 'assets/stands-map-placeholder.svg';
 
     this.root.innerHTML =
       '<div class="stands-map-stage">' +
-      '<img class="stands-map-image" src="' + imageSrc + '" alt="Plano de stands en Palmetto Plaza" loading="lazy">' +
+      '<img class="stands-map-image" alt="Plano de stands en Palmetto Plaza" loading="lazy">' +
       '<div class="stands-map-overlay" role="group" aria-label="Selección de stand"></div>' +
       '</div>';
+
+    setupMapImage(this.root.querySelector('.stands-map-image'), this.mapConfig.image);
 
     var overlay = this.root.querySelector('.stands-map-overlay');
     this.positions.forEach(function (pos) {
