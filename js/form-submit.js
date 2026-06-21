@@ -243,6 +243,24 @@
     });
   }
 
+  function fetchPatrocinadoresCompetencia() {
+    var url = getWebAppUrl();
+    if (!url) {
+      return Promise.resolve({ ok: false, reason: 'no_url' });
+    }
+
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    return fetch(url + sep + 'action=patrocinadores_competencia_publico&_=' + Date.now(), {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-store'
+    }).then(function (res) {
+      return res.json();
+    }).catch(function (err) {
+      return { ok: false, error: err.message || String(err) };
+    });
+  }
+
   function expositorLogin(email, accessCode) {
     return postAction('expositor_login', {
       email: String(email || '').trim().toLowerCase(),
@@ -258,6 +276,7 @@
     fetchStandsMap: fetchStandsMap,
     fetchExpositorFeed: fetchExpositorFeed,
     fetchParticipantesPublico: fetchParticipantesPublico,
+    fetchPatrocinadoresCompetencia: fetchPatrocinadoresCompetencia,
     expositorLogin: expositorLogin
   };
 })(window);

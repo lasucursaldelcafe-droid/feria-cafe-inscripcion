@@ -8,7 +8,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="googlebot" content="noindex, nofollow">
   <title>Panel admin — Analíticas</title>
-  <link rel="stylesheet" href="css/admin.css?v=20260621b">
+  <link rel="stylesheet" href="css/admin.css?v=20260621c">
 </head>
 <body class="admin-page">
   <header class="admin-header">
@@ -116,13 +116,28 @@
 
         <div class="admin-card">
           <div class="admin-card__head">
+            <h4 class="admin-card__title">Gestión de registros</h4>
+          </div>
+          <div class="admin-tabs" role="tablist" aria-label="Secciones de inscripciones">
+            <button type="button" class="admin-tab admin-tab--active" data-admin-tab="competencia" role="tab" aria-selected="true">Competidores</button>
+            <button type="button" class="admin-tab" data-admin-tab="expositores" role="tab" aria-selected="false">Stands / Expositores</button>
+            <button type="button" class="admin-tab" data-admin-tab="aliados" role="tab" aria-selected="false">Aliados</button>
+            <button type="button" class="admin-tab" data-admin-tab="patrocinadores" role="tab" aria-selected="false">Patrocinadores</button>
+            <button type="button" class="admin-tab" data-admin-tab="marcas" role="tab" aria-selected="false">Marcas (/marcas)</button>
+            <button type="button" class="admin-tab" data-admin-tab="feria" role="tab" aria-selected="false">Visitantes feria</button>
+          </div>
+          <div id="adminTabPanels"></div>
+        </div>
+
+        <div class="admin-card admin-card--legacy" hidden aria-hidden="true">
+          <div class="admin-card__head">
             <h4 class="admin-card__title"><span id="feriaTableTitle">Inscritos — Feria (visitantes)</span></h4>
             <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-export="feria">Descargar CSV</button>
           </div>
           <div id="tableFeria"></div>
         </div>
 
-        <div class="admin-card">
+        <div class="admin-card admin-card--legacy" hidden aria-hidden="true">
           <div class="admin-card__head">
             <h4 class="admin-card__title"><span id="competenciaTableTitle">Inscritos — Switch Championship</span></h4>
             <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-export="competencia">Descargar CSV</button>
@@ -130,7 +145,7 @@
           <div id="tableCompetencia"></div>
         </div>
 
-        <div class="admin-card">
+        <div class="admin-card admin-card--legacy" hidden aria-hidden="true">
           <div class="admin-card__head">
             <h4 class="admin-card__title"><span id="standsTableTitle">Solicitudes — Stands (expositores)</span></h4>
             <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-export="stands">Descargar CSV</button>
@@ -138,17 +153,62 @@
           <div id="tableStands"></div>
         </div>
 
-        <div class="admin-card">
+        <div class="admin-card admin-card--legacy" hidden aria-hidden="true">
           <div class="admin-card__head">
             <h4 class="admin-card__title">Directorio público — /marcas</h4>
           </div>
           <div id="tableDirectorio"></div>
         </div>
+
+        <div class="admin-card">
+          <div class="admin-card__head">
+            <h4 class="admin-card__title"><span id="patrocinadoresCompetenciaTitle">Patrocinadores competencia — Switch Championship</span></h4>
+          </div>
+          <div id="tablePatrocinadoresCompetencia"></div>
+          <form id="formPatrocinadorCompetencia" class="admin-inline-form">
+            <p class="admin-table-meta">Añadir o editar patrocinador (logo URL absoluta o ruta <code>assets/…</code>).</p>
+            <input type="hidden" id="patrocinadorCompetenciaEditId" value="">
+            <div class="admin-inline-form__row">
+              <label class="admin-inline-form__field">
+                <span>Nombre</span>
+                <input type="text" id="patrocinadorCompetenciaNombre" required maxlength="120" placeholder="Ej. Purist">
+              </label>
+              <label class="admin-inline-form__field">
+                <span>Instagram</span>
+                <input type="text" id="patrocinadorCompetenciaHandle" maxlength="80" placeholder="@marca">
+              </label>
+            </div>
+            <div class="admin-inline-form__row">
+              <label class="admin-inline-form__field">
+                <span>URL red social</span>
+                <input type="url" id="patrocinadorCompetenciaUrl" maxlength="300" placeholder="https://instagram.com/…">
+              </label>
+              <label class="admin-inline-form__field">
+                <span>Logo URL</span>
+                <input type="text" id="patrocinadorCompetenciaLogo" maxlength="500" placeholder="assets/sponsors/marca.webp">
+              </label>
+            </div>
+            <div class="admin-inline-form__row">
+              <label class="admin-inline-form__field admin-inline-form__field--sm">
+                <span>Orden</span>
+                <input type="number" id="patrocinadorCompetenciaOrden" min="1" max="999" placeholder="1">
+              </label>
+              <label class="admin-toggle admin-inline-form__toggle">
+                <input type="checkbox" id="patrocinadorCompetenciaHabilitado" checked>
+                Habilitado
+              </label>
+            </div>
+            <div class="admin-inline-form__actions">
+              <button type="submit" class="admin-btn admin-btn--primary admin-btn--sm" id="patrocinadorCompetenciaSubmit">Guardar patrocinador</button>
+              <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" id="patrocinadorCompetenciaReset" hidden>Cancelar edición</button>
+            </div>
+          </form>
+        </div>
       </section>
     </section>
   </main>
 
-  <script src="js/sheets-config.js?v=20260621b"></script>
-  <script src="js/admin-dashboard.js?v=20260621c"></script>
+  <script src="js/sheets-config.js?v=20260621pc"></script>
+  <script src="js/admin-dashboard.js?v=20260621pd"></script>
 </body>
 </html>

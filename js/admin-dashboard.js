@@ -9,20 +9,20 @@
 
   var DEFAULT_FERIA_COLS = [
     'Fecha registro', 'ID', 'Nombre', 'Edad', 'Celular', 'Correo', 'Intereses',
-    'Estado registro', 'Notas admin'
+    'Estado registro', 'Habilitado', 'Notas admin'
   ];
 
   var DEFAULT_COMP_COLS = [
     'Fecha registro', 'ID', 'Nombre', 'Correo', 'Celular', 'Ciudad',
-    'Estado pago', 'Cupo confirmado', 'Comprobante enlace Drive'
+    'Estado pago', 'Cupo confirmado', 'Habilitado', 'Comprobante enlace Drive'
   ];
 
   var DEFAULT_STANDS_COLS = [
     'Fecha registro', 'ID', 'Stand ID', 'Marca o negocio', 'Persona contacto', 'Celular', 'Correo',
-    'Plan stand', 'Ciudad', 'Descripción exhibición', 'Tipo participante', 'Red social preferida',
-    'Red social enlace', 'Visible directorio público', 'Logo enlace Drive',
-    'Comparte stand', 'Estado solicitud', 'Notas admin'
+    'Plan stand', 'Ciudad', 'Tipo participante', 'Estado solicitud', 'Habilitado'
   ];
+
+  var activeAdminTab = 'competencia';
 
   function getWebAppUrl() {
     var cfg = global.SHEETS_CONFIG || {};
@@ -107,7 +107,13 @@
     return v === 'sí' || v === 'si' || v === 'yes' || v === 'true' || v === '1';
   }
 
-  function patchStandVisibility(id, visible) {
+  function isHabilitadoValue(val) {
+    var v = String(val || '').trim().toLowerCase();
+    if (!v) return true;
+    return v === 'sí' || v === 'si' || v === 'yes' || v === 'true' || v === '1';
+  }
+
+  function postAdminAction(body) {
     var url = getWebAppUrl();
     if (!url) {
       return Promise.resolve({ ok: false, error: 'URL de Apps Script no configurada.' });
@@ -116,11 +122,7 @@
       method: 'POST',
       mode: 'cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        action: 'admin_patch_stand',
-        id: id,
-        visiblePublico: visible
-      })
+      body: JSON.stringify(body)
     }).then(function (res) {
       return res.json().catch(function () {
         return { ok: false, error: 'Respuesta inválida del servidor.' };
@@ -130,18 +132,191 @@
     });
   }
 
+  function toggleRecordStatus(dataset, id, enabled) {
+    return postAdminAction({
+      action: 'admin_toggle_status',
+      dataset: dataset,
+      id: id,
+      enabled: enabled
+    });
+  }
+
+  function patchStandVisibility(id, visible) {
+    return postAdminAction({
+      action: 'admin_patch_stand',
+      id: id,
+      visiblePublico: visible
+    });
+  }
+
+  function togglePatrocinadorCompetencia(id, habilitado) {
+    return postAdminAction({
+      action: 'admin_toggle_patrocinador_competencia',
+      id: id,
+      habilitado: habilitado
+    });
+  }
+
+  function savePatrocinadorCompetencia(payload) {
+    return postAdminAction(Object.assign({ action: 'admin_save_patrocinador_competencia' }, payload));
+  }
+
+  function filterStandsBySection(rows, section) {
+    return (rows || []).filter(function (row) {
+      var tipo = String(row['Tipo participante'] || '').trim().toLowerCase();
+      var plan = String(row['Plan stand'] || '').trim();
+      if (section === 'expositores') return tipo === 'expositor' || plan === 'Zona Origen';
+      if (section === 'aliados') return tipo === 'aliado' || plan === 'Aliado Patrocinador';
+      if (section === 'patrocinadores') return tipo === 'patrocinador' && plan !== 'Aliado Patrocinador';
+      return true;
+    });
+  }
+
+  function renderStatusBadge(enabled) {
+    var cls = enabled ? 'admin-badge admin-badge--on' : 'admin-badge admin-badge--off';
+    var label = enabled ? 'Habilitado' : 'Deshabilitado';
+    return '<span class="' + cls + '">' + label + '</span>';
+  }
+
+  function renderManageableTable(rows, columns, options) {
+    options = options || {};
+    var dataset = options.dataset || 'stands';
+    var meta = options.metaText ? '<p class="admin-table-meta">' + escapeHtml(options.metaText) + '</p>' : '';
+    if (!rows || !rows.length) {
+      return meta + '<p class="admin-empty">Sin registros todavía.</p>';
+    }
+    var cols = columns || [];
+    var html = meta + '<div class="admin-table-wrap"><table class="admin-table admin-table--manage"><thead><tr>';
+    cols.forEach(function (col) {
+      html += '<th>' + escapeHtml(col) + '</th>';
+    });
+    html += '<th>Estado</th><th>Acción</th></tr></thead><tbody>';
+    rows.forEach(function (row) {
+      var id = row['ID'] || '';
+      var enabled = isHabilitadoValue(row['Habilitado']);
+      html += '<tr data-record-id="' + escapeHtml(id) + '" data-dataset="' + escapeHtml(dataset) + '">';
+      cols.forEach(function (col) {
+        var val = row[col] || '';
+        if (isLinkColumn(col) && val && val.indexOf('http') === 0) {
+          html += '<td><a href="' + escapeHtml(val) + '" target="_blank" rel="noopener">Ver</a></td>';
+        } else {
+          html += '<td>' + escapeHtml(val) + '</td>';
+        }
+      });
+      html += '<td>' + renderStatusBadge(enabled) + '</td>';
+      html += '<td><button type="button" class="admin-btn admin-btn--sm ' +
+        (enabled ? 'admin-btn--danger' : 'admin-btn--success') +
+        ' admin-toggle-status-btn" data-record-id="' + escapeHtml(id) +
+        '" data-dataset="' + escapeHtml(dataset) + '" data-enabled="' + (enabled ? '0' : '1') + '">' +
+        (enabled ? 'Deshabilitar' : 'Habilitar') + '</button></td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    html += '<p class="admin-table-meta">Deshabilitado: no aparece en mapa público, /marcas ni conteos públicos.</p>';
+    return html;
+  }
+
+  function bindToggleStatusButtons() {
+    document.querySelectorAll('.admin-toggle-status-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-record-id');
+        var dataset = btn.getAttribute('data-dataset');
+        var enable = btn.getAttribute('data-enabled') === '1';
+        if (!id || !dataset) return;
+        btn.disabled = true;
+        toggleRecordStatus(dataset, id, enable).then(function (result) {
+          btn.disabled = false;
+          if (!result.ok) {
+            showError(result.error || 'No se pudo actualizar el estado.');
+            return;
+          }
+          showError('');
+          updateLocalHabilitado(dataset, id, result.habilitado || (enable ? 'Sí' : 'No'));
+          renderAdminTabPanels(lastDashboardData);
+        });
+      });
+    });
+  }
+
+  function updateLocalHabilitado(dataset, id, label) {
+    if (!lastDashboardData) return;
+    var key = dataset === 'feria' ? 'allFeria' :
+      dataset === 'competencia' ? 'allCompetencia' : 'allStands';
+    var rows = lastDashboardData[key] || [];
+    rows.forEach(function (row) {
+      if (row['ID'] === id) row['Habilitado'] = label;
+    });
+  }
+
+  function renderAdminTabPanels(data) {
+    var panel = document.getElementById('adminTabPanels');
+    if (!panel || !data) return;
+
+    var feriaRows = pickRows(data, 'allFeria');
+    var compRows = pickRows(data, 'allCompetencia');
+    var standsRows = pickRows(data, 'allStands');
+    var html = '';
+
+    if (activeAdminTab === 'competencia') {
+      html = '<div class="admin-tab-panel" role="tabpanel">' +
+        renderManageableTable(compRows, data.competenciaColumns || DEFAULT_COMP_COLS, {
+          dataset: 'competencia',
+          metaText: compRows.length + ' competidores — más recientes primero.'
+        }) + '</div>';
+    } else if (activeAdminTab === 'feria') {
+      html = '<div class="admin-tab-panel" role="tabpanel">' +
+        renderManageableTable(feriaRows, data.feriaColumns || DEFAULT_FERIA_COLS, {
+          dataset: 'feria',
+          metaText: feriaRows.length + ' visitantes registrados.'
+        }) + '</div>';
+    } else if (activeAdminTab === 'marcas') {
+      html = '<div class="admin-tab-panel" role="tabpanel">' + renderDirectorioTable(standsRows) + '</div>';
+    } else {
+      var sectionRows = filterStandsBySection(standsRows, activeAdminTab);
+      var sectionLabels = {
+        expositores: 'Stands / expositores (Zona Origen)',
+        aliados: 'Aliados (Aliado Patrocinador)',
+        patrocinadores: 'Patrocinadores (Zona Gran Reserva)'
+      };
+      html = '<div class="admin-tab-panel" role="tabpanel">' +
+        renderManageableTable(sectionRows, data.standsColumns || DEFAULT_STANDS_COLS, {
+          dataset: 'stands',
+          metaText: sectionRows.length + ' registros — ' + (sectionLabels[activeAdminTab] || activeAdminTab)
+        }) + '</div>';
+    }
+
+    panel.innerHTML = html;
+    bindToggleStatusButtons();
+    if (activeAdminTab === 'marcas') bindDirectorioToggles();
+  }
+
+  function bindAdminTabs() {
+    document.querySelectorAll('[data-admin-tab]').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        activeAdminTab = tab.getAttribute('data-admin-tab') || 'competencia';
+        document.querySelectorAll('[data-admin-tab]').forEach(function (t) {
+          var active = t === tab;
+          t.classList.toggle('admin-tab--active', active);
+          t.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        renderAdminTabPanels(lastDashboardData);
+      });
+    });
+  }
+
   function renderDirectorioTable(rows) {
     if (!rows || !rows.length) {
       return '<p class="admin-empty">Sin solicitudes de stand todavía.</p>';
     }
 
     var html = '<div class="admin-table-wrap"><table class="admin-table admin-table--directorio"><thead><tr>';
-    html += '<th>Marca</th><th>Tipo</th><th>Stand</th><th>Red social</th><th>Visible en /marcas</th>';
+    html += '<th>Marca</th><th>Tipo</th><th>Stand</th><th>Red social</th><th>Habilitado</th><th>Visible en /marcas</th>';
     html += '</tr></thead><tbody>';
 
     rows.forEach(function (row) {
       var id = row['ID'] || '';
       var visible = isVisiblePublicoValue(row['Visible directorio público']);
+      var habilitado = isHabilitadoValue(row['Habilitado']);
       var redUrl = row['Red social enlace'] || '';
       var redSocial = row['Red social preferida'] || '';
       html += '<tr data-stand-id="' + escapeHtml(id) + '">';
@@ -156,13 +331,22 @@
         html += escapeHtml(redSocial || '—');
       }
       html += '</td>';
+      html += '<td>' + renderStatusBadge(habilitado);
+      if (id) {
+        html += ' <button type="button" class="admin-btn admin-btn--sm ' +
+          (habilitado ? 'admin-btn--danger' : 'admin-btn--success') +
+          ' admin-toggle-status-btn" data-record-id="' + escapeHtml(id) +
+          '" data-dataset="stands" data-enabled="' + (habilitado ? '0' : '1') + '">' +
+          (habilitado ? 'Deshabilitar' : 'Habilitar') + '</button>';
+      }
+      html += '</td>';
       html += '<td><label class="admin-toggle"><input type="checkbox" class="admin-visibility-toggle" data-stand-id="' +
         escapeHtml(id) + '"' + (visible ? ' checked' : '') + '> Mostrar</label></td>';
       html += '</tr>';
     });
 
     html += '</tbody></table></div>';
-    html += '<p class="admin-table-meta">Cambia la visibilidad para incluir o excluir marcas del directorio público (/marcas).</p>';
+    html += '<p class="admin-table-meta">Habilitado controla mapa y conteos públicos. Visible controla solo el directorio /marcas.</p>';
     return html;
   }
 
@@ -188,6 +372,159 @@
             });
           }
         });
+      });
+    });
+  }
+
+  function renderPatrocinadoresCompetenciaTable(rows) {
+    if (!rows || !rows.length) {
+      return '<p class="admin-empty">Sin patrocinadores de competencia. Usa el formulario para añadir el primero.</p>';
+    }
+
+    var sorted = rows.slice().sort(function (a, b) {
+      var oa = parseInt(a['Orden'], 10) || 9999;
+      var ob = parseInt(b['Orden'], 10) || 9999;
+      if (oa !== ob) return oa - ob;
+      return String(a['Nombre'] || '').localeCompare(String(b['Nombre'] || ''), 'es');
+    });
+
+    var html = '<div class="admin-table-wrap"><table class="admin-table admin-table--patrocinadores-comp"><thead><tr>';
+    html += '<th>Logo</th><th>Nombre</th><th>Instagram</th><th>Enlace</th><th>Orden</th><th>Habilitado</th><th></th>';
+    html += '</tr></thead><tbody>';
+
+    sorted.forEach(function (row) {
+      var id = row['ID'] || '';
+      var enabled = isHabilitadoValue(row['Habilitado']);
+      var logo = row['Logo enlace'] || '';
+      var redUrl = row['Red social enlace'] || '';
+      html += '<tr data-patrocinador-id="' + escapeHtml(id) + '">';
+      html += '<td>';
+      if (logo && logo.indexOf('http') === 0) {
+        html += '<img class="admin-table__logo-thumb" src="' + escapeHtml(logo) + '" alt="" loading="lazy">';
+      } else if (logo) {
+        html += '<span class="admin-table-meta">' + escapeHtml(logo) + '</span>';
+      } else {
+        html += '—';
+      }
+      html += '</td>';
+      html += '<td>' + escapeHtml(row['Nombre'] || '') + '</td>';
+      html += '<td>' + escapeHtml(row['Instagram handle'] || '—') + '</td>';
+      html += '<td>';
+      if (redUrl && redUrl.indexOf('http') === 0) {
+        html += '<a href="' + escapeHtml(redUrl) + '" target="_blank" rel="noopener">Ver</a>';
+      } else {
+        html += '—';
+      }
+      html += '</td>';
+      html += '<td>' + escapeHtml(row['Orden'] || '') + '</td>';
+      html += '<td><label class="admin-toggle"><input type="checkbox" class="admin-patrocinador-toggle" data-patrocinador-id="' +
+        escapeHtml(id) + '"' + (enabled ? ' checked' : '') + '> Mostrar</label></td>';
+      html += '<td><button type="button" class="admin-btn admin-btn--secondary admin-btn--sm admin-patrocinador-edit" data-patrocinador-id="' +
+        escapeHtml(id) + '">Editar</button></td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    html += '<p class="admin-table-meta">Los habilitados aparecen en inicio (/) y competencia. Purist y Palmetto se crean al ejecutar sincronizarEncabezados().</p>';
+    return html;
+  }
+
+  function resetPatrocinadorCompetenciaForm() {
+    var editId = document.getElementById('patrocinadorCompetenciaEditId');
+    var form = document.getElementById('formPatrocinadorCompetencia');
+    var resetBtn = document.getElementById('patrocinadorCompetenciaReset');
+    var submitBtn = document.getElementById('patrocinadorCompetenciaSubmit');
+    if (editId) editId.value = '';
+    if (form) form.reset();
+    var hab = document.getElementById('patrocinadorCompetenciaHabilitado');
+    if (hab) hab.checked = true;
+    if (resetBtn) resetBtn.hidden = true;
+    if (submitBtn) submitBtn.textContent = 'Guardar patrocinador';
+  }
+
+  function fillPatrocinadorCompetenciaForm(row) {
+    document.getElementById('patrocinadorCompetenciaEditId').value = row['ID'] || '';
+    document.getElementById('patrocinadorCompetenciaNombre').value = row['Nombre'] || '';
+    document.getElementById('patrocinadorCompetenciaHandle').value = row['Instagram handle'] || '';
+    document.getElementById('patrocinadorCompetenciaUrl').value = row['Red social enlace'] || '';
+    document.getElementById('patrocinadorCompetenciaLogo').value = row['Logo enlace'] || '';
+    document.getElementById('patrocinadorCompetenciaOrden').value = row['Orden'] || '';
+    document.getElementById('patrocinadorCompetenciaHabilitado').checked = isHabilitadoValue(row['Habilitado']);
+    document.getElementById('patrocinadorCompetenciaReset').hidden = false;
+    document.getElementById('patrocinadorCompetenciaSubmit').textContent = 'Actualizar patrocinador';
+  }
+
+  function bindPatrocinadoresCompetenciaControls(rows) {
+    document.querySelectorAll('.admin-patrocinador-toggle').forEach(function (input) {
+      input.addEventListener('change', function () {
+        var id = input.getAttribute('data-patrocinador-id');
+        if (!id) return;
+        input.disabled = true;
+        togglePatrocinadorCompetencia(id, input.checked).then(function (result) {
+          input.disabled = false;
+          if (!result.ok) {
+            input.checked = !input.checked;
+            showError(result.error || 'No se pudo actualizar el patrocinador.');
+            return;
+          }
+          showError('');
+          if (lastDashboardData && lastDashboardData.allPatrocinadoresCompetencia) {
+            lastDashboardData.allPatrocinadoresCompetencia.forEach(function (row) {
+              if (row['ID'] === id) {
+                row['Habilitado'] = result.habilitado || (input.checked ? 'Sí' : 'No');
+              }
+            });
+          }
+        });
+      });
+    });
+
+    document.querySelectorAll('.admin-patrocinador-edit').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-patrocinador-id');
+        var row = (rows || []).find(function (item) { return item['ID'] === id; });
+        if (row) fillPatrocinadorCompetenciaForm(row);
+      });
+    });
+  }
+
+  function bindPatrocinadorCompetenciaForm() {
+    var form = document.getElementById('formPatrocinadorCompetencia');
+    var resetBtn = document.getElementById('patrocinadorCompetenciaReset');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', resetPatrocinadorCompetenciaForm);
+    }
+    if (!form) return;
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var editId = document.getElementById('patrocinadorCompetenciaEditId').value.trim();
+      var nombre = document.getElementById('patrocinadorCompetenciaNombre').value.trim();
+      if (!nombre) {
+        showError('El nombre del patrocinador es obligatorio.');
+        return;
+      }
+
+      var submitBtn = document.getElementById('patrocinadorCompetenciaSubmit');
+      if (submitBtn) submitBtn.disabled = true;
+
+      savePatrocinadorCompetencia({
+        id: editId,
+        nombre: nombre,
+        instagramHandle: document.getElementById('patrocinadorCompetenciaHandle').value.trim(),
+        redEnlace: document.getElementById('patrocinadorCompetenciaUrl').value.trim(),
+        logoEnlace: document.getElementById('patrocinadorCompetenciaLogo').value.trim(),
+        orden: document.getElementById('patrocinadorCompetenciaOrden').value.trim(),
+        habilitado: document.getElementById('patrocinadorCompetenciaHabilitado').checked
+      }).then(function (result) {
+        if (submitBtn) submitBtn.disabled = false;
+        if (!result.ok) {
+          showError(result.error || 'No se pudo guardar el patrocinador.');
+          return;
+        }
+        showError('');
+        resetPatrocinadorCompetenciaForm();
+        loadDashboard();
       });
     });
   }
@@ -361,6 +698,7 @@
     if (key === 'allFeria' && data.recentFeria) return data.recentFeria;
     if (key === 'allCompetencia' && data.recentCompetencia) return data.recentCompetencia;
     if (key === 'allStands' && data.recentStands) return data.recentStands;
+    if (key === 'allPatrocinadoresCompetencia') return data.allPatrocinadoresCompetencia;
     return [];
   }
 
@@ -398,50 +736,18 @@
         : 'Analítica propia (pageviews)';
     }
 
-    var feriaRows = pickRows(data, 'allFeria');
-    var feriaCols = data.feriaColumns || DEFAULT_FERIA_COLS;
-    var feriaTitle = document.getElementById('feriaTableTitle');
-    if (feriaTitle) {
-      feriaTitle.textContent = 'Inscritos — Feria (visitantes) — ' + formatNumber(feriaRows.length) + ' total';
+    var patrocRows = pickRows(data, 'allPatrocinadoresCompetencia');
+    var patrocTitle = document.getElementById('patrocinadoresCompetenciaTitle');
+    if (patrocTitle) {
+      patrocTitle.textContent = 'Patrocinadores competencia — Switch Championship — ' + formatNumber(patrocRows.length) + ' total';
     }
-    document.getElementById('tableFeria').innerHTML = renderTable(
-      feriaRows,
-      feriaCols,
-      feriaRows.length ? 'Todos los registros, más recientes primero.' : ''
-    );
-
-    var compRows = pickRows(data, 'allCompetencia');
-    var compCols = data.competenciaColumns || DEFAULT_COMP_COLS;
-    var compTitle = document.getElementById('competenciaTableTitle');
-    if (compTitle) {
-      compTitle.textContent = 'Inscritos — Switch Championship — ' + formatNumber(compRows.length) + ' total';
-    }
-    document.getElementById('tableCompetencia').innerHTML = renderTable(
-      compRows,
-      compCols,
-      compRows.length ? 'Todos los registros, más recientes primero.' : ''
-    );
-
-    var standsRows = pickRows(data, 'allStands');
-    var standsCols = data.standsColumns || DEFAULT_STANDS_COLS;
-    var standsTitle = document.getElementById('standsTableTitle');
-    if (standsTitle) {
-      standsTitle.textContent = 'Solicitudes — Stands (expositores) — ' + formatNumber(standsRows.length) + ' total';
-    }
-    var tableStands = document.getElementById('tableStands');
-    if (tableStands) {
-      tableStands.innerHTML = renderTable(
-        standsRows,
-        standsCols,
-        standsRows.length ? 'Todos los registros, más recientes primero.' : ''
-      );
+    var tablePatroc = document.getElementById('tablePatrocinadoresCompetencia');
+    if (tablePatroc) {
+      tablePatroc.innerHTML = renderPatrocinadoresCompetenciaTable(patrocRows);
+      bindPatrocinadoresCompetenciaControls(patrocRows);
     }
 
-    var tableDirectorio = document.getElementById('tableDirectorio');
-    if (tableDirectorio) {
-      tableDirectorio.innerHTML = renderDirectorioTable(standsRows);
-      bindDirectorioToggles();
-    }
+    renderAdminTabPanels(data);
 
     var updated = document.getElementById('dashboardUpdated');
     if (updated && data.generatedAt) {
@@ -489,6 +795,8 @@
       return;
     }
     bindEvents();
+    bindAdminTabs();
+    bindPatrocinadorCompetenciaForm();
     loadDashboard();
   }
 
