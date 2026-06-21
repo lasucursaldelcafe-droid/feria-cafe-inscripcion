@@ -443,11 +443,16 @@
         <p id="successLead"></p>
         <div id="successSummary" class="success-summary"></div>
         <p id="successComprobanteNote" class="hint"></p>
+        <p id="successEmailNote" class="hint"></p>
         <div id="successWhatsappGroup" class="whatsapp-group-cta" hidden
              data-whatsapp-url="https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9">
           <p class="whatsapp-group-cta__title">Únete al grupo de WhatsApp del torneo</p>
-          <p class="whatsapp-group-cta__text">Recibirás avisos, logística y novedades del Switch Championship.</p>
+          <p class="whatsapp-group-cta__text">Recibirás avisos, logística y novedades del Switch Championship. También te enviamos este enlace en tu correo de confirmación.</p>
           <a id="successWhatsappGroupLink" class="btn-whatsapp" href="#" target="_blank" rel="noopener noreferrer">Entrar al grupo de WhatsApp</a>
+          <p class="hint" style="margin:0.75rem 0 0;text-align:center">
+            <a id="successWaOrganizador" href="#" target="_blank" rel="noopener noreferrer">Contactar al organizador por WhatsApp</a>
+            <span class="hint"> (mensaje prellenado con tu inscripción)</span>
+          </p>
         </div>
         <p class="hint">
           <a data-link="reglasPdf" href="assets/reglas-switch-championship.pdf" target="_blank" rel="noopener">Reglamento (PDF)</a> ·
@@ -531,8 +536,21 @@
       const inscripcionId = document.getElementById("inscripcionId");
       const syncNote = document.getElementById("syncNote");
       const successComprobanteNote = document.getElementById("successComprobanteNote");
+      const successEmailNote = document.getElementById("successEmailNote");
       const successWhatsappGroup = document.getElementById("successWhatsappGroup");
       const successWhatsappGroupLink = document.getElementById("successWhatsappGroupLink");
+      const successWaOrganizador = document.getElementById("successWaOrganizador");
+
+      function buildWaOrganizadorUrl(entry) {
+        var contact = (window.EVENT_CONFIG && window.EVENT_CONFIG.contact) || {};
+        var phone = String(contact.whatsapp || "573116699638").replace(/\D/g, "");
+        var nombre = String(entry.nombre || "Participante").trim();
+        var id = String(entry.id || "").trim();
+        var msg =
+          "Hola, me inscribí al Switch Championship (1.ª clasificatoria). " +
+          "Nombre: " + nombre + ". Inscripción: " + (id || "pendiente") + ". Confirmo mi participación.";
+        return "https://wa.me/" + phone + "?text=" + encodeURIComponent(msg);
+      }
 
       function isValidWhatsappGrupoUrl(url) {
         return /^https:\/\/chat\.whatsapp\.com\//.test(String(url || "").trim());
@@ -560,13 +578,17 @@
         successWhatsappGroup.classList.remove("is-visible");
       }
 
-      function showWhatsappGroup(url) {
+      function showWhatsappGroup(url, entry) {
         if (!successWhatsappGroup || !successWhatsappGroupLink || !isValidWhatsappGrupoUrl(url)) {
           hideWhatsappGroup();
           return;
         }
         successWhatsappGroupLink.href = url;
         successWhatsappGroupLink.setAttribute("aria-label", "Entrar al grupo de WhatsApp del Switch Championship");
+        if (successWaOrganizador && entry) {
+          successWaOrganizador.href = buildWaOrganizadorUrl(entry);
+          successWaOrganizador.setAttribute("aria-label", "Contactar al organizador por WhatsApp con mensaje prellenado");
+        }
         successWhatsappGroup.removeAttribute("hidden");
         successWhatsappGroup.hidden = false;
         successWhatsappGroup.classList.add("is-visible");
@@ -1106,10 +1128,15 @@
             "<li><strong>Pago:</strong> $90.000 COP a Nubank <code>@mvl616</code> (Manuel Barraza)</li>" +
             "<li><strong>Café de práctica:</strong> 150 a 200 g a la dirección indicada, tras validar el pago</li>" +
             "<li><strong>Foto:</strong> " + fotoLine + "</li>" +
-            "<li><strong>Próximo paso:</strong> Únete al grupo de WhatsApp del torneo y revisa tu correo</li>" +
+            "<li><strong>Reglamento:</strong> <a href=\"reglas-switch-championship.html\" target=\"_blank\" rel=\"noopener\">Ver reglas oficiales</a></li>" +
+            "<li><strong>Próximo paso:</strong> Únete al grupo de WhatsApp del torneo y revisa tu correo de confirmación</li>" +
             "</ul>";
         }
-        showWhatsappGroup(whatsappUrl);
+        showWhatsappGroup(whatsappUrl, entry);
+        if (successEmailNote) {
+          successEmailNote.textContent =
+            "Te enviamos un correo de confirmación con el resumen del reglamento, el enlace al grupo de WhatsApp y un mensaje prellenado para contactarnos.";
+        }
         if (successComprobanteNote) {
           successComprobanteNote.textContent = hadComprobante
             ? "Recibimos tu comprobante de pago. Validaremos los $90.000 COP en Nubank @mvl616 y te confirmaremos por correo o WhatsApp."
@@ -1283,6 +1310,7 @@
         clearComprobantePreview();
         clearFotoPreview(true);
         if (successComprobanteNote) successComprobanteNote.textContent = "";
+        if (successEmailNote) successEmailNote.textContent = "";
         if (successLead) successLead.textContent = "";
         if (successSummary) successSummary.innerHTML = "";
         if (inscripcionId) inscripcionId.textContent = "";

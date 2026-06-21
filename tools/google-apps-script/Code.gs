@@ -22,6 +22,9 @@ var DRIVE_LOGOS_STANDS_FOLDER_NAME = 'Feria — Logos expositores';
 // Correo(s) del equipo para alertas de nueva inscripcion (separar con coma si son varios).
 var ORGANIZER_EMAIL = 'lasucursaldelcafe@gmail.com';
 var WHATSAPP_GRUPO_COMPETENCIA = 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9';
+var WHATSAPP_ORGANIZADOR = '573116699638';
+// WhatsApp automático: Apps Script no tiene WhatsApp Business API (Meta) configurada.
+// El participante recibe enlaces chat.whatsapp.com (grupo) y wa.me (organizador) en el correo.
 
 var HEADERS_FERIA = [
   'Fecha registro', 'ID', 'Nombre', 'Edad', 'Celular', 'Correo', 'Intereses',
@@ -695,23 +698,139 @@ function parseLegalAcceptances_(data) {
   ];
 }
 
+function getSiteUrl_() {
+  var props = PropertiesService.getScriptProperties();
+  return String(props.getProperty('SITE_URL') || 'https://la-sucursal-del-cafe.web.app').replace(/\/$/, '');
+}
+
+function getReglasUrl_() {
+  return getSiteUrl_() + '/reglas-switch-championship.html';
+}
+
+function buildWaMeUrl_(phone, text) {
+  var digits = String(phone || '').replace(/\D/g, '');
+  if (!digits) return '';
+  var url = 'https://wa.me/' + digits;
+  if (text) url += '?text=' + encodeURIComponent(text);
+  return url;
+}
+
+function buildCompetenciaWaOrganizadorUrl_(data) {
+  var nombre = String(data.nombre || 'Participante').trim();
+  var id = String(data.id || '').trim();
+  var msg = 'Hola, me inscribí al Switch Championship (1.ª clasificatoria). ' +
+    'Nombre: ' + nombre + '. Inscripción: ' + (id || 'pendiente') + '. Confirmo mi participación.';
+  return buildWaMeUrl_(WHATSAPP_ORGANIZADOR, msg);
+}
+
+function escapeHtml_(text) {
+  return String(text || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function buildCompetenciaEmailPlain_(data) {
+  var id = data.id || '';
+  var nombre = data.nombre || '';
+  var reglasUrl = getReglasUrl_();
+  var waOrganizador = buildCompetenciaWaOrganizadorUrl_(data);
+  var tieneComprobante = !!(data.comprobanteArchivo && data.comprobanteArchivo.tieneComprobante);
+  var lines = [
+    'Hola ' + nombre + ',',
+    '',
+    '¡Bienvenido/a al Switch Championship! Recibimos tu inscripción a la 1.ª clasificatoria del circuito de café filtrado con Hario Switch.',
+    '',
+    'Número de inscripción: ' + id,
+    'Fecha: 4 de julio de 2026',
+    'Sede: Plaza Marbella, Centro Comercial (Curis), Cali',
+    'Pago: $90.000 COP a Nubank @mvl616 (Manuel Barraza)',
+    '',
+    '—— Reglamento (resumen) ——',
+    '• Método obligatorio: Hario Switch (extracción manual).',
+    '• Formato: clasificatoria, semifinal y final.',
+    '• Sin reembolso por retiro o no asistencia (salvo cancelación total del evento).',
+    '• Debes cumplir tiempos, protocolo y criterios del jurado.',
+    'Reglamento completo: ' + reglasUrl,
+    '',
+    '—— WhatsApp del torneo ——',
+    'Únete al grupo para avisos, logística y novedades:',
+    WHATSAPP_GRUPO_COMPETENCIA,
+    '',
+    'Contacto con el organizador (mensaje prellenado):',
+    waOrganizador,
+    '',
+    'Nota: WhatsApp no puede enviarse automáticamente desde este sistema; usa los enlaces anteriores para unirte al grupo o escribirnos.',
+    ''
+  ];
+  if (tieneComprobante) {
+    lines.push('Recibimos tu comprobante de pago. Validaremos tu pago y confirmaremos tu cupo.');
+  } else {
+    lines.push('Pendiente: realiza tu pago de $90.000 COP y envía el comprobante si aún no lo adjuntaste.');
+  }
+  lines.push('');
+  lines.push('Dudas: ' + ORGANIZER_EMAIL);
+  lines.push('');
+  lines.push('— La Sucursal del Café');
+  lines.push('Switch Championship · 1.ª clasificatoria');
+  return lines.join('\n');
+}
+
+function buildCompetenciaEmailHtml_(data) {
+  var id = escapeHtml_(data.id || '');
+  var nombre = escapeHtml_(data.nombre || '');
+  var reglasUrl = escapeHtml_(getReglasUrl_());
+  var grupoUrl = escapeHtml_(WHATSAPP_GRUPO_COMPETENCIA);
+  var waOrganizador = escapeHtml_(buildCompetenciaWaOrganizadorUrl_(data));
+  var organizerEmail = escapeHtml_(ORGANIZER_EMAIL);
+  var tieneComprobante = !!(data.comprobanteArchivo && data.comprobanteArchivo.tieneComprobante);
+  var pagoNote = tieneComprobante
+    ? 'Recibimos tu comprobante de pago. Validaremos los $90.000 COP en Nubank @mvl616 y te confirmaremos tu cupo.'
+    : 'Pendiente: realiza tu pago de $90.000 COP a Nubank @mvl616 (Manuel Barraza) y envía el comprobante si aún no lo adjuntaste.';
+  var btnStyle = 'display:inline-block;padding:12px 20px;margin:8px 8px 8px 0;text-decoration:none;border-radius:6px;font-weight:600;font-size:15px;';
+  var btnGreen = btnStyle + 'background:#25D366;color:#ffffff;';
+  var btnBrown = btnStyle + 'background:#5f4a3a;color:#ffffff;';
+
+  return [
+    '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#3d2b1f;max-width:600px;">',
+    '<p style="margin:0 0 16px;">Hola <strong>' + nombre + '</strong>,</p>',
+    '<p style="margin:0 0 16px;">¡Bienvenido/a al <strong>Switch Championship</strong>! Recibimos tu inscripción a la <strong>1.ª clasificatoria</strong> del circuito de café filtrado con Hario Switch, organizado por La Sucursal del Café.</p>',
+    '<table style="width:100%;border-collapse:collapse;margin:0 0 20px;font-size:14px;">',
+    '<tr><td style="padding:6px 0;color:#6b5344;width:38%;">Número de inscripción</td><td style="padding:6px 0;"><strong>' + id + '</strong></td></tr>',
+    '<tr><td style="padding:6px 0;color:#6b5344;">Fecha</td><td style="padding:6px 0;">4 de julio de 2026</td></tr>',
+    '<tr><td style="padding:6px 0;color:#6b5344;">Sede</td><td style="padding:6px 0;">Plaza Marbella, Centro Comercial (Curis), Cali</td></tr>',
+    '<tr><td style="padding:6px 0;color:#6b5344;">Pago</td><td style="padding:6px 0;">$90.000 COP · Nubank <strong>@mvl616</strong> (Manuel Barraza)</td></tr>',
+    '</table>',
+    '<h2 style="font-size:17px;color:#5f4a3a;margin:24px 0 10px;">Reglamento</h2>',
+    '<ul style="margin:0 0 12px;padding-left:20px;">',
+    '<li style="margin-bottom:6px;">Método obligatorio: <strong>Hario Switch</strong> (extracción manual).</li>',
+    '<li style="margin-bottom:6px;">Formato: clasificatoria, semifinal y final.</li>',
+    '<li style="margin-bottom:6px;">Sin reembolso por retiro o no asistencia (salvo cancelación total del evento).</li>',
+    '<li style="margin-bottom:6px;">Debes cumplir tiempos, protocolo y criterios del jurado.</li>',
+    '</ul>',
+    '<p style="margin:0 0 20px;"><a href="' + reglasUrl + '" style="color:#8b4513;font-weight:600;">Ver reglamento completo en el sitio</a></p>',
+    '<h2 style="font-size:17px;color:#5f4a3a;margin:24px 0 10px;">WhatsApp del torneo</h2>',
+    '<p style="margin:0 0 12px;">Únete al grupo para recibir avisos, logística y novedades del Switch Championship:</p>',
+    '<p style="margin:0 0 16px;"><a href="' + grupoUrl + '" style="' + btnGreen + '">Entrar al grupo de WhatsApp</a></p>',
+    '<p style="margin:0 0 8px;font-size:14px;color:#6b5344;">¿Necesitas escribir al organizador? Abre WhatsApp con un mensaje prellenado:</p>',
+    '<p style="margin:0 0 16px;"><a href="' + waOrganizador + '" style="' + btnBrown + '">Contactar por WhatsApp</a></p>',
+    '<p style="margin:0 0 20px;padding:12px 14px;background:#f5f0ea;border-left:4px solid #bb5e3c;font-size:14px;">' + escapeHtml_(pagoNote) + '</p>',
+    '<p style="margin:0 0 8px;font-size:13px;color:#888;">WhatsApp no puede enviarse automáticamente desde este sistema; usa los botones anteriores para unirte al grupo o contactarnos.</p>',
+    '<p style="margin:16px 0 0;">Dudas: <a href="mailto:' + organizerEmail + '" style="color:#8b4513;">' + organizerEmail + '</a></p>',
+    '<hr style="border:none;border-top:1px solid #e0d5c8;margin:24px 0;">',
+    '<p style="margin:0;font-size:13px;color:#888;">— La Sucursal del Café<br>Switch Championship · 1.ª clasificatoria</p>',
+    '</div>'
+  ].join('');
+}
+
 function buildEmailBody_(formType, data) {
   var id = data.id || '';
   var nombre = data.nombre || '';
   var lines = ['Hola ' + nombre + ',', ''];
 
   if (formType === 'competencia') {
-    lines.push('Recibimos tu inscripción al Switch Championship (Evento 1).');
-    lines.push('Número de inscripción: ' + id);
-    lines.push('Fecha: 4 de julio de 2026');
-    lines.push('Sede: Plaza Marbella, Centro Comercial (Curis)');
-    lines.push('Pago: $90.000 COP a Nubank @mvl616 (Manuel Barraza)');
-    lines.push('');
-    lines.push('Únete al grupo de WhatsApp del torneo:');
-    lines.push(WHATSAPP_GRUPO_COMPETENCIA);
-    lines.push('');
-    lines.push('Si adjuntaste comprobante, validaremos tu pago y confirmaremos tu cupo.');
-    lines.push('Dudas: ' + ORGANIZER_EMAIL);
+    return buildCompetenciaEmailPlain_(data);
   } else if (formType === 'lista_espera') {
     lines.push('Te registramos en la lista de espera del Switch Championship.');
     lines.push('Referencia: ' + id);
@@ -759,7 +878,17 @@ function sendConfirmationEmail_(formType, data) {
   if (formType === 'stands') subject = 'Solicitud de stand recibida — ' + (data.marca || data.id || '');
 
   try {
-    MailApp.sendEmail(correo, subject, buildEmailBody_(formType, data));
+    if (formType === 'competencia') {
+      MailApp.sendEmail({
+        to: correo,
+        subject: subject,
+        body: buildCompetenciaEmailPlain_(data),
+        htmlBody: buildCompetenciaEmailHtml_(data),
+        name: 'La Sucursal del Café'
+      });
+    } else {
+      MailApp.sendEmail(correo, subject, buildEmailBody_(formType, data));
+    }
   } catch (err) {
     Logger.log('No se pudo enviar correo a ' + correo + ': ' + err);
   }
