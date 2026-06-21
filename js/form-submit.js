@@ -35,6 +35,13 @@
         base64OmitidoEnLocal: true
       };
     }
+    if (copy.logoStand && copy.logoStand.base64) {
+      copy.logoStand = {
+        nombreArchivo: copy.logoStand.nombreArchivo,
+        tipoArchivo: copy.logoStand.tipoArchivo,
+        base64OmitidoEnLocal: true
+      };
+    }
     return copy;
   }
 
@@ -69,8 +76,12 @@
           error: body && body.error,
           duplicate: !!(body && body.duplicate),
           cupoCompleto: !!(body && body.cupoCompleto),
+          standOcupado: !!(body && body.standOcupado),
           whatsappGrupoUrl: body && body.whatsappGrupoUrl,
           fotoEnlace: body && body.fotoEnlace,
+          logoEnlace: body && body.logoEnlace,
+          accessCode: body && body.accessCode,
+          expositorPanelUrl: body && body.expositorPanelUrl,
           status: res.status
         };
       }).catch(function () {
@@ -105,9 +116,13 @@
         error: remoteResult.error,
         duplicate: remoteResult.duplicate,
         cupoCompleto: remoteResult.cupoCompleto,
+        standOcupado: remoteResult.standOcupado,
         id: remoteResult.id,
         whatsappGrupoUrl: remoteResult.whatsappGrupoUrl,
-        fotoEnlace: remoteResult.fotoEnlace
+        fotoEnlace: remoteResult.fotoEnlace,
+        logoEnlace: remoteResult.logoEnlace,
+        accessCode: remoteResult.accessCode,
+        expositorPanelUrl: remoteResult.expositorPanelUrl
       };
     });
   }
@@ -134,10 +149,81 @@
     });
   }
 
+  function fetchStandsMap() {
+    var url = getWebAppUrl();
+    if (!url) {
+      return Promise.resolve({ ok: false, reason: 'no_url' });
+    }
+
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    return fetch(url + sep + 'action=stands_map', {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-store'
+    }).then(function (res) {
+      return res.json();
+    }).catch(function (err) {
+      return { ok: false, error: err.message || String(err) };
+    });
+  }
+
+  function postAction(action, payload) {
+    var url = getWebAppUrl();
+    if (!url) {
+      return Promise.resolve({ ok: false, skipped: true, reason: 'no_url' });
+    }
+
+    var body = payload || {};
+    body.action = action;
+
+    return fetch(url, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(body)
+    }).then(function (res) {
+      return res.json().then(function (data) {
+        return Object.assign({ status: res.status }, data || {});
+      }).catch(function () {
+        return { ok: false, error: 'Respuesta inválida del servidor.' };
+      });
+    }).catch(function (err) {
+      return { ok: false, error: err.message || String(err) };
+    });
+  }
+
+  function fetchExpositorFeed() {
+    var url = getWebAppUrl();
+    if (!url) {
+      return Promise.resolve({ ok: false, reason: 'no_url' });
+    }
+
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    return fetch(url + sep + 'action=expositor_feed', {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-store'
+    }).then(function (res) {
+      return res.json();
+    }).catch(function (err) {
+      return { ok: false, error: err.message || String(err) };
+    });
+  }
+
+  function expositorLogin(email, accessCode) {
+    return postAction('expositor_login', {
+      email: String(email || '').trim().toLowerCase(),
+      accessCode: String(accessCode || '').trim()
+    });
+  }
+
   global.FormSubmit = {
     isConfigured: isConfigured,
     submitForm: submitForm,
     submitWaitlist: submitWaitlist,
-    fetchCupoCount: fetchCupoCount
+    fetchCupoCount: fetchCupoCount,
+    fetchStandsMap: fetchStandsMap,
+    fetchExpositorFeed: fetchExpositorFeed,
+    expositorLogin: expositorLogin
   };
 })(window);

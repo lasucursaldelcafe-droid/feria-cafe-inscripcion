@@ -3744,3 +3744,291 @@ body.page-rules {
     height: 1.5rem;
   }
 }
+
+/* —— Mapa de stands (expositores) —— */
+.stands-map-steps {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  counter-reset: stand-step;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.stands-map-steps li {
+  position: relative;
+  margin: 0;
+  padding: 0.65rem 0.85rem 0.65rem 2.75rem;
+  background: var(--surface-warm);
+  border: 1px solid var(--border-coffee);
+  border-radius: 8px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.stands-map-steps li::before {
+  counter-increment: stand-step;
+  content: counter(stand-step);
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--green-accent);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.78rem;
+  border-radius: 50%;
+}
+
+.stands-map-legend-inline {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.82em;
+}
+
+.stands-map-legend-inline--free {
+  background: rgba(139, 105, 20, 0.22);
+  color: var(--brown-dark);
+}
+
+.stands-map-legend-inline--occupied {
+  background: rgba(75, 53, 42, 0.45);
+  color: #fff;
+}
+
+.stands-map-status {
+  font-size: 0.9rem;
+  color: var(--olive, #5C6B4A);
+  margin: 0 0 0.75rem;
+}
+
+.stands-map-status--warn {
+  color: var(--red-brand, #B33A3A);
+}
+
+.stands-map-root {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
+.stands-map-stage {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid var(--cream-dark, #D4C4B0);
+  background: var(--cream-muted, #F5EDE4);
+  box-shadow: 0 4px 18px rgba(75, 53, 42, 0.08);
+}
+
+.stands-map-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+.stands-map-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.stands-map-spot {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: 2px solid rgba(75, 53, 42, 0.55);
+  border-radius: 6px;
+  background: rgba(95, 127, 78, 0.35);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stands-map-spot:hover:not(.stands-map-spot--occupied):not(.stands-map-spot--disabled) {
+  background: rgba(187, 94, 60, 0.35);
+  border-color: var(--brown-warm, #BB5E3C);
+  transform: scale(1.03);
+  z-index: 2;
+}
+
+.stands-map-spot--selected {
+  background: rgba(187, 94, 60, 0.55);
+  border-color: var(--brown-warm, #BB5E3C);
+  box-shadow: 0 0 0 3px rgba(187, 94, 60, 0.35);
+  z-index: 3;
+}
+
+.stands-map-spot--occupied {
+  background: rgba(75, 53, 42, 0.45);
+  border-color: var(--brown-dark, #4B352A);
+  cursor: not-allowed;
+  z-index: 1;
+}
+
+.stands-map-spot--disabled:not(.stands-map-spot--occupied) {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.stands-map-spot__label {
+  font-size: clamp(0.55rem, 1.4vw, 0.72rem);
+  font-weight: 700;
+  color: var(--brown-dark, #4B352A);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.stands-map-spot--occupied .stands-map-spot__label,
+.stands-map-spot--selected .stands-map-spot__label {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.stands-map-spot__logo {
+  position: absolute;
+  inset: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.stands-map-spot__logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 2px;
+}
+
+.stands-map-spot__initial {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: clamp(0.7rem, 2vw, 1rem);
+  color: #fff;
+  background: rgba(75, 53, 42, 0.75);
+  border-radius: 4px;
+}
+
+.stands-map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.82rem;
+}
+
+.stands-map-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.stands-map-legend__item::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid rgba(75, 53, 42, 0.35);
+}
+
+.stands-map-legend__item--free::before {
+  background: rgba(95, 127, 78, 0.35);
+}
+
+.stands-map-legend__item--selected::before {
+  background: rgba(187, 94, 60, 0.55);
+  border-color: var(--brown-warm, #BB5E3C);
+}
+
+.stands-map-legend__item--occupied::before {
+  background: rgba(75, 53, 42, 0.45);
+}
+
+.stands-map-legend__count {
+  margin-left: auto;
+  color: var(--brown-dark, #4B352A);
+  font-weight: 600;
+}
+
+.stands-map-replace-hint {
+  flex-basis: 100%;
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+}
+
+.stands-map-selection {
+  margin: 0.35rem 0 0.75rem;
+  font-size: 0.92rem;
+}
+
+.stands-map-selection strong {
+  color: var(--brown-warm, #BB5E3C);
+}
+
+.stands-map-tooltip {
+  position: absolute;
+  z-index: 20;
+  max-width: min(240px, 90vw);
+  padding: 0.45rem 0.65rem;
+  background: var(--brown-dark, #4B352A);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.35;
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.stands-map-tooltip[hidden] {
+  display: none !important;
+}
+
+.stands-map-feedback {
+  min-height: 1.25rem;
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--red-brand, #C1272D);
+}
+
+@media (max-width: 640px) {
+  .stands-map-spot {
+    min-width: 3rem;
+    min-height: 3rem;
+  }
+
+  .stands-map-tooltip {
+    white-space: normal;
+    text-align: center;
+  }
+
+  .stands-map-legend__count {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+}

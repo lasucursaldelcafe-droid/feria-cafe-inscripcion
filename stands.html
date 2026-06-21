@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/brand.css?v=20260620c">
+  <link rel="stylesheet" href="css/brand.css?v=20260620d">
 </head>
 <body class="page-festival page-form" data-festival-page="stands">
   <header class="site-header">
@@ -52,7 +52,7 @@
     </header>
 
     <main class="site-main">
-      <article class="content-card" aria-labelledby="form-title">
+      <article class="content-card content-card--wide" aria-labelledby="form-title">
         <div id="formPanel" class="form-panel card-body">
         <div class="info-box" role="note">
           <p style="margin:0 0 0.5rem"><a data-link="festival" href="index.html">← Volver al evento</a></p>
@@ -69,6 +69,41 @@
           </p>
         </div>
         <form id="standsForm" novalidate>
+          <ol class="stands-map-steps" aria-label="Pasos para reservar tu stand">
+            <li><strong>Elige tu plan</strong> — define la zona del mapa.</li>
+            <li><strong>Toca un stand verde</strong> — disponible en tu zona.</li>
+            <li><strong>Sube tu logo</strong> — aparecerá en el mapa.</li>
+            <li><strong>Envía la solicitud</strong> — te contactamos para confirmar.</li>
+          </ol>
+
+          <h2 class="section-title">1. Elige tu plan</h2>
+          <div class="field">
+            <label for="plan">Tipo de stand o plan <span class="required" aria-hidden="true">*</span></label>
+            <select id="plan" name="plan" required aria-describedby="plan-error plan-hint">
+              <option value="">Selecciona…</option>
+              <option value="Zona Origen">Zona Origen — stand 120×60 cm ($1.500.000 COP)</option>
+              <option value="Zona Gran Reserva">Zona Gran Reserva — stand 3×2 m ($3.000.000 COP)</option>
+              <option value="Aliado Patrocinador">Aliado Patrocinador — visibilidad (a convenir)</option>
+              <option value="Quiero asesoría">Aún no sé / Quiero asesoría</option>
+            </select>
+            <p id="plan-hint" class="hint">Primero elige el plan; luego podrás seleccionar un stand disponible en el mapa.</p>
+            <span id="plan-error" class="error-msg" role="alert"></span>
+          </div>
+
+          <h2 class="section-title">2. Selecciona tu stand en el mapa</h2>
+          <p class="hint" style="margin:0 0 0.75rem">Los stands <span class="stands-map-legend-inline stands-map-legend-inline--free">verdes</span> están disponibles. Los <span class="stands-map-legend-inline stands-map-legend-inline--occupied">oscuros</span> ya están ocupados.</p>
+          <p id="standsMapStatus" class="stands-map-status" aria-live="polite"></p>
+          <div id="standsMapRoot" class="stands-map-root" aria-label="Mapa de stands"></div>
+          <div id="standsMapLegend" class="stands-map-legend"></div>
+          <div id="standsMapTooltip" class="stands-map-tooltip" role="tooltip" hidden></div>
+          <p id="standsMapFeedback" class="stands-map-feedback" aria-live="assertive"></p>
+          <input type="hidden" id="standId" name="standId" value="">
+          <p class="stands-map-selection">
+            Stand seleccionado: <strong id="standSelectionLabel">Ninguno</strong>
+          </p>
+          <span id="standId-error" class="error-msg" role="alert"></span>
+
+          <h2 class="section-title">3. Datos del expositor</h2>
           <div class="field">
             <label for="marca">Nombre de marca o negocio <span class="required" aria-hidden="true">*</span></label>
             <input
@@ -134,18 +169,6 @@
 
           <div class="field-row">
             <div class="field">
-              <label for="plan">Tipo de stand o plan <span class="required" aria-hidden="true">*</span></label>
-              <select id="plan" name="plan" required aria-describedby="plan-error plan-hint">
-                <option value="">Selecciona…</option>
-                <option value="Zona Origen">Zona Origen — stand 120×60 cm ($1.500.000 COP)</option>
-                <option value="Zona Gran Reserva">Zona Gran Reserva — stand 3×2 m ($3.000.000 COP)</option>
-                <option value="Aliado Patrocinador">Aliado Patrocinador — visibilidad (a convenir)</option>
-                <option value="Quiero asesoría">Aún no sé / Quiero asesoría</option>
-              </select>
-              <p id="plan-hint" class="hint">Nombres alineados con los planes en <a data-link="patrocinadores" href="patrocinadores.html">Patrocinadores</a>.</p>
-              <span id="plan-error" class="error-msg" role="alert"></span>
-            </div>
-            <div class="field">
               <label for="ciudad">Ciudad <span class="required" aria-hidden="true">*</span></label>
               <input
                 type="text"
@@ -158,6 +181,21 @@
               >
               <span id="ciudad-error" class="error-msg" role="alert"></span>
             </div>
+          </div>
+
+          <h2 class="section-title">4. Logo de tu marca</h2>
+          <div class="field" id="logoFieldWrap">
+            <label for="logoStand">Logo de tu negocio <span class="required" id="logoRequiredMark" aria-hidden="true">*</span></label>
+            <input
+              type="file"
+              id="logoStand"
+              name="logoStand"
+              accept="image/jpeg,image/png,image/webp"
+              aria-describedby="logo-hint logo-error logoPreview"
+            >
+            <p id="logo-hint" class="hint">Sube el logo que aparecerá en el mapa y materiales del evento. JPG, PNG o WebP · máx. 5 MB.</p>
+            <div id="logoPreview" class="comprobante-preview" aria-live="polite"></div>
+            <span id="logo-error" class="error-msg" role="alert"></span>
           </div>
 
           <div class="field">
@@ -176,7 +214,7 @@
             <span id="descripcion-error" class="error-msg" role="alert"></span>
           </div>
 
-          <h2 class="section-title">Términos y condiciones</h2>
+          <h2 class="section-title">5. Términos y condiciones</h2>
 
           <div class="terms-block field">
             <div class="terms-toolbar">
@@ -252,6 +290,14 @@
         <h2>¡Solicitud enviada!</h2>
         <p id="successLeadStands">Gracias por tu interés en exponer en <strong>La Sucursal del Café</strong>. El equipo revisará tu solicitud y te contactará para confirmar disponibilidad y siguientes pasos.</p>
         <p id="successEmailNoteStands" class="hint"></p>
+        <div id="successAccessBlock" class="success-summary" hidden>
+          <p><strong>Tu código de acceso al panel expositor</strong></p>
+          <p>Guárdalo junto con tu correo. Lo necesitarás para ver tu stand y las novedades de la feria.</p>
+          <p style="text-align:center;margin:0.75rem 0"><code id="successAccessCode" style="font-size:1.35rem;letter-spacing:0.12em"></code></p>
+          <p style="text-align:center;margin-top:1rem">
+            <a id="successExpositorLink" class="btn-submit" href="expositor.html" style="width:auto;display:inline-flex;min-width:220px">Ir a mi panel expositor</a>
+          </p>
+        </div>
         <button type="button" id="btnNuevaSolicitud" class="btn-secondary">Enviar otra solicitud</button>
         </div>
       </article>
@@ -293,11 +339,12 @@
     </footer>
   </div>
 
-  <script src="js/event-config.js?v=20260620ig"></script>
+  <script src="js/event-config.js?v=20260620ih"></script>
   <script src="js/site-links.js"></script>
   <script src="js/seo-structured-data.js"></script>
   <script src="js/sheets-config.js"></script>
   <script src="js/form-submit.js"></script>
+  <script src="js/stands-map.js"></script>
   <script src="js/terms-disclosure.js"></script>
   <script src="js/site-chrome.js?v=20260620ig"></script>
   <script src="js/festival-nav.js?v=20260620ig"></script>
@@ -312,6 +359,52 @@
       const btnNueva = document.getElementById("btnNuevaSolicitud");
       const btnSubmit = document.getElementById("btnSubmit");
       const syncNote = document.getElementById("syncNote");
+      const planSelect = document.getElementById("plan");
+      const logoRequiredMark = document.getElementById("logoRequiredMark");
+
+      var standsMap = new StandsMap({
+        storageKey: STORAGE_KEY,
+        onOccupiedClick: function (info) {
+          var fb = document.getElementById('standsMapFeedback');
+          if (fb) {
+            fb.textContent = 'El stand ' + info.id + ' (' + info.zone + ') ya está ocupado' +
+              (info.marca ? ' por ' + info.marca : '') + '. Elige otro stand disponible.';
+          }
+        },
+        onZoneMismatch: function (info) {
+          var fb = document.getElementById('standsMapFeedback');
+          if (fb) {
+            fb.textContent = 'El stand ' + info.id + ' pertenece a «' + info.zone +
+              '». Elige un stand de tu plan («' + (planSelect.value || '') + '») o cambia el plan.';
+          }
+        }
+      });
+      var logoUpload = new StandsLogoUpload();
+
+      standsMap.init().then(function () {
+        standsMap.setPlan(planSelect.value);
+      });
+
+      function updatePlanUi() {
+        var plan = planSelect.value;
+        standsMap.setPlan(plan);
+        var needsStand = StandsMapUtils.planRequiresStand(plan);
+        if (logoRequiredMark) logoRequiredMark.style.display = needsStand ? "" : "none";
+        if (logoUpload.input) {
+          logoUpload.input.required = needsStand;
+        }
+      }
+
+      planSelect.addEventListener("change", function () {
+        updatePlanUi();
+        if (document.getElementById("plan-error").classList.contains("visible")) {
+          validatePlan();
+        }
+        if (document.getElementById("standId-error").classList.contains("visible")) {
+          validateStandSelection();
+        }
+      });
+      updatePlanUi();
 
       if (syncNote && window.FormSubmit && !FormSubmit.isConfigured()) {
         syncNote.style.display = "block";
@@ -394,6 +487,19 @@
         field.el.setAttribute("aria-invalid", message ? "true" : "false");
       }
 
+      function validateStandSelection() {
+        var plan = planSelect.value;
+        var message = standsMap.validateSelection(plan);
+        var errorEl = document.getElementById("standId-error");
+        errorEl.textContent = message;
+        errorEl.classList.toggle("visible", !!message);
+        return !message;
+      }
+
+      function validateLogo() {
+        return logoUpload.validate(planSelect.value);
+      }
+
       function validatePlan() {
         const el = document.getElementById("plan");
         const error = document.getElementById("plan-error");
@@ -434,12 +540,6 @@
         });
       });
 
-      document.getElementById("plan").addEventListener("change", function () {
-        if (document.getElementById("plan-error").classList.contains("visible")) {
-          validatePlan();
-        }
-      });
-
       var termsUi = TermsDisclosure.init({
         termIds: ["aceptaVoluntaria", "aceptaPertenencias", "aceptaDatos", "aceptaImagen"],
         onChange: function () {
@@ -462,6 +562,12 @@
         validatePlan();
         document.getElementById("plan-error").textContent = "";
         document.getElementById("plan-error").classList.remove("visible");
+        document.getElementById("standId-error").textContent = "";
+        document.getElementById("standId-error").classList.remove("visible");
+        standsMap.selectStand("");
+        logoUpload.clear(true);
+        updatePlanUi();
+        standsMap.refresh();
         const terminosError = document.getElementById("terminos-error");
         if (terminosError) {
           terminosError.textContent = "";
@@ -473,7 +579,59 @@
         }
         successPanel.classList.remove("visible");
         formPanel.classList.remove("hidden");
+        var accessBlock = document.getElementById("successAccessBlock");
+        if (accessBlock) accessBlock.hidden = true;
+        var fb = document.getElementById("standsMapFeedback");
+        if (fb) fb.textContent = "";
         fields.marca.el.focus();
+      }
+
+      function submitEntry(entry) {
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = "Enviando…";
+
+        FormSubmit.submitForm(FORM_TYPE, STORAGE_KEY, entry).then(function (result) {
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = "Enviar solicitud de stand";
+          if (!result.ok) {
+            if (result.standOcupado) {
+              var fb = document.getElementById("standsMapFeedback");
+              if (fb) fb.textContent = result.error || "Ese stand acaba de ser reservado por otro expositor. Elige otro stand disponible en el mapa.";
+              standsMap.refresh();
+              validateStandSelection();
+              return;
+            }
+            if (result.duplicate) {
+              alert("Ya existe una solicitud de stand con este correo.");
+            } else {
+              alert(result.error || "No se pudo guardar la solicitud. Intenta de nuevo.");
+            }
+            return;
+          }
+          if (result.logoEnlace) entry.logoEnlace = result.logoEnlace;
+          standsMap.refresh();
+          var note = document.getElementById("successEmailNoteStands");
+          var standLine = entry.standId ? " Stand reservado: <strong>" + entry.standId + "</strong>." : "";
+          if (note) {
+            note.innerHTML = "Enviamos un correo de confirmación a " + entry.correo + "." + standLine + " Revisa spam si no lo ves.";
+          }
+          var accessBlock = document.getElementById("successAccessBlock");
+          var accessCodeEl = document.getElementById("successAccessCode");
+          var expositorLink = document.getElementById("successExpositorLink");
+          if (result.accessCode && accessBlock && accessCodeEl) {
+            accessCodeEl.textContent = result.accessCode;
+            accessBlock.hidden = false;
+            if (expositorLink) {
+              var panelUrl = result.expositorPanelUrl ||
+                (window.SiteLinks ? SiteLinks.href("miStand") : "expositor.html");
+              var qs = "?email=" + encodeURIComponent(entry.correo) + "&code=" + encodeURIComponent(result.accessCode);
+              expositorLink.href = panelUrl + qs;
+            }
+          } else if (accessBlock) {
+            accessBlock.hidden = true;
+          }
+          showSuccess();
+        });
       }
 
       form.addEventListener("submit", function (event) {
@@ -484,54 +642,61 @@
           if (!validateField(key)) valid = false;
         });
         if (!validatePlan()) valid = false;
+        if (!validateStandSelection()) valid = false;
+        if (!validateLogo()) valid = false;
         if (!validateTerms()) valid = false;
 
         if (!valid) {
           const firstInvalid = form.querySelector('[aria-invalid="true"]') ||
+            document.getElementById("standId-error").classList.contains("visible") && document.getElementById("standId-error") ||
             (document.getElementById("terminos-error").classList.contains("visible")
               ? document.getElementById("terminos-error") : null);
           if (firstInvalid && firstInvalid.focus) firstInvalid.focus();
           return;
         }
 
-        const entry = {
-          id: "ST-" + Date.now().toString(36).toUpperCase(),
-          fecha: new Date().toISOString(),
-          marca: fields.marca.el.value.trim(),
-          contacto: fields.contacto.el.value.trim(),
-          nombre: fields.contacto.el.value.trim(),
-          celular: fields.celular.el.value.trim(),
-          correo: fields.correo.el.value.trim().toLowerCase(),
-          plan: document.getElementById("plan").value,
-          ciudad: fields.ciudad.el.value.trim(),
-          descripcion: fields.descripcion.el.value.trim(),
-          aceptacionesLegales: {
-            aceptaVoluntaria: document.getElementById("aceptaVoluntaria").checked,
-            aceptaPertenencias: document.getElementById("aceptaPertenencias").checked,
-            aceptaDatos: document.getElementById("aceptaDatos").checked,
-            aceptaImagen: document.getElementById("aceptaImagen").checked
-          }
-        };
+        var standId = standsMap.getSelectedStandId();
+        var logoPayload = logoUpload.getPayload();
 
         btnSubmit.disabled = true;
-        btnSubmit.textContent = "Enviando…";
+        btnSubmit.textContent = "Verificando stand…";
 
-        FormSubmit.submitForm(FORM_TYPE, STORAGE_KEY, entry).then(function (result) {
-          btnSubmit.disabled = false;
-          btnSubmit.textContent = "Enviar solicitud de stand";
-          if (!result.ok) {
-            if (result.duplicate) {
-              alert("Ya existe una solicitud de stand con este correo.");
-            } else {
-              alert(result.error || "No se pudo guardar la solicitud. Intenta de nuevo.");
-            }
+        var verifyPromise = standId
+          ? standsMap.verifyAvailable(standId)
+          : Promise.resolve(true);
+
+        verifyPromise.then(function (available) {
+          if (standId && !available) {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "Enviar solicitud de stand";
+            var fb = document.getElementById("standsMapFeedback");
+            if (fb) fb.textContent = "El stand " + standId + " ya no está disponible. Elige otro stand verde en el mapa.";
+            validateStandSelection();
             return;
           }
-          var note = document.getElementById("successEmailNoteStands");
-          if (note) {
-            note.textContent = "Enviamos un correo de confirmación a " + entry.correo + " (revisa spam si no lo ves).";
-          }
-          showSuccess();
+
+          const entry = {
+            id: "ST-" + Date.now().toString(36).toUpperCase(),
+            fecha: new Date().toISOString(),
+            marca: fields.marca.el.value.trim(),
+            contacto: fields.contacto.el.value.trim(),
+            nombre: fields.contacto.el.value.trim(),
+            celular: fields.celular.el.value.trim(),
+            correo: fields.correo.el.value.trim().toLowerCase(),
+            plan: planSelect.value,
+            standId: standId,
+            ciudad: fields.ciudad.el.value.trim(),
+            descripcion: fields.descripcion.el.value.trim(),
+            logoStand: logoPayload,
+            aceptacionesLegales: {
+              aceptaVoluntaria: document.getElementById("aceptaVoluntaria").checked,
+              aceptaPertenencias: document.getElementById("aceptaPertenencias").checked,
+              aceptaDatos: document.getElementById("aceptaDatos").checked,
+              aceptaImagen: document.getElementById("aceptaImagen").checked
+            }
+          };
+
+          submitEntry(entry);
         });
       });
 

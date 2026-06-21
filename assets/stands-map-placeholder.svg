@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Plano placeholder de stands  Palmetto Plaza">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5EDE4"/>
+      <stop offset="100%" stop-color="#E8D9C8"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#C4A882" stroke-width="0.5" opacity="0.35"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#grid)"/>
+  <!-- Entrada -->
+  <rect x="340" y="8" width="120" height="36" rx="4" fill="#4B352A" opacity="0.85"/>
+  <text x="400" y="32" text-anchor="middle" fill="#F5EDE4" font-family="Inter, sans-serif" font-size="13" font-weight="600">ENTRADA</text>
+  <!-- Zona Aliado -->
+  <rect x="280" y="52" width="240" height="70" rx="6" fill="#BB5E3C" opacity="0.18" stroke="#BB5E3C" stroke-width="2"/>
+  <text x="400" y="72" text-anchor="middle" fill="#4B352A" font-family="Inter, sans-serif" font-size="11" font-weight="700">ALIADO PATROCINADOR</text>
+  <!-- Zona Origen -->
+  <rect x="24" y="130" width="340" height="340" rx="8" fill="#8B6914" opacity="0.12" stroke="#8B6914" stroke-width="2"/>
+  <text x="194" y="155" text-anchor="middle" fill="#4B352A" font-family="Inter, sans-serif" font-size="12" font-weight="700">ZONA ORIGEN · 120×60 cm</text>
+  <!-- Zona Gran Reserva -->
+  <rect x="400" y="130" width="376" height="340" rx="8" fill="#4B352A" opacity="0.10" stroke="#4B352A" stroke-width="2"/>
+  <text x="588" y="155" text-anchor="middle" fill="#4B352A" font-family="Inter, sans-serif" font-size="12" font-weight="700">ZONA GRAN RESERVA · 3×2 m</text>
+  <!-- Pasillo central -->
+  <rect x="364" y="130" width="36" height="340" fill="#F5EDE4" opacity="0.6"/>
+  <text x="382" y="310" text-anchor="middle" fill="#8B6914" font-family="Inter, sans-serif" font-size="10" transform="rotate(-90 382 310)">PASILLO</text>
+  <!-- Nota placeholder -->
+  <text x="400" y="488" text-anchor="middle" fill="#6B5344" font-family="Inter, sans-serif" font-size="11" opacity="0.85">
+    PLACEHOLDER  Reemplaza por assets/stands-map.jpg con el plano real
+  </text>
+</svg>

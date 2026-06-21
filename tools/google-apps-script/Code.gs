@@ -8,6 +8,8 @@ var SHEET_COMPETENCIA = 'Competencia';
 var SHEET_STANDS = 'Stands';
 var SHEET_LISTA_ESPERA = 'Lista de espera';
 var SHEET_ANALYTICS = 'Analytics';
+var SHEET_NOVEDADES = 'Novedades';
+var EXPOSITOR_PANEL_PATH = '/mi-stand';
 
 var HEADERS_ANALYTICS = [
   'Timestamp', 'Path', 'Titulo', 'Referrer', 'Session ID', 'User agent'
@@ -16,6 +18,7 @@ var CUPO_MAX_COMPETENCIA = 36;
 var COMPROBANTE_PREVIEW_MAX = 1000;
 var DRIVE_FOLDER_NAME = 'Switch Championship — Comprobantes';
 var DRIVE_FOTOS_FOLDER_NAME = 'Switch Championship — Fotos participantes';
+var DRIVE_LOGOS_STANDS_FOLDER_NAME = 'Feria — Logos expositores';
 // Correo(s) del equipo para alertas de nueva inscripcion (separar con coma si son varios).
 var ORGANIZER_EMAIL = 'lasucursaldelcafe@gmail.com';
 var WHATSAPP_GRUPO_COMPETENCIA = 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9';
@@ -41,10 +44,15 @@ var HEADERS_COMPETENCIA = [
 ];
 
 var HEADERS_STANDS = [
-  'Fecha registro', 'ID', 'Marca o negocio', 'Persona contacto', 'Celular', 'Correo',
+  'Fecha registro', 'ID', 'Stand ID', 'Marca o negocio', 'Persona contacto', 'Celular', 'Correo',
   'Plan stand', 'Ciudad', 'Descripción exhibición',
+  'Logo nombre', 'Logo tipo', 'Logo enlace Drive',
   'Acepta voluntaria', 'Acepta pertenencias', 'Acepta datos', 'Acepta imagen',
-  'Estado solicitud', 'Notas admin'
+  'Estado solicitud', 'Notas admin', 'Código acceso (hash)'
+];
+
+var HEADERS_NOVEDADES = [
+  'Timestamp', 'Titulo', 'Cuerpo', 'Audiencia'
 ];
 
 var HEADERS_LISTA_ESPERA = [
@@ -64,11 +72,17 @@ function doGet(e) {
       completo: count >= CUPO_MAX_COMPETENCIA
     });
   }
+  if (params.action === 'stands_map') {
+    return jsonResponse(getStandsMapData_());
+  }
   if (params.action === 'admin_dashboard') {
     return handleAdminDashboard_(params.idToken || '');
   }
   if (params.action === 'admin_export') {
     return handleAdminExport_(params.idToken || '', params.dataset || '');
+  }
+  if (params.action === 'expositor_feed') {
+    return jsonResponse(getExpositorFeed_());
   }
   return jsonResponse({
     ok: true,
@@ -98,6 +112,9 @@ function doPost(e) {
     if (action === 'admin_logout') {
       return jsonResponse({ ok: true, message: 'Sesión gestionada por Firebase Auth en el cliente.' });
     }
+    if (action === 'expositor_login') {
+      return jsonResponse(handleExpositorLogin_(payload.email || '', payload.accessCode || ''));
+    }
 
     var formType = String(payload.formType || '').toLowerCase();
     var data = payload.data || payload;
@@ -111,8 +128,12 @@ function doPost(e) {
       id = competenciaResult.id;
       extra.whatsappGrupoUrl = WHATSAPP_GRUPO_COMPETENCIA;
       extra.fotoEnlace = competenciaResult.fotoEnlace || '';
-    } else if (formType === 'stands') {
-      id = appendStands_(data);
+    } else     if (formType === 'stands') {
+      var standsResult = appendStands_(data);
+      id = standsResult.id;
+      extra.logoEnlace = standsResult.logoEnlace || '';
+      extra.accessCode = standsResult.accessCode || '';
+      extra.expositorPanelUrl = standsResult.expositorPanelUrl || '';
     } else if (formType === 'lista_espera') {
       id = appendListaEspera_(data);
     } else {
@@ -129,6 +150,7 @@ function doPost(e) {
     var body = { ok: false, error: msg };
     if (msg.indexOf('Cupo completo') !== -1) body.cupoCompleto = true;
     if (msg.indexOf('Ya existe') !== -1) body.duplicate = true;
+    if (msg.indexOf('ya está ocupado') !== -1) body.standOcupado = true;
     return jsonResponse(body, 400);
   }
 }
@@ -158,7 +180,8 @@ function sincronizarEncabezados() {
   applyHeaders_(getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS), HEADERS_STANDS);
   applyHeaders_(getOrCreateSheet_(SHEET_LISTA_ESPERA, HEADERS_LISTA_ESPERA), HEADERS_LISTA_ESPERA);
   applyHeaders_(getOrCreateSheet_(SHEET_ANALYTICS, HEADERS_ANALYTICS), HEADERS_ANALYTICS);
-  Logger.log('Encabezados sincronizados: Feria, Competencia, Stands, Lista de espera, Analytics.');
+  applyHeaders_(getOrCreateSheet_(SHEET_NOVEDADES, HEADERS_NOVEDADES), HEADERS_NOVEDADES);
+  Logger.log('Encabezados sincronizados: Feria, Competencia, Stands, Lista de espera, Analytics, Novedades.');
 }
 
 function applyHeaders_(sheet, headers) {
@@ -236,31 +259,238 @@ function appendFeria_(data) {
   return data.id || '';
 }
 
+function normalizeStandId_(v) {
+  return String(v || '').trim().toUpperCase();
+}
+
+function generateAccessCode_() {
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var code = '';
+  for (var i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+function hashAccessCode_(code) {
+  var normalized = String(code || '').trim().toUpperCase();
+  var digest = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    normalized,
+    Utilities.Charset.UTF_8
+  );
+  return Utilities.base64Encode(digest);
+}
+
+function getExpositorPanelUrl_() {
+  var props = PropertiesService.getScriptProperties();
+  var base = String(props.getProperty('SITE_URL') || 'https://la-sucursal-del-cafe.web.app').replace(/\/$/, '');
+  return base + EXPOSITOR_PANEL_PATH;
+}
+
+function findExpositorRowByCredentials_(email, accessCode) {
+  var emailNorm = normalizeEmail_(email);
+  var codeHash = hashAccessCode_(accessCode);
+  if (!emailNorm || !String(accessCode || '').trim()) return null;
+
+  var sheet = getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS);
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return null;
+
+  var correoCol = HEADERS_STANDS.indexOf('Correo') + 1;
+  var hashCol = HEADERS_STANDS.indexOf('Código acceso (hash)') + 1;
+  if (correoCol <= 0 || hashCol <= 0) return null;
+
+  var numRows = lastRow - 1;
+  var correoVals = sheet.getRange(2, correoCol, lastRow, correoCol).getValues();
+  var hashVals = sheet.getRange(2, hashCol, lastRow, hashCol).getValues();
+
+  for (var i = 0; i < correoVals.length; i++) {
+    if (normalizeEmail_(correoVals[i][0]) !== emailNorm) continue;
+    if (String(hashVals[i][0] || '') !== codeHash) continue;
+    return 2 + i;
+  }
+  return null;
+}
+
+function standRowToExpositorData_(sheet, rowNum) {
+  var values = sheet.getRange(rowNum, 1, rowNum, HEADERS_STANDS.length).getValues()[0];
+  var row = rowObjectFromValues_(HEADERS_STANDS, values);
+  return {
+    id: row['ID'] || '',
+    fecha: row['Fecha registro'] || '',
+    standId: row['Stand ID'] || '',
+    marca: row['Marca o negocio'] || '',
+    contacto: row['Persona contacto'] || '',
+    celular: row['Celular'] || '',
+    correo: row['Correo'] || '',
+    plan: row['Plan stand'] || '',
+    ciudad: row['Ciudad'] || '',
+    descripcion: row['Descripción exhibición'] || '',
+    logoEnlace: row['Logo enlace Drive'] || '',
+    estado: row['Estado solicitud'] || ''
+  };
+}
+
+function handleExpositorLogin_(email, accessCode) {
+  var rowNum = findExpositorRowByCredentials_(email, accessCode);
+  if (!rowNum) {
+    return { ok: false, error: 'Correo o código de acceso incorrectos.' };
+  }
+  var sheet = getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS);
+  return {
+    ok: true,
+    stand: standRowToExpositorData_(sheet, rowNum)
+  };
+}
+
+function getExpositorFeed_() {
+  var sheet = getOrCreateSheet_(SHEET_NOVEDADES, HEADERS_NOVEDADES);
+  var lastRow = sheet.getLastRow();
+  var items = [];
+  if (lastRow >= 2) {
+    var values = sheet.getRange(2, 1, lastRow, HEADERS_NOVEDADES.length).getValues();
+    for (var i = values.length - 1; i >= 0; i--) {
+      var row = rowObjectFromValues_(HEADERS_NOVEDADES, values[i]);
+      var audiencia = String(row['Audiencia'] || 'todos').trim().toLowerCase();
+      if (audiencia !== 'todos' && audiencia !== 'expositores') continue;
+      items.push({
+        timestamp: row['Timestamp'] || '',
+        titulo: row['Titulo'] || '',
+        cuerpo: row['Cuerpo'] || '',
+        audiencia: audiencia || 'todos'
+      });
+    }
+  }
+  return { ok: true, items: items };
+}
+
+function findStandOccupied_(standId) {
+  var id = normalizeStandId_(standId);
+  if (!id) return false;
+  var sheet = getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS);
+  var standCol = HEADERS_STANDS.indexOf('Stand ID') + 1;
+  if (standCol <= 0) return false;
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return false;
+  var values = sheet.getRange(2, standCol, lastRow, standCol).getValues();
+  for (var i = 0; i < values.length; i++) {
+    if (normalizeStandId_(values[i][0]) === id) return true;
+  }
+  return false;
+}
+
+function getStandsMapData_() {
+  var sheet = getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS);
+  var lastRow = sheet.getLastRow();
+  var occupied = [];
+  if (lastRow >= 2) {
+    var standCol = HEADERS_STANDS.indexOf('Stand ID') + 1;
+    var marcaCol = HEADERS_STANDS.indexOf('Marca o negocio') + 1;
+    var logoCol = HEADERS_STANDS.indexOf('Logo enlace Drive') + 1;
+    var standVals = standCol > 0 ? sheet.getRange(2, standCol, lastRow, standCol).getValues() : [];
+    var marcaVals = marcaCol > 0 ? sheet.getRange(2, marcaCol, lastRow, marcaCol).getValues() : [];
+    var logoVals = logoCol > 0 ? sheet.getRange(2, logoCol, lastRow, logoCol).getValues() : [];
+    for (var i = 0; i < standVals.length; i++) {
+      var sid = normalizeStandId_(standVals[i][0]);
+      if (!sid) continue;
+      occupied.push({
+        standId: sid,
+        marca: String(marcaVals[i][0] || ''),
+        logoEnlace: String(logoVals[i][0] || '')
+      });
+    }
+  }
+  return {
+    ok: true,
+    formType: 'stands',
+    occupied: occupied,
+    total: occupied.length
+  };
+}
+
+function planRequiresStand_(plan) {
+  var p = String(plan || '').trim();
+  return p === 'Zona Origen' || p === 'Zona Gran Reserva' || p === 'Aliado Patrocinador';
+}
+
+function parseLogoStand_(data) {
+  var archivo = data.logoStand || {};
+  var nombre = String(archivo.nombreArchivo || '');
+  var tipo = String(archivo.tipoArchivo || '');
+  var base64 = String(archivo.base64 || '');
+  var enlace = '';
+
+  if (base64) {
+    enlace = saveFileToDriveFolder_(
+      data.id || 'sin-id',
+      nombre,
+      tipo,
+      base64,
+      DRIVE_LOGOS_STANDS_FOLDER_NAME,
+      'logo'
+    );
+  }
+
+  return {
+    nombre: nombre,
+    tipo: tipo,
+    enlace: enlace
+  };
+}
+
 function appendStands_(data) {
   var sheet = getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS);
   if (findDuplicateInSheet_(sheet, HEADERS_STANDS, data.correo, null)) {
     throw new Error('Ya existe una solicitud de stand con este correo.');
   }
 
+  var standId = normalizeStandId_(data.standId);
+  var plan = String(data.plan || '').trim();
+  if (planRequiresStand_(plan) && !standId) {
+    throw new Error('Debes seleccionar un stand en el mapa.');
+  }
+  if (standId && findStandOccupied_(standId)) {
+    throw new Error('El stand ' + standId + ' ya está ocupado.');
+  }
+
+  var logo = parseLogoStand_(data);
+  if (planRequiresStand_(plan) && !logo.enlace && !(data.logoStand && data.logoStand.base64)) {
+    throw new Error('El logo de tu negocio es obligatorio.');
+  }
+
   var legalCols = parseFeriaLegalAcceptances_(data);
   var estado = 'Solicitud recibida';
   var contacto = data.contacto || data.nombre || '';
+  var accessCode = generateAccessCode_();
+  var accessHash = hashAccessCode_(accessCode);
 
   sheet.appendRow([
     data.fecha || new Date().toISOString(),
     data.id || '',
+    standId,
     data.marca || '',
     contacto,
     data.celular || '',
     data.correo || '',
-    data.plan || '',
+    plan,
     data.ciudad || '',
-    data.descripcion || ''
-  ].concat(legalCols).concat([estado, '']));
+    data.descripcion || '',
+    logo.nombre,
+    logo.tipo,
+    logo.enlace
+  ].concat(legalCols).concat([estado, '', accessHash]));
 
+  data.accessCode = accessCode;
+  data.expositorPanelUrl = getExpositorPanelUrl_();
   sendConfirmationEmail_('stands', data);
   sendOrganizerNotificationEmail_('stands', data);
-  return data.id || '';
+  return {
+    id: data.id || '',
+    logoEnlace: logo.enlace || '',
+    accessCode: accessCode,
+    expositorPanelUrl: data.expositorPanelUrl
+  };
 }
 
 function appendListaEspera_(data) {
@@ -492,10 +722,17 @@ function buildEmailBody_(formType, data) {
     lines.push('Recibimos tu solicitud de stand para la feria de La Sucursal del Café.');
     lines.push('Referencia: ' + id);
     lines.push('Marca o negocio: ' + (data.marca || ''));
+    if (data.standId) lines.push('Stand seleccionado: ' + data.standId);
     lines.push('Plan solicitado: ' + (data.plan || ''));
     lines.push('Fechas: 29 y 30 de agosto de 2026');
     lines.push('Sede: Palmetto Plaza, Cali');
     lines.push('');
+    if (data.accessCode) {
+      lines.push('Tu código de acceso al panel expositor: ' + data.accessCode);
+      lines.push('Panel: ' + (data.expositorPanelUrl || getExpositorPanelUrl_()));
+      lines.push('Ingresa con tu correo y este código para ver tu stand y novedades de la feria.');
+      lines.push('');
+    }
     lines.push('El equipo organizador revisará disponibilidad y te contactará por correo o WhatsApp para confirmar tu stand.');
     lines.push('Dudas: ' + ORGANIZER_EMAIL);
   } else {
@@ -561,6 +798,7 @@ function buildOrganizerAlertBody_(formType, data) {
     lines.push('Correo: ' + (data.correo || ''));
     lines.push('Celular: ' + (data.celular || ''));
     lines.push('Plan: ' + (data.plan || ''));
+    if (data.standId) lines.push('Stand ID: ' + data.standId);
     lines.push('Ciudad: ' + (data.ciudad || ''));
     lines.push('Descripción: ' + (data.descripcion || ''));
     lines.push('');

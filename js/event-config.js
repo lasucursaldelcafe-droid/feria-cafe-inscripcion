@@ -77,7 +77,38 @@ window.EVENT_CONFIG = {
     noEsVisitante:
       'Este formulario es para expositores y marcas. Si solo asistes como visitante, usa el registro de visitante (opcional, sin costo).',
     noEsCompetencia:
-      'No es la inscripción al Switch Championship (competencia de pago, formulario aparte).'
+      'No es la inscripción al Switch Championship (competencia de pago, formulario aparte).',
+    /** Mapa interactivo — reemplaza image por el plano real del venue cuando lo tengas. */
+    map: {
+      image: 'assets/stands-map-placeholder.svg',
+      replaceHint:
+        'Sube tu plano real como assets/stands-map.jpg (o .png / .webp) y actualiza map.image en js/event-config.js.',
+      logoMaxBytes: 5 * 1024 * 1024,
+      logoTypes: ['image/jpeg', 'image/png', 'image/webp'],
+      /** Posiciones en % del contenedor del mapa (left, top, width, height). */
+      positions: [
+        { id: 'P1', zone: 'Aliado Patrocinador', label: 'P1', left: 36, top: 12, width: 9, height: 11 },
+        { id: 'P2', zone: 'Aliado Patrocinador', label: 'P2', left: 55, top: 12, width: 9, height: 11 },
+        { id: 'O1', zone: 'Zona Origen', label: 'O1', left: 5, top: 34, width: 7, height: 9 },
+        { id: 'O2', zone: 'Zona Origen', label: 'O2', left: 14, top: 34, width: 7, height: 9 },
+        { id: 'O3', zone: 'Zona Origen', label: 'O3', left: 23, top: 34, width: 7, height: 9 },
+        { id: 'O4', zone: 'Zona Origen', label: 'O4', left: 32, top: 34, width: 7, height: 9 },
+        { id: 'O5', zone: 'Zona Origen', label: 'O5', left: 5, top: 46, width: 7, height: 9 },
+        { id: 'O6', zone: 'Zona Origen', label: 'O6', left: 14, top: 46, width: 7, height: 9 },
+        { id: 'O7', zone: 'Zona Origen', label: 'O7', left: 23, top: 46, width: 7, height: 9 },
+        { id: 'O8', zone: 'Zona Origen', label: 'O8', left: 32, top: 46, width: 7, height: 9 },
+        { id: 'O9', zone: 'Zona Origen', label: 'O9', left: 5, top: 58, width: 7, height: 9 },
+        { id: 'O10', zone: 'Zona Origen', label: 'O10', left: 14, top: 58, width: 7, height: 9 },
+        { id: 'O11', zone: 'Zona Origen', label: 'O11', left: 23, top: 58, width: 7, height: 9 },
+        { id: 'O12', zone: 'Zona Origen', label: 'O12', left: 32, top: 58, width: 7, height: 9 },
+        { id: 'G1', zone: 'Zona Gran Reserva', label: 'G1', left: 52, top: 34, width: 12, height: 14 },
+        { id: 'G2', zone: 'Zona Gran Reserva', label: 'G2', left: 66, top: 34, width: 12, height: 14 },
+        { id: 'G3', zone: 'Zona Gran Reserva', label: 'G3', left: 80, top: 34, width: 12, height: 14 },
+        { id: 'G4', zone: 'Zona Gran Reserva', label: 'G4', left: 52, top: 52, width: 12, height: 14 },
+        { id: 'G5', zone: 'Zona Gran Reserva', label: 'G5', left: 66, top: 52, width: 12, height: 14 },
+        { id: 'G6', zone: 'Zona Gran Reserva', label: 'G6', left: 80, top: 52, width: 12, height: 14 }
+      ]
+    }
   },
   circuito: {
     clasificatoriasTotal: 3,

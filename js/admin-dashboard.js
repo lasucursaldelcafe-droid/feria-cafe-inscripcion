@@ -18,8 +18,8 @@
   ];
 
   var DEFAULT_STANDS_COLS = [
-    'Fecha registro', 'ID', 'Marca o negocio', 'Persona contacto', 'Celular', 'Correo',
-    'Plan stand', 'Ciudad', 'Descripción exhibición', 'Estado solicitud', 'Notas admin'
+    'Fecha registro', 'ID', 'Stand ID', 'Marca o negocio', 'Persona contacto', 'Celular', 'Correo',
+    'Plan stand', 'Ciudad', 'Descripción exhibición', 'Logo enlace Drive', 'Estado solicitud', 'Notas admin'
   ];
 
   function getWebAppUrl() {
