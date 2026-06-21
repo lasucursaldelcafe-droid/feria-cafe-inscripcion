@@ -80,7 +80,7 @@ window.EVENT_CONFIG = {
       'No es la inscripción al Switch Championship (competencia de pago, formulario aparte).',
     /** Mapa interactivo — reemplaza image por el plano real del venue cuando lo tengas. */
     map: {
-      image: '/assets/stands-map.jpg',
+      image: '/assets/stands-map-placeholder.svg',
       replaceHint:
         'Plano guía activo. Sube el plano real como assets/stands-map.jpg para reemplazarlo automáticamente.',
       logoMaxBytes: 5 * 1024 * 1024,
@@ -142,7 +142,7 @@ window.EVENT_CONFIG = {
     mapsQuery: 'Plaza Marbella Curis Cali',
     horario: [
       { hora: '08:00', actividad: 'Registro, entrega de café de ronda y sorteo de método (dados)' },
-      { hora: '09:00', actividad: 'Ronda clasificatoria — estaciones en competencia' },
+      { hora: '18:00', actividad: 'Ronda clasificatoria — estaciones en competencia' },
       { hora: '12:00', actividad: 'Pausa / catación clasificatoria (estimado)' },
       { hora: '14:00', actividad: 'Semifinal (si aplica el cronograma del día)' },
       { hora: '16:00', actividad: 'Final y premiación (sujeto a avance de rondas)' }
