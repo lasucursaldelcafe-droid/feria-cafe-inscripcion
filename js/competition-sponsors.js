@@ -1,5 +1,5 @@
 /**
- * Patrocinadores Switch Championship — GET ?action=patrocinadores_competencia_publico
+ * Patrocinadores V60 Championship — GET ?action=patrocinadores_competencia_publico
  */
 (function (global) {
   'use strict';

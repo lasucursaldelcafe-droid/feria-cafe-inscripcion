@@ -739,7 +739,7 @@
     var patrocRows = pickRows(data, 'allPatrocinadoresCompetencia');
     var patrocTitle = document.getElementById('patrocinadoresCompetenciaTitle');
     if (patrocTitle) {
-      patrocTitle.textContent = 'Patrocinadores competencia — Switch Championship — ' + formatNumber(patrocRows.length) + ' total';
+      patrocTitle.textContent = 'Patrocinadores competencia — V60 Championship — ' + formatNumber(patrocRows.length) + ' total';
     }
     var tablePatroc = document.getElementById('tablePatrocinadoresCompetencia');
     if (tablePatroc) {

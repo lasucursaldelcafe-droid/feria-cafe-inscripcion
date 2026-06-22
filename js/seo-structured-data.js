@@ -1,5 +1,5 @@
 /**
- * JSON-LD (schema.org) para buscadores — feria y Switch Championship.
+ * JSON-LD (schema.org) para buscadores — feria y V60 Championship.
  */
 (function (global) {
   'use strict';
@@ -88,10 +88,10 @@
 
     return {
       '@type': 'Event',
-      name: 'Switch Championship — ' + (ev.clasificatoria || 'Clasificatoria'),
-      alternateName: 'Switch Championship Cali 2026',
+      name: 'V60 Championship — ' + (ev.clasificatoria || 'Clasificatoria'),
+      alternateName: 'V60 Championship Cali 2026',
       description:
-        'Competencia de café filtrado con Hario Switch en Cali. ' +
+        'Competencia de café filtrado con V60 en Cali. ' +
         (ev.clasificatoria || '') +
         '.',
       startDate: ev.fechaIso || '2026-07-04',

@@ -101,7 +101,7 @@
       if (modalNote) {
         modalNote.innerHTML =
           '¿Compites en café filtrado? Eso es aparte: ' +
-          '<a data-link="competencia" href="competencia.html">inscripción de pago al Switch Championship</a>.';
+          '<a data-link="competencia" href="competencia.html">inscripción de pago al V60 Championship</a>.';
         if (global.SiteLinks && global.SiteLinks.apply) global.SiteLinks.apply(modalNote);
       }
     }

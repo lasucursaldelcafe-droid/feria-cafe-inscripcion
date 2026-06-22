@@ -12,13 +12,13 @@ window.EVENT_CONFIG = {
     email: 'tu-correo@gmail.com'
   },
   evento1: {
-    nombre: 'Switch Championship — Evento 1',
+    nombre: 'V60 Championship — Evento 1',
     fecha: '4 de julio de 2026',
     fechaCorta: '4 jul 2026',
     sede: 'Plaza Marbella',
     ciudad: 'Ciudad Jardín',
     whatsappGrupoUrl: 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9',
-    whatsappGrupoNombre: 'Switch Championship — competidores'
+    whatsappGrupoNombre: 'V60 Championship — competidores'
   },
   pago: {
     monto: 90000,

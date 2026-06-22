@@ -1,6 +1,6 @@
 /**
  * Configuración pública del evento — editable sin tocar cada HTML.
- * Feria y Switch Championship son organizados por el mismo equipo,
+ * Feria y V60 Championship son organizados por el mismo equipo,
  * pero tienen fechas, sedes e inscripciones independientes.
  */
 window.EVENT_CONFIG = {
@@ -27,7 +27,7 @@ window.EVENT_CONFIG = {
       title: 'Registro de visitante (opcional)',
       cta: 'Registrarme como visitante',
       dismiss: 'Explorar primero',
-      note: '¿Compites en café filtrado? Eso es aparte: inscripción de pago al Switch Championship.'
+      note: '¿Compites en café filtrado? Eso es aparte: inscripción de pago al V60 Championship.'
     }
   },
   feria: {
@@ -50,7 +50,7 @@ window.EVENT_CONFIG = {
       premiosRegistro:
         'Si te registras como visitante (gratis), participas por premios exclusivos para visitantes registrados en la feria y recibes novedades del programa.',
       noEsCompetencia:
-        'Este registro es solo para asistir a la feria como visitante. No es la inscripción al Switch Championship (competencia de pago, formulario aparte).'
+        'Este registro es solo para asistir a la feria como visitante. No es la inscripción al V60 Championship (competencia de pago, formulario aparte).'
     },
     premiosVisitante: {
       titulo: 'Premios para visitantes registrados',
@@ -65,7 +65,7 @@ window.EVENT_CONFIG = {
         'El detalle de cada premio, fechas de sorteo y mecánica se comunicará a visitantes registrados por correo y redes oficiales. No aplica a quienes solo asistan sin registro.'
     },
     notaIndependencia:
-      'Organizado por el mismo equipo de La Sucursal del Café. El registro de visitante en la feria es independiente de la inscripción al Switch Championship.'
+      'Organizado por el mismo equipo de La Sucursal del Café. El registro de visitante en la feria es independiente de la inscripción al V60 Championship.'
   },
   stands: {
     nav: 'Adquiere tu stand',
@@ -77,7 +77,7 @@ window.EVENT_CONFIG = {
     noEsVisitante:
       'Este formulario es para expositores y marcas. Si solo asistes como visitante, usa el registro de visitante (opcional, sin costo).',
     noEsCompetencia:
-      'No es la inscripción al Switch Championship (competencia de pago, formulario aparte).',
+      'No es la inscripción al V60 Championship (competencia de pago, formulario aparte).',
     /** Mapa interactivo — reemplaza image por el plano real del venue cuando lo tengas. */
     map: {
       image: '/assets/stands-map-placeholder.svg',
@@ -132,7 +132,7 @@ window.EVENT_CONFIG = {
     }
   },
   evento1: {
-    nombre: 'Switch Championship — Evento 1',
+    nombre: 'V60 Championship — Evento 1',
     clasificatoria: '1.ª de 3 clasificatorias',
     fecha: '4 de julio de 2026',
     fechaCorta: '4 jul 2026',
@@ -149,7 +149,7 @@ window.EVENT_CONFIG = {
     ],
     horarioNota: 'Horario referencial; el juez principal confirmará tiempos exactos el día del evento.',
     whatsappGrupoUrl: 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9',
-    whatsappGrupoNombre: 'Switch Championship — competidores'
+    whatsappGrupoNombre: 'V60 Championship — competidores'
   },
   pago: {
     monto: 90000,

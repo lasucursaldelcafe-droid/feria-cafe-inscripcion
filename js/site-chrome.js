@@ -220,19 +220,19 @@
       crosslink =
         '<a href="' + href('stands') + '">Adquiere tu stand</a> · ' +
         '<a href="' + href('feria') + '">Registro visitante</a> · ' +
-        '<a href="' + href('competencia') + '">Switch Championship</a>' +
+        '<a href="' + href('competencia') + '">V60 Championship</a>' +
         '<span class="site-footer-dates">' + (feria.fechaCorta || feria.fecha || '') +
         ' · ' + feriaLugar() + '</span>';
     } else if (page === 'stands') {
       crosslink =
         '¿Vienes como visitante? <a href="' + href('feria') + '">Registro de visitante (opcional)</a> · ' +
-        '<a href="' + href('competencia') + '">Switch Championship</a>' +
+        '<a href="' + href('competencia') + '">V60 Championship</a>' +
         '<span class="site-footer-dates">' + (feria.fechaCorta || feria.fecha || '') +
         ' · ' + feriaLugar() + '</span>';
     } else if (page === 'feria') {
       crosslink =
         '¿Expones una marca? <a href="' + href('stands') + '">Adquiere tu stand</a> · ' +
-        '¿Compites en café filtrado? <a href="' + href('competencia') + '">Inscripción Switch Championship</a>' +
+        '¿Compites en café filtrado? <a href="' + href('competencia') + '">Inscripción V60 Championship</a>' +
         '<span class="site-footer-dates">' + (ev.fechaCorta || ev.fecha || '') +
         ' · ' + torneoLugar() + '</span>';
     } else if (page === 'torneo') {
@@ -246,7 +246,7 @@
         '<a href="' + href('festival') + '">Inicio</a> · ' +
         '<a href="' + href('stands') + '">Stands</a> · ' +
         '<a href="' + href('feria') + '">Feria</a> · ' +
-        '<a href="' + href('competencia') + '">Switch Championship</a>' +
+        '<a href="' + href('competencia') + '">V60 Championship</a>' +
         '<span class="site-footer-dates">Tres formularios · inscripciones independientes</span>';
     }
 
