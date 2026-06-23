@@ -11,10 +11,10 @@
  *    Firestore son las que de verdad protegen los datos).
  */
 window.FIREBASE_FIDELIZACION_CONFIG = {
-  apiKey: 'TU_API_KEY',
+  apiKey: 'AIzaSyDOvRlb20zY9OOjXYYuwEphMrV1npMXsKg',
   authDomain: 'la-sucursal-del-cafe.firebaseapp.com',
   projectId: 'la-sucursal-del-cafe',
   storageBucket: 'la-sucursal-del-cafe.firebasestorage.app',
-  messagingSenderId: 'TU_SENDER_ID',
-  appId: 'TU_APP_ID'
+  messagingSenderId: '181906685290',
+  appId: '1:181906685290:web:53341ba1a00e25f8587913'
 };
