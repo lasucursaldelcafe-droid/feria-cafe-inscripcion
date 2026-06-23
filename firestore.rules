@@ -1,8 +1,33 @@
 rules_version = '2';
 
-// Firestore opcional (respaldo). La base de datos principal es Google Sheets.
+// Firestore opcional (respaldo). La base de datos principal del sitio sigue siendo Google Sheets.
+//
+// Excepción: el módulo de Fidelización usa Firestore como base principal (puntos en
+// tiempo real, QR, niveles). El panel admin (dashboard-fidelizacion.html) NO usa Firebase
+// Auth, igual que admin.html: el control de acceso es la URL no publicada/no indexada,
+// NO estas reglas. Cualquiera con la API key del proyecto puede leer/escribir estas
+// colecciones. Es el mismo nivel de confianza ya aceptado para stands_reserva. Si más
+// adelante se reactiva Firebase Auth, reemplazar "if true" por "if request.auth != null".
 service cloud.firestore {
   match /databases/{database}/documents {
+    match /fidelizacion_clientes/{clienteId} {
+      allow read, create, update: if true;
+      allow delete: if false;
+    }
+    match /fidelizacion_transacciones/{txId} {
+      allow read, create: if true;
+      allow update, delete: if false;
+    }
+    match /fidelizacion_recompensas/{rewardId} {
+      allow read, write: if true;
+    }
+    match /fidelizacion_promociones/{promoId} {
+      allow read, write: if true;
+    }
+    match /fidelizacion_config/{docId} {
+      allow read, write: if true;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

@@ -20,7 +20,11 @@
     marcas: 'marcas.html',
     admin: 'admin.html',
     expositor: 'expositor.html',
-    miStand: 'expositor.html'
+    miStand: 'expositor.html',
+    fidelizacion: 'fidelizacion.html',
+    fidelizacionRegistro: 'fidelizacion-registro.html',
+    miTarjeta: 'mi-tarjeta.html',
+    panelFidelizacion: 'dashboard-fidelizacion.html'
   };
 
   var HOSTED = {
@@ -39,7 +43,11 @@
     marcas: '/marcas',
     admin: '/admin',
     expositor: '/expositor',
-    miStand: '/mi-stand'
+    miStand: '/mi-stand',
+    fidelizacion: '/fidelizacion',
+    fidelizacionRegistro: '/registro-fidelizacion',
+    miTarjeta: '/mi-tarjeta',
+    panelFidelizacion: '/panel-fidelizacion'
   };
 
   /** Alias legibles (p. ej. data-link="como-funciona"). */

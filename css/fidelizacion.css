@@ -1,0 +1,167 @@
+/* Fidelización — estilos propios, usa variables de css/brand.css */
+
+.fid-section {
+  padding: 64px 24px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.fid-niveles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin: 32px 0;
+}
+
+.fid-nivel-card {
+  background: var(--surface-card, #fff);
+  border-radius: 16px;
+  padding: 24px 20px;
+  text-align: center;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 16px rgba(75, 53, 42, 0.08);
+}
+
+.fid-nivel-card__badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+}
+
+.fid-nivel-card h3 {
+  margin: 0 0 4px;
+  color: var(--text-dark, #4B352A);
+}
+
+.fid-nivel-card p {
+  margin: 0;
+  color: var(--text-muted, rgba(75,53,42,.65));
+  font-size: 0.9rem;
+}
+
+/* Tarjeta del cliente */
+.fid-tarjeta {
+  max-width: 380px;
+  margin: 40px auto;
+  background: linear-gradient(135deg, var(--coffee-deep, #4B352A), var(--coffee-dark, #5D3A1A));
+  color: #fff;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 12px 32px rgba(75, 53, 42, 0.25);
+}
+
+.fid-tarjeta__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.fid-tarjeta__nivel {
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.fid-tarjeta__puntos {
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.fid-tarjeta__puntos-label {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.fid-tarjeta__progreso {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.2);
+  margin: 16px 0 6px;
+  overflow: hidden;
+}
+
+.fid-tarjeta__progreso-fill {
+  height: 100%;
+  background: var(--cream, #E9E6DD);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.fid-tarjeta__qr {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.fid-tarjeta__qr img {
+  display: block;
+  margin: 0 auto;
+}
+
+.fid-form {
+  max-width: 420px;
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+}
+
+.fid-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-dark, #4B352A);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.fid-form input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--cream-dark, #D9D4C8);
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.fid-form .form-error {
+  color: var(--red-cta, #C1272D);
+  font-size: 0.85rem;
+}
+
+/* ---- Panel admin (dashboard-fidelizacion.html) ---- */
+.fid-admin-body { background: #f4f1ec; font-family: 'Inter', system-ui, sans-serif; margin: 0; }
+.fid-admin-shell { max-width: 1200px; margin: 0 auto; padding: 24px; }
+.fid-admin-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.fid-admin-tab {
+  padding: 8px 16px; border-radius: 999px; border: 1px solid var(--coffee-deep, #4B352A);
+  background: #fff; color: var(--coffee-deep, #4B352A); cursor: pointer; font-size: 0.85rem; font-weight: 600;
+}
+.fid-admin-tab.is-active { background: var(--coffee-deep, #4B352A); color: #fff; }
+.fid-admin-card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 16px; }
+.fid-admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+.fid-admin-stat { text-align: center; }
+.fid-admin-stat__num { font-size: 1.8rem; font-weight: 800; color: var(--coffee-deep, #4B352A); }
+.fid-admin-stat__label { font-size: 0.8rem; color: #777; }
+.fid-admin-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.fid-admin-table th, .fid-admin-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; }
+.fid-admin-btn {
+  padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 0.85rem;
+  background: var(--red-cta, #C1272D); color: #fff;
+}
+.fid-admin-btn--ghost { background: transparent; color: var(--coffee-deep, #4B352A); border: 1px solid var(--coffee-deep, #4B352A); }
+.fid-admin-input { padding: 8px 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 0.9rem; }
+.fid-admin-banner {
+  background: #fff3cd; border: 1px solid #ffe69c; color: #7a5c00; padding: 10px 16px; border-radius: 10px;
+  font-size: 0.85rem; margin-bottom: 16px;
+}

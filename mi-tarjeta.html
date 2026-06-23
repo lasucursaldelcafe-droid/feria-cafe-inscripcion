@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Mi tarjeta | Fidelización La Sucursal del Café</title>
+  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/brand.css?v=20260621a">
+  <link rel="stylesheet" href="css/fidelizacion.css?v=20260623a">
+</head>
+<body class="page-festival">
+  <div class="site-shell">
+    <main class="site-main site-main--festival">
+      <section class="fid-section">
+        <div id="loading" style="text-align:center; padding: 60px 0;">Cargando tu tarjeta…</div>
+        <div id="errorBox" class="fid-form" hidden>
+          <p class="form-error" id="errorMsg"></p>
+        </div>
+
+        <div id="tarjeta" class="fid-tarjeta" hidden>
+          <div class="fid-tarjeta__header">
+            <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="90">
+            <span class="fid-tarjeta__nivel" id="nivelBadge">Bronce</span>
+          </div>
+          <p class="fid-tarjeta__puntos-label">Hola, <strong id="nombreCliente"></strong></p>
+          <p class="fid-tarjeta__puntos" id="puntosActuales">0</p>
+          <p class="fid-tarjeta__puntos-label">puntos disponibles</p>
+
+          <div class="fid-tarjeta__progreso">
+            <div class="fid-tarjeta__progreso-fill" id="progresoFill" style="width:0%"></div>
+          </div>
+          <p class="fid-tarjeta__puntos-label" id="progresoTexto"></p>
+
+          <div class="fid-tarjeta__qr">
+            <img id="qrImg" src="" alt="Código QR de tu tarjeta" width="180" height="180">
+            <p style="color:#444; font-size:0.8rem; margin: 8px 0 0;">Muestra este QR en caja para acumular o canjear puntos</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-fidelizacion-config.js"></script>
+  <script src="js/fidelizacion-common.js"></script>
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var clienteId = params.get('id');
+      var loading = document.getElementById('loading');
+      var errorBox = document.getElementById('errorBox');
+      var tarjeta = document.getElementById('tarjeta');
+
+      function mostrarError(msg) {
+        loading.hidden = true;
+        document.getElementById('errorMsg').textContent = msg;
+        errorBox.hidden = false;
+      }
+
+      if (!clienteId) {
+        mostrarError('Falta el identificador de tu tarjeta. Usa el enlace que recibiste al registrarte.');
+        return;
+      }
+
+      Fidelizacion.obtenerCliente(clienteId).then(function (snap) {
+        if (!snap.exists) {
+          mostrarError('No encontramos esta tarjeta. Verifica el enlace o regístrate de nuevo.');
+          return;
+        }
+        var data = snap.data();
+        var nivelActual = Fidelizacion.calcularNivel(data.puntosHistoricos || 0);
+        var siguiente = Fidelizacion.siguienteNivel(data.puntosHistoricos || 0);
+
+        document.getElementById('nombreCliente').textContent = (data.nombre || '').split(' ')[0];
+        document.getElementById('puntosActuales').textContent = data.puntos || 0;
+        document.getElementById('nivelBadge').textContent = nivelActual.nombre;
+        document.getElementById('nivelBadge').style.background = nivelActual.color;
+        document.getElementById('qrImg').src = Fidelizacion.qrUrl(clienteId);
+
+        if (siguiente) {
+          var rango = siguiente.minimo - nivelActual.minimo;
+          var avance = (data.puntosHistoricos || 0) - nivelActual.minimo;
+          var pct = Math.max(0, Math.min(100, Math.round((avance / rango) * 100)));
+          document.getElementById('progresoFill').style.width = pct + '%';
+          document.getElementById('progresoTexto').textContent =
+            (siguiente.minimo - (data.puntosHistoricos || 0)) + ' puntos para llegar a ' + siguiente.nombre;
+        } else {
+          document.getElementById('progresoFill').style.width = '100%';
+          document.getElementById('progresoTexto').textContent = '¡Estás en el nivel máximo!';
+        }
+
+        loading.hidden = true;
+        tarjeta.hidden = false;
+      }).catch(function (err) {
+        console.error(err);
+        mostrarError('Ocurrió un error al cargar tu tarjeta. Intenta de nuevo más tarde.');
+      });
+    })();
+  </script>
+</body>
+</html>
