@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
+  <title>Panel Fidelización — La Sucursal del Café</title>
+  <link rel="stylesheet" href="css/fidelizacion.css?v=20260623a">
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-fidelizacion-config.js"></script>
+  <script src="js/fidelizacion-common.js"></script>
+</head>
+<body class="fid-admin-body">
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useMemo } = React;
+
+    const TABS = [
+      { key: 'resumen', label: 'Resumen' },
+      { key: 'clientes', label: 'Clientes' },
+      { key: 'recompensas', label: 'Recompensas' },
+      { key: 'promociones', label: 'Promociones' },
+      { key: 'crm', label: 'CRM' },
+      { key: 'wallet', label: 'Wallet' },
+      { key: 'configuracion', label: 'Configuración' }
+    ];
+
+    function useFirestoreReady() {
+      const [ready, setReady] = useState(false);
+      const [error, setError] = useState(null);
+      useEffect(() => {
+        try {
+          Fidelizacion.db();
+          setReady(true);
+        } catch (e) {
+          setError(e.message);
+        }
+      }, []);
+      return { ready, error };
+    }
+
+    function StatCard({ num, label }) {
+      return (
+        <div className="fid-admin-card fid-admin-stat">
+          <div className="fid-admin-stat__num">{num}</div>
+          <div className="fid-admin-stat__label">{label}</div>
+        </div>
+      );
+    }
+
+    function Resumen({ clientes, transacciones }) {
+      const totalClientes = clientes.length;
+      const activos = clientes.filter(c => {
+        if (!c.ultimaVisita || !c.ultimaVisita.toDate) return false;
+        const dias = (Date.now() - c.ultimaVisita.toDate().getTime()) / 86400000;
+        return dias <= 30;
+      }).length;
+      const puntosEmitidos = transacciones.filter(t => t.tipo === 'acumulacion').reduce((s, t) => s + (t.puntos || 0), 0);
+      const puntosCanjeados = Math.abs(transacciones.filter(t => t.tipo === 'canje').reduce((s, t) => s + (t.puntos || 0), 0));
+
+      const porNivel = ['Bronce', 'Plata', 'Oro', 'Diamante'].map(n => ({
+        nivel: n,
+        total: clientes.filter(c => (c.nivel || 'Bronce') === n).length
+      }));
+
+      const top = clientes.slice().sort((a, b) => (b.puntosHistoricos || 0) - (a.puntosHistoricos || 0)).slice(0, 5);
+
+      return (
+        <div>
+          <div className="fid-admin-grid">
+            <StatCard num={totalClientes} label="Clientes registrados" />
+            <StatCard num={activos} label="Activos (30 días)" />
+            <StatCard num={puntosEmitidos} label="Puntos emitidos" />
+            <StatCard num={puntosCanjeados} label="Puntos canjeados" />
+          </div>
+
+          <div className="fid-admin-card">
+            <h3>Clientes por nivel</h3>
+            <div className="fid-admin-grid">
+              {porNivel.map(p => <StatCard key={p.nivel} num={p.total} label={p.nivel} />)}
+            </div>
+          </div>
+
+          <div className="fid-admin-card">
+            <h3>Top clientes</h3>
+            <table className="fid-admin-table">
+              <thead><tr><th>Nombre</th><th>Nivel</th><th>Puntos históricos</th></tr></thead>
+              <tbody>
+                {top.map(c => <tr key={c.id}><td>{c.nombre}</td><td>{c.nivel}</td><td>{c.puntosHistoricos || 0}</td></tr>)}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+
+    function PanelPuntos({ cliente, onClose, onSaved }) {
+      const [puntos, setPuntos] = useState('');
+      const [descripcion, setDescripcion] = useState('');
+      const [tipo, setTipo] = useState('acumulacion');
+      const [saving, setSaving] = useState(false);
+      const [error, setError] = useState('');
+
+      function guardar() {
+        const n = parseInt(puntos, 10);
+        if (!n || n <= 0) { setError('Ingresa una cantidad de puntos válida.'); return; }
+        setSaving(true);
+        setError('');
+        Fidelizacion.registrarTransaccion(cliente.id, tipo, n, { descripcion })
+          .then(() => { setSaving(false); onSaved(); })
+          .catch(e => { setSaving(false); setError(e.message); });
+      }
+
+      return (
+        <div className="fid-admin-card">
+          <h3>{cliente.nombre} — {cliente.puntos || 0} pts disponibles</h3>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+            <select className="fid-admin-input" value={tipo} onChange={e => setTipo(e.target.value)}>
+              <option value="acumulacion">Acumular puntos</option>
+              <option value="canje">Canjear puntos</option>
+            </select>
+            <input className="fid-admin-input" type="number" placeholder="Puntos" value={puntos} onChange={e => setPuntos(e.target.value)} />
+            <input className="fid-admin-input" type="text" placeholder="Descripción (ej. compra $25.000)" value={descripcion} onChange={e => setDescripcion(e.target.value)} style={{ flex: 1 }} />
+          </div>
+          {error && <p className="form-error">{error}</p>}
+          <button className="fid-admin-btn" disabled={saving} onClick={guardar}>{saving ? 'Guardando...' : 'Guardar'}</button>{' '}
+          <button className="fid-admin-btn fid-admin-btn--ghost" onClick={onClose}>Cerrar</button>
+        </div>
+      );
+    }
+
+    function Clientes({ clientes, refrescar }) {
+      const [busqueda, setBusqueda] = useState('');
+      const [seleccionado, setSeleccionado] = useState(null);
+
+      const filtrados = clientes.filter(c =>
+        (c.nombre || '').toLowerCase().includes(busqueda.toLowerCase()) ||
+        (c.telefono || '').includes(busqueda)
+      );
+
+      return (
+        <div>
+          <div className="fid-admin-card">
+            <input className="fid-admin-input" placeholder="Buscar por nombre o teléfono..." value={busqueda} onChange={e => setBusqueda(e.target.value)} style={{ width: '100%', boxSizing: 'border-box' }} />
+          </div>
+
+          {seleccionado && (
+            <PanelPuntos
+              cliente={seleccionado}
+              onClose={() => setSeleccionado(null)}
+              onSaved={() => { setSeleccionado(null); refrescar(); }}
+            />
+          )}
+
+          <div className="fid-admin-card">
+            <table className="fid-admin-table">
+              <thead><tr><th>Nombre</th><th>Teléfono</th><th>Nivel</th><th>Puntos</th><th>Última visita</th><th></th></tr></thead>
+              <tbody>
+                {filtrados.map(c => (
+                  <tr key={c.id}>
+                    <td>{c.nombre}</td>
+                    <td>{c.telefono}</td>
+                    <td>{c.nivel}</td>
+                    <td>{c.puntos || 0}</td>
+                    <td>{Fidelizacion.formatoFecha(c.ultimaVisita)}</td>
+                    <td><button className="fid-admin-btn fid-admin-btn--ghost" onClick={() => setSeleccionado(c)}>Puntos</button></td>
+                  </tr>
+                ))}
+                {filtrados.length === 0 && <tr><td colSpan="6">Sin resultados.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+
+    function ColeccionCRUD({ coleccion, campos, titulo }) {
+      const [items, setItems] = useState([]);
+      const [nuevo, setNuevo] = useState({});
+
+      useEffect(() => {
+        const unsub = Fidelizacion.db().collection(coleccion).onSnapshot(snap => {
+          setItems(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        });
+        return unsub;
+      }, []);
+
+      function agregar() {
+        if (!nuevo.nombre) return;
+        Fidelizacion.db().collection(coleccion).add({ ...nuevo, activa: true });
+        setNuevo({});
+      }
+
+      function toggle(item) {
+        Fidelizacion.db().collection(coleccion).doc(item.id).update({ activa: !item.activa });
+      }
+
+      function eliminar(item) {
+        if (!window.confirm('¿Eliminar "' + item.nombre + '"?')) return;
+        Fidelizacion.db().collection(coleccion).doc(item.id).delete();
+      }
+
+      return (
+        <div className="fid-admin-card">
+          <h3>{titulo}</h3>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+            {campos.map(c => (
+              <input key={c.key} className="fid-admin-input" placeholder={c.label} type={c.type || 'text'}
+                value={nuevo[c.key] || ''} onChange={e => setNuevo({ ...nuevo, [c.key]: e.target.value })} />
+            ))}
+            <button className="fid-admin-btn" onClick={agregar}>Agregar</button>
+          </div>
+          <table className="fid-admin-table">
+            <thead><tr>{campos.map(c => <th key={c.key}>{c.label}</th>)}<th>Estado</th><th></th></tr></thead>
+            <tbody>
+              {items.map(item => (
+                <tr key={item.id}>
+                  {campos.map(c => <td key={c.key}>{item[c.key]}</td>)}
+                  <td>{item.activa ? 'Activa' : 'Inactiva'}</td>
+                  <td>
+                    <button className="fid-admin-btn fid-admin-btn--ghost" onClick={() => toggle(item)}>{item.activa ? 'Desactivar' : 'Activar'}</button>{' '}
+                    <button className="fid-admin-btn fid-admin-btn--ghost" onClick={() => eliminar(item)}>Eliminar</button>
+                  </td>
+                </tr>
+              ))}
+              {items.length === 0 && <tr><td colSpan={campos.length + 2}>Sin registros aún.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+
+    function CRM({ clientes }) {
+      const vip = clientes.filter(c => c.nivel === 'Oro' || c.nivel === 'Diamante');
+      const frecuentes = clientes.filter(c => {
+        if (!c.ultimaVisita || !c.ultimaVisita.toDate) return false;
+        const dias = (Date.now() - c.ultimaVisita.toDate().getTime()) / 86400000;
+        return dias <= 14;
+      });
+      const inactivos = clientes.filter(c => {
+        if (!c.ultimaVisita || !c.ultimaVisita.toDate) return true;
+        const dias = (Date.now() - c.ultimaVisita.toDate().getTime()) / 86400000;
+        return dias > 45;
+      });
+
+      function Lista({ titulo, lista }) {
+        return (
+          <div className="fid-admin-card">
+            <h3>{titulo} ({lista.length})</h3>
+            <table className="fid-admin-table">
+              <thead><tr><th>Nombre</th><th>Teléfono</th><th>Última visita</th></tr></thead>
+              <tbody>
+                {lista.slice(0, 30).map(c => (
+                  <tr key={c.id}><td>{c.nombre}</td><td>{c.telefono}</td><td>{Fidelizacion.formatoFecha(c.ultimaVisita)}</td></tr>
+                ))}
+                {lista.length === 0 && <tr><td colSpan="3">Sin clientes en este segmento.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        );
+      }
+
+      return (
+        <div>
+          <Lista titulo="Clientes VIP (Oro / Diamante)" lista={vip} />
+          <Lista titulo="Clientes frecuentes (últimos 14 días)" lista={frecuentes} />
+          <Lista titulo="Clientes inactivos (+45 días sin visitar)" lista={inactivos} />
+        </div>
+      );
+    }
+
+    function Wallet() {
+      return (
+        <div className="fid-admin-card">
+          <div className="fid-admin-banner">
+            Próximamente — Google Wallet requiere una Cloud Function que firme los passes con una cuenta de
+            servicio de Google Wallet API. No está incluido en esta primera versión (no usa Functions todavía).
+            Mientras tanto, la tarjeta digital web (mi-tarjeta.html) con QR cumple la misma función: el cliente
+            la guarda como acceso directo en su celular.
+          </div>
+          <h3>Qué falta para activar Wallet</h3>
+          <ul>
+            <li>Crear proyecto en Google Wallet API Console y obtener cuenta de servicio.</li>
+            <li>Agregar Firebase Functions al repo (hoy no existen) para firmar el JWT del pase.</li>
+            <li>Botón "Agregar a Google Wallet" en mi-tarjeta.html que llame a esa función.</li>
+          </ul>
+        </div>
+      );
+    }
+
+    function Configuracion() {
+      const [niveles, setNiveles] = useState(Fidelizacion.NIVELES_DEFAULT);
+      const [guardado, setGuardado] = useState(false);
+
+      useEffect(() => {
+        Fidelizacion.db().collection('fidelizacion_config').doc('niveles').get().then(snap => {
+          if (snap.exists && snap.data().lista) setNiveles(snap.data().lista);
+        });
+      }, []);
+
+      function actualizar(i, campo, valor) {
+        const copia = niveles.slice();
+        copia[i] = { ...copia[i], [campo]: campo === 'minimo' ? parseInt(valor, 10) || 0 : valor };
+        setNiveles(copia);
+      }
+
+      function guardar() {
+        Fidelizacion.db().collection('fidelizacion_config').doc('niveles').set({ lista: niveles }).then(() => {
+          setGuardado(true);
+          setTimeout(() => setGuardado(false), 2000);
+        });
+      }
+
+      return (
+        <div className="fid-admin-card">
+          <h3>Umbrales de nivel (puntos históricos mínimos)</h3>
+          <table className="fid-admin-table">
+            <thead><tr><th>Nivel</th><th>Puntos mínimos</th><th>Color</th></tr></thead>
+            <tbody>
+              {niveles.map((n, i) => (
+                <tr key={n.nombre}>
+                  <td>{n.nombre}</td>
+                  <td><input className="fid-admin-input" type="number" value={n.minimo} onChange={e => actualizar(i, 'minimo', e.target.value)} /></td>
+                  <td><input className="fid-admin-input" type="color" value={n.color} onChange={e => actualizar(i, 'color', e.target.value)} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div style={{ marginTop: 12 }}>
+            <button className="fid-admin-btn" onClick={guardar}>Guardar configuración</button>
+            {guardado && <span style={{ marginLeft: 10, color: 'green' }}>Guardado ✓</span>}
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const { ready, error } = useFirestoreReady();
+      const [tab, setTab] = useState('resumen');
+      const [clientes, setClientes] = useState([]);
+      const [transacciones, setTransacciones] = useState([]);
+
+      useEffect(() => {
+        if (!ready) return;
+        const unsubC = Fidelizacion.db().collection('fidelizacion_clientes').onSnapshot(snap => {
+          setClientes(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        });
+        const unsubT = Fidelizacion.db().collection('fidelizacion_transacciones').onSnapshot(snap => {
+          setTransacciones(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        });
+        return () => { unsubC(); unsubT(); };
+      }, [ready]);
+
+      if (error) {
+        return (
+          <div className="fid-admin-shell">
+            <div className="fid-admin-banner">{error}</div>
+            <p>Edita <code>js/firebase-fidelizacion-config.js</code> con tus credenciales reales de Firebase y despliega de nuevo.</p>
+          </div>
+        );
+      }
+      if (!ready) return <div className="fid-admin-shell">Cargando…</div>;
+
+      return (
+        <div className="fid-admin-shell">
+          <div className="fid-admin-banner">Acceso interno sin login — no compartas esta URL.</div>
+          <h1>Panel de Fidelización</h1>
+          <div className="fid-admin-tabs">
+            {TABS.map(t => (
+              <button key={t.key} className={'fid-admin-tab' + (tab === t.key ? ' is-active' : '')} onClick={() => setTab(t.key)}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {tab === 'resumen' && <Resumen clientes={clientes} transacciones={transacciones} />}
+          {tab === 'clientes' && <Clientes clientes={clientes} refrescar={() => {}} />}
+          {tab === 'recompensas' && <ColeccionCRUD coleccion="fidelizacion_recompensas" titulo="Recompensas"
+            campos={[{ key: 'nombre', label: 'Nombre' }, { key: 'puntosRequeridos', label: 'Puntos requeridos', type: 'number' }, { key: 'descripcion', label: 'Descripción' }]} />}
+          {tab === 'promociones' && <ColeccionCRUD coleccion="fidelizacion_promociones" titulo="Promociones"
+            campos={[{ key: 'nombre', label: 'Nombre' }, { key: 'fechaInicio', label: 'Inicio (YYYY-MM-DD)' }, { key: 'fechaFin', label: 'Fin (YYYY-MM-DD)' }, { key: 'descripcion', label: 'Descripción' }]} />}
+          {tab === 'crm' && <CRM clientes={clientes} />}
+          {tab === 'wallet' && <Wallet />}
+          {tab === 'configuracion' && <Configuracion />}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

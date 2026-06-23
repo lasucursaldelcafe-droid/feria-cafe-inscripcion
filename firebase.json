@@ -25,7 +25,11 @@
       { "source": "/qr/", "destination": "/qr", "type": 301 },
       { "source": "/admin/", "destination": "/admin", "type": 301 },
       { "source": "/mi-stand/", "destination": "/mi-stand", "type": 301 },
-      { "source": "/expositor/", "destination": "/expositor", "type": 301 }
+      { "source": "/expositor/", "destination": "/expositor", "type": 301 },
+      { "source": "/fidelizacion/", "destination": "/fidelizacion", "type": 301 },
+      { "source": "/registro-fidelizacion/", "destination": "/registro-fidelizacion", "type": 301 },
+      { "source": "/mi-tarjeta/", "destination": "/mi-tarjeta", "type": 301 },
+      { "source": "/panel-fidelizacion/", "destination": "/panel-fidelizacion", "type": 301 }
     ],
     "rewrites": [
       {
@@ -91,6 +95,22 @@
       {
         "source": "/expositor",
         "destination": "/expositor.html"
+      },
+      {
+        "source": "/fidelizacion",
+        "destination": "/fidelizacion.html"
+      },
+      {
+        "source": "/registro-fidelizacion",
+        "destination": "/fidelizacion-registro.html"
+      },
+      {
+        "source": "/mi-tarjeta",
+        "destination": "/mi-tarjeta.html"
+      },
+      {
+        "source": "/panel-fidelizacion",
+        "destination": "/dashboard-fidelizacion.html"
       }
     ],
     "headers": [
@@ -179,6 +199,37 @@
           {
             "key": "Cache-Control",
             "value": "no-store, no-cache, must-revalidate, max-age=0"
+          }
+        ]
+      },
+      {
+        "source": "/panel-fidelizacion**",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-store, no-cache, must-revalidate, max-age=0"
+          }
+        ]
+      },
+      {
+        "source": "/mi-tarjeta**",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          }
+        ]
+      },
+      {
+        "source": "/registro-fidelizacion**",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
           }
         ]
       }
