@@ -232,7 +232,7 @@
                   </td>
                 </tr>
               ))}
-              {items.length === 0 && <tr><td colSpan={campos.length + 2}>Sin registros aún.</td></tr>}
+              {items.length === 0 && <tr><td colSpan={(campos && campos.length ? campos.length : 3) + 2}>Sin registros aún.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -253,16 +253,17 @@
       });
 
       function Lista({ titulo, lista }) {
+        const listaSegura = lista && Array.isArray(lista) ? lista : [];
         return (
           <div className="fid-admin-card">
-            <h3>{titulo} ({lista.length})</h3>
+            <h3>{titulo} ({listaSegura.length})</h3>
             <table className="fid-admin-table">
               <thead><tr><th>Nombre</th><th>Teléfono</th><th>Última visita</th></tr></thead>
               <tbody>
-                {lista.slice(0, 30).map(c => (
+                {listaSegura.slice(0, 30).map(c => (
                   <tr key={c.id}><td>{c.nombre}</td><td>{c.telefono}</td><td>{Fidelizacion.formatoFecha(c.ultimaVisita)}</td></tr>
                 ))}
-                {lista.length === 0 && <tr><td colSpan="3">Sin clientes en este segmento.</td></tr>}
+                {listaSegura.length === 0 && <tr><td colSpan="3">Sin clientes en este segmento.</td></tr>}
               </tbody>
             </table>
           </div>
