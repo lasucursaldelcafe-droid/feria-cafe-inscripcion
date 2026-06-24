@@ -269,14 +269,14 @@
             <p style="margin:0.5rem 0 0">Realiza tu pago a la cuenta oficial del evento:</p>
             <ul style="margin:0.5rem 0 0">
               <li><strong>Banco / app:</strong> Nubank</li>
-              <li><strong>Usuario / llave:</strong> <code>@mvl616</code></li>
+              <li><strong>Usuario / llave:</strong> <code>@mbl616</code></li>
               <li><strong>Titular:</strong> Manuel Barraza</li>
               <li><strong>Valor:</strong> $90.000 COP (inscripción V60 Championship)</li>
             </ul>
             <p class="hint" style="margin:0.5rem 0 0">Único método de pago aceptado. Adjunta el comprobante en este formulario para confirmar tu cupo más rápido.</p>
           </div>
 
-          <input type="hidden" id="metodoPago" name="metodoPago" value="Nubank (@mvl616) — Manuel Barraza">
+          <input type="hidden" id="metodoPago" name="metodoPago" value="Nubank (@mbl616) — Manuel Barraza">
 
           <div class="field">
             <label for="comprobanteReferencia">Referencia de pago (opcional)</label>
@@ -520,7 +520,7 @@
       const FORM_TYPE = "competencia";
       const CUPO_MAX = cfg.cupoCompetencia || 36;
       const PRECIO = pago.monto || 90000;
-      const METODO_PAGO = pago.metodo || "Nubank (@mvl616) — Manuel Barraza";
+      const METODO_PAGO = pago.metodo || "Nubank (@mbl616) — Manuel Barraza";
       const EVENTO_NOMBRE = ev.nombre || "V60 Championship — Evento 1";
       const EVENTO_FECHA = ev.fecha || "4 de julio de 2026";
       const EVENTO_SEDE = (window.SiteChrome && SiteChrome.torneoLugar) ? SiteChrome.torneoLugar() : (ev.sede + (ev.ciudad ? ", " + ev.ciudad : ""));
@@ -1127,7 +1127,7 @@
             "<li><strong>Número de inscripción:</strong> " + entry.id + "</li>" +
             "<li><strong>Evento:</strong> " + EVENTO_NOMBRE + " — 1.ª clasificatoria</li>" +
             "<li><strong>Fecha y sede:</strong> " + EVENTO_FECHA + " · " + EVENTO_SEDE + "</li>" +
-            "<li><strong>Pago:</strong> $90.000 COP a Nubank <code>@mvl616</code> (Manuel Barraza)</li>" +
+            "<li><strong>Pago:</strong> $90.000 COP a Nubank <code>@mbl616</code> (Manuel Barraza)</li>" +
             "<li><strong>Café de práctica:</strong> 150 a 200 g a la dirección indicada, tras validar el pago</li>" +
             "<li><strong>Foto:</strong> " + fotoLine + "</li>" +
             "<li><strong>Reglamento:</strong> <a href=\"reglas-v60-championship.html\" target=\"_blank\" rel=\"noopener\">Ver reglas oficiales</a></li>" +
@@ -1141,8 +1141,8 @@
         }
         if (successComprobanteNote) {
           successComprobanteNote.textContent = hadComprobante
-            ? "Recibimos tu comprobante de pago. Validaremos los $90.000 COP en Nubank @mvl616 y te confirmaremos por correo o WhatsApp."
-            : "Pendiente: realiza tu pago de $90.000 COP a Nubank @mvl616 (Manuel Barraza) y envía el comprobante si aún no lo adjuntaste.";
+            ? "Recibimos tu comprobante de pago. Validaremos los $90.000 COP en Nubank @mbl616 y te confirmaremos por correo o WhatsApp."
+            : "Pendiente: realiza tu pago de $90.000 COP a Nubank @mbl616 (Manuel Barraza) y envía el comprobante si aún no lo adjuntaste.";
         }
         if (inscripcionId) {
           inscripcionId.textContent = "Guarda tu número de inscripción: " + entry.id;

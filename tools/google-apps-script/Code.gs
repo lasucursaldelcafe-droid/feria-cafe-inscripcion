@@ -1310,7 +1310,7 @@ function buildCompetenciaEmailPlain_(data) {
     'Número de inscripción: ' + id,
     'Fecha: 4 de julio de 2026',
     'Sede: Plaza Marbella, Centro Comercial (Curis), Cali',
-    'Pago: $90.000 COP a Nubank @mvl616 (Manuel Barraza)',
+    'Pago: $90.000 COP a Nubank @mbl616 (Manuel Barraza)',
     '',
     '—— Reglamento (resumen) ——',
     '• Método obligatorio: Hario Switch (extracción manual).',
@@ -1351,8 +1351,8 @@ function buildCompetenciaEmailHtml_(data) {
   var organizerEmail = escapeHtml_(ORGANIZER_EMAIL);
   var tieneComprobante = !!(data.comprobanteArchivo && data.comprobanteArchivo.tieneComprobante);
   var pagoNote = tieneComprobante
-    ? 'Recibimos tu comprobante de pago. Validaremos los $90.000 COP en Nubank @mvl616 y te confirmaremos tu cupo.'
-    : 'Pendiente: realiza tu pago de $90.000 COP a Nubank @mvl616 (Manuel Barraza) y envía el comprobante si aún no lo adjuntaste.';
+    ? 'Recibimos tu comprobante de pago. Validaremos los $90.000 COP en Nubank @mbl616 y te confirmaremos tu cupo.'
+    : 'Pendiente: realiza tu pago de $90.000 COP a Nubank @mbl616 (Manuel Barraza) y envía el comprobante si aún no lo adjuntaste.';
   var btnStyle = 'display:inline-block;padding:12px 20px;margin:8px 8px 8px 0;text-decoration:none;border-radius:6px;font-weight:600;font-size:15px;';
   var btnGreen = btnStyle + 'background:#25D366;color:#ffffff;';
   var btnBrown = btnStyle + 'background:#5f4a3a;color:#ffffff;';
@@ -1365,7 +1365,7 @@ function buildCompetenciaEmailHtml_(data) {
     '<tr><td style="padding:6px 0;color:#6b5344;width:38%;">Número de inscripción</td><td style="padding:6px 0;"><strong>' + id + '</strong></td></tr>',
     '<tr><td style="padding:6px 0;color:#6b5344;">Fecha</td><td style="padding:6px 0;">4 de julio de 2026</td></tr>',
     '<tr><td style="padding:6px 0;color:#6b5344;">Sede</td><td style="padding:6px 0;">Plaza Marbella, Centro Comercial (Curis), Cali</td></tr>',
-    '<tr><td style="padding:6px 0;color:#6b5344;">Pago</td><td style="padding:6px 0;">$90.000 COP · Nubank <strong>@mvl616</strong> (Manuel Barraza)</td></tr>',
+    '<tr><td style="padding:6px 0;color:#6b5344;">Pago</td><td style="padding:6px 0;">$90.000 COP · Nubank <strong>@mbl616</strong> (Manuel Barraza)</td></tr>',
     '</table>',
     '<h2 style="font-size:17px;color:#5f4a3a;margin:24px 0 10px;">Reglamento</h2>',
     '<ul style="margin:0 0 12px;padding-left:20px;">',

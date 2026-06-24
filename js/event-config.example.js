@@ -23,7 +23,7 @@ window.EVENT_CONFIG = {
   pago: {
     monto: 90000,
     moneda: 'COP',
-    metodo: 'Nubank (@mvl616) — Manuel Barraza'
+    metodo: 'Nubank (@mbl616) — Manuel Barraza'
   },
   cupoCompetencia: 36
 };

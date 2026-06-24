@@ -154,8 +154,8 @@ window.EVENT_CONFIG = {
   pago: {
     monto: 90000,
     moneda: 'COP',
-    metodo: 'Nubank (@mvl616) — Manuel Barraza',
-    nubank: '@mvl616',
+    metodo: 'Nubank (@mbl616) — Manuel Barraza',
+    nubank: '@mbl616',
     titular: 'Manuel Barraza'
   },
   proximosEventos: [
