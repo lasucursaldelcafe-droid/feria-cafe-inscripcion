@@ -37,6 +37,7 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           projectId: la-sucursal-del-cafe
           channelId: live
+        continue-on-error: true
 
       - name: Deploy reglas de Firestore (módulo de fidelización)
         if: always()
