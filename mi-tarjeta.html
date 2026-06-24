@@ -36,6 +36,7 @@
           <div class="fid-tarjeta__qr">
             <img id="qrImg" src="" alt="Código QR de tu tarjeta" width="180" height="180">
             <p style="color:#444; font-size:0.8rem; margin: 8px 0 0;">Muestra este QR en caja para acumular o canjear puntos</p>
+            <button id="btnWallet" class="btn-submit" style="margin-top:12px; background:#4285F4; width:100%; border:none; padding:10px; border-radius:8px; color:#fff; font-weight:600; cursor:pointer; font-size:0.9rem;">+ Agregar a Google Wallet</button>
           </div>
         </div>
       </section>
@@ -46,6 +47,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="js/firebase-fidelizacion-config.js"></script>
   <script src="js/fidelizacion-common.js"></script>
+  <script src="js/wallet-qr.js"></script>
   <script>
     (function () {
       var params = new URLSearchParams(window.location.search);
@@ -94,6 +96,11 @@
 
         loading.hidden = true;
         tarjeta.hidden = false;
+
+        // Conectar botón de Google Wallet
+        document.getElementById('btnWallet').addEventListener('click', function () {
+          WalletQR.abrirWallet(clienteId);
+        });
       }).catch(function (err) {
         console.error(err);
         mostrarError('Ocurrió un error al cargar tu tarjeta. Intenta de nuevo más tarde.');
