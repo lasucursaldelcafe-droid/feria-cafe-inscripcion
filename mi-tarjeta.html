@@ -37,6 +37,11 @@
             <img id="qrImg" src="" alt="Código QR de tu tarjeta" width="180" height="180">
             <p style="color:#444; font-size:0.8rem; margin: 8px 0 0;">Muestra este QR en caja para acumular o canjear puntos</p>
             <button id="btnWallet" class="btn-submit" style="margin-top:12px; background:#4285F4; width:100%; border:none; padding:10px; border-radius:8px; color:#fff; font-weight:600; cursor:pointer; font-size:0.9rem;">+ Agregar a Google Wallet</button>
+            <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: center;">
+              <button id="btnDescargar" class="btn-submit" style="background:#5D3A1A; padding:8px 12px; font-size:0.85rem; border:none; border-radius:6px; color:#fff; cursor:pointer; flex:1; min-width:100px;">📥 Descargar</button>
+              <button id="btnWhatsApp" class="btn-submit" style="background:#25D366; padding:8px 12px; font-size:0.85rem; border:none; border-radius:6px; color:#fff; cursor:pointer; flex:1; min-width:100px;">📱 WhatsApp</button>
+              <button id="btnCopiar" class="btn-submit" style="background:#666; padding:8px 12px; font-size:0.85rem; border:none; border-radius:6px; color:#fff; cursor:pointer; flex:1; min-width:100px;">📋 Copiar</button>
+            </div>
           </div>
         </div>
       </section>
@@ -48,6 +53,7 @@
   <script src="js/firebase-fidelizacion-config.js"></script>
   <script src="js/fidelizacion-common.js"></script>
   <script src="js/wallet-qr.js"></script>
+  <script src="js/qr-descargar.js"></script>
   <script>
     (function () {
       var params = new URLSearchParams(window.location.search);
@@ -100,6 +106,19 @@
         // Conectar botón de Google Wallet
         document.getElementById('btnWallet').addEventListener('click', function () {
           WalletQR.abrirWallet(clienteId);
+        });
+
+        // Conectar botones de compartir/descargar
+        document.getElementById('btnDescargar').addEventListener('click', function () {
+          QRDescargar.descargarQR(clienteId, data.nombre);
+        });
+
+        document.getElementById('btnWhatsApp').addEventListener('click', function () {
+          QRDescargar.compartirWhatsApp(clienteId);
+        });
+
+        document.getElementById('btnCopiar').addEventListener('click', function () {
+          QRDescargar.copiarLink(clienteId);
         });
       }).catch(function (err) {
         console.error(err);

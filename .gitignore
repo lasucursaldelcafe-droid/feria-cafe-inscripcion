@@ -19,3 +19,4 @@ tools/credentials/*.json
 !tools/credentials/service-account.EJEMPLO.json
 !tools/credentials/apps-script-manifest.json
 tools/google-apps-script/.clasp.json
+functions/node_modules/
