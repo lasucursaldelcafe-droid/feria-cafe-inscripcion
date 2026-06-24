@@ -36,3 +36,14 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           projectId: la-sucursal-del-cafe
           channelId: live
+
+      - name: Deploy reglas de Firestore (módulo de fidelización)
+        if: always()
+        continue-on-error: true
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-sa.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
+          npx -y firebase-tools@latest deploy --only firestore:rules --project la-sucursal-del-cafe --non-interactive
+          rm -f /tmp/firebase-sa.json
