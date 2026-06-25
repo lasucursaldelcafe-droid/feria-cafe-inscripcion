@@ -1,0 +1,72 @@
+---
+description: Reglas globales del proyecto Feria Café para agentes y asistentes de Cursor
+alwaysApply: true
+---
+
+# Reglas globales — Feria Café (Cursor)
+
+Sitio estático del festival **La Sucursal del Café**: HTML/CSS/JS vanilla en la raíz del repo, backend en **Google Apps Script** + Sheets, hosting en **Firebase** (`la-sucursal-del-cafe`). No hay bundler ni framework frontend.
+
+## Skills obligatorios por tarea
+
+Antes de implementar, lee el skill en `.cursor/skills/`:
+
+| Tarea | Skill |
+|-------|-------|
+| Firebase Hosting, CI, `firebase.json`, `site-links`, `event-config`, `verify_admin` | `feria-web-hosting` |
+| `Code.gs`, formularios, stands, expositor, `setup_admin`, `conectar_sheets` | `feria-apps-script-backend` |
+| Lazy load, cache, WebP, `brand.css`, `stands-map`, sponsors | `web-performance-static` |
+
+## Arquitectura y archivos clave
+
+| Archivo | Rol |
+|---------|-----|
+| `js/site-links.js` | Rutas canónicas (`LOCAL` vs `HOSTED`). **Única fuente** para enlaces internos. |
+| `js/event-config.js` | Fechas, sedes, sponsors, stands, contacto. No duplicar en HTML. |
+| `js/sheets-config.js` | URL `/exec` de Apps Script. **Gitignored** — plantilla: `sheets-config.example.js`. |
+| `tools/google-apps-script/Code.gs` | Backend: formularios, emails, mapa stands, admin, analítica. |
+| `firebase.json` | Rewrites, redirects, headers de cache. |
+| `css/brand.css` | Estilos compartidos del sitio. |
+
+## Rutas y enlaces
+
+- Enlaces internos: `data-link="clave"` resuelto por `site-links.js` / `site-chrome.js`. **No hardcodear** rutas en HTML nuevos.
+- Al añadir página pública: actualizar juntos `site-links.js`, `firebase.json` (rewrites + redirects), `sitemap.xml` y `CHECKLIST.md`.
+- Claves habituales: `festival`, `evento`, `actividades`, `patrocinadores`, `feria`, `competencia`, `reglas`, `comoFunciona`, `privacidad`, `qr`, `admin`, `stands`, `expositor`, `miStand`.
+
+## Secretos y archivos ignorados
+
+**No versionar** ni commitear:
+
+- `js/sheets-config.js`, `js/admin-config.js`
+- `tools/.env`, `tools/**/*-sa.json`, `tools/credentials/*.json` (salvo ejemplos)
+- `tools/google-apps-script/.clasp.json`
+
+En CI, `SHEETS_WEB_APP_URL` y `FIREBASE_SERVICE_ACCOUNT` vienen de secretos de GitHub Actions.
+
+## Analítica
+
+- Usar **analítica propia** (`js/analytics-tracker.js` → hoja Analytics vía Apps Script).
+- **No añadir GA4 / Google Analytics.**
+
+## Estilo de código
+
+- Sitio estático sin React/Vue salvo petición explícita.
+- Scripts al final de `<body>`; orden típico: `event-config` → `sheets-config` (formularios) → feature → `site-chrome`.
+- Textos de UI y documentación del proyecto en **español**; nombres de código y comandos en su forma original.
+- Cambios mínimos y focalizados; seguir convenciones existentes del archivo que se edita.
+- Tras cambiar CSS/JS cacheable, bump `?v=YYYYMMDDx` en los `<link>`/`<script>` del HTML afectado.
+
+## Deploy y verificación
+
+- Desarrollo local: `npx serve .`
+- Deploy manual: `py tools/deploy_firebase.py` o `firebase deploy --only hosting`
+- Push a `main` → GitHub Actions despliega automáticamente.
+- Post-deploy: `py tools/verify_admin.py`
+- Redeploy Apps Script tras cambios en `Code.gs` (`tools/desplegar_apps_script.py` o editor web).
+
+## Referencias
+
+- `README.md`, `CHECKLIST.md`
+- `tools/INSTRUCCIONES-SHEETS.md`, `tools/INSTRUCCIONES-PYTHON.md`
+- `tools/ADMIN-DASHBOARD.md`
