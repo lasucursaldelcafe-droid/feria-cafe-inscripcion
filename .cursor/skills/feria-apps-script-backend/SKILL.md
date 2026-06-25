@@ -21,7 +21,7 @@ Web App desplegada como **Ejecutar como: yo** + **Acceso: cualquier persona**. U
 | action | Uso |
 |--------|-----|
 | *(vacío)* | Health: `{ ok, forms: [...] }` |
-| `cupo` | Cupo Switch Championship |
+| `cupo` | Cupo V60 Championship |
 | `stands_map` | Ocupación + logos para mapa |
 | `expositor_feed` | Novedades panel expositor |
 | `admin_dashboard` | Stats admin (+ `idToken` Firebase) |
@@ -34,7 +34,7 @@ Web App desplegada como **Ejecutar como: yo** + **Acceso: cualquier persona**. U
 | `action=pageview` | Analítica propia → hoja Analytics |
 | `action=expositor_login` | Login panel (`email` + `accessCode`) |
 | `formType=feria` | Inscripción visitante |
-| `formType=competencia` | Switch Championship (+ foto/comprobante Drive) |
+| `formType=competencia` | V60 Championship (+ foto/comprobante Drive) |
 | `formType=stands` | Solicitud stand (+ logo Drive, `accessCode`, `expositorPanelUrl`) |
 | `formType=lista_espera` | Lista de espera competencia |
 

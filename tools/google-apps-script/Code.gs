@@ -16,8 +16,8 @@ var HEADERS_ANALYTICS = [
 ];
 var CUPO_MAX_COMPETENCIA = 36;
 var COMPROBANTE_PREVIEW_MAX = 1000;
-var DRIVE_FOLDER_NAME = 'Switch Championship — Comprobantes';
-var DRIVE_FOTOS_FOLDER_NAME = 'Switch Championship — Fotos participantes';
+var DRIVE_FOLDER_NAME = 'V60 Championship — Comprobantes';
+var DRIVE_FOTOS_FOLDER_NAME = 'V60 Championship — Fotos participantes';
 var DRIVE_LOGOS_STANDS_FOLDER_NAME = 'Feria — Logos expositores';
 // Correo(s) del equipo para alertas de nueva inscripcion (separar con coma si son varios).
 var ORGANIZER_EMAIL = 'lasucursaldelcafe@gmail.com';
@@ -1086,7 +1086,7 @@ function appendListaEspera_(data) {
 
 function appendCompetencia_(data) {
   if (getCompetenciaCount_() >= CUPO_MAX_COMPETENCIA) {
-    throw new Error('Cupo completo. No hay cupos disponibles para Switch Championship.');
+    throw new Error('Cupo completo. No hay cupos disponibles para V60 Championship.');
   }
 
   var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
@@ -1106,7 +1106,7 @@ function appendCompetencia_(data) {
   sheet.appendRow([
     data.fecha || new Date().toISOString(),
     data.id || '',
-    data.evento || 'Switch Championship',
+    data.evento || 'V60 Championship',
     data.valorInscripcion || '',
     data.nombre || '',
     data.documento || '',
@@ -1269,7 +1269,7 @@ function getSiteUrl_() {
 }
 
 function getReglasUrl_() {
-  return getSiteUrl_() + '/reglas-switch-championship.html';
+  return getSiteUrl_() + '/reglas-v60-championship.html';
 }
 
 function buildWaMeUrl_(phone, text) {
@@ -1283,7 +1283,7 @@ function buildWaMeUrl_(phone, text) {
 function buildCompetenciaWaOrganizadorUrl_(data) {
   var nombre = String(data.nombre || 'Participante').trim();
   var id = String(data.id || '').trim();
-  var msg = 'Hola, me inscribí al Switch Championship (1.ª clasificatoria). ' +
+  var msg = 'Hola, me inscribí al V60 Championship (1.ª clasificatoria). ' +
     'Nombre: ' + nombre + '. Inscripción: ' + (id || 'pendiente') + '. Confirmo mi participación.';
   return buildWaMeUrl_(WHATSAPP_ORGANIZADOR, msg);
 }
@@ -1305,7 +1305,7 @@ function buildCompetenciaEmailPlain_(data) {
   var lines = [
     'Hola ' + nombre + ',',
     '',
-    '¡Bienvenido/a al Switch Championship! Recibimos tu inscripción a la 1.ª clasificatoria del circuito de café filtrado con Hario Switch.',
+    '¡Bienvenido/a al V60 Championship! Recibimos tu inscripción a la 1.ª clasificatoria del circuito de café filtrado con V60.',
     '',
     'Número de inscripción: ' + id,
     'Fecha: 4 de julio de 2026',
@@ -1313,7 +1313,7 @@ function buildCompetenciaEmailPlain_(data) {
     'Pago: $90.000 COP a Nubank @mbl616 (Manuel Barraza)',
     '',
     '—— Reglamento (resumen) ——',
-    '• Método obligatorio: Hario Switch (extracción manual).',
+    '• Método obligatorio: V60 (extracción manual).',
     '• Formato: clasificatoria, semifinal y final.',
     '• Sin reembolso por retiro o no asistencia (salvo cancelación total del evento).',
     '• Debes cumplir tiempos, protocolo y criterios del jurado.',
@@ -1338,7 +1338,7 @@ function buildCompetenciaEmailPlain_(data) {
   lines.push('Dudas: ' + ORGANIZER_EMAIL);
   lines.push('');
   lines.push('— La Sucursal del Café');
-  lines.push('Switch Championship · 1.ª clasificatoria');
+  lines.push('V60 Championship · 1.ª clasificatoria');
   return lines.join('\n');
 }
 
@@ -1360,7 +1360,7 @@ function buildCompetenciaEmailHtml_(data) {
   return [
     '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#3d2b1f;max-width:600px;">',
     '<p style="margin:0 0 16px;">Hola <strong>' + nombre + '</strong>,</p>',
-    '<p style="margin:0 0 16px;">¡Bienvenido/a al <strong>Switch Championship</strong>! Recibimos tu inscripción a la <strong>1.ª clasificatoria</strong> del circuito de café filtrado con Hario Switch, organizado por La Sucursal del Café.</p>',
+    '<p style="margin:0 0 16px;">¡Bienvenido/a al <strong>V60 Championship</strong>! Recibimos tu inscripción a la <strong>1.ª clasificatoria</strong> del circuito de café filtrado con V60, organizado por La Sucursal del Café.</p>',
     '<table style="width:100%;border-collapse:collapse;margin:0 0 20px;font-size:14px;">',
     '<tr><td style="padding:6px 0;color:#6b5344;width:38%;">Número de inscripción</td><td style="padding:6px 0;"><strong>' + id + '</strong></td></tr>',
     '<tr><td style="padding:6px 0;color:#6b5344;">Fecha</td><td style="padding:6px 0;">4 de julio de 2026</td></tr>',
@@ -1369,14 +1369,14 @@ function buildCompetenciaEmailHtml_(data) {
     '</table>',
     '<h2 style="font-size:17px;color:#5f4a3a;margin:24px 0 10px;">Reglamento</h2>',
     '<ul style="margin:0 0 12px;padding-left:20px;">',
-    '<li style="margin-bottom:6px;">Método obligatorio: <strong>Hario Switch</strong> (extracción manual).</li>',
+    '<li style="margin-bottom:6px;">Método obligatorio: <strong>V60</strong> (extracción manual).</li>',
     '<li style="margin-bottom:6px;">Formato: clasificatoria, semifinal y final.</li>',
     '<li style="margin-bottom:6px;">Sin reembolso por retiro o no asistencia (salvo cancelación total del evento).</li>',
     '<li style="margin-bottom:6px;">Debes cumplir tiempos, protocolo y criterios del jurado.</li>',
     '</ul>',
     '<p style="margin:0 0 20px;"><a href="' + reglasUrl + '" style="color:#8b4513;font-weight:600;">Ver reglamento completo en el sitio</a></p>',
     '<h2 style="font-size:17px;color:#5f4a3a;margin:24px 0 10px;">WhatsApp del torneo</h2>',
-    '<p style="margin:0 0 12px;">Únete al grupo para recibir avisos, logística y novedades del Switch Championship:</p>',
+    '<p style="margin:0 0 12px;">Únete al grupo para recibir avisos, logística y novedades del V60 Championship:</p>',
     '<p style="margin:0 0 16px;"><a href="' + grupoUrl + '" style="' + btnGreen + '">Entrar al grupo de WhatsApp</a></p>',
     '<p style="margin:0 0 8px;font-size:14px;color:#6b5344;">¿Necesitas escribir al organizador? Abre WhatsApp con un mensaje prellenado:</p>',
     '<p style="margin:0 0 16px;"><a href="' + waOrganizador + '" style="' + btnBrown + '">Contactar por WhatsApp</a></p>',
@@ -1384,7 +1384,7 @@ function buildCompetenciaEmailHtml_(data) {
     '<p style="margin:0 0 8px;font-size:13px;color:#888;">WhatsApp no puede enviarse automáticamente desde este sistema; usa los botones anteriores para unirte al grupo o contactarnos.</p>',
     '<p style="margin:16px 0 0;">Dudas: <a href="mailto:' + organizerEmail + '" style="color:#8b4513;">' + organizerEmail + '</a></p>',
     '<hr style="border:none;border-top:1px solid #e0d5c8;margin:24px 0;">',
-    '<p style="margin:0;font-size:13px;color:#888;">— La Sucursal del Café<br>Switch Championship · 1.ª clasificatoria</p>',
+    '<p style="margin:0;font-size:13px;color:#888;">— La Sucursal del Café<br>V60 Championship · 1.ª clasificatoria</p>',
     '</div>'
   ].join('');
 }
@@ -1397,7 +1397,7 @@ function buildEmailBody_(formType, data) {
   if (formType === 'competencia') {
     return buildCompetenciaEmailPlain_(data);
   } else if (formType === 'lista_espera') {
-    lines.push('Te registramos en la lista de espera del Switch Championship.');
+    lines.push('Te registramos en la lista de espera del V60 Championship.');
     lines.push('Referencia: ' + id);
     lines.push('Te contactaremos si se libera un cupo.');
     lines.push('Dudas: ' + ORGANIZER_EMAIL);
@@ -1451,7 +1451,7 @@ function buildEmailBody_(formType, data) {
     lines.push('Referencia: ' + id);
     lines.push('Fechas: 29 y 30 de agosto de 2026');
     lines.push('Sede: Palmetto Plaza, Cali');
-    lines.push('La feria y el Switch Championship son eventos independientes (fechas y sedes distintas).');
+    lines.push('La feria y el V60 Championship son eventos independientes (fechas y sedes distintas).');
     lines.push('Dudas: ' + ORGANIZER_EMAIL);
   }
 
@@ -1465,8 +1465,8 @@ function sendConfirmationEmail_(formType, data) {
   if (!correo || correo.indexOf('@') === -1) return;
 
   var subject = 'Inscripción recibida — La Sucursal del Café';
-  if (formType === 'competencia') subject = 'Switch Championship — inscripción ' + (data.id || '');
-  if (formType === 'lista_espera') subject = 'Lista de espera — Switch Championship';
+  if (formType === 'competencia') subject = 'V60 Championship — inscripción ' + (data.id || '');
+  if (formType === 'lista_espera') subject = 'Lista de espera — V60 Championship';
   if (formType === 'stands') subject = 'Solicitud de stand recibida — ' + (data.marca || data.id || '');
 
   try {
@@ -1499,7 +1499,7 @@ function buildOrganizerAlertBody_(formType, data) {
   var lines = ['Nueva actividad en el formulario web — La Sucursal del Café', ''];
 
   if (formType === 'competencia') {
-    lines.push('Formulario: Switch Championship (competencia)');
+    lines.push('Formulario: V60 Championship (competencia)');
     lines.push('ID: ' + id);
     lines.push('Nombre: ' + nombre);
     lines.push('Documento: ' + (data.documento || ''));
@@ -1550,7 +1550,7 @@ function buildOrganizerAlertBody_(formType, data) {
       lines.push('Revisa la hoja "' + SHEET_STANDS + '" en Google Sheets para el detalle completo.');
     }
   } else if (formType === 'lista_espera') {
-    lines.push('Formulario: Lista de espera (Switch Championship)');
+    lines.push('Formulario: Lista de espera (V60 Championship)');
     lines.push('ID: ' + id);
     lines.push('Nombre: ' + nombre);
     lines.push('Documento: ' + (data.documento || ''));
@@ -1581,7 +1581,7 @@ function buildOrganizerAlertSubject_(formType, data) {
   var nombre = data.nombre || 'Participante';
   var id = data.id || '';
   if (formType === 'competencia') {
-    return '[Switch Championship] Nueva inscripción — ' + nombre + (id ? ' (' + id + ')' : '');
+    return '[V60 Championship] Nueva inscripción — ' + nombre + (id ? ' (' + id + ')' : '');
   }
   if (formType === 'stands') {
     if (data.esAliadoPatrocinador || isAliadoPatrocinadorPlan_(data.plan)) {

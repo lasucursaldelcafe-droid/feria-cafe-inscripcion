@@ -625,7 +625,7 @@
     }
     if (dataset === 'competencia') {
       downloadCsvText(
-        stampFilename('switch-championship'),
+        stampFilename('v60-championship'),
         rowsToCsv(data.competenciaColumns || DEFAULT_COMP_COLS, data.allCompetencia || data.recentCompetencia || [])
       );
       return true;

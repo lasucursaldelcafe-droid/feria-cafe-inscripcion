@@ -37,7 +37,7 @@ Google también descubre el sitemap vía la línea `Sitemap:` en `robots.txt`.
 | El evento | https://la-sucursal-del-cafe.web.app/el-evento |
 | Actividades | https://la-sucursal-del-cafe.web.app/actividades |
 | Registro visitante | https://la-sucursal-del-cafe.web.app/inscripcion |
-| Switch Championship | https://la-sucursal-del-cafe.web.app/competencia |
+| V60 Championship | https://la-sucursal-del-cafe.web.app/competencia |
 | Patrocinadores | https://la-sucursal-del-cafe.web.app/patrocinadores |
 | Reglamento | https://la-sucursal-del-cafe.web.app/reglas |
 | Cómo funciona | https://la-sucursal-del-cafe.web.app/como-funciona |
@@ -62,7 +62,7 @@ Si **La Sucursal del Café** o el venue (**Palmetto Plaza**, Cali) tienen perfil
 
 - Al añadir páginas públicas: actualiza `sitemap.xml` y `lastmod`.
 - Revisa **Cobertura** y **Experiencia** en Search Console cada 2–4 semanas.
-- Consultas objetivo: *feria café Cali*, *La Sucursal del Café*, *café especial Cali agosto 2026*, *Switch Championship*.
+- Consultas objetivo: *feria café Cali*, *La Sucursal del Café*, *café especial Cali agosto 2026*, *V60 Championship*.
 
 ## 7. Despliegue
 

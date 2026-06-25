@@ -9,9 +9,9 @@
 | Actividades | `actividades.html` | https://la-sucursal-del-cafe.web.app/actividades |
 | Patrocinadores | `patrocinadores.html` | https://la-sucursal-del-cafe.web.app/patrocinadores |
 | Inscripción feria | `inscripcion.html` | https://la-sucursal-del-cafe.web.app/inscripcion |
-| Switch Championship | `competencia.html` | https://la-sucursal-del-cafe.web.app/competencia |
+| V60 Championship | `competencia.html` | https://la-sucursal-del-cafe.web.app/competencia |
 | ¿Cómo funciona? | `como-funciona-evento.html` | https://la-sucursal-del-cafe.web.app/como-funciona |
-| Reglamento | `reglas-switch-championship.html` | https://la-sucursal-del-cafe.web.app/reglas |
+| Reglamento | `reglas-v60-championship.html` | https://la-sucursal-del-cafe.web.app/reglas |
 | Privacidad | `privacidad.html` | https://la-sucursal-del-cafe.web.app/privacidad |
 | QR inscripción | `qr-inscripcion.html` | https://la-sucursal-del-cafe.web.app/qr |
 | Alias festival | `festival.html` → inicio | https://la-sucursal-del-cafe.web.app/festival |

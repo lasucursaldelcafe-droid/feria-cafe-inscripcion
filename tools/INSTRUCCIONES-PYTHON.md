@@ -60,7 +60,7 @@ py tools/setup_google_sheets.py `
   --web-app-url "https://script.google.com/macros/s/XXXX/exec"
 ```
 
-El script crea la hoja **Switch Championship — Inscripciones** con pestañas **Feria** y **Competencia** y los encabezados que usa `tools/google-apps-script/Code.gs`.
+El script crea la hoja **V60 Championship — Inscripciones** con pestañas **Feria** y **Competencia** y los encabezados que usa `tools/google-apps-script/Code.gs`.
 
 ### Apps Script (paso manual obligatorio)
 

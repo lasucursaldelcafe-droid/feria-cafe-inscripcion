@@ -1,6 +1,6 @@
 # Google Sheets — Feria y Competencia
 
-Conecta **index.html** (feria) y **competencia.html** (Switch Championship) con una hoja de cálculo centralizada.
+Conecta **index.html** (feria) y **competencia.html** (V60 Championship) con una hoja de cálculo centralizada.
 
 ## Un solo comando (recomendado)
 
@@ -115,7 +115,7 @@ py -3 -m pip install -r tools/requirements.txt
 py tools/conectar_sheets.py --crear-hoja --share-with tu-gmail@gmail.com
 ```
 
-El script crea **Switch Championship — Inscripciones** con pestañas **Feria** y **Competencia**, escribe encabezados y te muestra la URL de la hoja.
+El script crea **V60 Championship — Inscripciones** con pestañas **Feria** y **Competencia**, escribe encabezados y te muestra la URL de la hoja.
 
 Alternativa automatizada (pipeline completo):
 
@@ -205,7 +205,7 @@ Archivo: `tools/google-apps-script/Code.gs`
 
 - Recibe JSON con `formType`: `"feria"` o `"competencia"`.
 - Escribe en la pestaña correspondiente del libro vinculado al script.
-- Guarda comprobantes de pago en Drive (`Switch Championship — Comprobantes`) y registra el enlace.
+- Guarda comprobantes de pago en Drive (`V60 Championship — Comprobantes`) y registra el enlace.
 
 Tras actualizar `Code.gs`, vuelve a **Implementar → Nueva implementación** en Apps Script.
 

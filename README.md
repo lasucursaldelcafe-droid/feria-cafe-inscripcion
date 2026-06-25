@@ -1,6 +1,6 @@
 # Feria Café — La Sucursal del Café
 
-Sitio del festival de café especial: páginas informativas + formularios de inscripción (feria y Switch Championship). Datos en Google Sheets vía Apps Script. Hosting en Firebase.
+Sitio del festival de café especial: páginas informativas + formularios de inscripción (feria y V60 Championship). Datos en Google Sheets vía Apps Script. Hosting en Firebase.
 
 ## URLs publicadas
 
@@ -11,7 +11,7 @@ Sitio del festival de café especial: páginas informativas + formularios de ins
 | Actividades | https://la-sucursal-del-cafe.web.app/actividades |
 | Patrocinadores | https://la-sucursal-del-cafe.web.app/patrocinadores |
 | Inscripción feria | https://la-sucursal-del-cafe.web.app/inscripcion |
-| Switch Championship | https://la-sucursal-del-cafe.web.app/competencia |
+| V60 Championship | https://la-sucursal-del-cafe.web.app/competencia |
 | ¿Cómo funciona? | https://la-sucursal-del-cafe.web.app/como-funciona |
 | Reglamento | https://la-sucursal-del-cafe.web.app/reglas |
 | Privacidad | https://la-sucursal-del-cafe.web.app/privacidad |
@@ -35,8 +35,8 @@ Checklist operativo: [`CHECKLIST.md`](CHECKLIST.md) · Panel admin: [`tools/ADMI
 - **`index.html`** — Landing del festival (hero, actividades, patrocinadores, CTAs).
 - **`el-evento.html`**, **`actividades.html`**, **`patrocinadores.html`** — Subpáginas informativas.
 - **`inscripcion.html`** — Formulario feria (gratis).
-- **`competencia.html`** — Switch Championship ($90.000 COP, cupo 36).
-- **`como-funciona-evento.html`**, **`reglas-switch-championship.html`**, **`privacidad.html`**, **`qr-inscripcion.html`** — Guía, reglamento, legal y QR.
+- **`competencia.html`** — V60 Championship ($90.000 COP, cupo 36).
+- **`como-funciona-evento.html`**, **`reglas-v60-championship.html`**, **`privacidad.html`**, **`qr-inscripcion.html`** — Guía, reglamento, legal y QR.
 - **`festival.html`** — Redirección al inicio (alias `/festival`).
 
 ## Formularios → Google Sheets
@@ -88,7 +88,7 @@ Ver [`tools/INSTRUCCIONES-PYTHON.md`](tools/INSTRUCCIONES-PYTHON.md) para automa
 ├── inscripcion.html
 ├── competencia.html
 ├── como-funciona-evento.html
-├── reglas-switch-championship.html
+├── reglas-v60-championship.html
 ├── privacidad.html
 ├── qr-inscripcion.html
 ├── festival.html

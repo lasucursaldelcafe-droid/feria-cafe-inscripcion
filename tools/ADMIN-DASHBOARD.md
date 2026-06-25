@@ -1,6 +1,6 @@
 # Panel de administración y analíticas
 
-Panel interno para **tráfico del sitio** (analítica propia) e **inscripciones** (feria + Switch Championship). No está enlazado desde la navegación pública. **No usa Google Analytics ni GA4.**
+Panel interno para **tráfico del sitio** (analítica propia) e **inscripciones** (feria + V60 Championship). No está enlazado desde la navegación pública. **No usa Google Analytics ni GA4.**
 
 ## URL del panel
 
@@ -15,7 +15,7 @@ Panel interno para **tráfico del sitio** (analítica propia) e **inscripciones*
 | ------- | --- |
 | Sitio público | https://la-sucursal-del-cafe.web.app/ |
 | Inscripción feria | https://la-sucursal-del-cafe.web.app/inscripcion |
-| Switch Championship | https://la-sucursal-del-cafe.web.app/competencia |
+| V60 Championship | https://la-sucursal-del-cafe.web.app/competencia |
 | Instagram | https://www.instagram.com/lasucursal.delcafe/ |
 | WhatsApp | https://wa.me/573116699638 |
 | Apps Script `/exec` | `js/sheets-config.js` → `WEB_APP_URL` |
