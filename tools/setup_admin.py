@@ -107,7 +107,7 @@ def sync_clasp_rc(creds) -> None:
     (Path.home() / ".clasprc.json").write_text(json.dumps(rc, indent=2) + "\n", encoding="utf-8")
 
 
-def get_oauth_credentials():
+def get_oauth_credentials(*, ci: bool = False):
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
     from google_auth_oauthlib.flow import InstalledAppFlow
@@ -118,10 +118,16 @@ def get_oauth_credentials():
         creds = Credentials.from_authorized_user_file(str(OAUTH_TOKEN_PATH), SCRIPT_SCOPES)
         if creds and creds.valid:
             sync_clasp_rc(creds)
+            return creds
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
+        elif ci:
+            raise RuntimeError(
+                f"Modo CI: falta token OAuth válido en {OAUTH_TOKEN_PATH}. "
+                "Configura el secreto APPS_SCRIPT_OAUTH_TOKEN en GitHub Actions."
+            )
         else:
             warn("OAuth requerido — se abrirá el navegador (una sola vez).")
             flow = InstalledAppFlow.from_client_config(CLASP_OAUTH_CLIENT, SCRIPT_SCOPES)
@@ -299,6 +305,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--solo-verificar", action="store_true")
     parser.add_argument("--sin-firebase", action="store_true")
     parser.add_argument("--sin-deploy", action="store_true")
+    parser.add_argument(
+        "--ci",
+        action="store_true",
+        help="Modo CI: sin navegador; requiere token OAuth en tools/credentials/.oauth-script-token.json",
+    )
     return parser.parse_args()
 
 
@@ -311,7 +322,11 @@ def main() -> int:
     args = parse_args()
     env = read_env()
     admin_email = env.get("ALLOWED_ADMIN_EMAIL", DEFAULT_ADMIN_EMAIL).strip()
-    url = read_web_app_url() or env.get("SHEETS_WEB_APP_URL", "").strip()
+    url = (
+        read_web_app_url()
+        or os.environ.get("SHEETS_WEB_APP_URL", "").strip()
+        or env.get("SHEETS_WEB_APP_URL", "").strip()
+    )
     deployment_id = deployment_id_from_url(url)
 
     if args.solo_verificar:
@@ -321,11 +336,11 @@ def main() -> int:
         return 0 if verify_web_app(url) else 2
 
     if not url:
-        error("No hay WEB_APP_URL en js/sheets-config.js")
+        error("No hay WEB_APP_URL en js/sheets-config.js ni en SHEETS_WEB_APP_URL")
         return 1
 
     try:
-        creds = get_oauth_credentials()
+        creds = get_oauth_credentials(ci=args.ci)
         service = build_script_service(creds)
     except ImportError:
         error("Instala dependencias: py -3 -m pip install -r tools/requirements.txt")
@@ -334,7 +349,12 @@ def main() -> int:
         error(f"OAuth falló: {exc}")
         return 3
 
-    script_id = (args.script_id or read_script_id() or discover_script_id_clasp()).strip()
+    script_id = (
+        args.script_id
+        or os.environ.get("APPS_SCRIPT_ID", "").strip()
+        or read_script_id()
+        or (discover_script_id_clasp() if not args.ci else "")
+    ).strip()
     if not script_id:
         sheet_id = env.get("GOOGLE_SHEET_ID", "").strip()
         if sheet_id:

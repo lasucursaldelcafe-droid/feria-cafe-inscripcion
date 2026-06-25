@@ -36,9 +36,12 @@ from _util import (
 
 CREDENTIALS_DIR = TOOLS_DIR / "credentials"
 FIREBASE_HOSTING_SA = CREDENTIALS_DIR / "firebase-hosting-sa.json"
+OAUTH_TOKEN_PATH = CREDENTIALS_DIR / ".oauth-script-token.json"
 ENV_PATH = TOOLS_DIR / ".env"
 WORKFLOW_FILE = "deploy-firebase.yml"
 WORKFLOW_NAME = "Deploy Firebase Hosting"
+APPS_SCRIPT_WORKFLOW = "deploy-apps-script.yml"
+APPS_SCRIPT_WORKFLOW_NAME = "Deploy Apps Script"
 
 FIREBASE_CONSOLE_SA = (
     f"https://console.firebase.google.com/project/{DEFAULT_FIREBASE_PROJECT}"
@@ -250,6 +253,78 @@ def gh_secret_set(name: str, value: str) -> bool:
     return True
 
 
+def resolve_apps_script_id() -> str:
+    load_dotenv()
+    for source in (read_env_var("APPS_SCRIPT_ID"),):
+        if source.strip():
+            return source.strip()
+    clasp_json = TOOLS_DIR / "google-apps-script" / ".clasp.json"
+    if clasp_json.is_file():
+        try:
+            data = json.loads(clasp_json.read_text(encoding="utf-8"))
+            sid = str(data.get("scriptId", "")).strip()
+            if sid:
+                return sid
+        except json.JSONDecodeError:
+            pass
+    return ""
+
+
+def validate_oauth_token_file(path: Path) -> bool:
+    if not path.is_file():
+        error(f"No existe token OAuth: {path}")
+        info("Genera uno ejecutando: py tools/setup_admin.py --sin-firebase")
+        return False
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        error(f"Token OAuth inválido: {exc}")
+        return False
+    for key in ("token", "refresh_token", "client_id"):
+        if key not in data:
+            error(f"Falta campo '{key}' en {path.name}")
+            return False
+    ok(f"Token OAuth válido — {path.name}")
+    return True
+
+
+def sync_apps_script_secrets(*, dry_run: bool = False) -> bool:
+    if not validate_oauth_token_file(OAUTH_TOKEN_PATH):
+        return False
+
+    script_id = resolve_apps_script_id()
+    if not script_id:
+        error("Falta APPS_SCRIPT_ID en tools/.env o google-apps-script/.clasp.json")
+        info("Hoja → Extensiones → Apps Script → ⚙ → ID del script")
+        return False
+    ok(f"APPS_SCRIPT_ID: {script_id}")
+
+    sheets_url = resolve_sheets_url()
+    if not sheets_url:
+        error("Falta SHEETS_WEB_APP_URL para el workflow de Apps Script.")
+        info("Ejecuta primero: py tools/setup_admin.py --sin-firebase")
+        return False
+    ok(f"SHEETS_WEB_APP_URL: {sheets_url[:60]}…")
+
+    if dry_run:
+        ok("Modo dry-run: secretos Apps Script no subidos.")
+        return True
+
+    if not require_gh():
+        return False
+
+    oauth_text = OAUTH_TOKEN_PATH.read_text(encoding="utf-8")
+    if not gh_secret_set("APPS_SCRIPT_OAUTH_TOKEN", oauth_text):
+        return False
+    if not gh_secret_set("APPS_SCRIPT_ID", script_id):
+        return False
+    if not gh_secret_set("SHEETS_WEB_APP_URL", sheets_url):
+        return False
+
+    ok("Secretos Apps Script sincronizados en GitHub.")
+    return True
+
+
 def sync_secrets(*, dry_run: bool = False) -> bool:
     sa_path = resolve_sa_path(wait=False)
     if not sa_path:
@@ -372,6 +447,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--wait-sa", action="store_true", help="Esperar firebase-hosting-sa.json (abre consola).")
     parser.add_argument("--run-workflow", action="store_true", help="Lanzar Deploy Firebase Hosting y esperar.")
+    parser.add_argument(
+        "--apps-script",
+        action="store_true",
+        help="Sincronizar secretos del workflow Deploy Apps Script (OAuth + script ID + URL).",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Solo validar, no subir secretos.")
     parser.add_argument("--no-browser", action="store_true", help="No abrir Firebase Console al esperar SA.")
     return parser.parse_args()
@@ -386,6 +466,16 @@ def main() -> int:
     args = parse_args()
 
     print("=== setup_github_ci.py — secretos GitHub Actions ===\n")
+
+    if args.apps_script:
+        if not sync_apps_script_secrets(dry_run=args.dry_run):
+            return 2
+        if not args.dry_run and require_gh():
+            print()
+            info("Para desplegar Apps Script desde CI:")
+            print(f'  gh workflow run "{APPS_SCRIPT_WORKFLOW_NAME}"')
+            print(f"  gh run list --workflow {APPS_SCRIPT_WORKFLOW} --limit 3")
+        return 0
 
     if args.wait_sa:
         sa = wait_for_sa_json(open_browser=not args.no_browser)

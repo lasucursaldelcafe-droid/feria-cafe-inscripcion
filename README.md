@@ -78,6 +78,14 @@ Configuración paso a paso de secretos (`FIREBASE_SERVICE_ACCOUNT`, `SHEETS_WEB_
 
 Ver [`tools/INSTRUCCIONES-PYTHON.md`](tools/INSTRUCCIONES-PYTHON.md) para automatizar Sheets, Apps Script y Firebase.
 
+**Ecosistema Google (entrada unificada):**
+
+```bash
+py tools/automatizar_google.py mantenimiento
+```
+
+Guía completa: [`tools/GOOGLE-ECOSISTEMA.md`](tools/GOOGLE-ECOSISTEMA.md).
+
 ## Estructura de archivos
 
 ```

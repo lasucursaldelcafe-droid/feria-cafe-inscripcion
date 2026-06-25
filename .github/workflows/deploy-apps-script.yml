@@ -1,0 +1,66 @@
+name: Deploy Apps Script
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "tools/google-apps-script/**"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r tools/requirements.txt
+
+      - name: Validar secretos Apps Script
+        env:
+          APPS_SCRIPT_OAUTH_TOKEN: ${{ secrets.APPS_SCRIPT_OAUTH_TOKEN }}
+          APPS_SCRIPT_ID: ${{ secrets.APPS_SCRIPT_ID }}
+          SHEETS_WEB_APP_URL: ${{ secrets.SHEETS_WEB_APP_URL }}
+        run: python3 tools/validate_ci_secrets.py --ci-apps-script
+
+      - name: Escribir token OAuth
+        env:
+          APPS_SCRIPT_OAUTH_TOKEN: ${{ secrets.APPS_SCRIPT_OAUTH_TOKEN }}
+        run: |
+          mkdir -p tools/credentials
+          printf '%s' "$APPS_SCRIPT_OAUTH_TOKEN" > tools/credentials/.oauth-script-token.json
+
+      - name: Generar js/sheets-config.js
+        env:
+          SHEETS_URL: ${{ secrets.SHEETS_WEB_APP_URL }}
+        run: |
+          if [ -n "$SHEETS_URL" ]; then
+            printf "window.SHEETS_CONFIG = {\n  WEB_APP_URL: '%s'\n};\n" "$SHEETS_URL" > js/sheets-config.js
+          fi
+
+      - name: Desplegar Code.gs
+        env:
+          APPS_SCRIPT_ID: ${{ secrets.APPS_SCRIPT_ID }}
+          SHEETS_WEB_APP_URL: ${{ secrets.SHEETS_WEB_APP_URL }}
+        run: python3 tools/setup_admin.py --ci --sin-firebase
+
+      - name: Actualizar secreto SHEETS_WEB_APP_URL si cambió
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHEETS_WEB_APP_URL: ${{ secrets.SHEETS_WEB_APP_URL }}
+        run: |
+          if [ -f js/sheets-config.js ]; then
+            NEW_URL=$(python3 -c "import re; t=open('js/sheets-config.js').read(); m=re.search(r\"WEB_APP_URL:\\s*'([^']+)'\", t); print(m.group(1) if m else '')")
+            if [ -n "$NEW_URL" ] && [ "$NEW_URL" != "$SHEETS_WEB_APP_URL" ]; then
+              echo "::notice::La URL /exec cambió. Actualiza el secreto SHEETS_WEB_APP_URL en GitHub:"
+              echo "$NEW_URL"
+            fi
+          fi

@@ -28,12 +28,26 @@ Ir a **Settings** → **Secrets and variables** → **Actions** y agregar:
 **Necesario para**: Conectar Google Sheets como base de datos (secciones de inscripción, etc.)
 
 **Cómo obtenerlo**:
-1. Existe un Google Apps Script que expone un webhook de Sheets.
-2. La URL de ese webhook (termina en `/usercontent/...` o `/dev/...`).
+1. Despliega `tools/google-apps-script/Code.gs` como **Aplicación web** (acceso: cualquier persona).
+2. Copia la URL que termina en `/exec`.
 
-**Estado**: Probablemente ya está configurado (el workflow actual corre sin errores en ese paso).
+**Sincronizar automáticamente**: `py tools/setup_github_ci.py` (o `py tools/setup_github_ci.py --apps-script` junto con los secretos de Apps Script).
+
+### 3. APPS_SCRIPT_OAUTH_TOKEN + APPS_SCRIPT_ID (CI Apps Script)
+
+**Tipo**: Repository secrets  
+**Necesario para**: Desplegar `Code.gs` automáticamente vía `.github/workflows/deploy-apps-script.yml`
+
+**Cómo obtenerlos**:
+1. Ejecuta `py tools/setup_admin.py --sin-firebase` (genera `tools/credentials/.oauth-script-token.json`).
+2. Copia `APPS_SCRIPT_ID` desde `tools/.env` o el editor de Apps Script.
+3. Sincroniza: `py tools/setup_github_ci.py --apps-script`
+
+**Estado**: Opcional — solo si quieres CI para Apps Script al cambiar `tools/google-apps-script/**`.
 
 ## Qué hace el workflow
+
+### deploy-firebase.yml (Hosting)
 
 ```
 1. Checkout → descarga el código
@@ -42,6 +56,17 @@ Ir a **Settings** → **Secrets and variables** → **Actions** y agregar:
 4. Deploy to Firebase Hosting → sube HTML/CSS/JS a firebase.app
 5. Deploy Firestore Rules → actualiza firestore.rules (módulo fidelización)
 ```
+
+### deploy-apps-script.yml (Backend)
+
+```
+1. Checkout
+2. Validar secretos Apps Script (OAuth + script ID + URL)
+3. Escribir token OAuth en tools/credentials/
+4. Desplegar Code.gs con setup_admin.py --ci
+```
+
+Se dispara en push a `main` cuando cambia `tools/google-apps-script/**`, o manualmente con `gh workflow run "Deploy Apps Script"`.
 
 **Actualmente**:
 - ✅ Pasos 2–3 funcionan

@@ -13,7 +13,7 @@ Completa los valores según tu entorno. Referencia completa en [`tools/.env.exam
 Tras clonar el repo o antes de un release (Apps Script + Firebase + CI):
 
 ```powershell
-py tools/automatizar_manual.py --todo
+py tools/automatizar_google.py mantenimiento
 ```
 
 Ese comando, en orden:
@@ -35,7 +35,9 @@ Ese comando, en orden:
 | Solo verificar | `py tools/automatizar_manual.py --verificar` |
 | Abrir consolas | `py tools/automatizar_manual.py --abrir-urls` |
 | CI + relanzar Actions | `py tools/setup_github_ci.py --wait-sa --run-workflow` |
+| CI Apps Script | `py tools/setup_github_ci.py --apps-script` |
 | Diagnosticar CI | `py tools/validate_ci_secrets.py` |
+| Ecosistema Google (todos los modos) | `py tools/automatizar_google.py help` |
 
 ## Variables principales
 
