@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Reglas globales — Feria Café (Cursor)
 
-Sitio estático del festival **La Sucursal del Café**: HTML/CSS/JS vanilla en la raíz del repo, backend en **Google Apps Script** + Sheets, hosting en **Firebase** (`la-sucursal-del-cafe`). No hay bundler ni framework frontend.
+Sitio estático del festival **La Sucursal del Café**: HTML/CSS/JS vanilla en la raíz del repo, backend principal en **Google Apps Script** + Sheets, hosting en **Firebase** (`la-sucursal-del-cafe`). Sin bundler ni framework frontend (salvo React vía Babel en páginas puntuales de fidelización).
 
 ## Skills obligatorios por tarea
 
@@ -22,51 +22,186 @@ Antes de implementar, lee el skill en `.cursor/skills/`:
 | Archivo | Rol |
 |---------|-----|
 | `js/site-links.js` | Rutas canónicas (`LOCAL` vs `HOSTED`). **Única fuente** para enlaces internos. |
-| `js/event-config.js` | Fechas, sedes, sponsors, stands, contacto. No duplicar en HTML. |
+| `js/event-config.js` | Fechas, sedes, sponsors, stands, contacto, pagos. **No duplicar** en HTML. |
 | `js/sheets-config.js` | URL `/exec` de Apps Script. **Gitignored** — plantilla: `sheets-config.example.js`. |
+| `js/site-chrome.js` | OG/canonical, footer, WhatsApp flotante, copy dinámico, analítica condicional. |
+| `js/form-submit.js` | POST a Apps Script + fallback `localStorage`. |
+| `js/seo-structured-data.js` | JSON-LD (Event, Organization, WebSite). |
 | `tools/google-apps-script/Code.gs` | Backend: formularios, emails, mapa stands, admin, analítica. |
-| `firebase.json` | Rewrites, redirects, headers de cache. |
-| `css/brand.css` | Estilos compartidos del sitio. |
+| `firebase.json` | Rewrites, redirects, headers de cache y `noindex`. |
+| `css/brand.css` | Estilos compartidos; variables en `:root`. |
+| `js/firebase-fidelizacion-config.js` | Credenciales Firestore del módulo fidelización (rellenar antes de prod). |
+| `firestore.rules` | Solo colecciones `fidelizacion_*` abiertas; resto denegado. |
+
+## Configuración centralizada (`event-config.js`)
+
+- Copiar desde `js/event-config.example.js`. Una sola fuente para fechas, sedes, montos, sponsors y contacto.
+- `siteUrl` debe coincidir con la URL de producción (`https://la-sucursal-del-cafe.web.app`).
+- `alerts.email` debe alinearse con `ORGANIZER_EMAIL` en `Code.gs`.
+- Copy dinámico en páginas: IDs como `heroSubtitle`, `badgeFeriaFecha`, `data-bind="feria.fecha"` — rellenados por `site-chrome.js` / `festival-nav.js`.
+- Labels de nav editables: `feria.visitante.nav`, `stands.nav` (no hardcodear en cada HTML si ya hay `data-nav`).
 
 ## Rutas y enlaces
 
-- Enlaces internos: `data-link="clave"` resuelto por `site-links.js` / `site-chrome.js`. **No hardcodear** rutas en HTML nuevos.
-- Al añadir página pública: actualizar juntos `site-links.js`, `firebase.json` (rewrites + redirects), `sitemap.xml` y `CHECKLIST.md`.
-- Claves habituales: `festival`, `evento`, `actividades`, `patrocinadores`, `feria`, `competencia`, `reglas`, `comoFunciona`, `privacidad`, `qr`, `admin`, `stands`, `expositor`, `miStand`.
+- Enlaces internos: `data-link="clave"` (+ `data-hash` opcional). `SiteLinks.apply()` reescribe `href` según entorno.
+- **No hardcodear** rutas absolutas de producción en HTML/JS; usar `SiteLinks.href()` / `SiteLinks.absUrl()`.
+- Al añadir página pública, actualizar **en bloque**: `site-links.js`, `firebase.json` (rewrite + redirect trailing slash), `sitemap.xml`, `robots.txt` (si aplica), `CHECKLIST.md`.
+- Claves: `festival`, `evento`, `actividades`, `patrocinadores`, `marcas`, `stands`, `feria`, `competencia`, `reglas`, `reglasPdf`, `comoFunciona`, `privacidad`, `qr`, `admin`, `expositor`, `miStand`, `fidelizacion`, `fidelizacionRegistro`, `miTarjeta`, `panelFidelizacion`.
+
+## Plantilla HTML (páginas nuevas)
+
+```html
+<html lang="es">
+<head>
+  <!-- meta description + canonical + og:* únicos por página -->
+  <link rel="stylesheet" href="css/brand.css?v=YYYYMMDDx">
+</head>
+<body class="page-*" data-festival-page="clave-nav">
+  <a class="skip-link" href="#contenido-principal">…</a>
+  <!-- nav con data-link + data-nav -->
+  <!-- scripts al final: event-config → sheets-config (formularios) → feature → site-links → site-chrome -->
+</body>
+```
+
+- Páginas del festival: `festival-nav.js` + `data-festival-page` para nav activa (`aria-current="page"`).
+- Enlaces externos: `target="_blank"` + `rel="noopener noreferrer"`.
+- Formularios con términos: `js/terms-disclosure.js` (checkbox separado del acordeón).
+
+## Formularios e inscripciones
+
+| `formType` | Página | Notas |
+|------------|--------|-------|
+| `feria` | `inscripcion.html` | Registro visitante, gratis |
+| `competencia` | `competencia.html` | Cupo 36, foto/comprobante → Drive |
+| `stands` | `stands.html` | Logo, `accessCode`, panel expositor |
+| `lista_espera` | competencia | Cuando cupo lleno |
+
+- Envío vía `FormSubmit.post(formType, data)` → `fetch` POST JSON a `WEB_APP_URL`.
+- Sin URL configurada: fallback silencioso a `localStorage` (no romper UX).
+- Errores backend a manejar en UI: `duplicate`, `cupoCompleto`, `standOcupado`.
+- Archivos pesados (base64): `stripHeavyFields` omite base64 en copia local.
+- Tras cambiar contrato API (`Code.gs` ↔ cliente): redeploy Apps Script **y** bump `?v=` en JS afectado.
+
+## SEO e indexación
+
+- Cada página pública: `<title>`, `meta description`, `link rel="canonical"` coherentes con URL limpia en hosting.
+- Incluir `js/seo-structured-data.js` en páginas indexables.
+- `sitemap.xml`: URLs canónicas con `lastmod` actualizado.
+- `robots.txt`: `Disallow: /admin`; línea `Sitemap:` apuntando al dominio.
+- **No indexar** (meta `noindex` + header `X-Robots-Tag` en `firebase.json`): `/admin`, `/expositor`, `/mi-stand`, `/panel-fidelizacion`, `/mi-tarjeta`, `/registro-fidelizacion`.
+- `site-chrome.js` complementa OG/Twitter si faltan; preferir meta estáticos correctos en `<head>`.
+- Guía: `tools/SEO.md`.
+
+## Accesibilidad y UX
+
+- `lang="es"` en `<html>`.
+- Skip link al contenido principal.
+- Nav móvil: `#navToggle` + `#navMenu`, `aria-expanded` en toggle.
+- Imágenes: `alt` descriptivo; `width`/`height` en logos para evitar CLS.
+- Botón WhatsApp flotante: lo inyecta `site-chrome.js` (no duplicar en cada página).
+- Contacto y redes desde `EVENT_CONFIG.contact` / `festival.instagramUrl`.
+
+## Rendimiento
+
+- Sin React/Vue en páginas estándar; no añadir dependencias pesadas.
+- Hero/LCP: imagen **sin** `loading="lazy"`; sponsors y mapa: **con** lazy.
+- Sponsors: WebP en `assets/sponsors/`, listados en `EVENT_CONFIG.sponsors`.
+- Fuentes: preconnect a Google Fonts; no añadir pesos no usados.
+- CSS: reutilizar tokens `--coffee-deep`, `--font-body` en `brand.css`; hojas de página (`admin.css`, `expositor.css`, `fidelizacion.css`) solo cuando haga falta.
+- Cache CSS/JS/HTML: 5 min (`firebase.json`) → **obligatorio** bump `?v=YYYYMMDDx` tras cada cambio.
+- Paneles internos: `Cache-Control: no-store`.
+- **No** añadir GA4 ni tags third-party pesados.
+
+## Analítica propia
+
+- `site-chrome.js` carga `analytics-tracker.js` solo si hay `SHEETS_CONFIG.WEB_APP_URL`.
+- POST `action: pageview` → hoja Analytics en Sheets; dedupe por sesión.
+- No rastrear rutas `/admin`.
+- **No usar Google Analytics / GA4.**
+
+## Módulo fidelización (Firestore)
+
+- Páginas: `/fidelizacion`, `/registro-fidelizacion`, `/mi-tarjeta`, `/panel-fidelizacion`.
+- Lógica en `js/fidelizacion-common.js`; SDK Firebase compat (sin build, sin Auth).
+- Colecciones: `fidelizacion_clientes`, `fidelizacion_transacciones`, `fidelizacion_recompensas`, `fidelizacion_promociones`, `fidelizacion_config`.
+- Antes de producción: credenciales reales en `firebase-fidelizacion-config.js` + `firebase deploy --only firestore:rules`.
+- Panel sin login (URL no publicada); mismo modelo de riesgo que `/admin`.
+- Guía: `INTEGRACION-FIDELIZACION.md`.
+
+## Paneles internos
+
+| Ruta | Archivo | Backend |
+|------|---------|---------|
+| `/admin` | `admin.html` | Apps Script `admin_dashboard` |
+| `/mi-stand`, `/expositor` | `expositor.html` | `expositor_login`, `expositor_feed` |
+| `/panel-fidelizacion` | `dashboard-fidelizacion.html` | Firestore |
+
+- `noindex` + `no-store` en headers Firebase.
+- No enlazar paneles desde nav pública ni sitemap.
 
 ## Secretos y archivos ignorados
 
 **No versionar** ni commitear:
 
-- `js/sheets-config.js`, `js/admin-config.js`
+- `js/sheets-config.js`, `js/admin-config.js`, `js/firebase-config.js`
 - `tools/.env`, `tools/**/*-sa.json`, `tools/credentials/*.json` (salvo ejemplos)
 - `tools/google-apps-script/.clasp.json`
 
-En CI, `SHEETS_WEB_APP_URL` y `FIREBASE_SERVICE_ACCOUNT` vienen de secretos de GitHub Actions.
+CI: `SHEETS_WEB_APP_URL` y `FIREBASE_SERVICE_ACCOUNT` vía secretos GitHub Actions.
 
-## Analítica
+## Backend Apps Script (resumen)
 
-- Usar **analítica propia** (`js/analytics-tracker.js` → hoja Analytics vía Apps Script).
-- **No añadir GA4 / Google Analytics.**
+- Fuente: `tools/google-apps-script/Code.gs`.
+- Tras editar: `py tools/setup_admin.py` o `desplegar_apps_script.py` → `verify_admin.py`.
+- Nuevo `formType` o `action`: actualizar `sincronizarEncabezados`, health `forms[]`, cliente JS y docs.
+- Stands: GET `stands_map` alimenta `js/stands-map.js`.
 
 ## Estilo de código
 
-- Sitio estático sin React/Vue salvo petición explícita.
-- Scripts al final de `<body>`; orden típico: `event-config` → `sheets-config` (formularios) → feature → `site-chrome`.
-- Textos de UI y documentación del proyecto en **español**; nombres de código y comandos en su forma original.
-- Cambios mínimos y focalizados; seguir convenciones existentes del archivo que se edita.
-- Tras cambiar CSS/JS cacheable, bump `?v=YYYYMMDDx` en los `<link>`/`<script>` del HTML afectado.
+- Cambios mínimos y focalizados; seguir convenciones del archivo que se edita.
+- IIFE + `'use strict'` en JS del sitio; sin transpilar salvo páginas Babel existentes.
+- Textos de UI en **español**; nombres de código y comandos en forma original.
+- Scripts al final de `<body>`; orden: config → feature → `site-links` → `site-chrome`.
+- No marcar scripts de layout como `async` si dependen de orden.
+
+## Anti-patrones (evitar)
+
+- Hardcodear fechas, sedes, montos o emails en HTML cuando existen en `event-config.js`.
+- Rutas absolutas `https://la-sucursal-del-cafe.web.app/...` en lugar de `data-link`.
+- Olvidar `?v=` tras editar CSS/JS cacheable (usuarios ven versión vieja ~5 min).
+- `loading="lazy"` en imagen LCP del hero.
+- Añadir GA4, Facebook Pixel u otros trackers externos.
+- Commitear secretos o `sheets-config.js`.
+- Nueva página pública sin rewrite en `firebase.json` (404 en producción).
+- Cambiar `Code.gs` sin redeploy de la Web App.
+- Duplicar footer/nav manualmente en páginas que ya usan `site-chrome.js`.
+
+## Checklist — página pública nueva
+
+```
+- [ ] HTML con meta, canonical, lang="es", skip-link
+- [ ] site-links.js (LOCAL + HOSTED)
+- [ ] firebase.json rewrite + redirect trailing slash
+- [ ] sitemap.xml + lastmod
+- [ ] seo-structured-data.js si aplica
+- [ ] data-link en nav y CTAs
+- [ ] ?v= en CSS/JS referenciados
+- [ ] CHECKLIST.md y README si cambian URLs
+- [ ] py tools/verify_admin.py tras deploy
+```
 
 ## Deploy y verificación
 
-- Desarrollo local: `npx serve .`
-- Deploy manual: `py tools/deploy_firebase.py` o `firebase deploy --only hosting`
-- Push a `main` → GitHub Actions despliega automáticamente.
+- Local: `npx serve .`
+- Manual: `py tools/deploy_firebase.py` o `firebase deploy --only hosting`
+- Push a `main` → GitHub Actions despliega hosting.
 - Post-deploy: `py tools/verify_admin.py`
-- Redeploy Apps Script tras cambios en `Code.gs` (`tools/desplegar_apps_script.py` o editor web).
+- Apps Script: redeploy tras `Code.gs`; Firestore rules tras `firestore.rules`
+- Automatización completa: `py tools/automatizar_manual.py --todo`
 
 ## Referencias
 
 - `README.md`, `CHECKLIST.md`
 - `tools/INSTRUCCIONES-SHEETS.md`, `tools/INSTRUCCIONES-PYTHON.md`
-- `tools/ADMIN-DASHBOARD.md`
+- `tools/ADMIN-DASHBOARD.md`, `tools/SEO.md`
+- `INTEGRACION-FIDELIZACION.md`, `INTEGRACION-FIREBASE.md`
