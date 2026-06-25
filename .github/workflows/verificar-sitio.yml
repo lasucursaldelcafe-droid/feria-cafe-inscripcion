@@ -1,0 +1,30 @@
+name: Verificar sitio
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Lunes 08:00 UTC
+    - cron: "0 8 * * 1"
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verificación integral (solo web)
+        run: python3 tools/verificar_todo.py --solo-web
+        continue-on-error: true
+
+      - name: Resumen orden automática
+        if: always()
+        run: |
+          python3 tools/orden_automatica.py --solo-web || true
+          echo ""
+          echo "Para corregir desde tu PC: py tools/orden_automatica.py --aplicar"

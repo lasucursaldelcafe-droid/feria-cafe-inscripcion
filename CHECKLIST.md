@@ -134,6 +134,24 @@ Comprobar: tras un push a `main`, en **Actions** el job *Deploy Firebase Hosting
 
 **Local vs CI:** en tu máquina sigue usando `js/sheets-config.js` (desde `js/sheets-config.example.js`). En GitHub Actions el workflow **sobrescribe** ese archivo en el runner; no hace falta subirlo al repo.
 
+## Verificación automática (repo + producción)
+
+```bash
+# Auditoría integral: hosting, assets, Apps Script, integridad del repo
+py tools/verificar_todo.py
+
+# Plan de corrección ordenado (solo muestra pasos)
+py tools/orden_automatica.py
+
+# Aplicar correcciones automáticas posibles (local + CI)
+py tools/orden_automatica.py --aplicar
+
+# Mantenimiento completo (secretos, deploy, Apps Script)
+py tools/orden_automatica.py --completo --aplicar
+```
+
+Documentación: `tools/VERIFICACION-COMPLETA.md`. En GitHub Actions: workflow `verificar-sitio.yml` (manual o semanal).
+
 ## Verificación rápida
 
 - [ ] Nav hamburger funciona en móvil
