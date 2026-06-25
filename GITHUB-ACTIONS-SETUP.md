@@ -2,79 +2,97 @@
 
 Este documento explica qué secretos y configuraciones se necesitan para que el workflow de despliegue funcione completamente.
 
-## Estado actual
+## Estado actual (verificado 2026-06-25)
 
-El repositorio tiene un workflow automático de despliegue a Firebase (`/.github/workflows/deploy-firebase.yml`) que se dispara en cada push a `main`.
+| Componente | Estado |
+|------------|--------|
+| Workflow `.github/workflows/deploy-firebase.yml` | Activo |
+| `FIREBASE_SERVICE_ACCOUNT` | Configurado — Hosting despliega correctamente |
+| `SHEETS_WEB_APP_URL` | Configurado — formularios conectados a Apps Script |
+| Deploy Firebase Hosting | Funcional — https://la-sucursal-del-cafe.web.app/ |
+| Deploy Firestore rules | Falla con 403 IAM (no bloquea Hosting) |
+
+Los últimos runs en `main` completan el deploy de Hosting en ~45 s. El paso de Firestore rules requiere permisos adicionales en la cuenta de servicio (ver sección más abajo).
 
 ## Secretos requeridos en GitHub
 
-Ir a **Settings** → **Secrets and variables** → **Actions** y agregar:
+Ir a **Settings** → **Secrets and variables** → **Actions**:
 
-### 1. FIREBASE_SERVICE_ACCOUNT ⚠️ FALTA
+### 1. FIREBASE_SERVICE_ACCOUNT (obligatorio)
 
-**Tipo**: Repository secret  
-**Necesario para**: Desplegar a Firebase Hosting (sitio público)
-
-**Cómo obtenerlo**:
-1. Ir a Firebase Console → proyecto `la-sucursal-del-cafe` → Project settings (engranaje arriba)
-2. Tab **Service accounts** → Click **Generate new private key**
-3. Esto descarga un JSON. Copiar el contenido completo y pegarlo como valor del secreto.
-
-**Qué contiene**: Credenciales de la cuenta de servicio de Google Cloud para autenticarse con Firebase.
-
-### 2. SHEETS_WEB_APP_URL
-
-**Tipo**: Repository secret  
-**Necesario para**: Conectar Google Sheets como base de datos (secciones de inscripción, etc.)
+**Necesario para**: Desplegar a Firebase Hosting.
 
 **Cómo obtenerlo**:
-1. Existe un Google Apps Script que expone un webhook de Sheets.
-2. La URL de ese webhook (termina en `/usercontent/...` o `/dev/...`).
+1. Firebase Console → proyecto `la-sucursal-del-cafe` → Project settings
+2. Tab **Service accounts** → **Generate new private key**
+3. Copiar el JSON completo como valor del secreto.
 
-**Estado**: Probablemente ya está configurado (el workflow actual corre sin errores en ese paso).
+**Sincronizar desde tu PC** (recomendado):
+
+```bash
+py tools/setup_github_ci.py
+# o en PowerShell:
+.\tools\sync_github_secrets.ps1
+```
+
+### 2. SHEETS_WEB_APP_URL (opcional pero recomendado)
+
+**Necesario para**: Conectar formularios a Google Sheets en producción.
+
+**Valor**: URL `/exec` del Apps Script desplegado como aplicación web.
+
+Sin este secreto, el sitio se publica pero los formularios usan `localStorage` como respaldo.
 
 ## Qué hace el workflow
 
 ```
 1. Checkout → descarga el código
-2. Validar secretos (con continue-on-error → no bloquea si falla)
+2. Validar secretos → comprueba JSON de Firebase y URL de Sheets
 3. Generar js/sheets-config.js → inyecta la URL de Sheets
 4. Deploy to Firebase Hosting → sube HTML/CSS/JS a firebase.app
-5. Deploy Firestore Rules → actualiza firestore.rules (módulo fidelización)
+5. Deploy Firestore Rules → actualiza firestore.rules (opcional, no bloquea si falla)
 ```
 
-**Actualmente**:
-- ✅ Pasos 2–3 funcionan
-- ❌ Paso 4 requiere FIREBASE_SERVICE_ACCOUNT (aún no configurado)
-- ⚠️ Paso 5 puede ejecutarse si el secreto existe, sino se salta
+## Firestore rules — permisos pendientes
 
-## Despliegue manual mientras se configura el secreto
+El paso 5 falla con:
 
-Si necesitas desplegar sin esperar a que se configure el secreto:
+```
+Permission denied to get service [firestore.googleapis.com]
+```
+
+**Solución**: En [Google Cloud IAM](https://console.cloud.google.com/iam-admin/iam?project=la-sucursal-del-cafe), añadir a la cuenta de servicio de Firebase uno de estos roles:
+
+- **Firebase Rules Admin**, o
+- **Cloud Datastore Owner**
+
+Hosting no depende de este paso; el módulo de fidelización sí usa Firestore en producción.
+
+## Comandos útiles
 
 ```bash
-# Instalar Firebase CLI si no está
-npm install -g firebase-tools
+# Diagnóstico local
+py tools/validate_ci_secrets.py
 
-# Autenticarse
-firebase login
+# Relanzar deploy manual
+gh workflow run "Deploy Firebase Hosting"
 
-# Desplegar todo
-firebase deploy --project la-sucursal-del-cafe
+# Ver últimos runs
+gh run list --workflow deploy-firebase.yml --limit 5
 
-# O solo una parte
-firebase deploy --only hosting --project la-sucursal-del-cafe
-firebase deploy --only firestore:rules --project la-sucursal-del-cafe
+# Logs del último run fallido
+gh run list --workflow deploy-firebase.yml --limit 1 --json databaseId -q '.[0].databaseId' | xargs -I{} gh run view {} --log-failed
 ```
 
-## Próximos pasos
+## Despliegue manual (alternativa)
 
-1. **Obtener y configurar FIREBASE_SERVICE_ACCOUNT** → desbloquea despliegue automático a Hosting
-2. Desplegar manualmente una vez para verificar que el sitio es vivo
-3. Agregar alertas/notifications cuando algo falla
+```bash
+npx -y firebase-tools@latest login
+npx -y firebase-tools@latest deploy --project la-sucursal-del-cafe
+```
 
 ## Notas de seguridad
 
-- El secreto FIREBASE_SERVICE_ACCOUNT nunca debería exponerse (es un JSON con credenciales reales).
-- GitHub encripta secretos automáticamente; no aparecen en logs ni en el historio del repo.
-- Los secretos pueden rotarse/revocarse desde Google Cloud → IAM en cualquier momento.
+- `FIREBASE_SERVICE_ACCOUNT` nunca debe versionarse en el repo.
+- GitHub encripta secretos; no aparecen en logs.
+- Rotar la clave desde Google Cloud → IAM si se compromete.

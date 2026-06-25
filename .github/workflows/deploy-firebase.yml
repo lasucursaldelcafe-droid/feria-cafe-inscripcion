@@ -18,7 +18,6 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           SHEETS_WEB_APP_URL: ${{ secrets.SHEETS_WEB_APP_URL }}
         run: python3 tools/validate_ci_secrets.py --ci
-        continue-on-error: true
 
       - name: Generar js/sheets-config.js
         env:
@@ -37,10 +36,8 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           projectId: la-sucursal-del-cafe
           channelId: live
-        continue-on-error: true
 
       - name: Deploy reglas de Firestore (módulo de fidelización)
-        if: always()
         continue-on-error: true
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
@@ -48,7 +45,13 @@ jobs:
           if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
             echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-sa.json
             export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
-            npx -y firebase-tools@latest deploy --only firestore:rules --project la-sucursal-del-cafe --non-interactive
+            if npx -y firebase-tools@latest deploy --only firestore:rules --project la-sucursal-del-cafe --non-interactive; then
+              echo "Firestore rules desplegadas correctamente."
+            else
+              echo "::warning::Firestore rules no se pudieron desplegar (permisos IAM insuficientes en la cuenta de servicio)."
+              echo "Añade el rol 'Cloud Datastore Owner' o 'Firebase Rules Admin' a la SA en Google Cloud IAM."
+              exit 1
+            fi
             rm -f /tmp/firebase-sa.json
           else
             echo "Saltando despliegue de Firestore rules (secreto no configurado)"
