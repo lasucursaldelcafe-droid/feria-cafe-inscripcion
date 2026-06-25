@@ -1,12 +1,19 @@
 # Google Wallet Integration — Guía de implementación
 
-## Estado actual (fase 1 — workaround)
+## Estado actual
 
-El botón "Agregar a Google Wallet" en `/mi-tarjeta.html` redirige a la tarjeta digital web por ahora. Funciona y cumple la función de guardar acceso rápido en el celular.
+**Fase 2 implementada** en el código:
 
-## Implementación productiva (fase 2)
+- Cloud Function `generateWalletPass` (`functions/wallet.js`)
+- Cliente `js/wallet-qr.js` llama a la función automáticamente
+- Guía de configuración: [`GOOGLE-WALLET-SETUP.md`](GOOGLE-WALLET-SETUP.md)
+- Script asistente: `py tools/setup_google_wallet.py`
 
-Para que el pass aparezca nativamente en Google Wallet (con barcode interactivo, sin abrir web), se necesitan estos pasos:
+Falta **configurar credenciales** en tu proyecto Firebase (Issuer ID + cuenta de servicio). Sin eso, el botón muestra un mensaje de error y sugiere guardar la tarjeta web.
+
+## Fase 1 (workaround anterior)
+
+El botón redirigía solo a la tarjeta web. Eso sigue siendo el fallback si Wallet no está configurado.
 
 ### 1. Crear proyecto en Google Wallet Console
 

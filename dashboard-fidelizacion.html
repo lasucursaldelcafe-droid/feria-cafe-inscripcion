@@ -280,20 +280,36 @@
     }
 
     function Wallet() {
+      const functionUrl =
+        'https://us-central1-la-sucursal-del-cafe.cloudfunctions.net/generateWalletPass';
       return (
         <div className="fid-admin-card">
-          <div className="fid-admin-banner">
-            Próximamente — Google Wallet requiere una Cloud Function que firme los passes con una cuenta de
-            servicio de Google Wallet API. No está incluido en esta primera versión (no usa Functions todavía).
-            Mientras tanto, la tarjeta digital web (mi-tarjeta.html) con QR cumple la misma función: el cliente
-            la guarda como acceso directo en su celular.
-          </div>
-          <h3>Qué falta para activar Wallet</h3>
-          <ul>
-            <li>Crear proyecto en Google Wallet API Console y obtener cuenta de servicio.</li>
-            <li>Agregar Firebase Functions al repo (hoy no existen) para firmar el JWT del pase.</li>
-            <li>Botón "Agregar a Google Wallet" en mi-tarjeta.html que llame a esa función.</li>
-          </ul>
+          <h3>Google Wallet</h3>
+          <p>
+            El botón en <code>/mi-tarjeta</code> llama a la Cloud Function{' '}
+            <code>generateWalletPass</code>, que firma un pass de fidelización con JWT.
+          </p>
+          <p>
+            <strong>URL función:</strong>{' '}
+            <a href={functionUrl} target="_blank" rel="noopener noreferrer">
+              {functionUrl}
+            </a>
+          </p>
+          <h4>Configuración (una vez)</h4>
+          <ol>
+            <li>Issuer ID en Google Wallet Console.</li>
+            <li>Cuenta de servicio + Google Wallet API habilitada.</li>
+            <li>Invitar la SA como Developer en Wallet Console.</li>
+            <li>
+              <code>py tools/setup_google_wallet.py --configurar-firebase</code>
+            </li>
+            <li>
+              <code>py tools/setup_google_wallet.py --deploy</code>
+            </li>
+          </ol>
+          <p>
+            Guía completa: <code>GOOGLE-WALLET-SETUP.md</code> en la raíz del repositorio.
+          </p>
         </div>
       );
     }

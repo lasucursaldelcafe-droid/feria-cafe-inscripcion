@@ -1,0 +1,171 @@
+# Configurar Google Wallet — Fidelización La Sucursal del Café
+
+Guía paso a paso para que el botón **«Agregar a Google Wallet»** en `/mi-tarjeta` abra un pass nativo con QR, puntos y nivel.
+
+## Resumen rápido
+
+| Paso | Qué haces | Tiempo aprox. |
+|------|-----------|---------------|
+| 1 | Crear Issuer en Google Wallet Console | 10 min |
+| 2 | Habilitar Wallet API + cuenta de servicio | 10 min |
+| 3 | Invitar la SA como usuario en Wallet Console | 2 min |
+| 4 | Configurar secretos en Firebase Functions | 5 min |
+| 5 | Desplegar Functions + Hosting | 5 min |
+| 6 | Probar en Android | 2 min |
+
+**Comando de ayuda local:**
+
+```powershell
+py tools/setup_google_wallet.py
+```
+
+---
+
+## Paso 1 — Issuer ID (Google Wallet Console)
+
+1. Abre [Google Pay & Wallet Console](https://pay.google.com/business/console).
+2. Crea una cuenta de emisor (Issuer) si no tienes una.
+3. Anota tu **Issuer ID** (número, ej. `3388000000022345678`).
+
+> Sin Issuer ID no se puede firmar ningún pass.
+
+---
+
+## Paso 2 — Google Cloud (mismo proyecto Firebase)
+
+Proyecto: **`la-sucursal-del-cafe`**
+
+1. [APIs & Services → Library](https://console.cloud.google.com/apis/library) → habilita **Google Wallet API**.
+2. [IAM → Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts) → **Create service account**
+   - Nombre: `google-wallet-issuer`
+   - Rol: ninguno obligatorio en IAM (el permiso real está en Wallet Console).
+3. En la cuenta → **Keys** → **Add key** → **JSON** → descarga el archivo.
+4. Guárdalo como (gitignored):
+
+```
+tools/credentials/google-wallet-sa.json
+```
+
+---
+
+## Paso 3 — Autorizar la cuenta de servicio en Wallet
+
+1. Vuelve a [Wallet Console](https://pay.google.com/business/console).
+2. **Users** (o Usuarios) → **Invite user**.
+3. Pega el email de la cuenta de servicio (`...@...iam.gserviceaccount.com`).
+4. Rol: **Developer** (o equivalente con permiso de emitir passes).
+
+> Si omites este paso, el JWT se firma pero Google rechaza el pass.
+
+---
+
+## Paso 4 — Variables en Firebase Functions
+
+Desde la raíz del repo (con Firebase CLI instalado y login hecho):
+
+```bash
+# Issuer ID numérico de Wallet Console
+firebase functions:config:set wallet.issuer_id="TU_ISSUER_ID" --project la-sucursal-del-cafe
+
+# JSON de la cuenta de servicio (una línea; en PowerShell usa el script Python)
+py tools/setup_google_wallet.py --configurar-firebase
+```
+
+El script lee `tools/credentials/google-wallet-sa.json` y configura:
+
+- `wallet.issuer_id`
+- `wallet.service_account` (JSON completo)
+- `wallet.class_suffix` (opcional, default `la_sucursal_fidelizacion`)
+
+**Alternativa manual (PowerShell):**
+
+```powershell
+$json = Get-Content -Raw -Encoding UTF8 tools\credentials\google-wallet-sa.json
+firebase functions:config:set wallet.service_account="$json" wallet.issuer_id="TU_ISSUER_ID" --project la-sucursal-del-cafe
+```
+
+---
+
+## Paso 5 — Desplegar
+
+```bash
+cd functions && npm install && cd ..
+firebase deploy --only functions:generateWalletPass,hosting --project la-sucursal-del-cafe
+```
+
+O con el script:
+
+```powershell
+py tools/setup_google_wallet.py --deploy
+```
+
+La Cloud Function queda en:
+
+```
+https://us-central1-la-sucursal-del-cafe.cloudfunctions.net/generateWalletPass
+```
+
+El cliente (`js/wallet-qr.js`) la detecta automáticamente desde `FIREBASE_FIDELIZACION_CONFIG.projectId`.
+
+---
+
+## Paso 6 — Probar
+
+1. En Android, abre una tarjeta:  
+   `https://la-sucursal-del-cafe.web.app/mi-tarjeta?id=ID_CLIENTE`
+2. Toca **+ Agregar a Google Wallet**.
+3. Debe abrir Google Wallet / Google Pay con el pass.
+4. El QR debe ser escaneable en caja (valor = `clienteId` de Firestore).
+
+### Errores frecuentes
+
+| Síntoma | Causa | Solución |
+|---------|-------|----------|
+| `GOOGLE_WALLET_ISSUER_ID no configurado` | Falta config en Functions | Paso 4 |
+| `403` / pass inválido | SA no invitada en Wallet Console | Paso 3 |
+| `Wallet API has not been used` | API no habilitada | Paso 2 |
+| Botón abre solo la web | Function no desplegada o error 500 | Paso 5 + logs Firebase |
+| Pass en revisión | Normal la primera vez | Wallet Console → aprobar clase |
+
+Ver logs:
+
+```bash
+firebase functions:log --only generateWalletPass --project la-sucursal-del-cafe
+```
+
+---
+
+## Arquitectura
+
+```
+mi-tarjeta.html
+    → WalletQR.abrirWallet(clienteId, datos)
+    → POST generateWalletPass (Firebase Function)
+    → JWT firmado (loyaltyClass + loyaltyObject)
+    → https://pay.google.com/gp/v/save/{jwt}
+    → Google Wallet app
+```
+
+Archivos clave:
+
+| Archivo | Rol |
+|---------|-----|
+| `functions/wallet.js` | Firma JWT del pass |
+| `functions/index.js` | Exporta `generateWalletPass` |
+| `js/wallet-qr.js` | Cliente en el navegador |
+| `js/wallet-config.example.js` | Override opcional de URL |
+
+---
+
+## Costos
+
+Google Wallet API: **gratis**.  
+Firebase Functions: capa gratuita generosa (2M invocaciones/mes).
+
+---
+
+## Referencias
+
+- [Loyalty cards — JWT](https://developers.google.com/wallet/retail/loyalty-cards/use-cases/jwt)
+- [Autenticación REST](https://developers.google.com/wallet/retail/loyalty-cards/getting-started/auth/rest)
+- `WALLET-IMPLEMENTATION.md` — notas técnicas del repo

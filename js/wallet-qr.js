@@ -1,128 +1,94 @@
 /**
- * Google Wallet Pass Generator - Cliente + servidor mínimo
- * 
- * Este módulo genera código QR que enlazan directamente a Google Wallet
- * sin necesidad de Cloud Functions. Usa un enfoque simplificado que funciona
- * mientras se implementa la versión completa con funciones.
- *
- * Para una implementación productiva, reemplazar con Firebase Functions que
- * usen la API oficial de Google Wallet (requiere JwtHandler + service account).
+ * Google Wallet — cliente para tarjetas de fidelización.
+ * Llama a la Cloud Function generateWalletPass (Firebase).
  */
-
 window.WalletQR = {
-  /**
-   * Genera un URL que abre Google Wallet en el navegador del usuario.
-   * Es un workaround: redirige a un sitio que facilita agregar el pass.
-   */
-  generarURLWallet: function(clienteId, nombreCliente, puntos, nivel) {
-    // Datos del pass (paskin simplificado)
-    var passData = {
-      id: clienteId,
-      nombre: nombreCliente,
-      puntos: puntos,
-      nivel: nivel,
-      fecha: new Date().toISOString()
-    };
+  getFunctionUrl: function () {
+    var cfg = window.WALLET_CONFIG || {};
+    if (cfg.FUNCTION_URL) {
+      return cfg.FUNCTION_URL;
+    }
+    var fb = window.FIREBASE_FIDELIZACION_CONFIG || {};
+    if (fb.projectId) {
+      return (
+        'https://us-central1-' +
+        fb.projectId +
+        '.cloudfunctions.net/generateWalletPass'
+      );
+    }
+    return '';
+  },
 
-    // Codificar como URL-safe base64
-    var encoded = btoa(JSON.stringify(passData));
-    
-    // Opción 1: URL a un handler que genera el pass dinamicamente
-    // (necesita un backend que firme los passes)
-    // return 'https://tu-dominio.com/api/wallet-pass?data=' + encoded;
+  isEnabled: function () {
+    var cfg = window.WALLET_CONFIG || {};
+    if (cfg.ENABLED === false) {
+      return false;
+    }
+    return !!this.getFunctionUrl();
+  },
 
-    // Opción 2: Mientras tanto, mostrar QR que enlaza a la tarjeta web
-    // (es lo que ya hace mi-tarjeta.html)
-    return window.location.origin + '/mi-tarjeta.html?id=' + encodeURIComponent(clienteId);
+  /** Fallback: tarjeta web si Wallet no está configurado */
+  generarURLTarjeta: function (clienteId) {
+    return (
+      window.location.origin +
+      '/mi-tarjeta.html?id=' +
+      encodeURIComponent(clienteId)
+    );
   },
 
   /**
-   * Abre Google Wallet (Intent nativo en móviles, web en desktop)
-   * Por ahora simplemente muestra la tarjeta digital del cliente.
+   * Abre Google Wallet con pass firmado por Cloud Function.
+   * @param {string} clienteId
+   * @param {{ nombre?: string, puntos?: number, nivel?: string }} clienteData
    */
-  abrirWallet: function(clienteId) {
-    window.location.href = WalletQR.generarURLWallet(clienteId);
-  },
+  abrirWallet: async function (clienteId, clienteData) {
+    clienteData = clienteData || {};
+    var btn = document.getElementById('btnWallet');
+    var labelOriginal = btn ? btn.textContent : '';
 
-  /**
-   * Genera una propuesta de pass JSON (sin firmar — para desarrollo)
-   * En producción, esto debe estar firmado por Cloud Functions.
-   */
-  generarPassJSON: function(clienteId, clienteData) {
-    return {
-      iss: 'issuer@google.com', // Reemplazar con ID real del issuer
-      aud: 'google',
-      typ: 'savetowallet',
-      origins: ['https://la-sucursal-del-cafe.web.app'],
-      payload: {
-        loyaltyObjects: [
-          {
-            id: 'la-sucursal-del-cafe.' + clienteId,
-            classId: 'la-sucursal-del-cafe.fidelizacion', // Reemplazar
-            state: 'ACTIVE',
-            heroImage: {
-              sourceUri: {
-                uri: 'https://la-sucursal-del-cafe.web.app/assets/logo-la-sucursal-del-cafe.png'
-              }
-            },
-            textModulesData: [
-              {
-                id: 'nombreCliente',
-                header: clienteData.nombre,
-                body: 'Cliente fidelización'
-              },
-              {
-                id: 'puntos',
-                header: clienteData.puntos || 0,
-                body: 'Puntos disponibles'
-              }
-            ],
-            infoModuleData: {
-              showLastUpdateTime: true,
-              hexBackgroundColor: '#4B352A'
-            },
-            barcode: {
-              type: 'QR_CODE',
-              value: clienteId,
-              alternateText: clienteId
-            }
-          }
-        ]
+    if (!this.isEnabled()) {
+      window.location.href = this.generarURLTarjeta(clienteId);
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Generando pass…';
+    }
+
+    try {
+      var response = await fetch(this.getFunctionUrl(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clienteId: clienteId,
+          nombre: clienteData.nombre || '',
+          puntos: clienteData.puntos || 0,
+          nivel: clienteData.nivel || 'Bronce',
+        }),
+      });
+
+      var result = await response.json();
+      if (!response.ok || !result.walletUrl) {
+        throw new Error(result.error || 'No se pudo generar el pass');
       }
-    };
-  }
-};
 
-/**
- * PASOS PARA PRODUCCIÓN:
- * 
- * 1. Crear proyecto en Google Wallet Console (partners.google.com/wallet)
- * 2. Configurar "Loyalty program" class
- * 3. Obtener credenciales de servicio
- * 4. Crear Cloud Function que firme los passes con JWT (ver ejemplo más abajo)
- * 5. Reemplazar la URL en mi-tarjeta.html con botón "Agregar a Google Wallet"
- * 
- * ---- CLOUD FUNCTION EJEMPLO (usar en una segunda fase) ----
- * 
- * const {google} = require('googleapis');
- * const functions = require('@google-cloud/functions-framework');
- * const jwt = require('jsonwebtoken');
- * 
- * functions.http('generateWalletPass', async (req, res) => {
- *   const {clienteId, nombre, puntos} = req.body;
- *   
- *   const passPayload = WalletQR.generarPassJSON(clienteId, {nombre, puntos});
- *   
- *   const serviceAccount = JSON.parse(process.env.GOOGLE_WALLET_SA);
- *   
- *   const signedPass = jwt.sign(passPayload, serviceAccount.private_key, {
- *     algorithm: 'RS256',
- *     issuer: serviceAccount.client_email
- *   });
- *   
- *   res.json({
- *     jwt: signedPass,
- *     walletURL: 'https://pay.google.com/gp/v/save/' + signedPass
- *   });
- * });
- */
+      window.location.href = result.walletUrl;
+    } catch (err) {
+      console.error('WalletQR:', err);
+      var msg =
+        err && err.message
+          ? err.message
+          : 'Error al conectar con Google Wallet';
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = labelOriginal;
+      }
+      alert(
+        'No se pudo agregar a Google Wallet.\n\n' +
+          msg +
+          '\n\nPuedes guardar la tarjeta web como acceso directo.'
+      );
+    }
+  },
+};

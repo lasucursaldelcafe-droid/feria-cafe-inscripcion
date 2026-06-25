@@ -15,8 +15,8 @@ deliberadamente del panel admin — ver `js/firebase-config.js`), así que el m�
 | React + TypeScript + Tailwind | React vía Babel standalone, sin build | Consistente con `stands-reserva-firebase.html`, cero configuración nueva |
 | Firebase Authentication | URL no publicada, sin login | Mismo patrón ya usado en `admin.html` |
 | Cloud Firestore | ✅ Firestore (sí se activa) | Necesario para puntos en tiempo real, a diferencia del resto del sitio que usa Sheets |
-| Firebase Functions | No incluido | Sin Functions en el repo hoy; necesario solo para Wallet |
-| Google Wallet API | Pendiente (ver pestaña "Wallet" en el panel) | Requiere Cloud Function que firme el pase — fuera de alcance de esta primera versión |
+| Firebase Functions | ✅ `generateWalletPass` | Firma JWT del pass Wallet |
+| Google Wallet API | Configurar credenciales (ver `GOOGLE-WALLET-SETUP.md`) | Issuer ID + SA en Firebase Functions config |
 
 ## Modelo de seguridad — léelo antes de lanzar a producción
 
@@ -69,6 +69,6 @@ js/firebase-fidelizacion-config.js  # Credenciales Firebase (llenar antes de pro
 
 ## Pendiente / próximas fases
 
-- **Google Wallet**: requiere Cloud Functions + cuenta de servicio de Wallet API (ver pestaña Wallet en el panel para el detalle).
+- **Google Wallet**: ver [`GOOGLE-WALLET-SETUP.md`](GOOGLE-WALLET-SETUP.md) y `py tools/setup_google_wallet.py`.
 - **Estadísticas avanzadas**: hoy viven integradas en la pestaña Resumen; se puede separar si crece.
 - **Auth real para el panel**: si el volumen de datos de clientes lo justifica.
