@@ -9,6 +9,22 @@
   var db = null;
 
   var QR_PREFIX = 'LSCPAS:';
+  var PASAPORTE_STORAGE_KEY = 'lsc_pasaporte_cliente_id';
+
+  function guardarPasaporteLocal(clienteId) {
+    if (!clienteId) return;
+    try {
+      localStorage.setItem(PASAPORTE_STORAGE_KEY, String(clienteId));
+    } catch (e) { /* quota / privado */ }
+  }
+
+  function leerPasaporteLocal() {
+    try {
+      return localStorage.getItem(PASAPORTE_STORAGE_KEY) || '';
+    } catch (e) {
+      return '';
+    }
+  }
   var PIN_SALT = 'LSC-Pasaporte2026';
 
   function ready() {
@@ -139,6 +155,9 @@
       origen: datos.origen || 'registro',
       fechaRegistro: global.firebase.firestore.FieldValue.serverTimestamp(),
       ultimaVisita: global.firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function (ref) {
+      guardarPasaporteLocal(ref.id);
+      return ref;
     });
   }
 
@@ -156,6 +175,7 @@
       .then(function (snap) {
         if (!snap.empty) {
           var doc = snap.docs[0];
+          guardarPasaporteLocal(doc.id);
           return { id: doc.id, existed: true };
         }
         return crearCliente(Object.assign({}, datos, { telefono: tel, origen: datos.origen || 'registro' })).then(function (ref) {
@@ -343,6 +363,8 @@
     hashPin: hashPin,
     crearCliente: crearCliente,
     crearORecuperarCliente: crearORecuperarCliente,
+    guardarPasaporteLocal: guardarPasaporteLocal,
+    leerPasaporteLocal: leerPasaporteLocal,
     obtenerCliente: obtenerCliente,
     escucharCliente: escucharCliente,
     listarTransaccionesCliente: listarTransaccionesCliente,

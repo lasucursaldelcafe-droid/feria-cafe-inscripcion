@@ -262,6 +262,36 @@
     });
   }
 
+  function fetchParticipantePublico(id) {
+    var url = getWebAppUrl();
+    if (!url || !id) {
+      return Promise.resolve({ ok: false, reason: 'no_url' });
+    }
+
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    return fetch(url + sep + 'action=participante_publico&id=' + encodeURIComponent(id) + '&_=' + Date.now(), {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-store'
+    }).then(function (res) {
+      return res.json();
+    }).catch(function (err) {
+      return { ok: false, error: err.message || String(err) };
+    });
+  }
+
+  function expositorUpdateProfile(email, accessCode, profile) {
+    return postAction('expositor_update_profile', {
+      email: String(email || '').trim().toLowerCase(),
+      accessCode: String(accessCode || '').trim(),
+      profile: profile || {}
+    });
+  }
+
+  function adminCreateStand(payload) {
+    return postAction('admin_create_stand', payload || {});
+  }
+
   function expositorLogin(email, accessCode) {
     return postAction('expositor_login', {
       email: String(email || '').trim().toLowerCase(),
@@ -277,7 +307,10 @@
     fetchStandsMap: fetchStandsMap,
     fetchExpositorFeed: fetchExpositorFeed,
     fetchParticipantesPublico: fetchParticipantesPublico,
+    fetchParticipantePublico: fetchParticipantePublico,
     fetchPatrocinadoresCompetencia: fetchPatrocinadoresCompetencia,
-    expositorLogin: expositorLogin
+    expositorLogin: expositorLogin,
+    expositorUpdateProfile: expositorUpdateProfile,
+    adminCreateStand: adminCreateStand
   };
 })(window);

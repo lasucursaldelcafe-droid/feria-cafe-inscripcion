@@ -141,6 +141,165 @@
     });
   }
 
+  function adminCreateStand(payload) {
+    return postAdminAction(Object.assign({ action: 'admin_create_stand' }, payload || {}));
+  }
+
+  function readFileAsDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(reader.result); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  var MARCA_TABS = { expositores: true, aliados: true, patrocinadores: true, marcas: true };
+
+  var MARCA_PLAN_BY_TAB = {
+    expositores: 'Zona Origen',
+    aliados: 'Aliado Patrocinador',
+    patrocinadores: 'Zona Gran Reserva',
+    marcas: 'Zona Origen'
+  };
+
+  function updateCreateMarcaCardVisibility() {
+    var card = document.getElementById('adminCreateMarcaCard');
+    if (!card) return;
+    card.hidden = !MARCA_TABS[activeAdminTab];
+    if (!card.hidden) {
+      var planSelect = document.getElementById('adminMarcaPlan');
+      var defaultPlan = MARCA_PLAN_BY_TAB[activeAdminTab];
+      if (planSelect && defaultPlan) planSelect.value = defaultPlan;
+    }
+  }
+
+  function resetAdminCreateMarcaForm() {
+    var form = document.getElementById('formAdminCreateMarca');
+    var result = document.getElementById('adminCreateMarcaResult');
+    if (form) form.reset();
+    var hab = document.getElementById('adminMarcaHabilitado');
+    var vis = document.getElementById('adminMarcaVisible');
+    if (hab) hab.checked = true;
+    if (vis) vis.checked = true;
+    if (result) {
+      result.hidden = true;
+      result.innerHTML = '';
+    }
+    updateCreateMarcaCardVisibility();
+  }
+
+  function showAdminCreateMarcaResult(html) {
+    var result = document.getElementById('adminCreateMarcaResult');
+    if (!result) return;
+    result.innerHTML = html;
+    result.hidden = false;
+  }
+
+  function tipoFromPlan(plan) {
+    if (plan === 'Aliado Patrocinador') return 'aliado';
+    if (plan === 'Zona Gran Reserva') return 'patrocinador';
+    return 'expositor';
+  }
+
+  function bindAdminCreateMarcaForm() {
+    var form = document.getElementById('formAdminCreateMarca');
+    if (!form) return;
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      showError('');
+
+      var marca = document.getElementById('adminMarcaNombre').value.trim();
+      var correo = document.getElementById('adminMarcaCorreo').value.trim().toLowerCase();
+      if (!marca || !correo) {
+        showError('Marca y correo son obligatorios.');
+        return;
+      }
+
+      var plan = document.getElementById('adminMarcaPlan').value;
+      var payload = {
+        marca: marca,
+        correo: correo,
+        contacto: document.getElementById('adminMarcaContacto').value.trim(),
+        celular: document.getElementById('adminMarcaCelular').value.trim(),
+        plan: plan,
+        tipoParticipante: tipoFromPlan(plan),
+        standId: document.getElementById('adminMarcaStandId').value.trim(),
+        ciudad: document.getElementById('adminMarcaCiudad').value.trim(),
+        descripcion: document.getElementById('adminMarcaDescripcion').value.trim(),
+        redSocial: document.getElementById('adminMarcaRedSocial').value,
+        redEnlace: document.getElementById('adminMarcaRedUrl').value.trim(),
+        habilitado: document.getElementById('adminMarcaHabilitado').checked,
+        visiblePublico: document.getElementById('adminMarcaVisible').checked
+      };
+
+      var submitBtn = document.getElementById('adminMarcaSubmit');
+      var logoInput = document.getElementById('adminMarcaLogo');
+      var logoFile = logoInput && logoInput.files && logoInput.files[0];
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Subiendo…';
+      }
+
+      var logoPromise = logoFile
+        ? readFileAsDataUrl(logoFile).then(function (dataUrl) {
+          payload.logoStand = {
+            nombreArchivo: logoFile.name,
+            tipoArchivo: logoFile.type,
+            base64: dataUrl
+          };
+        })
+        : Promise.resolve();
+
+      logoPromise.then(function () {
+        return adminCreateStand(payload);
+      }).then(function (result) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Crear marca y publicar';
+        }
+        if (!result || !result.ok) {
+          showError((result && result.error) || 'No se pudo crear la marca. ¿Redesplegaste Code.gs con admin_create_stand?');
+          return;
+        }
+
+        var perfilLink = result.perfilUrl || '';
+        var panelLink = result.expositorPanelUrl || '';
+        var code = result.accessCode || '';
+        var html = '<p><strong>Marca creada:</strong> ' + escapeHtml(result.marca || marca) +
+          ' <span class="admin-badge admin-badge--on">ID ' + escapeHtml(result.id || '') + '</span></p>';
+        if (code) {
+          html += '<p>Código de acceso panel expositor: <code>' + escapeHtml(code) +
+            '</code> (enviado también por correo al expositor).</p>';
+        }
+        if (perfilLink) {
+          html += '<p><a href="' + escapeHtml(perfilLink) + '" target="_blank" rel="noopener">Ver página pública</a>';
+          if (panelLink) {
+            html += ' · <a href="' + escapeHtml(panelLink) + '" target="_blank" rel="noopener">Panel expositor</a>';
+          }
+          html += '</p>';
+        }
+        showAdminCreateMarcaResult(html);
+        var form = document.getElementById('formAdminCreateMarca');
+        if (form) form.reset();
+        var hab = document.getElementById('adminMarcaHabilitado');
+        var vis = document.getElementById('adminMarcaVisible');
+        if (hab) hab.checked = true;
+        if (vis) vis.checked = true;
+        if (logoInput) logoInput.value = '';
+        loadDashboard();
+      }).catch(function (err) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Crear marca y publicar';
+        }
+        showError(err.message || 'Error al crear la marca.');
+      });
+    });
+  }
+
   function patchStandVisibility(id, visible) {
     return postAdminAction({
       action: 'admin_patch_stand',
@@ -288,6 +447,7 @@
     panel.innerHTML = html;
     bindToggleStatusButtons();
     if (activeAdminTab === 'marcas') bindDirectorioToggles();
+    updateCreateMarcaCardVisibility();
   }
 
   function bindAdminTabs() {
@@ -300,6 +460,7 @@
           t.setAttribute('aria-selected', active ? 'true' : 'false');
         });
         renderAdminTabPanels(lastDashboardData);
+        updateCreateMarcaCardVisibility();
       });
     });
   }
@@ -320,7 +481,12 @@
       var redUrl = row['Red social enlace'] || '';
       var redSocial = row['Red social preferida'] || '';
       html += '<tr data-stand-id="' + escapeHtml(id) + '">';
-      html += '<td>' + escapeHtml(row['Marca o negocio'] || '') + '</td>';
+      html += '<td>' + escapeHtml(row['Marca o negocio'] || '');
+      if (id && global.SiteLinks) {
+        html += ' <a class="admin-table__link" href="' + escapeHtml(global.SiteLinks.absUrl('marcas') + '/' + encodeURIComponent(id)) +
+          '" target="_blank" rel="noopener">Ver perfil</a>';
+      }
+      html += '</td>';
       html += '<td>' + escapeHtml(row['Tipo participante'] || '') + '</td>';
       html += '<td>' + escapeHtml(row['Stand ID'] || '—') + '</td>';
       html += '<td>';
@@ -797,6 +963,8 @@
     bindEvents();
     bindAdminTabs();
     bindPatrocinadorCompetenciaForm();
+    bindAdminCreateMarcaForm();
+    updateCreateMarcaCardVisibility();
     loadDashboard();
   }
 

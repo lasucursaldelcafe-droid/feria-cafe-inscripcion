@@ -5,6 +5,15 @@
   'use strict';
 
   var SESSION_KEY = 'feria_expositor_session';
+  var MAX_FOTOS = 12;
+  var MAX_PRODUCTOS = 24;
+
+  var profileState = {
+    fotosEliminar: [],
+    fotosNuevas: [],
+    productos: [],
+    logoNuevo: null
+  };
 
   function $(id) {
     return document.getElementById(id);
@@ -53,6 +62,339 @@
 
   function clearSession() {
     sessionStorage.removeItem(SESSION_KEY);
+  }
+
+  function readFileAsDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(reader.result); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function setProfileError(msg) {
+    var el = $('profileSaveError');
+    if (!el) return;
+    el.textContent = msg || '';
+    el.classList.toggle('visible', !!msg);
+  }
+
+  function setProfileStatus(msg) {
+    var el = $('profileSaveStatus');
+    if (el) el.textContent = msg || '';
+  }
+
+  function renderProfileFotos(fotos) {
+    var grid = $('profileFotosGrid');
+    if (!grid) return;
+
+    var existentes = (fotos || []).filter(function (f) {
+      return profileState.fotosEliminar.indexOf(f.id) === -1;
+    });
+
+    var html = existentes.map(function (foto) {
+      return (
+        '<figure class="expositor-media-item">' +
+        '<img src="' + escapeHtml(driveThumb(foto.url)) + '" alt="">' +
+        '<button type="button" class="expositor-media-remove" data-foto-id="' + escapeHtml(foto.id) + '">Quitar</button>' +
+        '</figure>'
+      );
+    }).join('');
+
+    html += profileState.fotosNuevas.map(function (foto, idx) {
+      return (
+        '<figure class="expositor-media-item expositor-media-item--new">' +
+        '<img src="' + escapeHtml(foto.preview) + '" alt="Nueva foto">' +
+        '<button type="button" class="expositor-media-remove" data-foto-nueva="' + idx + '">Quitar</button>' +
+        '</figure>'
+      );
+    }).join('');
+
+    grid.innerHTML = html || '<p class="expositor-hint">Aún no hay fotos. Sube imágenes de tu emprendimiento.</p>';
+
+    grid.querySelectorAll('[data-foto-id]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-foto-id');
+        if (id && profileState.fotosEliminar.indexOf(id) === -1) {
+          profileState.fotosEliminar.push(id);
+        }
+        renderProfileFotos(fotos);
+      });
+    });
+
+    grid.querySelectorAll('[data-foto-nueva]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var idx = parseInt(btn.getAttribute('data-foto-nueva'), 10);
+        profileState.fotosNuevas.splice(idx, 1);
+        renderProfileFotos(fotos);
+      });
+    });
+  }
+
+  function renderProductosEditor() {
+    var root = $('profileProductosList');
+    if (!root) return;
+
+    if (!profileState.productos.length) {
+      root.innerHTML = '<p class="expositor-hint">Agrega los productos que quieres mostrar en tu página pública.</p>';
+      return;
+    }
+
+    root.innerHTML = profileState.productos.map(function (prod, idx) {
+      return (
+        '<div class="expositor-producto-edit" data-producto-idx="' + idx + '">' +
+        '<div class="expositor-field-row">' +
+        '<div class="expositor-field"><label>Nombre</label><input type="text" data-field="nombre" value="' + escapeHtml(prod.nombre) + '" maxlength="80"></div>' +
+        '<div class="expositor-field"><label>Precio</label><input type="text" data-field="precio" value="' + escapeHtml(prod.precio) + '" maxlength="40" placeholder="Ej. $25.000"></div>' +
+        '</div>' +
+        '<div class="expositor-field"><label>Descripción</label><textarea data-field="descripcion" rows="2" maxlength="300">' + escapeHtml(prod.descripcion) + '</textarea></div>' +
+        '<div class="expositor-field"><label>Foto del producto</label><input type="file" data-field="foto" accept="image/*">' +
+        (prod.fotoUrl ? '<img class="expositor-producto-thumb" src="' + escapeHtml(driveThumb(prod.fotoUrl)) + '" alt="">' : '') +
+        '</div>' +
+        '<button type="button" class="expositor-btn expositor-btn--secondary expositor-producto-remove" data-remove-idx="' + idx + '">Eliminar producto</button>' +
+        '</div>'
+      );
+    }).join('');
+
+    root.querySelectorAll('.expositor-producto-remove').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var idx = parseInt(btn.getAttribute('data-remove-idx'), 10);
+        profileState.productos.splice(idx, 1);
+        renderProductosEditor();
+      });
+    });
+  }
+
+  function syncProductosFromDom() {
+    var root = $('profileProductosList');
+    if (!root) return;
+
+    root.querySelectorAll('.expositor-producto-edit').forEach(function (block, idx) {
+      if (!profileState.productos[idx]) return;
+      var nombre = block.querySelector('[data-field="nombre"]');
+      var precio = block.querySelector('[data-field="precio"]');
+      var descripcion = block.querySelector('[data-field="descripcion"]');
+      if (nombre) profileState.productos[idx].nombre = nombre.value.trim();
+      if (precio) profileState.productos[idx].precio = precio.value.trim();
+      if (descripcion) profileState.productos[idx].descripcion = descripcion.value.trim();
+    });
+  }
+
+  function fillProfileForm(stand) {
+    var perfil = (stand && stand.perfil) || {};
+    profileState.fotosEliminar = [];
+    profileState.fotosNuevas = [];
+    profileState.logoNuevo = null;
+    profileState.productos = Array.isArray(perfil.productos)
+      ? perfil.productos.map(function (p) {
+        return {
+          id: p.id || '',
+          nombre: p.nombre || '',
+          descripcion: p.descripcion || '',
+          precio: p.precio || '',
+          fotoUrl: p.fotoUrl || ''
+        };
+      })
+      : [];
+
+    var tagline = $('profileTagline');
+    var descripcion = $('profileDescripcion');
+    var historia = $('profileHistoria');
+    var redSocial = $('profileRedSocial');
+    var redUrl = $('profileRedUrl');
+    var publicado = $('profilePublicado');
+    var viewBtn = $('viewPublicProfileBtn');
+
+    if (tagline) tagline.value = perfil.tagline || '';
+    if (descripcion) descripcion.value = stand.descripcion || '';
+    if (historia) historia.value = perfil.historia || '';
+    if (redSocial) redSocial.value = stand.redSocial || '';
+    if (redUrl) redUrl.value = stand.redUrl || '';
+    if (publicado) publicado.checked = perfil.publicado !== false;
+
+    if (viewBtn && stand.perfilUrl) {
+      viewBtn.href = stand.perfilUrl;
+      viewBtn.hidden = false;
+    }
+
+    renderProfileFotos(perfil.fotos || []);
+    renderProductosEditor();
+    setProfileError('');
+    setProfileStatus('');
+  }
+
+  function handleFotosInput(event) {
+    var files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    if (profileState.fotosNuevas.length + files.length > MAX_FOTOS) {
+      setProfileError('Máximo ' + MAX_FOTOS + ' fotos nuevas por guardado.');
+      return;
+    }
+
+    Promise.all(files.map(function (file) {
+      return readFileAsDataUrl(file).then(function (dataUrl) {
+        profileState.fotosNuevas.push({
+          preview: driveThumb(dataUrl) || dataUrl,
+          nombreArchivo: file.name,
+          tipoArchivo: file.type,
+          base64: dataUrl
+        });
+      });
+    })).then(function () {
+      var stand = getSession();
+      renderProfileFotos((stand && stand.stand && stand.stand.perfil && stand.stand.perfil.fotos) || []);
+      event.target.value = '';
+    });
+  }
+
+  function handleLogoInput(event) {
+    var file = (event.target.files || [])[0];
+    if (!file) return;
+    readFileAsDataUrl(file).then(function (dataUrl) {
+      profileState.logoNuevo = {
+        nombreArchivo: file.name,
+        tipoArchivo: file.type,
+        base64: dataUrl
+      };
+      setProfileStatus('Logo listo para subir al guardar.');
+    });
+  }
+
+  function handleAddProducto() {
+    if (profileState.productos.length >= MAX_PRODUCTOS) {
+      setProfileError('Máximo ' + MAX_PRODUCTOS + ' productos.');
+      return;
+    }
+    syncProductosFromDom();
+    profileState.productos.push({
+      id: 'p-local-' + Date.now(),
+      nombre: '',
+      descripcion: '',
+      precio: '',
+      fotoUrl: ''
+    });
+    renderProductosEditor();
+  }
+
+  function collectProductosPayload() {
+    syncProductosFromDom();
+    var root = $('profileProductosList');
+    var promises = profileState.productos.map(function (prod, idx) {
+      var block = root ? root.querySelector('[data-producto-idx="' + idx + '"]') : null;
+      var fileInput = block ? block.querySelector('[data-field="foto"]') : null;
+      var file = fileInput && fileInput.files && fileInput.files[0];
+
+      var payload = {
+        id: prod.id || ('p-' + idx),
+        nombre: prod.nombre,
+        descripcion: prod.descripcion,
+        precio: prod.precio,
+        fotoUrl: prod.fotoUrl || ''
+      };
+
+      if (!file) return Promise.resolve(payload);
+
+      return readFileAsDataUrl(file).then(function (dataUrl) {
+        payload.fotoNueva = {
+          nombreArchivo: file.name,
+          tipoArchivo: file.type,
+          base64: dataUrl
+        };
+        return payload;
+      });
+    });
+
+    return Promise.all(promises);
+  }
+
+  function handleProfileSubmit(event) {
+    event.preventDefault();
+    setProfileError('');
+    setProfileStatus('');
+
+    var session = getSession();
+    if (!session || !session.email) {
+      setProfileError('Sesión expirada. Vuelve a ingresar.');
+      return;
+    }
+
+    var accessCodeInput = $('loginAccessCode');
+    var accessCode = accessCodeInput && accessCodeInput.value.trim()
+      ? accessCodeInput.value.trim()
+      : (session.accessCode || '');
+
+    if (!FormSubmit || !FormSubmit.expositorUpdateProfile) {
+      setProfileError('El servidor no está configurado.');
+      return;
+    }
+
+    var btn = $('profileSaveBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Guardando…';
+    }
+
+    collectProductosPayload().then(function (productos) {
+      var profile = {
+        tagline: ($('profileTagline') && $('profileTagline').value.trim()) || '',
+        historia: ($('profileHistoria') && $('profileHistoria').value.trim()) || '',
+        descripcion: ($('profileDescripcion') && $('profileDescripcion').value.trim()) || '',
+        redSocial: ($('profileRedSocial') && $('profileRedSocial').value) || '',
+        redUrl: ($('profileRedUrl') && $('profileRedUrl').value.trim()) || '',
+        publicado: $('profilePublicado') ? $('profilePublicado').checked : true,
+        fotosEliminar: profileState.fotosEliminar.slice(),
+        fotosNuevas: profileState.fotosNuevas.map(function (f) {
+          return {
+            nombreArchivo: f.nombreArchivo,
+            tipoArchivo: f.tipoArchivo,
+            base64: f.base64
+          };
+        }),
+        productos: productos
+      };
+
+      if (profileState.logoNuevo) {
+        profile.logoNuevo = profileState.logoNuevo;
+      }
+
+      return FormSubmit.expositorUpdateProfile(session.email, accessCode, profile);
+    }).then(function (result) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Guardar y publicar perfil';
+      }
+      if (!result || !result.ok || !result.stand) {
+        setProfileError((result && result.error) || 'No se pudo guardar el perfil.');
+        return;
+      }
+      session.stand = result.stand;
+      if (result.stand.perfilUrl) session.stand.perfilUrl = result.stand.perfilUrl;
+      saveSession(session);
+      fillProfileForm(result.stand);
+      setProfileStatus('Perfil publicado. Ya está visible en /marcas.');
+    }).catch(function () {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Guardar y publicar perfil';
+      }
+      setProfileError('Error al guardar. Intenta de nuevo.');
+    });
+  }
+
+  function bindProfileForm() {
+    var form = $('expositorProfileForm');
+    if (form) form.addEventListener('submit', handleProfileSubmit);
+
+    var fotosInput = $('profileFotosInput');
+    if (fotosInput) fotosInput.addEventListener('change', handleFotosInput);
+
+    var logoInput = $('profileLogo');
+    if (logoInput) logoInput.addEventListener('change', handleLogoInput);
+
+    var addProd = $('addProductoBtn');
+    if (addProd) addProd.addEventListener('click', handleAddProducto);
   }
 
   function showLogin() {
@@ -189,6 +531,7 @@
     var emailEl = $('sessionEmail');
     if (emailEl) emailEl.textContent = session.email || '';
     renderStand(session.stand);
+    fillProfileForm(session.stand);
     showPanel();
     loadFeed();
   }
@@ -236,7 +579,7 @@
         setLoginError((result && result.error) || 'No pudimos verificar tus datos. Revisa correo y código.');
         return;
       }
-      var session = { email: email, stand: result.stand, loggedAt: new Date().toISOString() };
+      var session = { email: email, accessCode: code, stand: result.stand, loggedAt: new Date().toISOString() };
       saveSession(session);
       enterPanel(session);
     });
@@ -281,6 +624,8 @@
 
     var refreshBtn = $('refreshFeedBtn');
     if (refreshBtn) refreshBtn.addEventListener('click', loadFeed);
+
+    bindProfileForm();
   }
 
   function init() {

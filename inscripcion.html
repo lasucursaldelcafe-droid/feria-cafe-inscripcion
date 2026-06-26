@@ -516,8 +516,12 @@
               origen: 'feria'
             }).then(function (res) {
               entry.pasaporteId = res.id;
+              if (window.Fidelizacion && Fidelizacion.guardarPasaporteLocal) {
+                Fidelizacion.guardarPasaporteLocal(res.id);
+              }
               return entry;
-            }).catch(function () {
+            }).catch(function (err) {
+              console.warn('Pasaporte no creado:', err);
               return entry;
             });
           } catch (e) {

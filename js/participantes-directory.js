@@ -108,6 +108,17 @@
       ? '<span class="festival-sponsor-card__stand">Stand ' + escapeHtml(participante.standId) + '</span>'
       : '';
 
+    var perfilLink = participante.perfilUrl || (participante.id && global.SiteLinks
+      ? global.SiteLinks.absUrl('marcas') + '/' + encodeURIComponent(participante.id)
+      : '');
+    var taglineBlock = participante.tagline
+      ? '<p class="festival-sponsor-card__tagline">' + escapeHtml(participante.tagline) + '</p>'
+      : '';
+    var verPerfil = perfilLink
+      ? '<a class="festival-sponsor-card__profile-link" href="' + escapeHtml(perfilLink) + '">Ver perfil' +
+        (participante.tienePerfil ? ' completo' : '') + ' →</a>'
+      : '';
+
     return (
       '<li class="festival-sponsor-card festival-sponsor-card--directory">' +
       '<article class="festival-sponsor-card__link">' +
@@ -117,8 +128,10 @@
       name +
       '</span>' +
       standHint +
+      taglineBlock +
       descBlock +
       socialBlock +
+      verPerfil +
       '</article></li>'
     );
   }

@@ -487,4 +487,61 @@
   .admin-stat__value {
     font-size: 1.25rem;
   }
+
+  .admin-tabs {
+    gap: 0.35rem;
+  }
+
+  .admin-tab {
+    font-size: 0.78rem;
+    padding: 0.45rem 0.55rem;
+  }
+}
+
+.admin-create-marca {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--admin-border, rgba(0, 0, 0, 0.08));
+}
+
+.admin-create-marca__title {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.admin-inline-form__field select,
+.admin-inline-form__field textarea {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--admin-border, rgba(0, 0, 0, 0.15));
+  border-radius: 6px;
+  font: inherit;
+  width: 100%;
+}
+
+.admin-inline-form__field textarea {
+  resize: vertical;
+  min-height: 3.5rem;
+}
+
+.admin-inline-form__row--checks {
+  align-items: center;
+}
+
+.admin-create-result {
+  margin-top: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  background: rgba(107, 191, 138, 0.1);
+  border: 1px solid rgba(107, 191, 138, 0.25);
+  font-size: 0.9rem;
+}
+
+.admin-create-result code {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.admin-table__link {
+  font-size: 0.78rem;
+  white-space: nowrap;
 }
