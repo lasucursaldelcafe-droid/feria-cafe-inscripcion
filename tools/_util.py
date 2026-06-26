@@ -43,6 +43,8 @@ HEADERS_FERIA = [
     "Acepta datos",
     "Acepta imagen",
     "Estado registro",
+    "Habilitado",
+    "Pasaporte ID",
     "Notas admin",
 ]
 
