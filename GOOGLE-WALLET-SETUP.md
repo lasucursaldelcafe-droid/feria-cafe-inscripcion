@@ -39,11 +39,10 @@ En ese caso **no necesitas descargar ningún archivo**.
 ### Qué haces (5 pasos)
 
 1. Entra con **`lasucursaldelcafe@gmail.com`** a [Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts?project=la-sucursal-del-cafe).
-2. Copia el email de la cuenta que ya existe (recomendado):
-   ```
-   la-sucursal-del-cafe@appspot.gserviceaccount.com
-   ```
-   (Es la cuenta por defecto de Firebase/Functions; **no** hace falta crear otra.)
+2. Copia el email de una cuenta que **aparezca en la lista** (no inventes el email). Prioridad:
+   - `firebase-adminsdk-xxxxx@la-sucursal-del-cafe.iam.gserviceaccount.com` (la que ya trae Firebase)
+   - Si existe: `la-sucursal-del-cafe@appspot.gserviceaccount.com`
+   - O crea `google-wallet-issuer` → su email termina en `@la-sucursal-del-cafe.iam.gserviceaccount.com`
 3. Habilita APIs:
    - [Google Wallet API](https://console.cloud.google.com/apis/library/wallet.googleapis.com?project=la-sucursal-del-cafe)
    - [IAM Credentials API](https://console.cloud.google.com/apis/library/iamcredentials.googleapis.com?project=la-sucursal-del-cafe)
@@ -163,6 +162,7 @@ El cliente (`js/wallet-qr.js`) la detecta automáticamente desde `FIREBASE_FIDEL
 |---------|-------|----------|
 | `GOOGLE_WALLET_ISSUER_ID no configurado` | Falta config en Functions | Paso 4 |
 | `403` / pass inválido | SA no invitada en Wallet Console | Paso 3 |
+| «Correo no está en ninguna cuenta de Google» | SA no existe en GCP o Issuer en otra cuenta Google | Sección troubleshooting abajo |
 | `Wallet API has not been used` | API no habilitada | Paso 2 |
 | Botón abre solo la web | Function no desplegada o error 500 | Paso 5 + logs Firebase |
 | Pass en revisión | Normal la primera vez | Wallet Console → aprobar clase |
@@ -172,6 +172,60 @@ Ver logs:
 ```bash
 firebase functions:log --only generateWalletPass --project la-sucursal-del-cafe
 ```
+
+---
+
+## «Ese correo no está en ninguna cuenta de Google»
+
+Wallet muestra esto cuando el email **no existe** en el proyecto Google Cloud del Issuer, o cuando el Issuer y Firebase están en **cuentas Google distintas**.
+
+### Checklist (en orden)
+
+**1. Misma cuenta Google en todo**
+
+| Consola | Usa |
+|---------|-----|
+| Firebase / Google Cloud | `lasucursaldelcafe@gmail.com` |
+| Wallet Console (Issuer `3388000000023162431`) | **La misma** `lasucursaldelcafe@gmail.com` si es posible |
+
+Si el Issuer lo creó `pabcolgom@gmail.com` pero el proyecto Firebase es de `lasucursaldelcafe@gmail.com`, Wallet **no** encontrará las cuentas de servicio del proyecto. Solución: entrar a Wallet con `lasucursaldelcafe@gmail.com` o crear el Issuer desde esa cuenta.
+
+**2. Copiar un email que exista de verdad**
+
+Abre [Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts?project=la-sucursal-del-cafe) con `lasucursaldelcafe@gmail.com`.
+
+¿Ves `la-sucursal-del-cafe@appspot.gserviceaccount.com` en la lista?
+
+- **No** → no la invites (no existe). Usa en su lugar:
+  - `firebase-adminsdk-XXXX@la-sucursal-del-cafe.iam.gserviceaccount.com`
+- **Sí** → puedes invitarla, pero `@iam.gserviceaccount.com` suele funcionar mejor.
+
+**3. Crear cuenta solo para Wallet (sin JSON)**
+
+En Service Accounts → **CREATE** → nombre `google-wallet-issuer` → **DONE**.
+
+Copia el email exacto (termina en `@la-sucursal-del-cafe.iam.gserviceaccount.com`) e invítalo en Wallet → Users → Developer.
+
+**4. Recrear appspot si falta** (solo si necesitas esa cuenta)
+
+En [Cloud Shell](https://console.cloud.google.com/?project=la-sucursal-del-cafe):
+
+```bash
+gcloud app create --region=us-central
+```
+
+O desactiva y reactiva Cloud Functions API (a veces recrea appspot).
+
+**5. Cuentas de prueba (para probar en el móvil)**
+
+En Wallet Console → **Manage** → **Test accounts** → añade `lasucursaldelcafe@gmail.com` (Gmail sí vale aquí).
+
+### Si nada de lo anterior funciona
+
+Google Wallet exige alinear Issuer + proyecto GCP + cuenta de servicio. Opciones:
+
+1. Soporte Google Pay & Wallet Console (feedback en la consola).
+2. **Plan B (ya funciona hoy):** tarjeta web en `/mi-tarjeta` con QR — no requiere Wallet nativo.
 
 ---
 
