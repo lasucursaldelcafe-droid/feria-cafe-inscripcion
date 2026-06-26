@@ -53,7 +53,7 @@
       <div class="pasaporte-qr-box">
         <div id="qrContainer" aria-label="Código QR del pasaporte"></div>
         <p class="pasaporte-qr-hint">Muestra este QR en cada stand. El expositor lo escanea y sumas puntos al instante.</p>
-        <button type="button" id="btnWallet" class="pasaporte-btn pasaporte-btn--wallet">+ Google Wallet (opcional)</button>
+        <button type="button" id="btnWallet" class="pasaporte-btn pasaporte-btn--wallet" hidden>+ Google Wallet (opcional)</button>
       </div>
 
       <div class="pasaporte-actions">
@@ -76,8 +76,6 @@
   <script src="js/fidelizacion-common.js"></script>
   <script src="js/qr-render.js"></script>
   <script src="js/pasaporte-pwa.js"></script>
-  <script src="js/wallet-config.example.js"></script>
-  <script src="js/wallet-qr.js"></script>
   <script>
     (function () {
       var params = new URLSearchParams(window.location.search);
@@ -161,14 +159,6 @@
         return initQr().then(function () {
           loading.hidden = true;
           pasaporte.hidden = false;
-
-          document.getElementById('btnWallet').addEventListener('click', function () {
-            WalletQR.abrirWallet(clienteId, {
-              nombre: data.nombre,
-              puntos: data.puntos,
-              nivel: nivelActual.nombre
-            });
-          });
 
           document.getElementById('btnDescargar').addEventListener('click', function () {
             QRRender.descargarDesdeContenedor(

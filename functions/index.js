@@ -159,7 +159,7 @@ exports.reenviarTarjeta = functions.https.onCall(async (data, context) => {
     }
 
     // Reutilizar la lógica de envío de arriba
-    const urlTarjeta = `${process.env.HOSTING_URL || 'https://la-sucursal-del-cafe.web.app'}/mi-tarjeta.html?id=${encodeURIComponent(clienteId)}`;
+    const urlTarjeta = `${process.env.HOSTING_URL || 'https://la-sucursal-del-cafe.web.app'}/pasaporte?id=${encodeURIComponent(clienteId)}`;
     const urlQR = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(clienteId)}`;
 
     // (Aquí irían los detalles del email — reutilizar htmlEmail de arriba)

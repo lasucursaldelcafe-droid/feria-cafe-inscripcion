@@ -29,7 +29,7 @@ var WHATSAPP_ORGANIZADOR = '573116699638';
 var HEADERS_FERIA = [
   'Fecha registro', 'ID', 'Nombre', 'Edad', 'Celular', 'Correo', 'Intereses',
   'Acepta voluntaria', 'Acepta pertenencias', 'Acepta datos', 'Acepta imagen',
-  'Estado registro', 'Habilitado', 'Notas admin'
+  'Estado registro', 'Habilitado', 'Pasaporte ID', 'Notas admin'
 ];
 
 var HEADERS_COMPETENCIA = [
@@ -157,6 +157,7 @@ function doPost(e) {
     var extra = {};
     if (formType === 'feria') {
       id = appendFeria_(data);
+      extra.pasaporteUrl = getPasaporteUrl_(data);
     } else if (formType === 'competencia') {
       var competenciaResult = appendCompetencia_(data);
       id = competenciaResult.id;
@@ -294,7 +295,7 @@ function appendFeria_(data) {
     data.celular || '',
     data.correo || '',
     intereses
-  ].concat(legalCols).concat([estado, 'Sí', '']));
+  ].concat(legalCols).concat([estado, 'Sí', data.pasaporteId || '', '']);
 
   sendConfirmationEmail_('feria', data);
   sendOrganizerNotificationEmail_('feria', data);
@@ -313,6 +314,13 @@ function getPasaporteRegistroUrl_(data) {
 
 function getPasaporteEscanerUrl_() {
   return SITE_PUBLIC_BASE_URL + PASAPORTE_ESCANER_PATH;
+}
+
+function getPasaporteUrl_(data) {
+  if (data && data.pasaporteId) {
+    return SITE_PUBLIC_BASE_URL + '/pasaporte?id=' + encodeURIComponent(String(data.pasaporteId));
+  }
+  return getPasaporteRegistroUrl_(data);
 }
 
 function normalizeStandId_(v) {
@@ -1474,7 +1482,8 @@ function buildEmailBody_(formType, data) {
 function buildFeriaEmailPlain_(data) {
   var id = data.id || '';
   var nombre = data.nombre || '';
-  var pasaporteUrl = getPasaporteRegistroUrl_(data);
+  var pasaporteUrl = getPasaporteUrl_(data);
+  var tienePasaporte = !!(data && data.pasaporteId);
   var lines = [
     'Hola ' + nombre + ',',
     '',
@@ -1485,7 +1494,9 @@ function buildFeriaEmailPlain_(data) {
     'La feria y el V60 Championship son eventos independientes (fechas y sedes distintas).',
     '',
     '☕ PASAPORTE CAFETERO (fidelización)',
-    'Crea tu tarjeta digital gratis, guárdala en el celular como app y muestra el QR en cada stand para acumular puntos:',
+    tienePasaporte
+      ? 'Tu pasaporte digital ya está listo. Ábrelo, guárdalo en el celular y muestra el QR en cada stand:'
+      : 'Crea tu tarjeta digital gratis, guárdala en el celular como app y muestra el QR en cada stand para acumular puntos:',
     pasaporteUrl,
     '',
     'En iPhone: abre el enlace → Compartir → Añadir a pantalla de inicio.',
@@ -1499,9 +1510,9 @@ function buildFeriaEmailPlain_(data) {
 function buildFeriaEmailHtml_(data) {
   var nombre = escapeHtml_(data.nombre || 'visitante');
   var id = escapeHtml_(data.id || '');
-  var pasaporteUrl = getPasaporteRegistroUrl_(data);
+  var pasaporteUrl = getPasaporteUrl_(data);
+  var tienePasaporte = !!(data && data.pasaporteId);
   var organizerEmail = escapeHtml_(ORGANIZER_EMAIL);
-  var btnBrown = 'display:inline-block;background:#5D3A1A;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:600;';
   var btnRed = 'display:inline-block;background:#C1272D;color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;';
   return [
     '<div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:0 auto;color:#4B352A;line-height:1.55;">',
@@ -1515,8 +1526,11 @@ function buildFeriaEmailHtml_(data) {
     '<p style="margin:0 0 16px;font-size:14px;color:#6b5344;">📅 29 y 30 de agosto de 2026 · Palmetto Plaza, Cali</p>',
     '<div style="background:#fff;border:2px solid #D9D4C8;border-radius:12px;padding:18px;margin:0 0 18px;">',
     '<p style="margin:0 0 8px;font-size:18px;font-weight:700;">☕ Tu Pasaporte Cafetero</p>',
-    '<p style="margin:0 0 14px;font-size:14px;">Tarjeta digital con QR. Cada stand que visites puede escanearla y sumarte puntos. Guárdala en tu celular como una app.</p>',
-    '<p style="margin:0 0 16px;text-align:center;"><a href="' + pasaporteUrl + '" style="' + btnRed + '">Crear mi Pasaporte Cafetero</a></p>',
+    '<p style="margin:0 0 14px;font-size:14px;">' + (tienePasaporte
+      ? 'Tu pasaporte ya está activo. Guárdalo en el celular y muestra el QR en cada stand para sumar puntos.'
+      : 'Tarjeta digital con QR. Cada stand que visites puede escanearla y sumarte puntos. Guárdala en tu celular como una app.') + '</p>',
+    '<p style="margin:0 0 16px;text-align:center;"><a href="' + pasaporteUrl + '" style="' + btnRed + '">' +
+      (tienePasaporte ? 'Abrir mi Pasaporte Cafetero' : 'Crear mi Pasaporte Cafetero') + '</a></p>',
     '<p style="margin:0;font-size:12px;color:#888;">iPhone: Compartir → Añadir a pantalla de inicio · Android: Instalar aplicación</p>',
     '</div>',
     '<p style="margin:0 0 8px;font-size:14px;">Dudas: <a href="mailto:' + organizerEmail + '" style="color:#8b4513;">' + organizerEmail + '</a></p>',
@@ -1644,7 +1658,12 @@ function buildOrganizerAlertBody_(formType, data) {
     lines.push('Correo: ' + (data.correo || ''));
     lines.push('Celular: ' + (data.celular || ''));
     lines.push('Intereses: ' + (intereses || '(ninguno)'));
-    lines.push('Pasaporte Cafetero (enlace enviado al visitante): ' + getPasaporteRegistroUrl_(data));
+    if (data.pasaporteId) {
+      lines.push('Pasaporte ID: ' + data.pasaporteId);
+      lines.push('Enlace pasaporte: ' + getPasaporteUrl_(data));
+    } else {
+      lines.push('Pasaporte Cafetero (enlace enviado al visitante): ' + getPasaporteRegistroUrl_(data));
+    }
     lines.push('');
     lines.push('Revisa la hoja "' + SHEET_FERIA + '" en Google Sheets para el detalle completo.');
   }

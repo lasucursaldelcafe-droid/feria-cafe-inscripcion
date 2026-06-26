@@ -23,7 +23,7 @@
     miStand: 'expositor.html',
     fidelizacion: 'fidelizacion.html',
     fidelizacionRegistro: 'fidelizacion-registro.html',
-    miTarjeta: 'mi-tarjeta.html',
+    miTarjeta: 'pasaporte-cafetero.html',
     pasaporte: 'pasaporte-cafetero.html',
     escanearPasaporte: 'escanear-pasaporte.html',
     panelFidelizacion: 'dashboard-fidelizacion.html'
@@ -48,7 +48,7 @@
     miStand: '/mi-stand',
     fidelizacion: '/fidelizacion',
     fidelizacionRegistro: '/registro-fidelizacion',
-    miTarjeta: '/mi-tarjeta',
+    miTarjeta: '/pasaporte',
     pasaporte: '/pasaporte',
     escanearPasaporte: '/escanear-pasaporte',
     panelFidelizacion: '/panel-fidelizacion'

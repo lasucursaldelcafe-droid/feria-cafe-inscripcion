@@ -96,7 +96,7 @@
           logos: body && body.logos,
           accessCode: body && body.accessCode,
           expositorPanelUrl: body && body.expositorPanelUrl,
-          status: res.status
+          pasaporteUrl: body && body.pasaporteUrl,
         };
       }).catch(function () {
         return { ok: false, remote: true, error: 'Respuesta inválida del servidor.' };
@@ -137,7 +137,8 @@
         logoEnlace: remoteResult.logoEnlace,
         logos: remoteResult.logos,
         accessCode: remoteResult.accessCode,
-        expositorPanelUrl: remoteResult.expositorPanelUrl
+        expositorPanelUrl: remoteResult.expositorPanelUrl,
+        pasaporteUrl: remoteResult.pasaporteUrl
       };
     });
   }

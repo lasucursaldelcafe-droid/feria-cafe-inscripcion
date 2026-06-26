@@ -75,9 +75,8 @@
         btn.disabled = true;
         btn.textContent = 'Creando…';
 
-        Fidelizacion.crearCliente(datos).then(function (docRef) {
-          var url = Fidelizacion.urlPasaporte(docRef.id);
-          window.location.href = url;
+        Fidelizacion.crearORecuperarCliente(Object.assign({}, datos, { origen: 'registro' })).then(function (res) {
+          window.location.href = Fidelizacion.urlPasaporte(res.id);
         }).catch(function (err) {
           console.error(err);
           errorEl.textContent = 'No pudimos crear tu pasaporte. ' + (err && err.message ? err.message : 'Intenta de nuevo.');

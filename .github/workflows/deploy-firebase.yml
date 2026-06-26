@@ -34,10 +34,9 @@ jobs:
             printf "window.SHEETS_CONFIG = {\n  WEB_APP_URL: ''\n};\n" > js/sheets-config.js
           fi
 
-      - name: Deploy completo (Hosting + Wallet + Firestore)
+      - name: Deploy Hosting + Firestore rules
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          GOOGLE_WALLET_ISSUER_ID: ${{ env.GOOGLE_WALLET_ISSUER_ID }}
         run: |
           set -e
           if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
@@ -46,23 +45,26 @@ jobs:
           fi
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-sa.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
-          cd functions && npm install && cd ..
-          python3 tools/configure_wallet_firebase.py --enable-apis
           npx -y firebase-tools@latest deploy \
-            --only hosting,functions:generateWalletPass \
+            --only hosting,firestore:rules \
             --project la-sucursal-del-cafe \
             --non-interactive
           rm -f /tmp/firebase-sa.json
 
-      - name: Deploy reglas Firestore (opcional)
+      - name: Deploy Wallet Function (opcional)
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GOOGLE_WALLET_ISSUER_ID: ${{ env.GOOGLE_WALLET_ISSUER_ID }}
         run: |
           if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then exit 0; fi
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-sa.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
-          npx -y firebase-tools@latest deploy --only firestore:rules \
-            --project la-sucursal-del-cafe --non-interactive || true
+          cd functions && npm install && cd ..
+          python3 tools/configure_wallet_firebase.py --enable-apis || true
+          npx -y firebase-tools@latest deploy \
+            --only functions:generateWalletPass \
+            --project la-sucursal-del-cafe \
+            --non-interactive || echo "Wallet function omitida (permisos/API)."
           rm -f /tmp/firebase-sa.json
         continue-on-error: true
 

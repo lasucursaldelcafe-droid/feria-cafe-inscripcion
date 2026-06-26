@@ -136,9 +136,32 @@
       puntosHistoricos: 0,
       nivel: 'Bronce',
       activo: true,
+      origen: datos.origen || 'registro',
       fechaRegistro: global.firebase.firestore.FieldValue.serverTimestamp(),
       ultimaVisita: global.firebase.firestore.FieldValue.serverTimestamp()
     });
+  }
+
+  function crearORecuperarCliente(datos) {
+    var tel = String(datos.telefono || datos.celular || '').trim();
+    if (!tel) {
+      return crearCliente(datos).then(function (ref) {
+        return { id: ref.id, existed: false };
+      });
+    }
+    return ready().collection('fidelizacion_clientes')
+      .where('telefono', '==', tel)
+      .limit(1)
+      .get()
+      .then(function (snap) {
+        if (!snap.empty) {
+          var doc = snap.docs[0];
+          return { id: doc.id, existed: true };
+        }
+        return crearCliente(Object.assign({}, datos, { telefono: tel, origen: datos.origen || 'registro' })).then(function (ref) {
+          return { id: ref.id, existed: false };
+        });
+      });
   }
 
   function obtenerCliente(clienteId) {
@@ -319,6 +342,7 @@
     parseClienteIdDesdeQr: parseClienteIdDesdeQr,
     hashPin: hashPin,
     crearCliente: crearCliente,
+    crearORecuperarCliente: crearORecuperarCliente,
     obtenerCliente: obtenerCliente,
     escucharCliente: escucharCliente,
     listarTransaccionesCliente: listarTransaccionesCliente,

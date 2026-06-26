@@ -246,7 +246,7 @@
         <p id="successLeadFeria">Gracias por registrarte como visitante en la feria de <strong>La Sucursal del Café</strong>. Quedas en la lista para premios exclusivos de visitantes registrados.</p>
         <p id="successEmailNoteFeria" class="hint"></p>
         <p id="successPasaporteNote" class="hint" style="margin-top:12px"></p>
-        <a id="btnPasaporteFeria" class="btn-submit" data-link="fidelizacionRegistro" href="fidelizacion-registro.html" style="display:inline-block;margin-top:12px;text-decoration:none">Crear mi Pasaporte Cafetero ☕</a>
+        <a id="btnPasaporteFeria" class="btn-submit" href="#" style="display:inline-block;margin-top:12px;text-decoration:none">Abrir mi Pasaporte Cafetero ☕</a>
         <button type="button" id="btnNuevaInscripcion" class="btn-secondary">Registrar otra persona</button>
         </div>
       </article>
@@ -290,6 +290,10 @@
     </footer>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-fidelizacion-config.js"></script>
+  <script src="js/fidelizacion-common.js"></script>
   <script src="js/event-config.js?v=20260620ig"></script>
   <script src="js/site-links.js"></script>
   <script src="js/seo-structured-data.js"></script>
@@ -496,7 +500,30 @@
         btnSubmit.disabled = true;
         btnSubmit.textContent = "Enviando…";
 
-        FormSubmit.submitForm(FORM_TYPE, STORAGE_KEY, entry).then(function (result) {
+        function enviarFeria(entry) {
+          return FormSubmit.submitForm(FORM_TYPE, STORAGE_KEY, entry);
+        }
+
+        function prepararPasaporte(entry) {
+          if (!window.Fidelizacion) return Promise.resolve(entry);
+          try {
+            return Fidelizacion.crearORecuperarCliente({
+              nombre: entry.nombre,
+              telefono: entry.celular,
+              email: entry.correo,
+              origen: 'feria'
+            }).then(function (res) {
+              entry.pasaporteId = res.id;
+              return entry;
+            }).catch(function () {
+              return entry;
+            });
+          } catch (e) {
+            return Promise.resolve(entry);
+          }
+        }
+
+        prepararPasaporte(entry).then(enviarFeria).then(function (result) {
           btnSubmit.disabled = false;
           btnSubmit.textContent = "Enviar registro de visitante";
           if (!result.ok) {
@@ -513,15 +540,20 @@
           }
           var pasaporteBtn = document.getElementById("btnPasaporteFeria");
           var pasaporteNote = document.getElementById("successPasaporteNote");
-          if (pasaporteBtn && window.SiteLinks) {
-            var pUrl = SiteLinks.absUrl("fidelizacionRegistro") +
-              "?nombre=" + encodeURIComponent(entry.nombre) +
-              "&telefono=" + encodeURIComponent(entry.celular) +
-              "&email=" + encodeURIComponent(entry.correo);
-            pasaporteBtn.href = pUrl;
+          var pasaporteUrl = result.pasaporteUrl ||
+            (entry.pasaporteId && window.SiteLinks
+              ? SiteLinks.absUrl("pasaporte") + "?id=" + encodeURIComponent(entry.pasaporteId)
+              : (window.SiteLinks ? SiteLinks.absUrl("fidelizacionRegistro") : "fidelizacion-registro.html"));
+          if (pasaporteBtn) {
+            pasaporteBtn.href = pasaporteUrl;
+            pasaporteBtn.textContent = entry.pasaporteId
+              ? "Abrir mi Pasaporte Cafetero ☕"
+              : "Crear mi Pasaporte Cafetero ☕";
           }
           if (pasaporteNote) {
-            pasaporteNote.textContent = "Crea tu Pasaporte Cafetero ahora: tarjeta digital con QR para acumular puntos en cada stand. Guárdala en tu celular como app.";
+            pasaporteNote.textContent = entry.pasaporteId
+              ? "Tu Pasaporte Cafetero ya está listo. Ábrelo y guárdalo en tu celular (añadir a pantalla de inicio) para mostrar el QR en cada stand."
+              : "Crea tu Pasaporte Cafetero: tarjeta digital con QR para acumular puntos en cada stand.";
           }
           showSuccess();
         });
