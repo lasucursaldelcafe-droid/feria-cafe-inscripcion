@@ -34,11 +34,10 @@ jobs:
             printf "window.SHEETS_CONFIG = {\n  WEB_APP_URL: ''\n};\n" > js/sheets-config.js
           fi
 
-      - name: Deploy Hosting + Firestore rules
+      - name: Deploy Hosting
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
-          set -e
           if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
             echo "Sin FIREBASE_SERVICE_ACCOUNT — se usará deploy de hosting alternativo."
             exit 0
@@ -46,10 +45,23 @@ jobs:
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-sa.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
           npx -y firebase-tools@latest deploy \
-            --only hosting,firestore:rules \
+            --only hosting \
             --project la-sucursal-del-cafe \
             --non-interactive
           rm -f /tmp/firebase-sa.json
+
+      - name: Deploy reglas Firestore (opcional)
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then exit 0; fi
+          echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-sa.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
+          npx -y firebase-tools@latest deploy --only firestore:rules \
+            --project la-sucursal-del-cafe --non-interactive || \
+            echo "::warning::Firestore rules omitidas (permisos serviceusage)."
+          rm -f /tmp/firebase-sa.json
+        continue-on-error: true
 
       - name: Deploy Wallet Function (opcional)
         env:
@@ -68,7 +80,7 @@ jobs:
           rm -f /tmp/firebase-sa.json
         continue-on-error: true
 
-      - name: Deploy Hosting (fallback sin cuenta de servicio)
+      - name: Deploy Hosting (fallback)
         if: failure()
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -76,6 +88,20 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           projectId: la-sucursal-del-cafe
           channelId: live
+        continue-on-error: true
+
+      - name: Verificar rutas en producción
+        run: |
+          BASE="https://la-sucursal-del-cafe.web.app"
+          FAIL=0
+          for path in / /pasaporte /escanear-pasaporte /registro-fidelizacion /panel-fidelizacion /qr /fidelizacion /inscripcion; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE$path")
+            echo "$CODE $path"
+            if [ "$CODE" != "200" ]; then FAIL=1; fi
+          done
+          if [ "$FAIL" -ne 0 ]; then
+            echo "::warning::Alguna ruta no respondió 200 (revisar deploy)."
+          fi
         continue-on-error: true
 
       - name: Verificar generateWalletPass
