@@ -158,6 +158,12 @@ function doPost(e) {
     if (action === 'admin_create_stand') {
       return jsonResponse(handleAdminCreateStand_(payload));
     }
+    if (action === 'admin_create_competitor') {
+      return jsonResponse(handleAdminCreateCompetitor_(payload));
+    }
+    if (action === 'admin_create_feria') {
+      return jsonResponse(handleAdminCreateFeria_(payload));
+    }
     if (action === 'expositor_update_profile') {
       return jsonResponse(handleExpositorUpdateProfile_(payload));
     }
@@ -925,6 +931,130 @@ function handleAdminCreateStand_(payload) {
     expositorPanelUrl: data.expositorPanelUrl,
     perfilUrl: getPublicMarcaUrl_(data.id),
     marca: data.marca
+  };
+}
+
+function handleAdminCreateCompetitor_(payload) {
+  var access = assertAdminAccess_(payload.idToken || '');
+  if (!access.ok) {
+    return { ok: false, error: access.error };
+  }
+
+  var nombre = String(payload.nombre || '').trim();
+  var correo = String(payload.correo || '').trim().toLowerCase();
+  var celular = String(payload.celular || '').trim();
+  if (!nombre || !correo || !celular) {
+    return { ok: false, error: 'Nombre, correo y celular son obligatorios.' };
+  }
+
+  var forzarCupo = payload.forzarCupo === true || payload.forzarCupo === 'true' || payload.forzarCupo === 1;
+  if (!forzarCupo && getCompetenciaCount_() >= CUPO_MAX_COMPETENCIA) {
+    return { ok: false, error: 'Cupo completo. Marca "Forzar si cupo lleno" para agregar igual.' };
+  }
+
+  var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
+  if (findDuplicateInSheet_(sheet, HEADERS_COMPETENCIA, correo, payload.documento || null)) {
+    return { ok: false, error: 'Ya existe una inscripción con este correo o documento.' };
+  }
+
+  var data = {
+    fecha: new Date().toISOString(),
+    id: String(payload.id || ('COMP-' + Date.now().toString(36).toUpperCase())).trim(),
+    evento: 'V60 Championship',
+    nombre: nombre,
+    documento: String(payload.documento || '').trim(),
+    celular: celular,
+    correo: correo,
+    ciudad: String(payload.ciudad || '').trim(),
+    estadoPago: String(payload.estadoPago || 'Confirmado por admin').trim(),
+    cupoConfirmado: payload.cupoConfirmado !== false && payload.cupoConfirmado !== 'false' ? 'Sí' : 'No',
+    aceptaVoluntaria: true,
+    aceptaPertenencias: true,
+    aceptaDatos: true,
+    aceptaNoReembolso: true,
+    aceptaDescalificacion: true,
+    aceptaReglas: true,
+    aceptaDisponibilidad: true,
+    aceptaImagen: true
+  };
+
+  var legalCols = parseLegalAcceptances_(data);
+  var compRow = joinRowParts_([
+    data.fecha,
+    data.id,
+    data.evento,
+    '',
+    data.nombre,
+    data.documento,
+    '',
+    data.ciudad,
+    data.celular,
+    data.correo,
+    '', '', '',
+    '', '', '', '', '', '', '', '',
+    '', '', '', '', '', '',
+    '', '', 'No', '', '', '', ''
+  ], legalCols, [
+    'Creado desde panel admin',
+    data.estadoPago,
+    data.cupoConfirmado,
+    'Sí',
+    ''
+  ]);
+  sheet.appendRow(compRow);
+
+  return { ok: true, id: data.id, nombre: data.nombre };
+}
+
+function handleAdminCreateFeria_(payload) {
+  var access = assertAdminAccess_(payload.idToken || '');
+  if (!access.ok) {
+    return { ok: false, error: access.error };
+  }
+
+  var nombre = String(payload.nombre || '').trim();
+  var celular = String(payload.celular || '').trim();
+  if (!nombre || !celular) {
+    return { ok: false, error: 'Nombre y celular son obligatorios.' };
+  }
+
+  var correo = String(payload.correo || '').trim().toLowerCase();
+  var sheet = getOrCreateSheet_(SHEET_FERIA, HEADERS_FERIA);
+  if (correo && findDuplicateInSheet_(sheet, HEADERS_FERIA, correo, null)) {
+    return { ok: false, error: 'Ya existe un visitante con este correo.' };
+  }
+
+  var data = {
+    fecha: new Date().toISOString(),
+    id: String(payload.id || ('FER-' + Date.now().toString(36).toUpperCase())).trim(),
+    nombre: nombre,
+    edad: String(payload.edad || '').trim(),
+    celular: celular,
+    correo: correo,
+    intereses: String(payload.intereses || '').trim(),
+    pasaporteId: String(payload.pasaporteId || '').trim(),
+    aceptaVoluntaria: true,
+    aceptaPertenencias: true,
+    aceptaDatos: true,
+    aceptaImagen: true
+  };
+
+  var legalCols = parseFeriaLegalAcceptances_(data);
+  var row = joinRowParts_([
+    data.fecha,
+    data.id,
+    data.nombre,
+    data.edad,
+    data.celular,
+    data.correo,
+    data.intereses
+  ], legalCols, ['Registrado por admin', 'Sí', data.pasaporteId, 'Panel admin']);
+  sheet.appendRow(row);
+
+  return {
+    ok: true,
+    id: data.id,
+    pasaporteUrl: data.pasaporteId ? getPasaporteUrl_(data) : getPasaporteRegistroUrl_(data)
   };
 }
 

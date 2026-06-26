@@ -1,6 +1,19 @@
 # Panel de administración y analíticas
 
-Panel interno para **tráfico del sitio** (analítica propia) e **inscripciones** (feria + V60 Championship). No está enlazado desde la navegación pública. **No usa Google Analytics ni GA4.**
+Panel interno unificado para **administrar** inscripciones, stands, sitio web y Pasaporte Cafetero. La sección **Analíticas** es independiente (tráfico del sitio). No está enlazado desde la navegación pública. **No usa Google Analytics ni GA4.**
+
+## Secciones del panel (`/admin`)
+
+| Sección | Función |
+| ------- | ------- |
+| Resumen | KPIs y accesos rápidos |
+| Analíticas | Tráfico, top páginas, export CSV |
+| Competidores | Alta manual V60 + listado |
+| Stands / ventas | Crear marca/stand + expositores/aliados/patrocinadores |
+| Visitantes feria | Registro manual + opción crear pasaporte |
+| Sitio web | Directorio `/marcas` y patrocinadores competencia |
+| Pasaportes | Crear pasaporte + clientes recientes |
+| Operadores de confianza | Usuarios PIN para escáner en stands |
 
 ## URL del panel
 

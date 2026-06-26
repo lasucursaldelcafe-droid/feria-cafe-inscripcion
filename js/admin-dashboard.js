@@ -22,7 +22,12 @@
     'Plan stand', 'Ciudad', 'Tipo participante', 'Estado solicitud', 'Habilitado'
   ];
 
-  var activeAdminTab = 'competencia';
+  var activeAdminTab = 'expositores';
+  var activeAdminSection = 'resumen';
+
+  var ADMIN_SECTIONS = [
+    'resumen', 'analiticas', 'competidores', 'stands', 'visitantes', 'sitio', 'pasaportes', 'operadores'
+  ];
 
   function getWebAppUrl() {
     var cfg = global.SHEETS_CONFIG || {};
@@ -145,6 +150,14 @@
     return postAdminAction(Object.assign({ action: 'admin_create_stand' }, payload || {}));
   }
 
+  function adminCreateCompetidor(payload) {
+    return postAdminAction(Object.assign({ action: 'admin_create_competitor' }, payload || {}));
+  }
+
+  function adminCreateVisitante(payload) {
+    return postAdminAction(Object.assign({ action: 'admin_create_feria' }, payload || {}));
+  }
+
   function readFileAsDataUrl(file) {
     return new Promise(function (resolve, reject) {
       var reader = new FileReader();
@@ -154,24 +167,16 @@
     });
   }
 
-  var MARCA_TABS = { expositores: true, aliados: true, patrocinadores: true, marcas: true };
-
   var MARCA_PLAN_BY_TAB = {
     expositores: 'Zona Origen',
     aliados: 'Aliado Patrocinador',
-    patrocinadores: 'Zona Gran Reserva',
-    marcas: 'Zona Origen'
+    patrocinadores: 'Zona Gran Reserva'
   };
 
-  function updateCreateMarcaCardVisibility() {
-    var card = document.getElementById('adminCreateMarcaCard');
-    if (!card) return;
-    card.hidden = !MARCA_TABS[activeAdminTab];
-    if (!card.hidden) {
-      var planSelect = document.getElementById('adminMarcaPlan');
-      var defaultPlan = MARCA_PLAN_BY_TAB[activeAdminTab];
-      if (planSelect && defaultPlan) planSelect.value = defaultPlan;
-    }
+  function syncMarcaPlanFromTab() {
+    var planSelect = document.getElementById('adminMarcaPlan');
+    var defaultPlan = MARCA_PLAN_BY_TAB[activeAdminTab];
+    if (planSelect && defaultPlan) planSelect.value = defaultPlan;
   }
 
   function resetAdminCreateMarcaForm() {
@@ -186,7 +191,7 @@
       result.hidden = true;
       result.innerHTML = '';
     }
-    updateCreateMarcaCardVisibility();
+    syncMarcaPlanFromTab();
   }
 
   function showAdminCreateMarcaResult(html) {
@@ -408,60 +413,117 @@
   }
 
   function renderAdminTabPanels(data) {
-    var panel = document.getElementById('adminTabPanels');
-    if (!panel || !data) return;
+    if (!data) return;
 
     var feriaRows = pickRows(data, 'allFeria');
     var compRows = pickRows(data, 'allCompetencia');
     var standsRows = pickRows(data, 'allStands');
-    var html = '';
 
-    if (activeAdminTab === 'competencia') {
-      html = '<div class="admin-tab-panel" role="tabpanel">' +
+    var panelComp = document.getElementById('adminTabPanelsCompetencia');
+    if (panelComp) {
+      panelComp.innerHTML = '<div class="admin-tab-panel" role="tabpanel">' +
         renderManageableTable(compRows, data.competenciaColumns || DEFAULT_COMP_COLS, {
           dataset: 'competencia',
           metaText: compRows.length + ' competidores — más recientes primero.'
         }) + '</div>';
-    } else if (activeAdminTab === 'feria') {
-      html = '<div class="admin-tab-panel" role="tabpanel">' +
+    }
+
+    var panelFeria = document.getElementById('adminTabPanelsFeria');
+    if (panelFeria) {
+      panelFeria.innerHTML = '<div class="admin-tab-panel" role="tabpanel">' +
         renderManageableTable(feriaRows, data.feriaColumns || DEFAULT_FERIA_COLS, {
           dataset: 'feria',
           metaText: feriaRows.length + ' visitantes registrados.'
         }) + '</div>';
-    } else if (activeAdminTab === 'marcas') {
-      html = '<div class="admin-tab-panel" role="tabpanel">' + renderDirectorioTable(standsRows) + '</div>';
-    } else {
+    }
+
+    var panelStands = document.getElementById('adminTabPanels');
+    if (panelStands) {
       var sectionRows = filterStandsBySection(standsRows, activeAdminTab);
       var sectionLabels = {
         expositores: 'Stands / expositores (Zona Origen)',
         aliados: 'Aliados (Aliado Patrocinador)',
         patrocinadores: 'Patrocinadores (Zona Gran Reserva)'
       };
-      html = '<div class="admin-tab-panel" role="tabpanel">' +
+      panelStands.innerHTML = '<div class="admin-tab-panel" role="tabpanel">' +
         renderManageableTable(sectionRows, data.standsColumns || DEFAULT_STANDS_COLS, {
           dataset: 'stands',
           metaText: sectionRows.length + ' registros — ' + (sectionLabels[activeAdminTab] || activeAdminTab)
         }) + '</div>';
     }
 
-    panel.innerHTML = html;
+    var directorio = document.getElementById('tableDirectorio');
+    if (directorio) {
+      directorio.innerHTML = renderDirectorioTable(standsRows);
+      bindDirectorioToggles();
+    }
+
     bindToggleStatusButtons();
-    if (activeAdminTab === 'marcas') bindDirectorioToggles();
-    updateCreateMarcaCardVisibility();
   }
 
   function bindAdminTabs() {
     document.querySelectorAll('[data-admin-tab]').forEach(function (tab) {
       tab.addEventListener('click', function () {
-        activeAdminTab = tab.getAttribute('data-admin-tab') || 'competencia';
+        activeAdminTab = tab.getAttribute('data-admin-tab') || 'expositores';
         document.querySelectorAll('[data-admin-tab]').forEach(function (t) {
           var active = t === tab;
           t.classList.toggle('admin-tab--active', active);
           t.setAttribute('aria-selected', active ? 'true' : 'false');
         });
         renderAdminTabPanels(lastDashboardData);
-        updateCreateMarcaCardVisibility();
+        syncMarcaPlanFromTab();
       });
+    });
+  }
+
+  function showAdminSection(section) {
+    if (ADMIN_SECTIONS.indexOf(section) === -1) section = 'resumen';
+    activeAdminSection = section;
+
+    document.querySelectorAll('[data-admin-section]').forEach(function (btn) {
+      var active = btn.getAttribute('data-admin-section') === section;
+      btn.classList.toggle('admin-nav__item--active', active);
+    });
+
+    document.querySelectorAll('[data-admin-section-panel]').forEach(function (panel) {
+      var show = panel.getAttribute('data-admin-section-panel') === section;
+      panel.hidden = !show;
+    });
+
+    if (section === 'pasaportes' && global.AdminPasaportes && global.AdminPasaportes.onShow) {
+      global.AdminPasaportes.onShow();
+    }
+    if (section === 'operadores' && global.AdminOperadores && global.AdminOperadores.onShow) {
+      global.AdminOperadores.onShow();
+    }
+
+    if (global.history && global.history.replaceState) {
+      var nextHash = section === 'resumen' ? '#resumen' : '#' + section;
+      global.history.replaceState(null, '', nextHash);
+    }
+  }
+
+  function readHashSection() {
+    var hash = (global.location.hash || '').replace(/^#/, '').trim().toLowerCase();
+    if (hash && ADMIN_SECTIONS.indexOf(hash) !== -1) return hash;
+    return 'resumen';
+  }
+
+  function bindAdminNav() {
+    document.querySelectorAll('[data-admin-section]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        showAdminSection(btn.getAttribute('data-admin-section') || 'resumen');
+      });
+    });
+
+    document.querySelectorAll('.admin-goto-section').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        showAdminSection(btn.getAttribute('data-goto') || 'resumen');
+      });
+    });
+
+    global.addEventListener('hashchange', function () {
+      showAdminSection(readHashSection());
     });
   }
 
@@ -874,6 +936,10 @@
 
     document.getElementById('statVisitsToday').textContent = formatNumber(stats.visitsToday);
     document.getElementById('statVisitsTotal').textContent = formatNumber(stats.visitsTotal);
+    var visitsTodayA = document.getElementById('statVisitsTodayAnalytics');
+    var visitsTotalA = document.getElementById('statVisitsTotalAnalytics');
+    if (visitsTodayA) visitsTodayA.textContent = formatNumber(stats.visitsToday);
+    if (visitsTotalA) visitsTotalA.textContent = formatNumber(stats.visitsTotal);
     var uniqueToday = document.getElementById('statUniquePathsToday');
     if (uniqueToday) uniqueToday.textContent = formatNumber(stats.uniquePathsToday);
     var uniqueTotal = document.getElementById('statUniquePathsTotal');
@@ -882,7 +948,8 @@
     document.getElementById('statCompetencia').textContent = formatNumber(stats.competenciaRegistrations);
     var statStands = document.getElementById('statStands');
     if (statStands) statStands.textContent = formatNumber(stats.standsRegistrations);
-    document.getElementById('statLista').textContent = formatNumber(stats.listaEspera);
+    var statLista = document.getElementById('statLista');
+    if (statLista) statLista.textContent = formatNumber(stats.listaEspera);
 
     var cupo = stats.competenciaCupo || {};
     document.getElementById('statCupo').textContent =
@@ -938,6 +1005,149 @@
     });
   }
 
+  function bindAdminCreateCompetidorForm() {
+    var form = document.getElementById('formAdminCreateCompetidor');
+    if (!form) return;
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      showError('');
+
+      var nombre = document.getElementById('adminCompNombre').value.trim();
+      var correo = document.getElementById('adminCompCorreo').value.trim().toLowerCase();
+      var celular = document.getElementById('adminCompCelular').value.trim();
+      if (!nombre || !correo || !celular) {
+        showError('Nombre, correo y celular son obligatorios.');
+        return;
+      }
+
+      var submitBtn = document.getElementById('adminCompSubmit');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creando…';
+      }
+
+      adminCreateCompetidor({
+        nombre: nombre,
+        documento: document.getElementById('adminCompDocumento').value.trim(),
+        correo: correo,
+        celular: celular,
+        ciudad: document.getElementById('adminCompCiudad').value.trim(),
+        estadoPago: document.getElementById('adminCompEstadoPago').value,
+        cupoConfirmado: document.getElementById('adminCompCupoConfirmado').checked,
+        forzarCupo: document.getElementById('adminCompForzarCupo').checked
+      }).then(function (result) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Crear competidor';
+        }
+        if (!result || !result.ok) {
+          showError((result && result.error) || 'No se pudo crear el competidor.');
+          return;
+        }
+        var resultEl = document.getElementById('adminCreateCompResult');
+        if (resultEl) {
+          resultEl.innerHTML = '<p><strong>Competidor creado:</strong> ' + escapeHtml(nombre) +
+            ' <span class="admin-badge admin-badge--on">ID ' + escapeHtml(result.id || '') + '</span></p>';
+          resultEl.hidden = false;
+        }
+        form.reset();
+        document.getElementById('adminCompCupoConfirmado').checked = true;
+        loadDashboard();
+      }).catch(function (err) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Crear competidor';
+        }
+        showError(err.message || 'Error al crear competidor.');
+      });
+    });
+  }
+
+  function bindAdminCreateVisitanteForm() {
+    var form = document.getElementById('formAdminCreateVisitante');
+    if (!form) return;
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      showError('');
+
+      var nombre = document.getElementById('adminFeriaNombre').value.trim();
+      var celular = document.getElementById('adminFeriaCelular').value.trim();
+      if (!nombre || !celular) {
+        showError('Nombre y celular son obligatorios.');
+        return;
+      }
+
+      var crearPasaporte = document.getElementById('adminFeriaCrearPasaporte').checked;
+      var submitBtn = document.getElementById('adminFeriaSubmit');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = crearPasaporte ? 'Registrando y creando pasaporte…' : 'Registrando…';
+      }
+
+      function registrarEnSheets(pasaporteId) {
+        return adminCreateVisitante({
+          nombre: nombre,
+          edad: document.getElementById('adminFeriaEdad').value.trim(),
+          celular: celular,
+          correo: document.getElementById('adminFeriaCorreo').value.trim().toLowerCase(),
+          intereses: document.getElementById('adminFeriaIntereses').value.trim(),
+          pasaporteId: pasaporteId || ''
+        });
+      }
+
+      var flow = Promise.resolve(null);
+      if (crearPasaporte && global.Fidelizacion && global.Fidelizacion.crearORecuperarCliente) {
+        flow = global.Fidelizacion.crearORecuperarCliente({
+          nombre: nombre,
+          telefono: celular,
+          email: document.getElementById('adminFeriaCorreo').value.trim(),
+          origen: 'admin-feria'
+        }).then(function (res) { return res.id; })
+          .catch(function (err) {
+            throw new Error('Pasaporte: ' + (err.message || 'Firestore no disponible. Habilita Firestore en Firebase Console.'));
+          });
+      }
+
+      flow.then(function (pasaporteId) {
+        return registrarEnSheets(pasaporteId).then(function (result) {
+          return { result: result, pasaporteId: pasaporteId };
+        });
+      }).then(function (payload) {
+        var result = payload.result;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Registrar visitante';
+        }
+        if (!result || !result.ok) {
+          showError((result && result.error) || 'No se pudo registrar el visitante.');
+          return;
+        }
+        var html = '<p><strong>Visitante registrado:</strong> ' + escapeHtml(nombre) +
+          ' <span class="admin-badge admin-badge--on">ID ' + escapeHtml(result.id || '') + '</span></p>';
+        if (payload.pasaporteId && global.Fidelizacion) {
+          html += '<p><a href="' + escapeHtml(global.Fidelizacion.urlPasaporte(payload.pasaporteId)) +
+            '" target="_blank" rel="noopener">Abrir Pasaporte Cafetero</a></p>';
+        }
+        var resultEl = document.getElementById('adminCreateFeriaResult');
+        if (resultEl) {
+          resultEl.innerHTML = html;
+          resultEl.hidden = false;
+        }
+        form.reset();
+        document.getElementById('adminFeriaCrearPasaporte').checked = true;
+        loadDashboard();
+      }).catch(function (err) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Registrar visitante';
+        }
+        showError(err.message || 'Error al registrar visitante.');
+      });
+    });
+  }
+
   function bindEvents() {
     var refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) refreshBtn.addEventListener('click', loadDashboard);
@@ -961,10 +1171,13 @@
       return;
     }
     bindEvents();
+    bindAdminNav();
     bindAdminTabs();
     bindPatrocinadorCompetenciaForm();
     bindAdminCreateMarcaForm();
-    updateCreateMarcaCardVisibility();
+    bindAdminCreateCompetidorForm();
+    bindAdminCreateVisitanteForm();
+    showAdminSection(readHashSection());
     loadDashboard();
   }
 
