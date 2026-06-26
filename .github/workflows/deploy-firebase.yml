@@ -44,11 +44,20 @@ jobs:
           fi
           echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-sa.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
-          npx -y firebase-tools@latest deploy \
+          set +e
+          OUTPUT=$(npx -y firebase-tools@latest deploy \
             --only hosting \
             --project la-sucursal-del-cafe \
-            --non-interactive
+            --non-interactive 2>&1)
+          CODE=$?
+          echo "$OUTPUT"
           rm -f /tmp/firebase-sa.json
+          if [ "$CODE" -eq 0 ]; then exit 0; fi
+          if echo "$OUTPUT" | grep -q "current active version"; then
+            echo "Hosting ya en la versión activa — OK"
+            exit 0
+          fi
+          exit "$CODE"
 
       - name: Deploy reglas Firestore (opcional)
         env:
