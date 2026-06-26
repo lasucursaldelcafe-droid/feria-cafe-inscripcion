@@ -1,4 +1,6 @@
 // Web App de Google Apps Script - La Sucursal del Cafe
+// IMPORTANTE: pega ESTE ARCHIVO COMPLETO en el editor (borra todo lo anterior).
+// Tras guardar sin errores: ejecutar sincronizarEncabezados() y Nueva implementacion Web App.
 // Recibe inscripciones JSON y las guarda en hojas Feria, Competencia, Stands y Lista de espera.
 // Tras cada inscripcion valida envia confirmacion al participante y alerta a ORGANIZER_EMAIL.
 // Redespliega la Web App tras editar este archivo (Implementar > Nueva implementacion).
@@ -277,6 +279,19 @@ function getCompetenciaCount_() {
   return lastRow > 1 ? lastRow - 1 : 0;
 }
 
+/** Une columnas base + legales + cola (sin .concat anidado dentro de appendRow). */
+function joinRowParts_(baseCols, legalCols, tailCols) {
+  var row = [];
+  var groups = [baseCols, legalCols, tailCols];
+  for (var g = 0; g < groups.length; g++) {
+    var part = groups[g] || [];
+    for (var i = 0; i < part.length; i++) {
+      row.push(part[i]);
+    }
+  }
+  return row;
+}
+
 function appendFeria_(data) {
   var sheet = getOrCreateSheet_(SHEET_FERIA, HEADERS_FERIA);
   if (findDuplicateInSheet_(sheet, HEADERS_FERIA, data.correo, null)) {
@@ -285,9 +300,7 @@ function appendFeria_(data) {
 
   var intereses = Array.isArray(data.intereses) ? data.intereses.join('; ') : String(data.intereses || '');
   var legalCols = parseFeriaLegalAcceptances_(data);
-  var estado = 'Registrado';
-
-  var feriaRow = [
+  var row = joinRowParts_([
     data.fecha || new Date().toISOString(),
     data.id || '',
     data.nombre || '',
@@ -295,8 +308,8 @@ function appendFeria_(data) {
     data.celular || '',
     data.correo || '',
     intereses
-  ].concat(legalCols).concat([estado, 'Si', data.pasaporteId || '', '']);
-  sheet.appendRow(feriaRow);
+  ], legalCols, ['Registrado', 'Sí', data.pasaporteId || '', '']);
+  sheet.appendRow(row);
 
   sendConfirmationEmail_('feria', data);
   sendOrganizerNotificationEmail_('feria', data);
@@ -1048,7 +1061,7 @@ function appendStands_(data) {
   var logosDirectorioJson = logosDirectorioJsonFromRow_(data.marca, logo.enlace, marcasExtra.json);
   data.esAliadoPatrocinador = esAliadoPatrocinador;
 
-  sheet.appendRow([
+  var standRow = joinRowParts_([
     data.fecha || new Date().toISOString(),
     data.id || '',
     standId,
@@ -1069,7 +1082,8 @@ function appendStands_(data) {
     logo.enlace,
     marcasExtra.comparte,
     marcasExtra.json
-  ].concat(legalCols).concat([estado, 'Sí', '', accessHash]));
+  ], legalCols, [estado, 'Sí', '', accessHash]);
+  sheet.appendRow(standRow);
 
   data.accessCode = accessCode;
   data.expositorPanelUrl = getExpositorPanelUrl_();
@@ -1128,7 +1142,7 @@ function appendCompetencia_(data) {
   var estadoPago = tieneComprobante ? 'Comprobante recibido' : 'Pendiente pago';
   var cupoConfirmado = 'No';
 
-  sheet.appendRow([
+  var compRow = joinRowParts_([
     data.fecha || new Date().toISOString(),
     data.id || '',
     data.evento || 'V60 Championship',
@@ -1163,13 +1177,14 @@ function appendCompetencia_(data) {
     comp.tipo,
     comp.enlace,
     comp.preview
-  ].concat(legalCols).concat([
+  ], legalCols, [
     data.observaciones || '',
     estadoPago,
     cupoConfirmado,
     'Sí',
     ''
-  ]));
+  ]);
+  sheet.appendRow(compRow);
 
   sendConfirmationEmail_('competencia', data);
   sendOrganizerNotificationEmail_('competencia', data);
