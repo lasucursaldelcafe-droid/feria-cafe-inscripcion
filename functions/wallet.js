@@ -11,7 +11,6 @@ const { GoogleAuth } = require('google-auth-library');
 const HOSTING_ORIGIN = 'https://la-sucursal-del-cafe.web.app';
 const LOGO_URL = `${HOSTING_ORIGIN}/assets/logo-la-sucursal-del-cafe.png`;
 const CLASS_SUFFIX = 'la_sucursal_fidelizacion';
-const DEFAULT_SERVICE_ACCOUNT_EMAIL = 'la-sucursal-del-cafe@appspot.gserviceaccount.com';
 
 function walletEnv() {
   const cfg = functions.config().wallet || {};
@@ -31,10 +30,6 @@ function walletEnv() {
     } catch (_) {
       /* usar solo email explícito */
     }
-  }
-
-  if (!serviceAccountEmail && !serviceAccountRaw) {
-    serviceAccountEmail = DEFAULT_SERVICE_ACCOUNT_EMAIL;
   }
 
   return {
@@ -249,5 +244,4 @@ module.exports = {
   createGenerateWalletPassHandler,
   walletEnv,
   signSaveToWalletJwt,
-  DEFAULT_SERVICE_ACCOUNT_EMAIL,
 };

@@ -4,19 +4,17 @@ Guía paso a paso para que el botón **«Agregar a Google Wallet»** en `/mi-tar
 
 ## Resumen rápido
 
-| Paso | Qué haces | Tiempo aprox. |
-|------|-----------|---------------|
-| 1 | Crear Issuer en Google Wallet Console | 10 min |
-| 2 | Habilitar Wallet API + cuenta de servicio | 10 min |
-| 3 | Invitar la SA como usuario en Wallet Console | 2 min |
-| 4 | Configurar secretos en Firebase Functions | 5 min |
-| 5 | Desplegar Functions + Hosting | 5 min |
-| 6 | Probar en Android | 2 min |
+| Paso | Qué haces | Automático en CI |
+|------|-----------|------------------|
+| Issuer ID `3388000000023162431` | Cuenta `lasucursaldelcafe@gmail.com` en Wallet Console | Sí (workflow) |
+| Cuenta de servicio Firebase | `FIREBASE_SERVICE_ACCOUNT` en GitHub (Admin SDK) | Sí |
+| Deploy `generateWalletPass` | Push a `main` | Sí |
 
-**Comando de ayuda local:**
+**No necesitas** `google-wallet-sa.json` ni invitar `@appspot`. CI usa la misma clave que el deploy de Hosting.
 
-```powershell
-py tools/setup_google_wallet.py
+```bash
+# Local (con firebase-hosting-sa.json):
+py tools/setup_google_wallet.py --auto
 ```
 
 ---

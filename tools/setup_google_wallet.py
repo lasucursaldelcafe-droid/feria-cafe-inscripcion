@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """
-Asistente de configuración Google Wallet para fidelización.
+Asistente Google Wallet — usa la misma cuenta de servicio que Firebase CI.
 
-Uso:
-  py tools/setup_google_wallet.py
-  py tools/setup_google_wallet.py --sin-json --configurar-firebase   # sin descargar JSON
-  py tools/setup_google_wallet.py --configurar-firebase              # con JSON local
-  py tools/setup_google_wallet.py --deploy
-  py tools/setup_google_wallet.py --verificar
+Uso recomendado (automático):
+  py tools/setup_google_wallet.py --auto
+
+CI (GitHub Actions): tools/configure_wallet_firebase.py en deploy-firebase.yml
 """
 
 from __future__ import annotations
@@ -22,18 +20,15 @@ from pathlib import Path
 
 from _util import DEFAULT_FIREBASE_PROJECT, PROJECT_ROOT, TOOLS_DIR, error, info, ok, warn
 
+FIREBASE_HOSTING_SA = TOOLS_DIR / "credentials" / "firebase-hosting-sa.json"
 WALLET_SA = TOOLS_DIR / "credentials" / "google-wallet-sa.json"
 ENV_PATH = TOOLS_DIR / ".env"
 FUNCTIONS_DIR = PROJECT_ROOT / "functions"
-DEFAULT_WALLET_SA_EMAIL = f"{DEFAULT_FIREBASE_PROJECT}@appspot.gserviceaccount.com"
+DEFAULT_ISSUER_ID = "3388000000023162431"
+CONFIGURE_SCRIPT = PROJECT_ROOT / "tools" / "configure_wallet_firebase.py"
 
 WALLET_CONSOLE = "https://pay.google.com/business/console"
-GCP_APIS = "https://console.cloud.google.com/apis/library/wallet.googleapis.com?project=la-sucursal-del-cafe"
-GCP_IAM_CRED = (
-    "https://console.cloud.google.com/apis/library/iamcredentials.googleapis.com"
-    f"?project={DEFAULT_FIREBASE_PROJECT}"
-)
-GCP_SA = "https://console.cloud.google.com/iam-admin/serviceaccounts?project=la-sucursal-del-cafe"
+GCP_APIS = f"https://console.cloud.google.com/apis/library/wallet.googleapis.com?project={DEFAULT_FIREBASE_PROJECT}"
 
 
 def read_env_var(key: str) -> str:
@@ -70,114 +65,82 @@ def run_cmd(cmd: list[str], *, cwd: Path | None = None) -> int:
     return subprocess.run(cmd, cwd=str(cwd or PROJECT_ROOT)).returncode
 
 
-def validate_wallet_sa(path: Path) -> bool:
-    if not path.is_file():
-        error(f"No existe {path}")
-        info("Descarga el JSON desde Google Cloud → Service accounts → Keys")
-        return False
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        error(f"JSON inválido: {exc}")
-        return False
-    for field in ("client_email", "private_key", "project_id"):
-        if field not in data:
-            error(f"Falta campo '{field}' en el JSON")
-            return False
-    ok(f"Cuenta de servicio: {data['client_email']}")
-    return True
+def resolve_firebase_sa() -> Path | None:
+    raw = read_env_var("FIREBASE_SERVICE_ACCOUNT_JSON").strip()
+    if raw:
+        path = Path(raw).expanduser()
+        if path.is_file():
+            return path.resolve()
+    if FIREBASE_HOSTING_SA.is_file():
+        return FIREBASE_HOSTING_SA
+    return None
 
 
 def print_checklist() -> None:
     print()
-    info("Checklist Google Wallet (sin JSON — recomendado si no puedes descargar clave):")
-    print("  1. Issuer ID →", WALLET_CONSOLE)
-    print("  2. Habilitar Wallet API + IAM Credentials API")
-    print(f"  3. Invitar en Wallet Console: {DEFAULT_WALLET_SA_EMAIL}")
-    print("  4. py tools/setup_google_wallet.py --sin-json --configurar-firebase")
-    print("  5. py tools/setup_google_wallet.py --deploy")
+    info("Google Wallet — modo automático (lasucursaldelcafe@gmail.com / Firebase SA):")
+    print("  py tools/setup_google_wallet.py --auto")
     print()
-    info("Alternativa con JSON local (si tu proyecto lo permite):")
-    print(f"  - JSON en {WALLET_SA}")
-    print("  - py tools/setup_google_wallet.py --configurar-firebase")
-    print()
-    info("Guía completa: GOOGLE-WALLET-SETUP.md")
+    info("En cada push a main, GitHub Actions ejecuta configure_wallet_firebase.py + deploy.")
+    print("  Issuer ID:", DEFAULT_ISSUER_ID)
+    info("Guía: GOOGLE-WALLET-SETUP.md")
 
 
-def cmd_configurar_firebase_iam(issuer_id: str, service_account_email: str) -> int:
-    iid = issuer_id or read_env_var("GOOGLE_WALLET_ISSUER_ID")
-    if not iid:
-        error("Falta Issuer ID.")
-        info("Usa --issuer-id 3388000000023162431 o GOOGLE_WALLET_ISSUER_ID en tools/.env")
-        webbrowser.open(WALLET_CONSOLE)
-        return 2
+def cmd_auto(issuer_id: str) -> int:
+    sa = resolve_firebase_sa()
+    if not sa:
+        error(f"Falta {FIREBASE_HOSTING_SA} (misma clave que FIREBASE_SERVICE_ACCOUNT en GitHub).")
+        info("Descárgala: Firebase Console → Project settings → Service accounts → Generate new private key")
+        return 1
 
-    email = (service_account_email or read_env_var("GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL") or DEFAULT_WALLET_SA_EMAIL).strip()
-    if not email.endswith(".iam.gserviceaccount.com") and not email.endswith("@appspot.gserviceaccount.com"):
-        warn(f"Email inusual para SA: {email}")
-
-    if not shutil.which("firebase"):
-        firebase = ["npx", "-y", "firebase-tools@latest"]
-    else:
-        firebase = ["firebase"]
+    iid = issuer_id or read_env_var("GOOGLE_WALLET_ISSUER_ID") or DEFAULT_ISSUER_ID
+    try:
+        data = json.loads(sa.read_text(encoding="utf-8"))
+        update_env_var("GOOGLE_WALLET_ISSUER_ID", iid)
+        if data.get("client_email"):
+            update_env_var("GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL", data["client_email"])
+    except json.JSONDecodeError:
+        pass
 
     rc = run_cmd(
         [
-            *firebase,
-            "functions:config:set",
-            f"wallet.issuer_id={iid}",
-            f"wallet.service_account_email={email}",
-            "wallet.class_suffix=la_sucursal_fidelizacion",
-            f"--project={DEFAULT_FIREBASE_PROJECT}",
+            sys.executable,
+            str(CONFIGURE_SCRIPT),
+            "--service-account",
+            str(sa),
+            "--issuer-id",
+            iid,
+            "--enable-apis",
         ]
     )
     if rc != 0:
-        error("No se pudo guardar config. ¿firebase login con lasucursaldelcafe@gmail.com?")
         return rc
-
-    update_env_var("GOOGLE_WALLET_ISSUER_ID", iid)
-    update_env_var("GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL", email)
-    ok("Firebase Functions configurado (modo IAM signJwt, sin JSON).")
-    info(f"Invita en Wallet Console: {email}")
-    info("APIs: Wallet + IAM Credentials deben estar habilitadas.")
-    return 0
+    return cmd_deploy()
 
 
 def cmd_configurar_firebase(issuer_id: str) -> int:
-    if not validate_wallet_sa(WALLET_SA):
-        return 1
+    """Legacy: google-wallet-sa.json dedicado."""
+    if not WALLET_SA.is_file():
+        warn("Sin google-wallet-sa.json — usando firebase-hosting-sa.json")
+        return cmd_auto(issuer_id)
 
-    iid = issuer_id or read_env_var("GOOGLE_WALLET_ISSUER_ID")
-    if not iid:
-        error("Falta Issuer ID.")
-        info("Añade GOOGLE_WALLET_ISSUER_ID en tools/.env o usa --issuer-id")
-        webbrowser.open(WALLET_CONSOLE)
-        return 2
-
-    if not shutil.which("firebase"):
-        warn("Firebase CLI no encontrado — usa npx:")
-        firebase = ["npx", "-y", "firebase-tools@latest"]
-    else:
-        firebase = ["firebase"]
-
+    iid = issuer_id or read_env_var("GOOGLE_WALLET_ISSUER_ID") or DEFAULT_ISSUER_ID
+    firebase = ["firebase"] if shutil.which("firebase") else ["npx", "-y", "firebase-tools@latest"]
     sa_json = WALLET_SA.read_text(encoding="utf-8")
-    # firebase functions:config:set acepta pares clave=valor
     rc = run_cmd(
         [
             *firebase,
             "functions:config:set",
             f"wallet.issuer_id={iid}",
-            f'wallet.service_account={sa_json}',
+            f"wallet.service_account={sa_json}",
             "wallet.class_suffix=la_sucursal_fidelizacion",
             f"--project={DEFAULT_FIREBASE_PROJECT}",
         ]
     )
     if rc != 0:
-        error("No se pudo guardar config. Prueba manualmente (ver GOOGLE-WALLET-SETUP.md).")
         return rc
-
     update_env_var("GOOGLE_WALLET_ISSUER_ID", iid)
-    ok("Firebase Functions configurado para Google Wallet.")
+    ok("Firebase Functions configurado.")
     return 0
 
 
@@ -185,16 +148,10 @@ def cmd_deploy() -> int:
     if not (FUNCTIONS_DIR / "package.json").is_file():
         error("No existe carpeta functions/")
         return 1
-
     rc = run_cmd(["npm", "install"], cwd=FUNCTIONS_DIR)
     if rc != 0:
         return rc
-
-    if shutil.which("firebase"):
-        firebase = ["firebase"]
-    else:
-        firebase = ["npx", "-y", "firebase-tools@latest"]
-
+    firebase = ["firebase"] if shutil.which("firebase") else ["npx", "-y", "firebase-tools@latest"]
     return run_cmd(
         [
             *firebase,
@@ -208,47 +165,35 @@ def cmd_deploy() -> int:
 
 def cmd_verificar() -> int:
     ok_flag = True
-    sin_json = read_env_var("GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL")
-
-    if validate_wallet_sa(WALLET_SA):
-        info("Modo JSON: google-wallet-sa.json presente")
-    elif sin_json:
-        ok(f"Modo sin JSON: {sin_json}")
+    sa = resolve_firebase_sa()
+    if sa:
+        try:
+            email = json.loads(sa.read_text(encoding="utf-8")).get("client_email", "?")
+            ok(f"Firebase SA: {email}")
+        except json.JSONDecodeError:
+            warn(f"JSON inválido: {sa}")
+            ok_flag = False
     else:
-        warn("Sin JSON ni GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL en tools/.env")
-        info(f"Sugerencia: usa --sin-json con {DEFAULT_WALLET_SA_EMAIL}")
+        warn("Sin firebase-hosting-sa.json (CI usa FIREBASE_SERVICE_ACCOUNT en GitHub).")
         ok_flag = False
 
-    iid = read_env_var("GOOGLE_WALLET_ISSUER_ID")
-    if iid:
-        ok(f"Issuer ID en .env: {iid}")
-    else:
-        warn("GOOGLE_WALLET_ISSUER_ID no está en tools/.env")
-        ok_flag = False
+    iid = read_env_var("GOOGLE_WALLET_ISSUER_ID") or DEFAULT_ISSUER_ID
+    ok(f"Issuer ID: {iid}")
 
-    url = f"https://us-central1-{DEFAULT_FIREBASE_PROJECT}.cloudfunctions.net/generateWalletPass"
-    info(f"URL esperada de la función: {url}")
-    info("Prueba POST con clienteId desde mi-tarjeta.html en Android.")
-
+    info(
+        f"URL: https://us-central1-{DEFAULT_FIREBASE_PROJECT}.cloudfunctions.net/generateWalletPass"
+    )
     return 0 if ok_flag else 1
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Configura Google Wallet para fidelización.")
-    parser.add_argument("--configurar-firebase", action="store_true", help="Sube issuer + SA (JSON) a Firebase.")
-    parser.add_argument(
-        "--sin-json",
-        action="store_true",
-        help="Configura issuer + email SA sin archivo JSON (IAM signJwt).",
-    )
-    parser.add_argument("--deploy", action="store_true", help="npm install + deploy function + hosting.")
+    parser = argparse.ArgumentParser(description="Google Wallet — configuración automática.")
+    parser.add_argument("--auto", action="store_true", help="Config + deploy con firebase-hosting-sa.json.")
+    parser.add_argument("--configurar-firebase", action="store_true", help="Solo config en Firebase.")
+    parser.add_argument("--deploy", action="store_true", help="Solo deploy function + hosting.")
     parser.add_argument("--verificar", action="store_true", help="Comprueba archivos locales.")
-    parser.add_argument("--abrir", action="store_true", help="Abrir consolas Google.")
-    parser.add_argument("--issuer-id", help="Issuer ID numérico de Wallet Console.")
-    parser.add_argument(
-        "--service-account-email",
-        help=f"Email SA para Wallet (default: {DEFAULT_WALLET_SA_EMAIL})",
-    )
+    parser.add_argument("--abrir", action="store_true", help="Abrir Wallet Console.")
+    parser.add_argument("--issuer-id", default="", help=f"Issuer ID (default {DEFAULT_ISSUER_ID}).")
     return parser.parse_args()
 
 
@@ -263,13 +208,27 @@ def main() -> int:
     if args.abrir:
         webbrowser.open(WALLET_CONSOLE)
         webbrowser.open(GCP_APIS)
-        webbrowser.open(GCP_IAM_CRED)
 
-    if args.sin_json and args.configurar_firebase:
-        return cmd_configurar_firebase_iam(args.issuer_id or "", args.service_account_email or "")
+    if args.auto:
+        return cmd_auto(args.issuer_id)
 
     if args.configurar_firebase:
-        return cmd_configurar_firebase(args.issuer_id or "")
+        if resolve_firebase_sa() and not WALLET_SA.is_file():
+            sa = resolve_firebase_sa()
+            assert sa
+            iid = args.issuer_id or read_env_var("GOOGLE_WALLET_ISSUER_ID") or DEFAULT_ISSUER_ID
+            return run_cmd(
+                [
+                    sys.executable,
+                    str(CONFIGURE_SCRIPT),
+                    "--service-account",
+                    str(sa),
+                    "--issuer-id",
+                    iid,
+                    "--enable-apis",
+                ]
+            )
+        return cmd_configurar_firebase(args.issuer_id)
 
     if args.deploy:
         return cmd_deploy()
@@ -278,8 +237,6 @@ def main() -> int:
         return cmd_verificar()
 
     print_checklist()
-    if not WALLET_SA.is_file():
-        webbrowser.open(GCP_SA)
     return 0
 
 

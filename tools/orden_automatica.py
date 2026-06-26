@@ -71,11 +71,11 @@ REMEDIATION_ACTIONS: dict[str, Action] = {
         "Desplegar Firebase Hosting",
         True,
     ),
-    "py tools/setup_google_wallet.py --configurar-firebase && py tools/setup_google_wallet.py --deploy": Action(
+    "py tools/setup_google_wallet.py --auto": Action(
         60,
         "wallet",
         f'"{sys.executable}" tools/setup_google_wallet.py --verificar',
-        "Verificar Google Wallet (requiere credenciales manuales)",
+        "Google Wallet (Firebase SA + deploy)",
         False,
     ),
 }

@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  FIREBASE_PROJECT: la-sucursal-del-cafe
+  GOOGLE_WALLET_ISSUER_ID: "3388000000023162431"
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -30,7 +34,28 @@ jobs:
             printf "window.SHEETS_CONFIG = {\n  WEB_APP_URL: ''\n};\n" > js/sheets-config.js
           fi
 
-      - name: Deploy to Firebase Hosting
+      - name: Deploy completo (Hosting + Wallet + Firestore)
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GOOGLE_WALLET_ISSUER_ID: ${{ env.GOOGLE_WALLET_ISSUER_ID }}
+        run: |
+          set -e
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "Sin FIREBASE_SERVICE_ACCOUNT — se usará deploy de hosting alternativo."
+            exit 0
+          fi
+          echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-sa.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
+          cd functions && npm install && cd ..
+          python3 tools/configure_wallet_firebase.py --enable-apis
+          npx -y firebase-tools@latest deploy \
+            --only hosting,functions:generateWalletPass,firestore:rules \
+            --project la-sucursal-del-cafe \
+            --non-interactive
+          rm -f /tmp/firebase-sa.json
+
+      - name: Deploy Hosting (fallback sin cuenta de servicio)
+        if: failure()
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
@@ -39,18 +64,22 @@ jobs:
           channelId: live
         continue-on-error: true
 
-      - name: Deploy reglas de Firestore (módulo de fidelización)
-        if: always()
-        continue-on-error: true
+      - name: Verificar generateWalletPass
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
-          if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
-            echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-sa.json
-            export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
-            npx -y firebase-tools@latest deploy --only firestore:rules --project la-sucursal-del-cafe --non-interactive
-            rm -f /tmp/firebase-sa.json
-          else
-            echo "Saltando despliegue de Firestore rules (secreto no configurado)"
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "Saltando verificación Wallet (sin SA)."
+            exit 0
           fi
-
+          URL="https://us-central1-la-sucursal-del-cafe.cloudfunctions.net/generateWalletPass"
+          CODE=$(curl -sS -o /tmp/wallet-test.json -w "%{http_code}" \
+            -X POST "$URL" \
+            -H "Content-Type: application/json" \
+            -d '{"clienteId":"ci-test","nombre":"Test","puntos":0,"nivel":"Bronce"}' || echo "000")
+          echo "generateWalletPass → HTTP $CODE"
+          head -c 400 /tmp/wallet-test.json 2>/dev/null || true
+          echo ""
+          if [ "$CODE" = "404" ]; then
+            echo "::warning::Function aún no publicada (404)"
+          fi
