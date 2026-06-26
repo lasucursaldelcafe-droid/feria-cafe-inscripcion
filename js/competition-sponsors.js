@@ -84,7 +84,7 @@
   function renderInto(selector, sponsors) {
     var el = document.querySelector(selector);
     if (!el) return;
-    if (!sponsors.length) {
+    if (!sponsors || !sponsors.length) {
       el.innerHTML = '';
       el.hidden = true;
       return;
