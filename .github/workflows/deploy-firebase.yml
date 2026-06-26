@@ -49,10 +49,22 @@ jobs:
           cd functions && npm install && cd ..
           python3 tools/configure_wallet_firebase.py --enable-apis
           npx -y firebase-tools@latest deploy \
-            --only hosting,functions:generateWalletPass,firestore:rules \
+            --only hosting,functions:generateWalletPass \
             --project la-sucursal-del-cafe \
             --non-interactive
           rm -f /tmp/firebase-sa.json
+
+      - name: Deploy reglas Firestore (opcional)
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then exit 0; fi
+          echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-sa.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
+          npx -y firebase-tools@latest deploy --only firestore:rules \
+            --project la-sucursal-del-cafe --non-interactive || true
+          rm -f /tmp/firebase-sa.json
+        continue-on-error: true
 
       - name: Deploy Hosting (fallback sin cuenta de servicio)
         if: failure()
