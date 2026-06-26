@@ -21,7 +21,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
-from _util import PROJECT_ROOT, TOOLS_DIR, error, info, load_dotenv, ok, read_web_app_url, warn
+from _util import PROJECT_ROOT, TOOLS_DIR, error, info, load_dotenv, ok, read_canonical_web_app_url, read_web_app_url, warn
 
 SITE_BASE = "https://la-sucursal-del-cafe.web.app"
 WALLET_FN = (
@@ -43,6 +43,8 @@ HOSTING_ROUTES: list[tuple[str, str, bool]] = [
     ("/festival", "Alias festival", True),
     ("/stands", "Stands", True),
     ("/marcas", "Marcas", True),
+    ("/pasaporte", "Pasaporte cafetero", True),
+    ("/escanear-pasaporte", "Escanear pasaporte", True),
     ("/fidelizacion", "Fidelización", True),
     ("/registro-fidelizacion", "Registro fidelización", True),
     ("/mi-tarjeta", "Tarjeta cliente", True),
@@ -220,15 +222,30 @@ def check_sheets_config_prod(report: VerificationReport) -> None:
             category="backend",
             passed=False,
             detail="WEB_APP_URL vacía o placeholder en producción",
-            remediation="py tools/setup_github_ci.py && gh workflow run \"Deploy Firebase Hosting\"",
+            remediation="gh secret set SHEETS_WEB_APP_URL --body \"$(cat tools/CANONICAL_SHEETS_URL.txt)\"",
+        )
+        return
+    canonical = read_canonical_web_app_url()
+    match = re.search(r"WEB_APP_URL:\s*'([^']+)'", html)
+    prod_url = match.group(1) if match else ""
+    url_ok = bool(prod_url and "/exec" in prod_url)
+    if canonical and prod_url and prod_url.rstrip("/") != canonical.rstrip("/"):
+        add(
+            report,
+            id="sheets_config_prod",
+            category="backend",
+            passed=False,
+            detail=f"Producción usa URL distinta a tools/CANONICAL_SHEETS_URL.txt",
+            remediation='gh secret set SHEETS_WEB_APP_URL --body "$(cat tools/CANONICAL_SHEETS_URL.txt)" && gh workflow run "Deploy Firebase Hosting"',
         )
         return
     add(
         report,
         id="sheets_config_prod",
         category="backend",
-        passed=True,
-        detail="sheets-config.js con URL /exec en producción",
+        passed=url_ok,
+        detail="sheets-config.js con URL /exec en producción" + (f" ({prod_url[:50]}…)" if prod_url else ""),
+        remediation="gh secret set SHEETS_WEB_APP_URL" if not url_ok else "",
     )
 
 
@@ -249,19 +266,28 @@ def check_apps_script(report: VerificationReport, web_url: str) -> None:
         ("cupo", f"{web_url}?action=cupo", "GET", ""),
         ("stands_map", f"{web_url}?action=stands_map", "GET", ""),
         ("admin_dashboard", f"{web_url}?action=admin_dashboard", "GET", ""),
+        ("participante_publico", f"{web_url}?action=participante_publico&id=__probe__", "GET", ""),
     ]
     for name, url, method, _ in tests:
         status, data = http_json(url, method=method)
         passed = status == 200 and data.get("ok")
         if name == "admin_dashboard":
             passed = passed and bool(data.get("stats"))
+        if name == "participante_publico":
+            passed = status == 200 and (
+                data.get("formType") == "participante_publico"
+                or (data.get("error") and "no encontrada" in str(data.get("error")).lower())
+            )
         add(
             report,
             id=f"apps_script:{name}",
             category="backend",
             passed=passed,
             detail=f"{name} → HTTP {status}",
-            remediation="py tools/setup_admin.py --sin-firebase" if not passed else "",
+            remediation="Pega Code.gs del repo en Apps Script, redepliega y ejecuta sincronizarEncabezados()"
+            if not passed and name == "participante_publico"
+            else ("py tools/setup_admin.py --sin-firebase" if not passed else ""),
+            optional=name == "participante_publico",
         )
 
     _, pv = http_json(
@@ -293,6 +319,8 @@ def check_forms_pages(report: VerificationReport) -> None:
         ("/competencia", ["form-submit.js", "sheets-config.js"]),
         ("/admin", ["admin-dashboard.js", "sheets-config.js"]),
         ("/stands", ["stands-map.js"]),
+        ("/marcas", ["participantes-directory.js"]),
+        ("/mi-stand", ["expositor-panel.js"]),
         ("/fidelizacion", ["site-links.js"]),
     ]
     for path, tokens in pages:

@@ -249,6 +249,44 @@ def cmd_verificar() -> int:
 
     print()
     ok("Verificación completada. Ejecuta --probar-envio para insertar filas de prueba.")
+    info("Comprobando versión de Code.gs (perfiles de marca)…")
+    probe_status, probe_body = http_request(
+        url + ("&" if "?" in url else "?") + "action=participante_publico&id=__verificar__",
+        "GET",
+    )
+    code_gs_ok = False
+    if probe_status == 200:
+        try:
+            probe_payload = json.loads(probe_body)
+            if probe_payload.get("formType") == "participante_publico":
+                code_gs_ok = True
+            elif probe_payload.get("error") and "no encontrada" in str(probe_payload.get("error")).lower():
+                code_gs_ok = True
+        except json.JSONDecodeError:
+            pass
+    if code_gs_ok:
+        ok("Code.gs actualizado — participante_publico disponible.")
+    else:
+        warn(
+            "Code.gs desactualizado en Apps Script: falta action=participante_publico y admin_create_stand."
+        )
+        info("Pega tools/google-apps-script/Code.gs en el editor, redepliega Web App y ejecuta sincronizarEncabezados().")
+
+    post_probe_status, post_probe_body = http_request(
+        url,
+        "POST",
+        {"action": "admin_create_stand", "marca": "", "correo": ""},
+    )
+    if post_probe_status == 200:
+        try:
+            post_probe = json.loads(post_probe_body)
+            if post_probe.get("error") and "formType" not in str(post_probe.get("error")):
+                ok("admin_create_stand reconocido por doPost.")
+            elif "formType inválido" in str(post_probe.get("error", "")):
+                warn("doPost sin admin_create_stand — redepliega Code.gs desde el repo.")
+        except json.JSONDecodeError:
+            pass
+
     return 0
 
 
