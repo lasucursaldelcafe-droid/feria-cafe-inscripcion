@@ -22,3 +22,5 @@ tools/credentials/*.json
 !tools/credentials/google-wallet-sa.EJEMPLO.json
 tools/google-apps-script/.clasp.json
 functions/node_modules/
+functions/.env
+functions/.env.*

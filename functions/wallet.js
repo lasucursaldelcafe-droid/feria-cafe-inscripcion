@@ -13,14 +13,8 @@ const LOGO_URL = `${HOSTING_ORIGIN}/assets/logo-la-sucursal-del-cafe.png`;
 const CLASS_SUFFIX = 'la_sucursal_fidelizacion';
 
 function walletEnv() {
-  const cfg = functions.config().wallet || {};
-  const serviceAccountRaw =
-    process.env.GOOGLE_WALLET_SERVICE_ACCOUNT || cfg.service_account || '';
-  let serviceAccountEmail = (
-    process.env.GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL ||
-    cfg.service_account_email ||
-    ''
-  ).trim();
+  const serviceAccountRaw = process.env.GOOGLE_WALLET_SERVICE_ACCOUNT || '';
+  let serviceAccountEmail = (process.env.GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL || '').trim();
 
   if (!serviceAccountEmail && serviceAccountRaw) {
     try {
@@ -33,8 +27,8 @@ function walletEnv() {
   }
 
   return {
-    issuerId: (process.env.GOOGLE_WALLET_ISSUER_ID || cfg.issuer_id || '').trim(),
-    classSuffix: (process.env.GOOGLE_WALLET_CLASS_SUFFIX || cfg.class_suffix || CLASS_SUFFIX).trim(),
+    issuerId: (process.env.GOOGLE_WALLET_ISSUER_ID || '').trim(),
+    classSuffix: (process.env.GOOGLE_WALLET_CLASS_SUFFIX || CLASS_SUFFIX).trim(),
     serviceAccountRaw,
     serviceAccountEmail,
   };
