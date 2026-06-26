@@ -61,6 +61,10 @@
         "destination": "/patrocinadores.html"
       },
       {
+        "source": "/marcas/:marcaId",
+        "destination": "/marca-perfil.html"
+      },
+      {
         "source": "/marcas",
         "destination": "/marcas.html"
       },

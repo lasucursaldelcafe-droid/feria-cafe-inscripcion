@@ -8,7 +8,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="googlebot" content="noindex, nofollow">
   <title>Panel admin — Analíticas</title>
-  <link rel="stylesheet" href="css/admin.css?v=20260621c">
+  <link rel="stylesheet" href="css/admin.css?v=20260625c">
 </head>
 <body class="admin-page">
   <header class="admin-header">
@@ -118,6 +118,95 @@
           <div class="admin-card__head">
             <h4 class="admin-card__title">Gestión de registros</h4>
           </div>
+
+          <div id="adminCreateMarcaCard" class="admin-create-marca" hidden>
+            <h5 class="admin-create-marca__title">Subir marca al directorio</h5>
+            <p class="admin-table-meta">Crea el perfil de un expositor, aliado o patrocinador que ya compró stand. El logo se sube a Drive y la marca puede publicarse en <code>/marcas</code>.</p>
+            <form id="formAdminCreateMarca" class="admin-inline-form admin-inline-form--marca">
+              <div class="admin-inline-form__row">
+                <label class="admin-inline-form__field">
+                  <span>Marca o negocio *</span>
+                  <input type="text" id="adminMarcaNombre" required maxlength="120" placeholder="Ej. Café del Valle">
+                </label>
+                <label class="admin-inline-form__field">
+                  <span>Correo del expositor *</span>
+                  <input type="email" id="adminMarcaCorreo" required maxlength="120" placeholder="contacto@marca.com">
+                </label>
+              </div>
+              <div class="admin-inline-form__row">
+                <label class="admin-inline-form__field">
+                  <span>Persona contacto</span>
+                  <input type="text" id="adminMarcaContacto" maxlength="120" placeholder="Nombre">
+                </label>
+                <label class="admin-inline-form__field">
+                  <span>Celular</span>
+                  <input type="tel" id="adminMarcaCelular" maxlength="30" placeholder="300…">
+                </label>
+              </div>
+              <div class="admin-inline-form__row">
+                <label class="admin-inline-form__field">
+                  <span>Plan / tipo</span>
+                  <select id="adminMarcaPlan">
+                    <option value="Zona Origen">Zona Origen (expositor)</option>
+                    <option value="Aliado Patrocinador">Aliado Patrocinador</option>
+                    <option value="Zona Gran Reserva">Zona Gran Reserva (patrocinador)</option>
+                  </select>
+                </label>
+                <label class="admin-inline-form__field admin-inline-form__field--sm">
+                  <span>Stand ID</span>
+                  <input type="text" id="adminMarcaStandId" maxlength="20" placeholder="Ej. A12">
+                </label>
+                <label class="admin-inline-form__field admin-inline-form__field--sm">
+                  <span>Ciudad</span>
+                  <input type="text" id="adminMarcaCiudad" maxlength="80" placeholder="Cali">
+                </label>
+              </div>
+              <div class="admin-inline-form__row">
+                <label class="admin-inline-form__field">
+                  <span>Descripción (directorio)</span>
+                  <textarea id="adminMarcaDescripcion" rows="2" maxlength="500" placeholder="Qué exhiben o promocionan en la feria"></textarea>
+                </label>
+              </div>
+              <div class="admin-inline-form__row">
+                <label class="admin-inline-form__field">
+                  <span>Red social</span>
+                  <select id="adminMarcaRedSocial">
+                    <option value="">—</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="TikTok">TikTok</option>
+                    <option value="Web">Sitio web</option>
+                    <option value="WhatsApp">WhatsApp</option>
+                  </select>
+                </label>
+                <label class="admin-inline-form__field">
+                  <span>Enlace red social</span>
+                  <input type="url" id="adminMarcaRedUrl" maxlength="300" placeholder="https://instagram.com/…">
+                </label>
+              </div>
+              <div class="admin-inline-form__row">
+                <label class="admin-inline-form__field">
+                  <span>Logo (imagen)</span>
+                  <input type="file" id="adminMarcaLogo" accept="image/*">
+                </label>
+              </div>
+              <div class="admin-inline-form__row admin-inline-form__row--checks">
+                <label class="admin-toggle admin-inline-form__toggle">
+                  <input type="checkbox" id="adminMarcaHabilitado" checked>
+                  Habilitado (mapa y conteos)
+                </label>
+                <label class="admin-toggle admin-inline-form__toggle">
+                  <input type="checkbox" id="adminMarcaVisible" checked>
+                  Visible en /marcas
+                </label>
+              </div>
+              <div class="admin-inline-form__actions">
+                <button type="submit" class="admin-btn admin-btn--primary" id="adminMarcaSubmit">Crear marca y publicar</button>
+              </div>
+            </form>
+            <div id="adminCreateMarcaResult" class="admin-create-result" hidden role="status"></div>
+          </div>
+
           <div class="admin-tabs" role="tablist" aria-label="Secciones de inscripciones">
             <button type="button" class="admin-tab admin-tab--active" data-admin-tab="competencia" role="tab" aria-selected="true">Competidores</button>
             <button type="button" class="admin-tab" data-admin-tab="expositores" role="tab" aria-selected="false">Stands / Expositores</button>
@@ -209,6 +298,6 @@
   </main>
 
   <script src="js/sheets-config.js?v=20260621pc"></script>
-  <script src="js/admin-dashboard.js?v=20260621pd"></script>
+  <script src="js/admin-dashboard.js?v=20260625c"></script>
 </body>
 </html>

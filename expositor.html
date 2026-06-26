@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/expositor.css?v=20260620a">
+  <link rel="stylesheet" href="css/expositor.css?v=20260625b">
 </head>
 <body class="expositor-page">
   <header class="expositor-header">
@@ -58,6 +58,73 @@
         <div id="standDetails"></div>
       </article>
 
+      <article class="expositor-card expositor-card--profile" aria-labelledby="profileTitle">
+        <div class="expositor-toolbar" style="margin-bottom:0.5rem">
+          <h2 id="profileTitle" style="margin:0">Perfil público de mi emprendimiento</h2>
+          <a id="viewPublicProfileBtn" class="expositor-btn expositor-btn--secondary" href="#" target="_blank" rel="noopener noreferrer" hidden>Ver en la web</a>
+        </div>
+        <p class="expositor-hint">Edita cómo te ven los visitantes en <strong>/marcas</strong>. Fotos y productos se publican en línea al guardar.</p>
+        <form id="expositorProfileForm" class="expositor-profile-form" novalidate>
+          <div class="expositor-field">
+            <label for="profileTagline">Frase corta (tagline)</label>
+            <input type="text" id="profileTagline" maxlength="140" placeholder="Ej. Café de origen desde el Huila">
+          </div>
+          <div class="expositor-field">
+            <label for="profileDescripcion">Descripción en el directorio</label>
+            <textarea id="profileDescripcion" rows="3" maxlength="500" placeholder="Qué ofreces en la feria"></textarea>
+          </div>
+          <div class="expositor-field">
+            <label for="profileHistoria">Historia de tu emprendimiento</label>
+            <textarea id="profileHistoria" rows="4" maxlength="3000" placeholder="Cuéntanos tu historia (opcional)"></textarea>
+          </div>
+          <div class="expositor-field-row">
+            <div class="expositor-field">
+              <label for="profileRedSocial">Red social</label>
+              <select id="profileRedSocial">
+                <option value="">—</option>
+                <option value="Instagram">Instagram</option>
+                <option value="Facebook">Facebook</option>
+                <option value="TikTok">TikTok</option>
+                <option value="Web">Sitio web</option>
+                <option value="WhatsApp">WhatsApp</option>
+              </select>
+            </div>
+            <div class="expositor-field">
+              <label for="profileRedUrl">Enlace</label>
+              <input type="url" id="profileRedUrl" placeholder="https://">
+            </div>
+          </div>
+          <div class="expositor-field">
+            <label class="expositor-checkbox">
+              <input type="checkbox" id="profilePublicado" checked>
+              Publicar perfil en el directorio /marcas
+            </label>
+          </div>
+
+          <div class="expositor-field">
+            <label for="profileLogo">Logo (opcional, reemplaza el actual)</label>
+            <input type="file" id="profileLogo" accept="image/*">
+          </div>
+
+          <div class="expositor-field">
+            <label>Fotos de tu emprendimiento</label>
+            <div id="profileFotosGrid" class="expositor-media-grid"></div>
+            <input type="file" id="profileFotosInput" accept="image/*" multiple>
+            <p class="expositor-hint">Hasta 12 fotos. Se alojan en Google Drive y se muestran en tu página pública.</p>
+          </div>
+
+          <div class="expositor-field">
+            <label>Productos</label>
+            <div id="profileProductosList" class="expositor-productos-editor"></div>
+            <button type="button" id="addProductoBtn" class="expositor-btn expositor-btn--secondary">+ Agregar producto</button>
+          </div>
+
+          <span id="profileSaveStatus" class="expositor-hint" aria-live="polite"></span>
+          <span id="profileSaveError" class="expositor-error" role="alert"></span>
+          <button type="submit" id="profileSaveBtn" class="expositor-btn expositor-btn--primary">Guardar y publicar perfil</button>
+        </form>
+      </article>
+
       <article class="expositor-card" aria-labelledby="feedTitle">
         <div class="expositor-toolbar" style="margin-bottom:0.5rem">
           <h2 id="feedTitle" style="margin:0">Novedades de la feria</h2>
@@ -82,6 +149,6 @@
   <script src="js/site-links.js"></script>
   <script src="js/sheets-config.js"></script>
   <script src="js/form-submit.js"></script>
-  <script src="js/expositor-panel.js?v=20260620a"></script>
+  <script src="js/expositor-panel.js?v=20260625b"></script>
 </body>
 </html>

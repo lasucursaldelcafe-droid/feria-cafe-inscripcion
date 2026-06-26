@@ -80,6 +80,13 @@
     (function () {
       var params = new URLSearchParams(window.location.search);
       var clienteId = params.get('id');
+      if (!clienteId && window.Fidelizacion && Fidelizacion.leerPasaporteLocal) {
+        clienteId = Fidelizacion.leerPasaporteLocal();
+        if (clienteId && !params.get('id')) {
+          var nextUrl = window.location.pathname + '?id=' + encodeURIComponent(clienteId);
+          window.history.replaceState(null, '', nextUrl);
+        }
+      }
       var loading = document.getElementById('loading');
       var errorBox = document.getElementById('errorBox');
       var pasaporte = document.getElementById('pasaporte');
@@ -159,6 +166,9 @@
         return initQr().then(function () {
           loading.hidden = true;
           pasaporte.hidden = false;
+          if (window.Fidelizacion && Fidelizacion.guardarPasaporteLocal) {
+            Fidelizacion.guardarPasaporteLocal(clienteId);
+          }
 
           document.getElementById('btnDescargar').addEventListener('click', function () {
             QRRender.descargarDesdeContenedor(

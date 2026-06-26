@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Perfil de marca en La Sucursal del Café — feria de café especial, Cali 2026.">
+  <link rel="canonical" href="https://la-sucursal-del-cafe.web.app/marcas">
+  <title>Marca en la feria | La Sucursal del Café</title>
+  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/brand.css?v=20260625b">
+</head>
+<body class="page-festival page-marca-perfil" data-festival-page="marca-perfil">
+  <header class="site-header">
+    <nav class="festival-nav" aria-label="Navegación principal">
+      <a class="festival-nav__brand" data-link="festival" href="index.html">
+        <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="120" height="48">
+      </a>
+      <button type="button" class="festival-nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navMenu">Menú</button>
+      <ul class="festival-nav__menu" id="navMenu">
+        <li><a data-link="festival" href="index.html">Inicio</a></li>
+        <li><a data-link="marcas" href="marcas.html">Marcas</a></li>
+        <li><a data-link="stands" href="stands.html">Adquiere tu stand</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="site-shell">
+    <main class="site-main site-main--festival">
+      <section class="festival-section festival-section--light marca-perfil-section">
+        <div class="festival-wrap marca-perfil-wrap">
+          <p id="marcaPerfilStatus" class="hint marca-perfil-status" aria-live="polite">Cargando perfil…</p>
+
+          <article id="marcaPerfil" class="marca-perfil" hidden>
+            <nav class="marca-perfil-breadcrumb" aria-label="Ruta">
+              <a data-link="marcas" href="marcas.html">Marcas</a>
+              <span aria-hidden="true">›</span>
+              <span id="marcaPerfilBreadcrumb">Perfil</span>
+            </nav>
+
+            <header class="marca-perfil-hero">
+              <div class="marca-perfil-hero__avatar" id="marcaPerfilAvatar" aria-hidden="true"></div>
+              <div class="marca-perfil-hero__body">
+                <span id="marcaPerfilBadge" class="festival-sponsor-card__badge">Expositor</span>
+                <h1 id="marcaPerfilTitle" class="marca-perfil-hero__title">Marca</h1>
+                <p id="marcaPerfilTagline" class="marca-perfil-hero__tagline"></p>
+                <div class="marca-perfil-hero__meta">
+                  <span id="marcaPerfilStand" class="marca-perfil-meta"></span>
+                  <span id="marcaPerfilCiudad" class="marca-perfil-meta"></span>
+                </div>
+                <a id="marcaPerfilSocial" class="marca-perfil-social" href="#" target="_blank" rel="noopener noreferrer" hidden></a>
+              </div>
+            </header>
+
+            <div id="marcaPerfilDescripcion" class="marca-perfil-block"></div>
+            <div id="marcaPerfilHistoria" class="marca-perfil-block" hidden></div>
+
+            <section id="marcaPerfilGaleria" class="marca-perfil-block" hidden aria-labelledby="galeriaTitle">
+              <h2 id="galeriaTitle" class="marca-perfil-block__title">Galería</h2>
+              <div id="marcaPerfilGaleriaGrid" class="marca-perfil-galeria"></div>
+            </section>
+
+            <section id="marcaPerfilProductos" class="marca-perfil-block" hidden aria-labelledby="productosTitle">
+              <h2 id="productosTitle" class="marca-perfil-block__title">Productos</h2>
+              <div id="marcaPerfilProductosGrid" class="marca-perfil-productos"></div>
+            </section>
+          </article>
+
+          <div id="marcaPerfilError" class="marca-perfil-error" hidden>
+            <p id="marcaPerfilErrorMsg"></p>
+            <p><a data-link="marcas" href="marcas.html">← Volver al directorio de marcas</a></p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/event-config.js?v=20260620sp"></script>
+  <script src="js/site-links.js"></script>
+  <script src="js/sheets-config.js"></script>
+  <script src="js/form-submit.js"></script>
+  <script src="js/site-chrome.js?v=20260621b"></script>
+  <script src="js/festival-nav.js?v=20260620ig"></script>
+  <script src="js/marca-perfil.js?v=20260625b"></script>
+</body>
+</html>

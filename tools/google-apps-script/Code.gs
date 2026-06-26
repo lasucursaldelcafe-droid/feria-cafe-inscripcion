@@ -21,6 +21,7 @@ var COMPROBANTE_PREVIEW_MAX = 1000;
 var DRIVE_FOLDER_NAME = 'V60 Championship — Comprobantes';
 var DRIVE_FOTOS_FOLDER_NAME = 'V60 Championship — Fotos participantes';
 var DRIVE_LOGOS_STANDS_FOLDER_NAME = 'Feria — Logos expositores';
+var DRIVE_GALERIA_EXPOSITORES_FOLDER = 'Feria — Galería expositores';
 // Correo(s) del equipo para alertas de nueva inscripcion (separar con coma si son varios).
 var ORGANIZER_EMAIL = 'lasucursaldelcafe@gmail.com';
 var WHATSAPP_GRUPO_COMPETENCIA = 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9';
@@ -55,7 +56,7 @@ var HEADERS_STANDS = [
   'Logo nombre', 'Logo tipo', 'Logo enlace Drive',
   'Comparte stand', 'Marcas adicionales (JSON)',
   'Acepta voluntaria', 'Acepta pertenencias', 'Acepta datos', 'Acepta imagen',
-  'Estado solicitud', 'Habilitado', 'Notas admin', 'Código acceso (hash)'
+  'Estado solicitud', 'Habilitado', 'Notas admin', 'Perfil emprendimiento (JSON)', 'Código acceso (hash)'
 ];
 
 var HEADERS_NOVEDADES = [
@@ -101,6 +102,9 @@ function doGet(e) {
   }
   if (params.action === 'participantes_publico') {
     return jsonResponse(getParticipantesPublico_());
+  }
+  if (params.action === 'participante_publico') {
+    return jsonResponse(getParticipantePublicoById_(params.id || ''));
   }
   if (params.action === 'patrocinadores_competencia_publico') {
     return jsonResponse(getPatrocinadoresCompetenciaPublico_());
@@ -150,6 +154,12 @@ function doPost(e) {
     }
     if (action === 'admin_save_patrocinador_competencia') {
       return jsonResponse(handleAdminSavePatrocinadorCompetencia_(payload));
+    }
+    if (action === 'admin_create_stand') {
+      return jsonResponse(handleAdminCreateStand_(payload));
+    }
+    if (action === 'expositor_update_profile') {
+      return jsonResponse(handleExpositorUpdateProfile_(payload));
     }
 
     var formType = String(payload.formType || '').toLowerCase();
@@ -394,8 +404,10 @@ function findExpositorRowByCredentials_(email, accessCode) {
 function standRowToExpositorData_(sheet, rowNum) {
   var values = sheet.getRange(rowNum, 1, rowNum, HEADERS_STANDS.length).getValues()[0];
   var row = rowObjectFromValues_(HEADERS_STANDS, values);
+  var perfil = parsePerfilEmprendimientoJson_(row['Perfil emprendimiento (JSON)']);
+  var recordId = row['ID'] || '';
   return {
-    id: row['ID'] || '',
+    id: recordId,
     fecha: row['Fecha registro'] || '',
     standId: row['Stand ID'] || '',
     marca: row['Marca o negocio'] || '',
@@ -406,6 +418,8 @@ function standRowToExpositorData_(sheet, rowNum) {
     ciudad: row['Ciudad'] || '',
     descripcion: row['Descripción exhibición'] || '',
     logoEnlace: row['Logo enlace Drive'] || '',
+    redSocial: row['Red social preferida'] || '',
+    redUrl: row['Red social enlace'] || '',
     comparteStand: row['Comparte stand'] || 'No',
     marcasAdicionales: parseMarcasAdicionalesJson_(row['Marcas adicionales (JSON)']),
     logos: buildStandLogosFromRow_(
@@ -413,7 +427,10 @@ function standRowToExpositorData_(sheet, rowNum) {
       row['Logo enlace Drive'],
       row['Marcas adicionales (JSON)']
     ),
-    estado: row['Estado solicitud'] || ''
+    estado: row['Estado solicitud'] || '',
+    perfil: perfil,
+    perfilUrl: getPublicMarcaUrl_(recordId),
+    visiblePublico: isVisiblePublico_(row['Visible directorio público'])
   };
 }
 
@@ -550,6 +567,367 @@ function parseLogosDirectorioJson_(raw, marca, logoEnlace, marcasJsonRaw) {
   });
 }
 
+function getPublicMarcaUrl_(recordId) {
+  var id = String(recordId || '').trim();
+  if (!id) return '';
+  var base = String(SITE_PUBLIC_BASE_URL || 'https://la-sucursal-del-cafe.web.app').replace(/\/$/, '');
+  return base + '/marcas/' + encodeURIComponent(id);
+}
+
+function defaultPerfilEmprendimiento_() {
+  return {
+    tagline: '',
+    historia: '',
+    fotos: [],
+    productos: [],
+    publicado: true,
+    updatedAt: ''
+  };
+}
+
+function parsePerfilEmprendimientoJson_(raw) {
+  var base = defaultPerfilEmprendimiento_();
+  try {
+    var parsed = JSON.parse(String(raw || '{}'));
+    if (!parsed || typeof parsed !== 'object') return base;
+    base.tagline = String(parsed.tagline || '').trim();
+    base.historia = String(parsed.historia || '').trim();
+    base.publicado = parsed.publicado !== false;
+    base.updatedAt = String(parsed.updatedAt || '').trim();
+    base.fotos = Array.isArray(parsed.fotos) ? parsed.fotos.map(function (item) {
+      return {
+        id: String((item && item.id) || '').trim(),
+        url: String((item && item.url) || '').trim(),
+        caption: String((item && item.caption) || '').trim()
+      };
+    }).filter(function (item) { return item.url; }) : [];
+    base.productos = Array.isArray(parsed.productos) ? parsed.productos.map(function (item) {
+      return {
+        id: String((item && item.id) || '').trim(),
+        nombre: String((item && item.nombre) || '').trim(),
+        descripcion: String((item && item.descripcion) || '').trim(),
+        precio: String((item && item.precio) || '').trim(),
+        fotoUrl: String((item && item.fotoUrl) || '').trim()
+      };
+    }).filter(function (item) { return item.nombre; }) : [];
+  } catch (e) {
+    return base;
+  }
+  return base;
+}
+
+function findStandRowById_(recordId) {
+  var id = String(recordId || '').trim();
+  if (!id) return null;
+
+  var sheet = getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS);
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return null;
+
+  var idCol = HEADERS_STANDS.indexOf('ID') + 1;
+  if (idCol <= 0) return null;
+
+  var ids = sheet.getRange(2, idCol, lastRow, idCol).getValues();
+  for (var i = 0; i < ids.length; i++) {
+    if (String(ids[i][0] || '').trim() === id) return 2 + i;
+  }
+  return null;
+}
+
+function participanteResumenFromRow_(row) {
+  var marca = String(row['Marca o negocio'] || '').trim();
+  if (!marca) return null;
+
+  var perfil = parsePerfilEmprendimientoJson_(row['Perfil emprendimiento (JSON)']);
+  var id = String(row['ID'] || '').trim();
+  var tienePerfil = !!(perfil.tagline || perfil.historia || perfil.fotos.length || perfil.productos.length);
+
+  return {
+    id: id,
+    marca: marca,
+    tipo: String(row['Tipo participante'] || tipoParticipanteFromPlan_(row['Plan stand']) || '').trim(),
+    descripcion: String(row['Descripción exhibición'] || '').trim(),
+    redSocial: String(row['Red social preferida'] || '').trim(),
+    redUrl: String(row['Red social enlace'] || '').trim(),
+    logos: parseLogosDirectorioJson_(
+      row['Logos directorio (JSON)'],
+      marca,
+      row['Logo enlace Drive'],
+      row['Marcas adicionales (JSON)']
+    ),
+    standId: String(row['Stand ID'] || '').trim(),
+    ciudad: String(row['Ciudad'] || '').trim(),
+    tagline: perfil.tagline,
+    tienePerfil: tienePerfil,
+    perfilUrl: getPublicMarcaUrl_(id)
+  };
+}
+
+function participanteDetalleFromRow_(row) {
+  var resumen = participanteResumenFromRow_(row);
+  if (!resumen) return null;
+
+  var perfil = parsePerfilEmprendimientoJson_(row['Perfil emprendimiento (JSON)']);
+  if (perfil.publicado) {
+    resumen.perfil = perfil;
+  }
+  return resumen;
+}
+
+function getParticipantePublicoById_(recordId) {
+  var rowNum = findStandRowById_(recordId);
+  if (!rowNum) {
+    return { ok: false, error: 'Marca no encontrada.' };
+  }
+
+  var sheet = getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS);
+  var values = sheet.getRange(rowNum, 1, rowNum, HEADERS_STANDS.length).getValues()[0];
+  var row = rowObjectFromValues_(HEADERS_STANDS, values);
+
+  if (!isHabilitado_(row['Habilitado'])) {
+    return { ok: false, error: 'Esta marca no está publicada.' };
+  }
+  if (!isVisiblePublico_(row['Visible directorio público'])) {
+    return { ok: false, error: 'Esta marca no está visible en el directorio.' };
+  }
+
+  var participante = participanteDetalleFromRow_(row);
+  if (!participante) {
+    return { ok: false, error: 'Marca no encontrada.' };
+  }
+
+  return {
+    ok: true,
+    formType: 'participante_publico',
+    participante: participante
+  };
+}
+
+function uploadExpositorMedia_(recordId, archivo, prefix) {
+  if (!archivo || !archivo.base64) return '';
+  return saveFileToDriveFolder_(
+    recordId || 'sin-id',
+    String(archivo.nombreArchivo || prefix + '.jpg'),
+    String(archivo.tipoArchivo || ''),
+    String(archivo.base64 || ''),
+    DRIVE_GALERIA_EXPOSITORES_FOLDER,
+    prefix
+  );
+}
+
+function handleExpositorUpdateProfile_(payload) {
+  var rowNum = findExpositorRowByCredentials_(payload.email || '', payload.accessCode || '');
+  if (!rowNum) {
+    return { ok: false, error: 'Correo o código de acceso incorrectos.' };
+  }
+
+  var sheet = getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS);
+  var values = sheet.getRange(rowNum, 1, rowNum, HEADERS_STANDS.length).getValues()[0];
+  var row = rowObjectFromValues_(HEADERS_STANDS, values);
+  var recordId = String(row['ID'] || '').trim();
+  var perfil = parsePerfilEmprendimientoJson_(row['Perfil emprendimiento (JSON)']);
+  var profile = payload.profile || {};
+
+  if (profile.tagline !== undefined) {
+    perfil.tagline = String(profile.tagline || '').trim().substring(0, 140);
+  }
+  if (profile.historia !== undefined) {
+    perfil.historia = String(profile.historia || '').trim().substring(0, 3000);
+  }
+  if (profile.publicado !== undefined) {
+    perfil.publicado = profile.publicado !== false && profile.publicado !== 'No';
+  }
+  if (profile.descripcion !== undefined) {
+    var descCol = HEADERS_STANDS.indexOf('Descripción exhibición') + 1;
+    if (descCol > 0) {
+      sheet.getRange(rowNum, descCol).setValue(String(profile.descripcion || '').trim().substring(0, 500));
+    }
+  }
+  if (profile.redSocial !== undefined || profile.redUrl !== undefined) {
+    var redCol = HEADERS_STANDS.indexOf('Red social preferida') + 1;
+    var urlCol = HEADERS_STANDS.indexOf('Red social enlace') + 1;
+    if (redCol > 0 && profile.redSocial !== undefined) {
+      sheet.getRange(rowNum, redCol).setValue(String(profile.redSocial || '').trim());
+    }
+    if (urlCol > 0 && profile.redUrl !== undefined) {
+      sheet.getRange(rowNum, urlCol).setValue(normalizeRedSocialEnlace_(profile.redSocial || row['Red social preferida'], profile.redUrl || ''));
+    }
+  }
+
+  if (Array.isArray(profile.fotosEliminar) && profile.fotosEliminar.length) {
+    var eliminar = profile.fotosEliminar.map(function (id) { return String(id || '').trim(); });
+    perfil.fotos = perfil.fotos.filter(function (foto) {
+      return eliminar.indexOf(String(foto.id || '').trim()) === -1;
+    });
+  }
+
+  if (Array.isArray(profile.fotosNuevas)) {
+    profile.fotosNuevas.forEach(function (archivo, idx) {
+      var url = uploadExpositorMedia_(recordId, archivo, 'foto-' + (perfil.fotos.length + idx + 1));
+      if (!url) return;
+      perfil.fotos.push({
+        id: 'f-' + Date.now() + '-' + idx,
+        url: url,
+        caption: String((archivo && archivo.caption) || '').trim().substring(0, 120)
+      });
+    });
+  }
+
+  if (Array.isArray(profile.productos)) {
+    perfil.productos = profile.productos.map(function (item, idx) {
+      var producto = {
+        id: String((item && item.id) || ('p-' + Date.now() + '-' + idx)).trim(),
+        nombre: String((item && item.nombre) || '').trim().substring(0, 80),
+        descripcion: String((item && item.descripcion) || '').trim().substring(0, 300),
+        precio: String((item && item.precio) || '').trim().substring(0, 40),
+        fotoUrl: String((item && item.fotoUrl) || '').trim()
+      };
+      if (item && item.fotoNueva && item.fotoNueva.base64) {
+        var fotoUrl = uploadExpositorMedia_(recordId, item.fotoNueva, 'producto-' + (idx + 1));
+        if (fotoUrl) producto.fotoUrl = fotoUrl;
+      }
+      return producto;
+    }).filter(function (item) { return item.nombre; }).slice(0, 24);
+  }
+
+  if (profile.logoNuevo && profile.logoNuevo.base64) {
+    var logo = parseLogoStand_({
+      id: recordId,
+      logoStand: profile.logoNuevo
+    });
+    if (logo.enlace) {
+      var logoNombreCol = HEADERS_STANDS.indexOf('Logo nombre') + 1;
+      var logoTipoCol = HEADERS_STANDS.indexOf('Logo tipo') + 1;
+      var logoEnlaceCol = HEADERS_STANDS.indexOf('Logo enlace Drive') + 1;
+      var logosJsonCol = HEADERS_STANDS.indexOf('Logos directorio (JSON)') + 1;
+      if (logoNombreCol > 0) sheet.getRange(rowNum, logoNombreCol).setValue(logo.nombre || '');
+      if (logoTipoCol > 0) sheet.getRange(rowNum, logoTipoCol).setValue(logo.tipo || '');
+      if (logoEnlaceCol > 0) sheet.getRange(rowNum, logoEnlaceCol).setValue(logo.enlace || '');
+      if (logosJsonCol > 0) {
+        sheet.getRange(rowNum, logosJsonCol).setValue(
+          logosDirectorioJsonFromRow_(row['Marca o negocio'], logo.enlace, row['Marcas adicionales (JSON)'])
+        );
+      }
+    }
+  }
+
+  perfil.updatedAt = new Date().toISOString();
+  var perfilCol = HEADERS_STANDS.indexOf('Perfil emprendimiento (JSON)') + 1;
+  if (perfilCol > 0) {
+    sheet.getRange(rowNum, perfilCol).setValue(JSON.stringify(perfil));
+  }
+
+  return {
+    ok: true,
+    stand: standRowToExpositorData_(sheet, rowNum),
+    perfilUrl: getPublicMarcaUrl_(recordId)
+  };
+}
+
+function handleAdminCreateStand_(payload) {
+  var access = assertAdminAccess_(payload.idToken || '');
+  if (!access.ok) {
+    return { ok: false, error: access.error };
+  }
+
+  var marca = String(payload.marca || '').trim();
+  var correo = String(payload.correo || '').trim();
+  if (!marca) {
+    return { ok: false, error: 'La marca o negocio es obligatoria.' };
+  }
+  if (!correo || correo.indexOf('@') === -1) {
+    return { ok: false, error: 'Correo electrónico válido requerido.' };
+  }
+
+  var plan = String(payload.plan || 'Zona Origen').trim();
+  var tipoParticipante = String(payload.tipoParticipante || tipoParticipanteFromPlan_(plan) || 'expositor').trim();
+  var data = {
+    fecha: new Date().toISOString(),
+    id: String(payload.id || ('ST-' + Date.now().toString(36).toUpperCase())).trim(),
+    standId: payload.standId || '',
+    marca: marca,
+    contacto: String(payload.contacto || payload.nombre || '').trim(),
+    celular: String(payload.celular || '').trim(),
+    correo: correo,
+    plan: plan,
+    ciudad: String(payload.ciudad || '').trim(),
+    descripcion: String(payload.descripcion || '').trim(),
+    tipoParticipante: tipoParticipante,
+    redSocial: String(payload.redSocial || '').trim(),
+    redEnlace: String(payload.redEnlace || '').trim(),
+    visiblePublico: payload.visiblePublico !== false && payload.visiblePublico !== 'No',
+    comparteStand: false,
+    logoStand: payload.logoStand || null,
+    aceptaVoluntaria: true,
+    aceptaPertenencias: true,
+    aceptaDatos: true,
+    aceptaImagen: true
+  };
+
+  var sheet = getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS);
+  if (findDuplicateInSheet_(sheet, HEADERS_STANDS, data.correo, null)) {
+    return { ok: false, error: 'Ya existe un registro con este correo.' };
+  }
+
+  var standId = normalizeStandId_(data.standId);
+  if (standId && findStandOccupied_(standId)) {
+    return { ok: false, error: 'El stand ' + standId + ' ya está ocupado.' };
+  }
+
+  var logo = { nombre: '', tipo: '', enlace: '' };
+  if (data.logoStand && data.logoStand.base64) {
+    logo = parseLogoStand_(data);
+  }
+
+  var legalCols = ['Sí', 'Sí', 'Sí', 'Sí'];
+  var accessCode = generateAccessCode_();
+  var accessHash = hashAccessCode_(accessCode);
+  var habilitado = payload.habilitado !== false && payload.habilitado !== 'No' ? 'Sí' : 'No';
+  var visiblePublico = data.visiblePublico ? 'Sí' : 'No';
+  var estado = String(payload.estado || 'Confirmado por admin').trim();
+  var logosDirectorioJson = logosDirectorioJsonFromRow_(data.marca, logo.enlace, '[]');
+  var redEnlace = normalizeRedSocialEnlace_(data.redSocial, data.redEnlace);
+
+  var standRow = joinRowParts_([
+    data.fecha,
+    data.id,
+    standId,
+    data.marca,
+    data.contacto,
+    data.celular,
+    data.correo,
+    data.plan,
+    data.ciudad,
+    data.descripcion,
+    tipoParticipante,
+    data.redSocial,
+    redEnlace,
+    logosDirectorioJson,
+    visiblePublico,
+    logo.nombre,
+    logo.tipo,
+    logo.enlace,
+    'No',
+    '[]'
+  ], legalCols, [estado, habilitado, String(payload.notasAdmin || 'Creado desde panel admin').trim(), '{}', accessHash]);
+  sheet.appendRow(standRow);
+
+  data.accessCode = accessCode;
+  data.expositorPanelUrl = getExpositorPanelUrl_();
+  data.standId = standId;
+  data.esAliadoPatrocinador = isAliadoPatrocinadorPlan_(plan) || isPatrocinadorAliadoTipo_(tipoParticipante, plan);
+  sendConfirmationEmail_('stands', data);
+
+  return {
+    ok: true,
+    id: data.id,
+    accessCode: accessCode,
+    expositorPanelUrl: data.expositorPanelUrl,
+    perfilUrl: getPublicMarcaUrl_(data.id),
+    marca: data.marca
+  };
+}
+
 function getParticipantesPublico_() {
   var sheet = getOrCreateSheet_(SHEET_STANDS, HEADERS_STANDS);
   var lastRow = sheet.getLastRow();
@@ -562,24 +940,8 @@ function getParticipantesPublico_() {
       if (!isHabilitado_(row['Habilitado'])) continue;
       if (!isVisiblePublico_(row['Visible directorio público'])) continue;
 
-      var marca = String(row['Marca o negocio'] || '').trim();
-      if (!marca) continue;
-
-      participantes.push({
-        id: String(row['ID'] || '').trim(),
-        marca: marca,
-        tipo: String(row['Tipo participante'] || tipoParticipanteFromPlan_(row['Plan stand']) || '').trim(),
-        descripcion: String(row['Descripción exhibición'] || '').trim(),
-        redSocial: String(row['Red social preferida'] || '').trim(),
-        redUrl: String(row['Red social enlace'] || '').trim(),
-        logos: parseLogosDirectorioJson_(
-          row['Logos directorio (JSON)'],
-          marca,
-          row['Logo enlace Drive'],
-          row['Marcas adicionales (JSON)']
-        ),
-        standId: String(row['Stand ID'] || '').trim()
-      });
+      var item = participanteResumenFromRow_(row);
+      if (item) participantes.push(item);
     }
   }
 
@@ -1082,7 +1444,7 @@ function appendStands_(data) {
     logo.enlace,
     marcasExtra.comparte,
     marcasExtra.json
-  ], legalCols, [estado, 'Sí', '', accessHash]);
+  ], legalCols, [estado, 'Sí', '', '{}', accessHash]);
   sheet.appendRow(standRow);
 
   data.accessCode = accessCode;
