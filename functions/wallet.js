@@ -1,22 +1,47 @@
 /**
  * Google Wallet — tarjetas de fidelización (Loyalty).
- * Requiere variables de entorno (ver GOOGLE-WALLET-SETUP.md).
+ * Modo A: JSON de cuenta de servicio (wallet.service_account).
+ * Modo B: IAM signJwt sin clave JSON (wallet.service_account_email) — ver GOOGLE-WALLET-SETUP.md.
  */
 
 const functions = require('firebase-functions');
 const jwt = require('jsonwebtoken');
+const { GoogleAuth } = require('google-auth-library');
 
 const HOSTING_ORIGIN = 'https://la-sucursal-del-cafe.web.app';
 const LOGO_URL = `${HOSTING_ORIGIN}/assets/logo-la-sucursal-del-cafe.png`;
 const CLASS_SUFFIX = 'la_sucursal_fidelizacion';
+const DEFAULT_SERVICE_ACCOUNT_EMAIL = 'la-sucursal-del-cafe@appspot.gserviceaccount.com';
 
 function walletEnv() {
   const cfg = functions.config().wallet || {};
+  const serviceAccountRaw =
+    process.env.GOOGLE_WALLET_SERVICE_ACCOUNT || cfg.service_account || '';
+  let serviceAccountEmail = (
+    process.env.GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL ||
+    cfg.service_account_email ||
+    ''
+  ).trim();
+
+  if (!serviceAccountEmail && serviceAccountRaw) {
+    try {
+      const parsed =
+        typeof serviceAccountRaw === 'string' ? JSON.parse(serviceAccountRaw) : serviceAccountRaw;
+      serviceAccountEmail = (parsed.client_email || '').trim();
+    } catch (_) {
+      /* usar solo email explícito */
+    }
+  }
+
+  if (!serviceAccountEmail && !serviceAccountRaw) {
+    serviceAccountEmail = DEFAULT_SERVICE_ACCOUNT_EMAIL;
+  }
+
   return {
     issuerId: (process.env.GOOGLE_WALLET_ISSUER_ID || cfg.issuer_id || '').trim(),
     classSuffix: (process.env.GOOGLE_WALLET_CLASS_SUFFIX || cfg.class_suffix || CLASS_SUFFIX).trim(),
-    serviceAccountRaw:
-      process.env.GOOGLE_WALLET_SERVICE_ACCOUNT || cfg.service_account || '',
+    serviceAccountRaw,
+    serviceAccountEmail,
   };
 }
 
@@ -94,24 +119,78 @@ function buildLoyaltyObject(issuerId, classSuffix, clienteId, data) {
   };
 }
 
-function signSaveToWalletJwt(serviceAccount, issuerId, classSuffix, clienteId, data) {
+function buildSaveToWalletClaims(serviceAccountEmail, issuerId, classSuffix, clienteId, data) {
   const iat = Math.floor(Date.now() / 1000);
-  const loyaltyClass = buildLoyaltyClass(issuerId, classSuffix);
-  const loyaltyObject = buildLoyaltyObject(issuerId, classSuffix, clienteId, data);
-
-  const claims = {
-    iss: serviceAccount.client_email,
+  return {
+    iss: serviceAccountEmail,
     aud: 'google',
     typ: 'savetowallet',
     iat,
     origins: [HOSTING_ORIGIN, 'http://localhost:3000', 'http://localhost:5000'],
     payload: {
-      loyaltyClasses: [loyaltyClass],
-      loyaltyObjects: [loyaltyObject],
+      loyaltyClasses: [buildLoyaltyClass(issuerId, classSuffix)],
+      loyaltyObjects: [buildLoyaltyObject(issuerId, classSuffix, clienteId, data)],
     },
   };
+}
 
-  return jwt.sign(claims, serviceAccount.private_key, { algorithm: 'RS256' });
+async function signJwtWithIam(serviceAccountEmail, claims) {
+  const auth = new GoogleAuth({
+    scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+  });
+  const client = await auth.getClient();
+  const url =
+    'https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/' +
+    encodeURIComponent(serviceAccountEmail) +
+    ':signJwt';
+
+  const response = await client.request({
+    url,
+    method: 'POST',
+    data: { payload: JSON.stringify(claims) },
+  });
+
+  if (!response.data || !response.data.signedJwt) {
+    throw new Error('IAM signJwt no devolvió signedJwt. ¿API IAM Credentials habilitada?');
+  }
+  return response.data.signedJwt;
+}
+
+async function signSaveToWalletJwt(walletConfig, issuerId, classSuffix, clienteId, data) {
+  if (walletConfig.serviceAccountRaw) {
+    try {
+      const serviceAccount = loadServiceAccount(walletConfig.serviceAccountRaw);
+      const claims = buildSaveToWalletClaims(
+        serviceAccount.client_email,
+        issuerId,
+        classSuffix,
+        clienteId,
+        data
+      );
+      return jwt.sign(claims, serviceAccount.private_key, { algorithm: 'RS256' });
+    } catch (err) {
+      if (!walletConfig.serviceAccountEmail) {
+        throw err;
+      }
+      console.warn('Wallet: JSON inválido, usando IAM signJwt:', err.message);
+    }
+  }
+
+  const serviceAccountEmail = walletConfig.serviceAccountEmail;
+  if (!serviceAccountEmail) {
+    throw new Error(
+      'Configura wallet.service_account_email o wallet.service_account. Ver GOOGLE-WALLET-SETUP.md'
+    );
+  }
+
+  const claims = buildSaveToWalletClaims(
+    serviceAccountEmail,
+    issuerId,
+    classSuffix,
+    clienteId,
+    data
+  );
+  return signJwtWithIam(serviceAccountEmail, claims);
 }
 
 function setCors(res) {
@@ -135,7 +214,8 @@ function createGenerateWalletPassHandler() {
     }
 
     try {
-      const { issuerId, classSuffix, serviceAccountRaw } = walletEnv();
+      const walletConfig = walletEnv();
+      const { issuerId, classSuffix } = walletConfig;
       if (!issuerId) {
         return res.status(503).json({
           error: 'GOOGLE_WALLET_ISSUER_ID no configurado. Ver GOOGLE-WALLET-SETUP.md',
@@ -148,8 +228,7 @@ function createGenerateWalletPassHandler() {
         return res.status(400).json({ error: 'clienteId es requerido' });
       }
 
-      const serviceAccount = loadServiceAccount(serviceAccountRaw);
-      const token = signSaveToWalletJwt(serviceAccount, issuerId, classSuffix, clienteId, {
+      const token = await signSaveToWalletJwt(walletConfig, issuerId, classSuffix, clienteId, {
         nombre: body.nombre,
         puntos: body.puntos,
         nivel: body.nivel,
@@ -166,4 +245,9 @@ function createGenerateWalletPassHandler() {
   });
 }
 
-module.exports = { createGenerateWalletPassHandler, walletEnv, signSaveToWalletJwt };
+module.exports = {
+  createGenerateWalletPassHandler,
+  walletEnv,
+  signSaveToWalletJwt,
+  DEFAULT_SERVICE_ACCOUNT_EMAIL,
+};

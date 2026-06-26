@@ -4,7 +4,8 @@ Asistente de configuración Google Wallet para fidelización.
 
 Uso:
   py tools/setup_google_wallet.py
-  py tools/setup_google_wallet.py --configurar-firebase
+  py tools/setup_google_wallet.py --sin-json --configurar-firebase   # sin descargar JSON
+  py tools/setup_google_wallet.py --configurar-firebase              # con JSON local
   py tools/setup_google_wallet.py --deploy
   py tools/setup_google_wallet.py --verificar
 """
@@ -24,9 +25,14 @@ from _util import DEFAULT_FIREBASE_PROJECT, PROJECT_ROOT, TOOLS_DIR, error, info
 WALLET_SA = TOOLS_DIR / "credentials" / "google-wallet-sa.json"
 ENV_PATH = TOOLS_DIR / ".env"
 FUNCTIONS_DIR = PROJECT_ROOT / "functions"
+DEFAULT_WALLET_SA_EMAIL = f"{DEFAULT_FIREBASE_PROJECT}@appspot.gserviceaccount.com"
 
 WALLET_CONSOLE = "https://pay.google.com/business/console"
 GCP_APIS = "https://console.cloud.google.com/apis/library/wallet.googleapis.com?project=la-sucursal-del-cafe"
+GCP_IAM_CRED = (
+    "https://console.cloud.google.com/apis/library/iamcredentials.googleapis.com"
+    f"?project={DEFAULT_FIREBASE_PROJECT}"
+)
 GCP_SA = "https://console.cloud.google.com/iam-admin/serviceaccounts?project=la-sucursal-del-cafe"
 
 
@@ -84,16 +90,57 @@ def validate_wallet_sa(path: Path) -> bool:
 
 def print_checklist() -> None:
     print()
-    info("Checklist Google Wallet:")
-    print("  1. Issuer ID en Wallet Console →", WALLET_CONSOLE)
-    print("  2. Habilitar Google Wallet API →", GCP_APIS)
-    print("  3. Crear SA y descargar JSON →", GCP_SA)
-    print(f"  4. Guardar JSON en → {WALLET_SA}")
-    print("  5. Invitar email de la SA en Wallet Console (rol Developer)")
-    print("  6. py tools/setup_google_wallet.py --configurar-firebase")
-    print("  7. py tools/setup_google_wallet.py --deploy")
+    info("Checklist Google Wallet (sin JSON — recomendado si no puedes descargar clave):")
+    print("  1. Issuer ID →", WALLET_CONSOLE)
+    print("  2. Habilitar Wallet API + IAM Credentials API")
+    print(f"  3. Invitar en Wallet Console: {DEFAULT_WALLET_SA_EMAIL}")
+    print("  4. py tools/setup_google_wallet.py --sin-json --configurar-firebase")
+    print("  5. py tools/setup_google_wallet.py --deploy")
+    print()
+    info("Alternativa con JSON local (si tu proyecto lo permite):")
+    print(f"  - JSON en {WALLET_SA}")
+    print("  - py tools/setup_google_wallet.py --configurar-firebase")
     print()
     info("Guía completa: GOOGLE-WALLET-SETUP.md")
+
+
+def cmd_configurar_firebase_iam(issuer_id: str, service_account_email: str) -> int:
+    iid = issuer_id or read_env_var("GOOGLE_WALLET_ISSUER_ID")
+    if not iid:
+        error("Falta Issuer ID.")
+        info("Usa --issuer-id 3388000000023162431 o GOOGLE_WALLET_ISSUER_ID en tools/.env")
+        webbrowser.open(WALLET_CONSOLE)
+        return 2
+
+    email = (service_account_email or read_env_var("GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL") or DEFAULT_WALLET_SA_EMAIL).strip()
+    if not email.endswith(".iam.gserviceaccount.com") and not email.endswith("@appspot.gserviceaccount.com"):
+        warn(f"Email inusual para SA: {email}")
+
+    if not shutil.which("firebase"):
+        firebase = ["npx", "-y", "firebase-tools@latest"]
+    else:
+        firebase = ["firebase"]
+
+    rc = run_cmd(
+        [
+            *firebase,
+            "functions:config:set",
+            f"wallet.issuer_id={iid}",
+            f"wallet.service_account_email={email}",
+            "wallet.class_suffix=la_sucursal_fidelizacion",
+            f"--project={DEFAULT_FIREBASE_PROJECT}",
+        ]
+    )
+    if rc != 0:
+        error("No se pudo guardar config. ¿firebase login con lasucursaldelcafe@gmail.com?")
+        return rc
+
+    update_env_var("GOOGLE_WALLET_ISSUER_ID", iid)
+    update_env_var("GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL", email)
+    ok("Firebase Functions configurado (modo IAM signJwt, sin JSON).")
+    info(f"Invita en Wallet Console: {email}")
+    info("APIs: Wallet + IAM Credentials deben estar habilitadas.")
+    return 0
 
 
 def cmd_configurar_firebase(issuer_id: str) -> int:
@@ -161,9 +208,15 @@ def cmd_deploy() -> int:
 
 def cmd_verificar() -> int:
     ok_flag = True
+    sin_json = read_env_var("GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL")
+
     if validate_wallet_sa(WALLET_SA):
-        pass
+        info("Modo JSON: google-wallet-sa.json presente")
+    elif sin_json:
+        ok(f"Modo sin JSON: {sin_json}")
     else:
+        warn("Sin JSON ni GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL en tools/.env")
+        info(f"Sugerencia: usa --sin-json con {DEFAULT_WALLET_SA_EMAIL}")
         ok_flag = False
 
     iid = read_env_var("GOOGLE_WALLET_ISSUER_ID")
@@ -182,11 +235,20 @@ def cmd_verificar() -> int:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Configura Google Wallet para fidelización.")
-    parser.add_argument("--configurar-firebase", action="store_true", help="Sube issuer + SA a Firebase config.")
+    parser.add_argument("--configurar-firebase", action="store_true", help="Sube issuer + SA (JSON) a Firebase.")
+    parser.add_argument(
+        "--sin-json",
+        action="store_true",
+        help="Configura issuer + email SA sin archivo JSON (IAM signJwt).",
+    )
     parser.add_argument("--deploy", action="store_true", help="npm install + deploy function + hosting.")
     parser.add_argument("--verificar", action="store_true", help="Comprueba archivos locales.")
     parser.add_argument("--abrir", action="store_true", help="Abrir consolas Google.")
     parser.add_argument("--issuer-id", help="Issuer ID numérico de Wallet Console.")
+    parser.add_argument(
+        "--service-account-email",
+        help=f"Email SA para Wallet (default: {DEFAULT_WALLET_SA_EMAIL})",
+    )
     return parser.parse_args()
 
 
@@ -201,6 +263,10 @@ def main() -> int:
     if args.abrir:
         webbrowser.open(WALLET_CONSOLE)
         webbrowser.open(GCP_APIS)
+        webbrowser.open(GCP_IAM_CRED)
+
+    if args.sin_json and args.configurar_firebase:
+        return cmd_configurar_firebase_iam(args.issuer_id or "", args.service_account_email or "")
 
     if args.configurar_firebase:
         return cmd_configurar_firebase(args.issuer_id or "")

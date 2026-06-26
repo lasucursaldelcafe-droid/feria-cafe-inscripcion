@@ -31,7 +31,47 @@ py tools/setup_google_wallet.py
 
 ---
 
-## Paso 2 — Google Cloud (mismo proyecto Firebase)
+## Alternativa recomendada — Sin clave JSON (si Google bloquea descargar JSON)
+
+Muchos proyectos Firebase **no permiten** crear claves JSON (`Service account key creation is disabled`).  
+En ese caso **no necesitas descargar ningún archivo**.
+
+### Qué haces (5 pasos)
+
+1. Entra con **`lasucursaldelcafe@gmail.com`** a [Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts?project=la-sucursal-del-cafe).
+2. Copia el email de la cuenta que ya existe (recomendado):
+   ```
+   la-sucursal-del-cafe@appspot.gserviceaccount.com
+   ```
+   (Es la cuenta por defecto de Firebase/Functions; **no** hace falta crear otra.)
+3. Habilita APIs:
+   - [Google Wallet API](https://console.cloud.google.com/apis/library/wallet.googleapis.com?project=la-sucursal-del-cafe)
+   - [IAM Credentials API](https://console.cloud.google.com/apis/library/iamcredentials.googleapis.com?project=la-sucursal-del-cafe)
+4. En [Wallet Console](https://pay.google.com/business/console) → **Users** → **Invite user** → pega ese email `@appspot.gserviceaccount.com` → rol **Developer**.
+5. Configura y despliega (sin JSON):
+
+```bash
+py tools/setup_google_wallet.py --sin-json --issuer-id 3388000000023162431 --configurar-firebase
+py tools/setup_google_wallet.py --deploy
+```
+
+La Cloud Function firma el pass con la API **IAM signJwt** (la clave privada nunca sale de Google).
+
+### Si signJwt falla con permisos
+
+En [IAM](https://console.cloud.google.com/iam-admin/iam?project=la-sucursal-del-cafe), la cuenta `...@appspot.gserviceaccount.com` debe poder firmar como sí misma. En Cloud Shell (opcional):
+
+```bash
+gcloud iam service-accounts add-iam-policy-binding \
+  la-sucursal-del-cafe@appspot.gserviceaccount.com \
+  --project=la-sucursal-del-cafe \
+  --member="serviceAccount:la-sucursal-del-cafe@appspot.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountTokenCreator"
+```
+
+---
+
+## Paso 2 — Google Cloud con JSON (solo si puedes descargar clave)
 
 Proyecto: **`la-sucursal-del-cafe`**
 
