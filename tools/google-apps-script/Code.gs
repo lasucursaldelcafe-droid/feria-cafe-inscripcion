@@ -163,7 +163,7 @@ function doPost(e) {
       id = competenciaResult.id;
       extra.whatsappGrupoUrl = WHATSAPP_GRUPO_COMPETENCIA;
       extra.fotoEnlace = competenciaResult.fotoEnlace || '';
-    } else     if (formType === 'stands') {
+    } else if (formType === 'stands') {
       var standsResult = appendStands_(data);
       id = standsResult.id;
       extra.logoEnlace = standsResult.logoEnlace || '';
@@ -295,7 +295,7 @@ function appendFeria_(data) {
     data.celular || '',
     data.correo || '',
     intereses
-  ].concat(legalCols).concat([estado, 'Sí', data.pasaporteId || '', '']);
+  ].concat(legalCols).concat([estado, 'Sí', data.pasaporteId || '', '']));
 
   sendConfirmationEmail_('feria', data);
   sendOrganizerNotificationEmail_('feria', data);
