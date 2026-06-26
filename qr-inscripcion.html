@@ -55,18 +55,35 @@
             <p class="hint">Registro opcional · entrada sin costo</p>
             <div id="qrFeria" class="qr-box" aria-label="QR feria visitantes"></div>
             <p class="hint" id="urlFeria"></p>
+            <div class="qr-download-row"><button type="button" data-dl="qrFeria" data-name="feria-visitantes">Descargar PNG</button></div>
           </section>
           <section class="qr-card">
             <h2>Stands — expositores</h2>
             <p class="hint">Solicitud de stand en la feria</p>
             <div id="qrStands" class="qr-box" aria-label="QR stands expositores"></div>
             <p class="hint" id="urlStands"></p>
+            <div class="qr-download-row"><button type="button" data-dl="qrStands" data-name="stands-expositores">Descargar PNG</button></div>
           </section>
           <section class="qr-card">
             <h2>V60 Championship</h2>
             <p class="hint">Inscripción de pago · competencia de café filtrado</p>
             <div id="qrCompetencia" class="qr-box" aria-label="QR competencia"></div>
             <p class="hint" id="urlCompetencia"></p>
+            <div class="qr-download-row"><button type="button" data-dl="qrCompetencia" data-name="competencia-v60">Descargar PNG</button></div>
+          </section>
+          <section class="qr-card">
+            <h2>Pasaporte Cafetero</h2>
+            <p class="hint">Fidelización · crear tarjeta digital con QR</p>
+            <div id="qrPasaporte" class="qr-box" aria-label="QR Pasaporte Cafetero"></div>
+            <p class="hint" id="urlPasaporte"></p>
+            <div class="qr-download-row"><button type="button" data-dl="qrPasaporte" data-name="pasaporte-cafetero">Descargar PNG</button></div>
+          </section>
+          <section class="qr-card">
+            <h2>Escáner stands</h2>
+            <p class="hint">Solo operadores · sumar puntos al visitante</p>
+            <div id="qrEscaner" class="qr-box" aria-label="QR escáner stands"></div>
+            <p class="hint" id="urlEscaner"></p>
+            <div class="qr-download-row"><button type="button" data-dl="qrEscaner" data-name="escaner-stands">Descargar PNG</button></div>
           </section>
         </div>
       </article>
@@ -112,7 +129,7 @@
   <script src="js/event-config.js?v=20260620ig"></script>
   <script src="js/site-links.js"></script>
   <script src="js/seo-structured-data.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/lib/browser.js"></script>
+  <script src="js/qr-render.js"></script>
   <script src="js/site-chrome.js?v=20260620ig"></script>
   <script src="js/festival-nav.js?v=20260620ig"></script>
   <script>
@@ -121,30 +138,39 @@
         return SiteLinks.absUrl(key);
       }
 
-      function renderQr(boxId, url) {
-        var box = document.getElementById(boxId);
-        if (!box || !window.QRCode) return;
-        QRCode.toCanvas(url, { width: 220, margin: 2 }, function (err, canvas) {
-          if (err) {
-            box.innerHTML = '<p class="hint">No se pudo generar el QR. Usa el enlace de abajo.</p>';
-            return;
-          }
-          box.appendChild(canvas);
-        });
-      }
-
       var urls = {
         feria: abs('feria'),
         stands: abs('stands'),
-        competencia: abs('competencia')
+        competencia: abs('competencia'),
+        pasaporte: abs('fidelizacionRegistro'),
+        escaner: abs('escanearPasaporte')
       };
 
       document.getElementById('urlFeria').innerHTML = '<a href="' + urls.feria + '">' + urls.feria + '</a>';
       document.getElementById('urlStands').innerHTML = '<a href="' + urls.stands + '">' + urls.stands + '</a>';
       document.getElementById('urlCompetencia').innerHTML = '<a href="' + urls.competencia + '">' + urls.competencia + '</a>';
-      renderQr('qrFeria', urls.feria);
-      renderQr('qrStands', urls.stands);
-      renderQr('qrCompetencia', urls.competencia);
+      document.getElementById('urlPasaporte').innerHTML = '<a href="' + urls.pasaporte + '">' + urls.pasaporte + '</a>';
+      document.getElementById('urlEscaner').innerHTML = '<a href="' + urls.escaner + '">' + urls.escaner + '</a>';
+
+      var boxes = [
+        ['qrFeria', urls.feria],
+        ['qrStands', urls.stands],
+        ['qrCompetencia', urls.competencia],
+        ['qrPasaporte', urls.pasaporte],
+        ['qrEscaner', urls.escaner]
+      ];
+
+      boxes.forEach(function (pair) {
+        QRRender.toCanvas(document.getElementById(pair[0]), pair[1], { width: 220, ariaLabel: 'QR ' + pair[0] });
+      });
+
+      document.querySelectorAll('[data-dl]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = btn.getAttribute('data-dl');
+          var name = btn.getAttribute('data-name') || 'qr';
+          QRRender.descargarDesdeContenedor(document.getElementById(id), name + '.png');
+        });
+      });
     })();
   </script>
 </body>

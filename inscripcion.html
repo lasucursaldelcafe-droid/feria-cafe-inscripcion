@@ -245,6 +245,8 @@
         <h2>¡Registro enviado!</h2>
         <p id="successLeadFeria">Gracias por registrarte como visitante en la feria de <strong>La Sucursal del Café</strong>. Quedas en la lista para premios exclusivos de visitantes registrados.</p>
         <p id="successEmailNoteFeria" class="hint"></p>
+        <p id="successPasaporteNote" class="hint" style="margin-top:12px"></p>
+        <a id="btnPasaporteFeria" class="btn-submit" data-link="fidelizacionRegistro" href="fidelizacion-registro.html" style="display:inline-block;margin-top:12px;text-decoration:none">Crear mi Pasaporte Cafetero ☕</a>
         <button type="button" id="btnNuevaInscripcion" class="btn-secondary">Registrar otra persona</button>
         </div>
       </article>
@@ -508,6 +510,18 @@
           var note = document.getElementById("successEmailNoteFeria");
           if (note) {
             note.textContent = "Enviamos un correo de confirmación a " + entry.correo + " (revisa spam si no lo ves).";
+          }
+          var pasaporteBtn = document.getElementById("btnPasaporteFeria");
+          var pasaporteNote = document.getElementById("successPasaporteNote");
+          if (pasaporteBtn && window.SiteLinks) {
+            var pUrl = SiteLinks.absUrl("fidelizacionRegistro") +
+              "?nombre=" + encodeURIComponent(entry.nombre) +
+              "&telefono=" + encodeURIComponent(entry.celular) +
+              "&email=" + encodeURIComponent(entry.correo);
+            pasaporteBtn.href = pUrl;
+          }
+          if (pasaporteNote) {
+            pasaporteNote.textContent = "Crea tu Pasaporte Cafetero ahora: tarjeta digital con QR para acumular puntos en cada stand. Guárdala en tu celular como app.";
           }
           showSuccess();
         });

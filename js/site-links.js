@@ -24,6 +24,8 @@
     fidelizacion: 'fidelizacion.html',
     fidelizacionRegistro: 'fidelizacion-registro.html',
     miTarjeta: 'mi-tarjeta.html',
+    pasaporte: 'pasaporte-cafetero.html',
+    escanearPasaporte: 'escanear-pasaporte.html',
     panelFidelizacion: 'dashboard-fidelizacion.html'
   };
 
@@ -47,6 +49,8 @@
     fidelizacion: '/fidelizacion',
     fidelizacionRegistro: '/registro-fidelizacion',
     miTarjeta: '/mi-tarjeta',
+    pasaporte: '/pasaporte',
+    escanearPasaporte: '/escanear-pasaporte',
     panelFidelizacion: '/panel-fidelizacion'
   };
 

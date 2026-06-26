@@ -1,0 +1,26 @@
+{
+  "name": "Pasaporte Cafetero — La Sucursal del Café",
+  "short_name": "Pasaporte",
+  "description": "Tu tarjeta digital de fidelización. Muestra el QR en cada stand para acumular puntos.",
+  "start_url": "/pasaporte",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#4B352A",
+  "theme_color": "#5D3A1A",
+  "lang": "es-CO",
+  "icons": [
+    {
+      "src": "/assets/logo-la-sucursal-del-cafe.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/logo-la-sucursal-del-cafe.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

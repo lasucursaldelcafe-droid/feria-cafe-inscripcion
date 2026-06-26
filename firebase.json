@@ -35,7 +35,9 @@
       { "source": "/fidelizacion/", "destination": "/fidelizacion", "type": 301 },
       { "source": "/registro-fidelizacion/", "destination": "/registro-fidelizacion", "type": 301 },
       { "source": "/mi-tarjeta/", "destination": "/mi-tarjeta", "type": 301 },
-      { "source": "/panel-fidelizacion/", "destination": "/panel-fidelizacion", "type": 301 }
+      { "source": "/panel-fidelizacion/", "destination": "/panel-fidelizacion", "type": 301 },
+      { "source": "/pasaporte/", "destination": "/pasaporte", "type": 301 },
+      { "source": "/escanear-pasaporte/", "destination": "/escanear-pasaporte", "type": 301 }
     ],
     "rewrites": [
       {
@@ -117,6 +119,22 @@
       {
         "source": "/panel-fidelizacion",
         "destination": "/dashboard-fidelizacion.html"
+      },
+      {
+        "source": "/pasaporte",
+        "destination": "/pasaporte-cafetero.html"
+      },
+      {
+        "source": "/escanear-pasaporte",
+        "destination": "/escanear-pasaporte.html"
+      },
+      {
+        "source": "/manifest-pasaporte.webmanifest",
+        "destination": "/manifest-pasaporte.webmanifest"
+      },
+      {
+        "source": "/sw-pasaporte.js",
+        "destination": "/sw-pasaporte.js"
       }
     ],
     "headers": [
@@ -236,6 +254,32 @@
           {
             "key": "X-Robots-Tag",
             "value": "noindex, nofollow"
+          }
+        ]
+      },
+      {
+        "source": "/pasaporte**",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-store, no-cache, must-revalidate, max-age=0"
+          }
+        ]
+      },
+      {
+        "source": "/escanear-pasaporte**",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-store, no-cache, must-revalidate, max-age=0"
           }
         ]
       }

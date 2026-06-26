@@ -1,74 +1,41 @@
 /**
- * Opción alternativa: Generador de QR client-side
- * 
- * Si no quieres configurar Cloud Functions, puedes:
- * 1. Generar QR en el navegador del cliente
- * 2. Ofrecerle un botón para descargar/compartir
- * 3. Opcionalmente: hacer que el usuario mismo copie el enlace para compartir
- * 
- * Este script va en mi-tarjeta.html
+ * Descargar / compartir QR del Pasaporte Cafetero.
  */
-
 window.QRDescargar = {
-  /**
-   * Descargar el QR como imagen PNG
-   */
-  descargarQR: function(clienteId, nombreCliente) {
-    const canvas = document.querySelector('canvas');
-    if (!canvas) {
-      alert('QR aún no está generado');
+  descargarQR: function (clienteId, nombreCliente) {
+    var container = document.getElementById('qrContainer');
+    if (container && window.QRRender) {
+      QRRender.descargarDesdeContenedor(
+        container,
+        'pasaporte-' + (nombreCliente || 'cafetero').replace(/\s+/g, '-').toLowerCase() + '.png'
+      );
       return;
     }
-    
-    const link = document.createElement('a');
-    link.href = canvas.toDataURL('image/png');
-    link.download = `tarjeta-${nombreCliente.replace(/\s+/g, '-')}.png`;
-    link.click();
+    var img = document.getElementById('qrImg');
+    if (img && img.src) {
+      var link = document.createElement('a');
+      link.href = img.src;
+      link.download = 'pasaporte-' + (nombreCliente || 'cafetero').replace(/\s+/g, '-') + '.png';
+      link.click();
+      return;
+    }
+    alert('QR aún no está listo');
   },
 
-  /**
-   * Compartir QR por WhatsApp
-   */
-  compartirWhatsApp: function(clienteId) {
-    const urlTarjeta = `${window.location.origin}/mi-tarjeta.html?id=${encodeURIComponent(clienteId)}`;
-    const mensaje = `Aquí está mi tarjeta de fidelización en La Sucursal del Café 🎯☕\n${urlTarjeta}`;
-    const whatsappURL = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
-    window.open(whatsappURL, '_blank');
+  compartirWhatsApp: function (clienteId) {
+    var urlTarjeta = (window.Fidelizacion && Fidelizacion.urlPasaporte)
+      ? Fidelizacion.urlPasaporte(clienteId)
+      : window.location.origin + '/pasaporte?id=' + encodeURIComponent(clienteId);
+    var mensaje = 'Mi Pasaporte Cafetero de La Sucursal del Café ☕\n' + urlTarjeta;
+    window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(mensaje), '_blank');
   },
 
-  /**
-   * Copiar link al portapapeles
-   */
-  copiarLink: function(clienteId) {
-    const urlTarjeta = `${window.location.origin}/mi-tarjeta.html?id=${encodeURIComponent(clienteId)}`;
-    navigator.clipboard.writeText(urlTarjeta).then(() => {
-      alert('✓ Link copiado al portapapeles');
+  copiarLink: function (clienteId) {
+    var urlTarjeta = (window.Fidelizacion && Fidelizacion.urlPasaporte)
+      ? Fidelizacion.urlPasaporte(clienteId)
+      : window.location.origin + '/pasaporte?id=' + encodeURIComponent(clienteId);
+    navigator.clipboard.writeText(urlTarjeta).then(function () {
+      alert('Enlace copiado. Guárdalo en favoritos o añádelo a tu pantalla de inicio.');
     });
-  },
-
-  /**
-   * Envío simple por correo (abre el cliente de email del usuario)
-   */
-  abrirEmail: function(email, clienteId, nombreCliente) {
-    const urlTarjeta = `${window.location.origin}/mi-tarjeta.html?id=${encodeURIComponent(clienteId)}`;
-    const asunto = '¡Tu tarjeta de fidelización - La Sucursal del Café!';
-    const cuerpo = `Hola ${nombreCliente},\n\nAquí está tu tarjeta de fidelización:\n${urlTarjeta}\n\nMuestra el QR en caja para acumular puntos.\n\n¡Saludos!`;
-    
-    const mailtoURL = `mailto:${email}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
-    window.location.href = mailtoURL;
   }
 };
-
-/**
- * Para usar esto en mi-tarjeta.html:
- * 
- * 1. Agregar botones de acción:
- * 
- * <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
- *   <button onclick="QRDescargar.descargarQR('...')">📥 Descargar QR</button>
- *   <button onclick="QRDescargar.compartirWhatsApp('...')">📱 Compartir por WhatsApp</button>
- *   <button onclick="QRDescargar.copiarLink('...')">📋 Copiar enlace</button>
- * </div>
- * 
- * 2. Opción más simple: mostrar el link directamente para que lo copie/comparta
- */

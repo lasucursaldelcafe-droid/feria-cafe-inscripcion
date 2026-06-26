@@ -35,10 +35,10 @@ exports.enviarTarjetaAlRegistro = functions.firestore
       console.log(`Enviando tarjeta a ${cliente.email}...`);
 
       // Generar URL de tarjeta digital
-      const urlTarjeta = `${process.env.HOSTING_URL || 'https://la-sucursal-del-cafe.web.app'}/mi-tarjeta.html?id=${encodeURIComponent(clienteId)}`;
+      const urlTarjeta = `${process.env.HOSTING_URL || 'https://la-sucursal-del-cafe.web.app'}/pasaporte?id=${encodeURIComponent(clienteId)}`;
 
       // Generar URL del QR (usando API gratuita)
-      const urlQR = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(clienteId)}`;
+      const urlQR = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent('LSCPAS:' + clienteId)}`;
 
       // HTML del email
       const htmlEmail = `

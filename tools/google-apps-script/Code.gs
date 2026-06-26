@@ -69,6 +69,8 @@ var HEADERS_PATROCINADORES_COMPETENCIA = [
   'ID', 'Nombre', 'Instagram handle', 'Red social enlace', 'Logo enlace', 'Habilitado', 'Orden', 'Notas admin'
 ];
 var SITE_PUBLIC_BASE_URL = 'https://la-sucursal-del-cafe.web.app';
+var PASAPORTE_REGISTRO_PATH = '/registro-fidelizacion';
+var PASAPORTE_ESCANER_PATH = '/escanear-pasaporte';
 
 function doGet(e) {
   var params = e && e.parameter ? e.parameter : {};
@@ -297,6 +299,20 @@ function appendFeria_(data) {
   sendConfirmationEmail_('feria', data);
   sendOrganizerNotificationEmail_('feria', data);
   return data.id || '';
+}
+
+function getPasaporteRegistroUrl_(data) {
+  var base = SITE_PUBLIC_BASE_URL + PASAPORTE_REGISTRO_PATH;
+  var params = [];
+  if (data && data.nombre) params.push('nombre=' + encodeURIComponent(String(data.nombre)));
+  var tel = (data && (data.celular || data.telefono)) || '';
+  if (tel) params.push('telefono=' + encodeURIComponent(String(tel)));
+  if (data && data.correo) params.push('email=' + encodeURIComponent(String(data.correo)));
+  return params.length ? base + '?' + params.join('&') : base;
+}
+
+function getPasaporteEscanerUrl_() {
+  return SITE_PUBLIC_BASE_URL + PASAPORTE_ESCANER_PATH;
 }
 
 function normalizeStandId_(v) {
@@ -1447,17 +1463,68 @@ function buildEmailBody_(formType, data) {
       lines.push('Dudas: ' + ORGANIZER_EMAIL);
     }
   } else {
-    lines.push('Recibimos tu inscripción a la feria de La Sucursal del Café.');
-    lines.push('Referencia: ' + id);
-    lines.push('Fechas: 29 y 30 de agosto de 2026');
-    lines.push('Sede: Palmetto Plaza, Cali');
-    lines.push('La feria y el V60 Championship son eventos independientes (fechas y sedes distintas).');
-    lines.push('Dudas: ' + ORGANIZER_EMAIL);
+    return buildFeriaEmailPlain_(data);
   }
 
   lines.push('');
   lines.push('— La Sucursal del Café');
   return lines.join('\n');
+}
+
+function buildFeriaEmailPlain_(data) {
+  var id = data.id || '';
+  var nombre = data.nombre || '';
+  var pasaporteUrl = getPasaporteRegistroUrl_(data);
+  var lines = [
+    'Hola ' + nombre + ',',
+    '',
+    'Recibimos tu inscripción a la feria de La Sucursal del Café.',
+    'Referencia: ' + id,
+    'Fechas: 29 y 30 de agosto de 2026',
+    'Sede: Palmetto Plaza, Cali',
+    'La feria y el V60 Championship son eventos independientes (fechas y sedes distintas).',
+    '',
+    '☕ PASAPORTE CAFETERO (fidelización)',
+    'Crea tu tarjeta digital gratis, guárdala en el celular como app y muestra el QR en cada stand para acumular puntos:',
+    pasaporteUrl,
+    '',
+    'En iPhone: abre el enlace → Compartir → Añadir a pantalla de inicio.',
+    'En Android: Menú del navegador → Instalar aplicación o Añadir a pantalla de inicio.',
+    '',
+    'Dudas: ' + ORGANIZER_EMAIL
+  ];
+  return lines.join('\n');
+}
+
+function buildFeriaEmailHtml_(data) {
+  var nombre = escapeHtml_(data.nombre || 'visitante');
+  var id = escapeHtml_(data.id || '');
+  var pasaporteUrl = getPasaporteRegistroUrl_(data);
+  var organizerEmail = escapeHtml_(ORGANIZER_EMAIL);
+  var btnBrown = 'display:inline-block;background:#5D3A1A;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:600;';
+  var btnRed = 'display:inline-block;background:#C1272D;color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;';
+  return [
+    '<div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:0 auto;color:#4B352A;line-height:1.55;">',
+    '<div style="background:linear-gradient(135deg,#4B352A,#5D3A1A);color:#fff;padding:24px;border-radius:12px 12px 0 0;text-align:center;">',
+    '<p style="margin:0 0 6px;font-size:13px;opacity:0.85;">La Sucursal del Café</p>',
+    '<h1 style="margin:0;font-size:22px;">¡Inscripción recibida!</h1>',
+    '</div>',
+    '<div style="background:#f9f7f4;padding:24px;border-radius:0 0 12px 12px;">',
+    '<p style="margin:0 0 12px;">Hola <strong>' + nombre + '</strong>,</p>',
+    '<p style="margin:0 0 12px;">Quedaste registrado como visitante de la feria (ref. <strong>' + id + '</strong>).</p>',
+    '<p style="margin:0 0 16px;font-size:14px;color:#6b5344;">📅 29 y 30 de agosto de 2026 · Palmetto Plaza, Cali</p>',
+    '<div style="background:#fff;border:2px solid #D9D4C8;border-radius:12px;padding:18px;margin:0 0 18px;">',
+    '<p style="margin:0 0 8px;font-size:18px;font-weight:700;">☕ Tu Pasaporte Cafetero</p>',
+    '<p style="margin:0 0 14px;font-size:14px;">Tarjeta digital con QR. Cada stand que visites puede escanearla y sumarte puntos. Guárdala en tu celular como una app.</p>',
+    '<p style="margin:0 0 16px;text-align:center;"><a href="' + pasaporteUrl + '" style="' + btnRed + '">Crear mi Pasaporte Cafetero</a></p>',
+    '<p style="margin:0;font-size:12px;color:#888;">iPhone: Compartir → Añadir a pantalla de inicio · Android: Instalar aplicación</p>',
+    '</div>',
+    '<p style="margin:0 0 8px;font-size:14px;">Dudas: <a href="mailto:' + organizerEmail + '" style="color:#8b4513;">' + organizerEmail + '</a></p>',
+    '<hr style="border:none;border-top:1px solid #e0d5c8;margin:20px 0;">',
+    '<p style="margin:0;font-size:12px;color:#888;">— La Sucursal del Café · Apoya lo nuestro, toma café colombiano.</p>',
+    '</div>',
+    '</div>'
+  ].join('');
 }
 
 function sendConfirmationEmail_(formType, data) {
@@ -1468,6 +1535,7 @@ function sendConfirmationEmail_(formType, data) {
   if (formType === 'competencia') subject = 'V60 Championship — inscripción ' + (data.id || '');
   if (formType === 'lista_espera') subject = 'Lista de espera — V60 Championship';
   if (formType === 'stands') subject = 'Solicitud de stand recibida — ' + (data.marca || data.id || '');
+  if (formType === 'feria') subject = 'Tu inscripción + Pasaporte Cafetero — La Sucursal del Café';
 
   try {
     if (formType === 'competencia') {
@@ -1476,6 +1544,14 @@ function sendConfirmationEmail_(formType, data) {
         subject: subject,
         body: buildCompetenciaEmailPlain_(data),
         htmlBody: buildCompetenciaEmailHtml_(data),
+        name: 'La Sucursal del Café'
+      });
+    } else if (formType === 'feria') {
+      MailApp.sendEmail({
+        to: correo,
+        subject: subject,
+        body: buildFeriaEmailPlain_(data),
+        htmlBody: buildFeriaEmailHtml_(data),
         name: 'La Sucursal del Café'
       });
     } else {
@@ -1568,6 +1644,7 @@ function buildOrganizerAlertBody_(formType, data) {
     lines.push('Correo: ' + (data.correo || ''));
     lines.push('Celular: ' + (data.celular || ''));
     lines.push('Intereses: ' + (intereses || '(ninguno)'));
+    lines.push('Pasaporte Cafetero (enlace enviado al visitante): ' + getPasaporteRegistroUrl_(data));
     lines.push('');
     lines.push('Revisa la hoja "' + SHEET_FERIA + '" en Google Sheets para el detalle completo.');
   }

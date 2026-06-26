@@ -29,9 +29,12 @@ window.WalletQR = {
 
   /** Fallback: tarjeta web si Wallet no está configurado */
   generarURLTarjeta: function (clienteId) {
+    if (window.Fidelizacion && Fidelizacion.urlPasaporte) {
+      return Fidelizacion.urlPasaporte(clienteId);
+    }
     return (
       window.location.origin +
-      '/mi-tarjeta.html?id=' +
+      '/pasaporte?id=' +
       encodeURIComponent(clienteId)
     );
   },

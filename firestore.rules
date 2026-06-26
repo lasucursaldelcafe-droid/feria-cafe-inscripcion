@@ -27,6 +27,14 @@ service cloud.firestore {
     match /fidelizacion_config/{docId} {
       allow read, write: if true;
     }
+    match /fidelizacion_operadores/{operadorId} {
+      allow read, create, update: if true;
+      allow delete: if false;
+    }
+    match /fidelizacion_escaneos/{escaneoId} {
+      allow read, create: if true;
+      allow update, delete: if false;
+    }
 
     match /{document=**} {
       allow read, write: if false;

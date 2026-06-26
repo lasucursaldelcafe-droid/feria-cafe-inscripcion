@@ -4,19 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Crea tu tarjeta | Fidelización La Sucursal del Café</title>
+  <title>Pasaporte Cafetero | La Sucursal del Café</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/brand.css?v=20260621a">
-  <link rel="stylesheet" href="css/fidelizacion.css?v=20260623a">
+  <link rel="stylesheet" href="css/brand.css?v=20260625a">
+  <link rel="stylesheet" href="css/fidelizacion.css?v=20260625a">
 </head>
 <body class="page-festival">
   <div class="site-shell">
     <header class="site-hero site-hero--coffee">
       <div class="festival-sub-hero">
-        <p class="festival-kicker">Fidelización</p>
-        <h1 class="festival-sub-hero__title">Crea tu tarjeta</h1>
-        <p class="festival-sub-hero__lead">Toma 30 segundos. Después de registrarte verás tu tarjeta digital con tu código QR.</p>
+        <p class="festival-kicker">Pasaporte Cafetero</p>
+        <h1 class="festival-sub-hero__title">Crea tu pasaporte</h1>
+        <p class="festival-sub-hero__lead">Tarjeta digital con QR. Guárdala en tu celular y acumula puntos en cada stand de la feria.</p>
       </div>
     </header>
 
@@ -36,7 +36,7 @@
             <input type="email" id="email" autocomplete="email">
           </div>
           <p id="formError" class="form-error" hidden></p>
-          <button type="submit" class="btn-submit" id="btnRegistrar">Crear mi tarjeta</button>
+          <button type="submit" class="btn-submit" id="btnRegistrar">Crear mi Pasaporte Cafetero</button>
         </form>
       </section>
     </main>
@@ -45,39 +45,48 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="js/firebase-fidelizacion-config.js"></script>
+  <script src="js/site-links.js"></script>
   <script src="js/fidelizacion-common.js"></script>
   <script>
-    document.getElementById('formRegistro').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var errorEl = document.getElementById('formError');
-      var btn = document.getElementById('btnRegistrar');
-      errorEl.hidden = true;
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('nombre')) document.getElementById('nombre').value = params.get('nombre');
+      if (params.get('telefono')) document.getElementById('telefono').value = params.get('telefono');
+      if (params.get('email')) document.getElementById('email').value = params.get('email');
 
-      var datos = {
-        nombre: document.getElementById('nombre').value.trim(),
-        telefono: document.getElementById('telefono').value.trim(),
-        email: document.getElementById('email').value.trim()
-      };
+      document.getElementById('formRegistro').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var errorEl = document.getElementById('formError');
+        var btn = document.getElementById('btnRegistrar');
+        errorEl.hidden = true;
 
-      if (!datos.nombre || !datos.telefono) {
-        errorEl.textContent = 'Nombre y teléfono son obligatorios.';
-        errorEl.hidden = false;
-        return;
-      }
+        var datos = {
+          nombre: document.getElementById('nombre').value.trim(),
+          telefono: document.getElementById('telefono').value.trim(),
+          email: document.getElementById('email').value.trim()
+        };
 
-      btn.disabled = true;
-      btn.textContent = 'Creando...';
+        if (!datos.nombre || !datos.telefono) {
+          errorEl.textContent = 'Nombre y teléfono son obligatorios.';
+          errorEl.hidden = false;
+          return;
+        }
 
-      Fidelizacion.crearCliente(datos).then(function (docRef) {
-        window.location.href = 'mi-tarjeta.html?id=' + encodeURIComponent(docRef.id);
-      }).catch(function (err) {
-        console.error(err);
-        errorEl.textContent = 'No pudimos crear tu tarjeta. ' + (err && err.message ? err.message : 'Intenta de nuevo.');
-        errorEl.hidden = false;
-        btn.disabled = false;
-        btn.textContent = 'Crear mi tarjeta';
+        btn.disabled = true;
+        btn.textContent = 'Creando…';
+
+        Fidelizacion.crearCliente(datos).then(function (docRef) {
+          var url = Fidelizacion.urlPasaporte(docRef.id);
+          window.location.href = url;
+        }).catch(function (err) {
+          console.error(err);
+          errorEl.textContent = 'No pudimos crear tu pasaporte. ' + (err && err.message ? err.message : 'Intenta de nuevo.');
+          errorEl.hidden = false;
+          btn.disabled = false;
+          btn.textContent = 'Crear mi Pasaporte Cafetero';
+        });
       });
-    });
+    })();
   </script>
 </body>
 </html>

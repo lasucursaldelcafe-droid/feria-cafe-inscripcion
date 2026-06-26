@@ -16,6 +16,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="js/firebase-fidelizacion-config.js"></script>
+  <script src="js/site-links.js"></script>
   <script src="js/fidelizacion-common.js"></script>
 </head>
 <body class="fid-admin-body">
@@ -27,6 +28,7 @@
     const TABS = [
       { key: 'resumen', label: 'Resumen' },
       { key: 'clientes', label: 'Clientes' },
+      { key: 'operadores', label: 'Operadores stand' },
       { key: 'recompensas', label: 'Recompensas' },
       { key: 'promociones', label: 'Promociones' },
       { key: 'crm', label: 'CRM' },
@@ -279,15 +281,100 @@
       );
     }
 
+    function Operadores() {
+      const [operadores, setOperadores] = useState([]);
+      const [form, setForm] = useState({ standNombre: '', usuario: '', pin: '', puntosPorEscaneo: '10' });
+      const [error, setError] = useState('');
+      const [creado, setCreado] = useState(null);
+      const [saving, setSaving] = useState(false);
+
+      useEffect(() => {
+        const unsub = Fidelizacion.db().collection('fidelizacion_operadores').onSnapshot(snap => {
+          setOperadores(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        });
+        return unsub;
+      }, []);
+
+      function crear(e) {
+        e.preventDefault();
+        setError('');
+        setCreado(null);
+        setSaving(true);
+        Fidelizacion.crearOperador({
+          standNombre: form.standNombre.trim(),
+          usuario: form.usuario.trim(),
+          pin: form.pin,
+          puntosPorEscaneo: form.puntosPorEscaneo
+        }).then(() => {
+          setCreado({ usuario: form.usuario.trim().toLowerCase(), pin: form.pin, stand: form.standNombre.trim() });
+          setForm({ standNombre: '', usuario: '', pin: '', puntosPorEscaneo: '10' });
+        }).catch(err => setError(err.message)).finally(() => setSaving(false));
+      }
+
+      function toggleOp(op) {
+        Fidelizacion.db().collection('fidelizacion_operadores').doc(op.id).update({ activo: !op.activo });
+      }
+
+      const escanerUrl = typeof SiteLinks !== 'undefined' ? SiteLinks.absUrl('escanearPasaporte') : '/escanear-pasaporte';
+
+      return (
+        <div>
+          <div className="fid-admin-card">
+            <h3>Operadores de stand (escáner Pasaporte Cafetero)</h3>
+            <p>Crea un usuario por stand. El expositor entra en <a href={escanerUrl} target="_blank" rel="noopener noreferrer">{escanerUrl}</a> con su usuario y PIN, escanea el QR del visitante y suma puntos automáticamente (máx. 1 vez por stand por día).</p>
+            <form onSubmit={crear} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+              <input className="fid-admin-input" placeholder="Nombre del stand" required value={form.standNombre} onChange={e => setForm({ ...form, standNombre: e.target.value })} />
+              <input className="fid-admin-input" placeholder="Usuario (ej. cafe-arabica)" required value={form.usuario} onChange={e => setForm({ ...form, usuario: e.target.value })} />
+              <input className="fid-admin-input" placeholder="PIN (mín. 4)" type="password" required minLength={4} value={form.pin} onChange={e => setForm({ ...form, pin: e.target.value })} />
+              <input className="fid-admin-input" placeholder="Puntos/escaneo" type="number" min="1" value={form.puntosPorEscaneo} onChange={e => setForm({ ...form, puntosPorEscaneo: e.target.value })} style={{ width: 100 }} />
+              <button className="fid-admin-btn" type="submit" disabled={saving}>{saving ? 'Creando…' : 'Crear operador'}</button>
+            </form>
+            {error && <p className="form-error">{error}</p>}
+            {creado && (
+              <div style={{ marginTop: 12, padding: 12, background: '#e8f5e9', borderRadius: 8, fontSize: '0.9rem' }}>
+                <strong>Operador creado</strong> — Comparte con el stand:<br />
+                Usuario: <code>{creado.usuario}</code> · PIN: <code>{creado.pin}</code> · Stand: {creado.stand}
+              </div>
+            )}
+          </div>
+          <div className="fid-admin-card">
+            <table className="fid-admin-table">
+              <thead><tr><th>Stand</th><th>Usuario</th><th>Pts/escaneo</th><th>Estado</th><th></th></tr></thead>
+              <tbody>
+                {operadores.map(op => (
+                  <tr key={op.id}>
+                    <td>{op.standNombre}</td>
+                    <td><code>{op.usuario}</code></td>
+                    <td>{op.puntosPorEscaneo || 10}</td>
+                    <td>{op.activo ? 'Activo' : 'Inactivo'}</td>
+                    <td><button className="fid-admin-btn fid-admin-btn--ghost" onClick={() => toggleOp(op)}>{op.activo ? 'Desactivar' : 'Activar'}</button></td>
+                  </tr>
+                ))}
+                {operadores.length === 0 && <tr><td colSpan="5">Aún no hay operadores. Crea uno para cada stand.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+
     function Wallet() {
       const functionUrl =
         'https://us-central1-la-sucursal-del-cafe.cloudfunctions.net/generateWalletPass';
+      const pasaporteUrl = typeof SiteLinks !== 'undefined' ? SiteLinks.absUrl('pasaporte') : '/pasaporte';
       return (
         <div className="fid-admin-card">
-          <h3>Google Wallet</h3>
+          <h3>Pasaporte Cafetero (sistema principal)</h3>
           <p>
-            El botón en <code>/mi-tarjeta</code> llama a la Cloud Function{' '}
-            <code>generateWalletPass</code>, que firma un pass de fidelización con JWT.
+            La tarjeta HTML en <a href={pasaporteUrl} target="_blank" rel="noopener noreferrer">{pasaporteUrl}</a> funciona
+            sin Google Wallet: el visitante guarda la página en su celular y muestra el QR en cada stand.
+          </p>
+          <p>Escáner de stands: <code>{typeof SiteLinks !== 'undefined' ? SiteLinks.absUrl('escanearPasaporte') : '/escanear-pasaporte'}</code></p>
+          <hr style={{ margin: '20px 0', border: 'none', borderTop: '1px solid #eee' }} />
+          <h3>Google Wallet (opcional)</h3>
+          <p>
+            Si la Cloud Function está desplegada, el botón en el pasaporte llama a{' '}
+            <code>generateWalletPass</code> para agregar el pase a Google Wallet.
           </p>
           <p>
             <strong>URL función:</strong>{' '}
@@ -401,6 +488,7 @@
 
           {tab === 'resumen' && <Resumen clientes={clientes} transacciones={transacciones} />}
           {tab === 'clientes' && <Clientes clientes={clientes} refrescar={() => {}} />}
+          {tab === 'operadores' && <Operadores />}
           {tab === 'recompensas' && <ColeccionCRUD coleccion="fidelizacion_recompensas" titulo="Recompensas"
             campos={[{ key: 'nombre', label: 'Nombre' }, { key: 'puntosRequeridos', label: 'Puntos requeridos', type: 'number' }, { key: 'descripcion', label: 'Descripción' }]} />}
           {tab === 'promociones' && <ColeccionCRUD coleccion="fidelizacion_promociones" titulo="Promociones"
