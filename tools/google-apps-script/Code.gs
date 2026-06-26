@@ -287,7 +287,7 @@ function appendFeria_(data) {
   var legalCols = parseFeriaLegalAcceptances_(data);
   var estado = 'Registrado';
 
-  sheet.appendRow([
+  var feriaRow = [
     data.fecha || new Date().toISOString(),
     data.id || '',
     data.nombre || '',
@@ -295,7 +295,8 @@ function appendFeria_(data) {
     data.celular || '',
     data.correo || '',
     intereses
-  ].concat(legalCols).concat([estado, 'Sí', data.pasaporteId || '', '']));
+  ].concat(legalCols).concat([estado, 'Si', data.pasaporteId || '', '']);
+  sheet.appendRow(feriaRow);
 
   sendConfirmationEmail_('feria', data);
   sendOrganizerNotificationEmail_('feria', data);
