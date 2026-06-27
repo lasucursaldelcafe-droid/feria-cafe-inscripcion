@@ -658,6 +658,80 @@
   font-size: 0.95rem;
 }
 
+.admin-creds-box {
+  margin-top: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(233, 230, 221, 0.12);
+}
+
+.admin-creds-box__title {
+  margin: 0 0 0.65rem;
+  font-weight: 600;
+}
+
+.admin-creds-list {
+  margin: 0 0 0.65rem;
+}
+
+.admin-creds-list > div {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.45rem;
+  align-items: center;
+}
+
+.admin-creds-list dt {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--admin-text-muted, #b8a99a);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.admin-creds-list dd {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.admin-creds-code {
+  font-size: 1.05rem !important;
+  letter-spacing: 0.06em;
+}
+
+.admin-creds-hint {
+  margin: 0 0 0.65rem;
+  font-size: 0.82rem;
+  color: var(--admin-text-muted, #b8a99a);
+}
+
+.admin-creds-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
+}
+
+.admin-creds-steps {
+  margin: 0;
+  padding-left: 1.15rem;
+  font-size: 0.85rem;
+  color: var(--admin-text-muted, #b8a99a);
+}
+
+.admin-creds-steps li {
+  margin-bottom: 0.3rem;
+}
+
+.admin-creds-links {
+  margin: 0.65rem 0 0;
+}
+
 .admin-table__link {
   font-size: 0.78rem;
   white-space: nowrap;

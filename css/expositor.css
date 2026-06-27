@@ -400,6 +400,54 @@
   max-width: 840px;
 }
 
+.expositor-install-wrap:empty {
+  display: none;
+}
+
+.expositor-install {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--exp-radius);
+  background: rgba(107, 191, 138, 0.12);
+  border: 1px solid rgba(107, 191, 138, 0.28);
+  font-size: 0.9rem;
+}
+
+.expositor-install strong {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.expositor-install p {
+  margin: 0;
+  color: var(--exp-text-muted);
+}
+
+.expositor-card--onboarding {
+  border-color: rgba(187, 94, 60, 0.35);
+  background: linear-gradient(160deg, var(--exp-surface) 0%, #32261e 100%);
+}
+
+.expositor-steps {
+  margin: 0.75rem 0 1rem;
+  padding-left: 1.25rem;
+  color: var(--exp-text-muted);
+}
+
+.expositor-steps li {
+  margin-bottom: 0.45rem;
+}
+
+.expositor-steps strong {
+  color: var(--exp-text);
+}
+
+.expositor-onboarding-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 @media (max-width: 560px) {
   .expositor-main {
     padding: 1rem;

@@ -5,6 +5,8 @@
   'use strict';
 
   var SESSION_KEY = 'feria_expositor_session';
+  var REMEMBER_KEY = 'feria_expositor_remember';
+  var ONBOARDING_KEY = 'feria_expositor_onboarding_dismissed';
   var MAX_FOTOS = 12;
   var MAX_PRODUCTOS = 24;
 
@@ -47,21 +49,64 @@
     return url;
   }
 
+  function shouldRememberDevice() {
+    try {
+      var pref = localStorage.getItem(REMEMBER_KEY);
+      if (pref === '0') return false;
+      if (pref === '1') return true;
+    } catch (e) { /* ignore */ }
+    var checkbox = $('loginRemember');
+    return !checkbox || checkbox.checked;
+  }
+
+  function getSessionStorage() {
+    if (shouldRememberDevice()) {
+      try {
+        return localStorage;
+      } catch (e) {
+        return sessionStorage;
+      }
+    }
+    return sessionStorage;
+  }
+
   function getSession() {
     try {
-      var raw = sessionStorage.getItem(SESSION_KEY);
-      return raw ? JSON.parse(raw) : null;
+      var storages = shouldRememberDevice()
+        ? [localStorage, sessionStorage]
+        : [sessionStorage, localStorage];
+      for (var i = 0; i < storages.length; i++) {
+        var raw = storages[i].getItem(SESSION_KEY);
+        if (raw) return JSON.parse(raw);
+      }
+      return null;
     } catch (e) {
       return null;
     }
   }
 
-  function saveSession(session) {
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  function saveSession(session, remember) {
+    var rememberDevice = remember !== undefined ? !!remember : shouldRememberDevice();
+    try {
+      if (rememberDevice) {
+        localStorage.setItem(REMEMBER_KEY, '1');
+        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        sessionStorage.removeItem(SESSION_KEY);
+      } else {
+        localStorage.setItem(REMEMBER_KEY, '0');
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        localStorage.removeItem(SESSION_KEY);
+      }
+    } catch (e) {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    }
   }
 
   function clearSession() {
-    sessionStorage.removeItem(SESSION_KEY);
+    try {
+      localStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
+    } catch (e) { /* ignore */ }
   }
 
   function readFileAsDataUrl(file) {
@@ -532,8 +577,63 @@
     if (emailEl) emailEl.textContent = session.email || '';
     renderStand(session.stand);
     fillProfileForm(session.stand);
+    showOnboarding(session.stand);
+    showInstallBanner();
     showPanel();
     loadFeed();
+  }
+
+  function showOnboarding(stand) {
+    var card = $('expositorOnboarding');
+    if (!card) return;
+    try {
+      if (localStorage.getItem(ONBOARDING_KEY) === '1') {
+        card.hidden = true;
+        return;
+      }
+    } catch (e) { /* ignore */ }
+    card.hidden = false;
+    var linkBtn = $('onboardingPublicLink');
+    if (linkBtn && stand && stand.perfilUrl) {
+      linkBtn.href = stand.perfilUrl;
+      linkBtn.hidden = false;
+    }
+  }
+
+  function dismissOnboarding() {
+    var card = $('expositorOnboarding');
+    if (card) card.hidden = true;
+    try {
+      localStorage.setItem(ONBOARDING_KEY, '1');
+    } catch (e) { /* ignore */ }
+  }
+
+  function esIos() {
+    return /iphone|ipad|ipod/i.test(navigator.userAgent);
+  }
+
+  function esStandalone() {
+    return global.matchMedia('(display-mode: standalone)').matches ||
+      global.navigator.standalone === true;
+  }
+
+  function showInstallBanner() {
+    if (esStandalone()) return;
+    var el = $('expositorInstallBanner');
+    if (!el) return;
+    var html = '';
+    if (esIos()) {
+      html = '<div class="expositor-install">' +
+        '<strong>Guarda tu panel en el celular</strong>' +
+        '<p>Toca <span aria-hidden="true">Compartir</span> ↗ y luego <strong>Añadir a pantalla de inicio</strong>. Así vuelves a tu stand sin volver a escribir el código.</p>' +
+        '</div>';
+    } else {
+      html = '<div class="expositor-install">' +
+        '<strong>Guarda tu panel en el celular</strong>' +
+        '<p>Menú del navegador (⋮) → <strong>Instalar aplicación</strong> o <strong>Añadir a pantalla de inicio</strong>. Marca «Recordar en este dispositivo» al entrar.</p>' +
+        '</div>';
+    }
+    el.innerHTML = html;
   }
 
   function handleLoginSubmit(event) {
@@ -580,7 +680,9 @@
         return;
       }
       var session = { email: email, accessCode: code, stand: result.stand, loggedAt: new Date().toISOString() };
-      saveSession(session);
+      var rememberCheckbox = $('loginRemember');
+      var remember = rememberCheckbox ? rememberCheckbox.checked : true;
+      saveSession(session, remember);
       enterPanel(session);
     });
   }
@@ -609,6 +711,18 @@
     if (code && codeInput) codeInput.value = decodeURIComponent(code);
   }
 
+  function syncRememberCheckbox() {
+    var checkbox = $('loginRemember');
+    if (!checkbox) return;
+    try {
+      var pref = localStorage.getItem(REMEMBER_KEY);
+      if (pref === '0') checkbox.checked = false;
+      else checkbox.checked = true;
+    } catch (e) {
+      checkbox.checked = true;
+    }
+  }
+
   function bindEvents() {
     var form = $('expositorLoginForm');
     if (form) form.addEventListener('submit', handleLoginSubmit);
@@ -625,11 +739,15 @@
     var refreshBtn = $('refreshFeedBtn');
     if (refreshBtn) refreshBtn.addEventListener('click', loadFeed);
 
+    var dismissBtn = $('dismissOnboardingBtn');
+    if (dismissBtn) dismissBtn.addEventListener('click', dismissOnboarding);
+
     bindProfileForm();
   }
 
   function init() {
     initContact();
+    syncRememberCheckbox();
     prefillFromQuery();
     bindEvents();
 
