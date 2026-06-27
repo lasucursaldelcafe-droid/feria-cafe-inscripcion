@@ -116,6 +116,9 @@ function doGet(e) {
   if (params.action === 'expositor_feed') {
     return jsonResponse(getExpositorFeed_());
   }
+  if (params.action === 'feria_resumen') {
+    return jsonResponse(getFeriaResumen_());
+  }
   if (params.action === 'participantes_publico') {
     return jsonResponse(getParticipantesPublico_());
   }
@@ -531,6 +534,27 @@ function getExpositorFeed_() {
     }
   }
   return { ok: true, items: items };
+}
+
+function getFeriaResumen_() {
+  var sheet = getOrCreateSheet_(SHEET_NOVEDADES, HEADERS_NOVEDADES);
+  var lastRow = sheet.getLastRow();
+  var novedades = [];
+  if (lastRow >= 2) {
+    var values = sheet.getRange(2, 1, lastRow, HEADERS_NOVEDADES.length).getValues();
+    for (var i = values.length - 1; i >= 0; i--) {
+      var row = rowObjectFromValues_(HEADERS_NOVEDADES, values[i]);
+      var audiencia = String(row['Audiencia'] || 'todos').trim().toLowerCase();
+      if (audiencia !== 'todos' && audiencia !== 'visitantes') continue;
+      novedades.push({
+        timestamp: row['Timestamp'] || '',
+        titulo: row['Titulo'] || '',
+        cuerpo: row['Cuerpo'] || ''
+      });
+      if (novedades.length >= 6) break;
+    }
+  }
+  return { ok: true, novedades: novedades };
 }
 
 function findStandOccupied_(standId) {

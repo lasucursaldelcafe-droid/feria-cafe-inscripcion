@@ -1,5 +1,5 @@
-/* Service worker — Pasaporte Cafetero PWA (v2: incluye backend Sheets) */
-var CACHE = 'pasaporte-cafetero-v2';
+/* Service worker — Pasaporte Cafetero PWA (v3: resumen feria) */
+var CACHE = 'pasaporte-cafetero-v3';
 var SHELL = [
   '/pasaporte',
   '/pasaporte-cafetero.html',
@@ -18,7 +18,8 @@ var SHELL = [
   '/js/fidelizacion-common.js',
   '/js/firebase-fidelizacion-config.js',
   '/js/qr-render.js',
-  '/js/pasaporte-pwa.js'
+  '/js/pasaporte-pwa.js',
+  '/js/pasaporte-feria.js'
 ];
 
 function shellMatch(url) {

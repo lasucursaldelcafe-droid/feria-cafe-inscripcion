@@ -65,7 +65,33 @@ window.EVENT_CONFIG = {
         'El detalle de cada premio, fechas de sorteo y mecánica se comunicará a visitantes registrados por correo y redes oficiales. No aplica a quienes solo asistan sin registro.'
     },
     notaIndependencia:
-      'Organizado por el mismo equipo de La Sucursal del Café. El registro de visitante en la feria es independiente de la inscripción al V60 Championship.'
+      'Organizado por el mismo equipo de La Sucursal del Café. El registro de visitante en la feria es independiente de la inscripción al V60 Championship.',
+    programaCorto: [
+      {
+        icono: '☕',
+        tag: 'Stands',
+        titulo: 'Café tostado y cata',
+        texto: 'Recorre expositores, prueba perfiles de taza y conoce tostadores.'
+      },
+      {
+        icono: '🌱',
+        tag: 'Origen',
+        titulo: 'Fincas cafeteras',
+        texto: 'Productores comparten proceso, variedades e historias del grano.'
+      },
+      {
+        icono: '🏆',
+        tag: 'Competencia',
+        titulo: 'V60 Championship',
+        texto: 'Baristas compiten en café filtrado — técnica y emoción en vivo.'
+      },
+      {
+        icono: '📚',
+        tag: 'Talleres',
+        titulo: 'Cata y formación',
+        texto: 'Sesiones guiadas para entrenar paladar y métodos de extracción.'
+      }
+    ]
   },
   stands: {
     nav: 'Adquiere tu stand',

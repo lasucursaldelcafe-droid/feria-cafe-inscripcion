@@ -17,7 +17,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/brand.css?v=20260625a">
   <link rel="stylesheet" href="css/fidelizacion.css?v=20260626a">
-  <link rel="stylesheet" href="css/pasaporte.css?v=20260626a">
+  <link rel="stylesheet" href="css/pasaporte.css?v=20260627a">
 </head>
 <body class="pasaporte-page">
   <div class="pasaporte-shell">
@@ -80,6 +80,20 @@
         <ul id="historialLista"></ul>
       </section>
     </article>
+
+    <section id="feriaResumen" class="pasaporte-feria" hidden aria-labelledby="feriaResumenTitle">
+      <h3 id="feriaResumenTitle">En la feria</h3>
+      <p class="pasaporte-feria__meta" data-feria-meta></p>
+      <ul class="pasaporte-feria__lista" data-feria-programa></ul>
+      <div class="pasaporte-feria__novedades" data-feria-novedades hidden></div>
+      <div class="pasaporte-feria__links">
+        <a class="pasaporte-btn pasaporte-btn--primary" data-feria-marcas href="marcas.html">Coffee Shop — ver marcas</a>
+        <a class="pasaporte-btn pasaporte-btn--muted" data-feria-actividades href="actividades.html">Programa completo</a>
+      </div>
+      <p class="pasaporte-feria__expositor-wrap">
+        <a class="pasaporte-feria__expositor" data-feria-expositor href="expositor.html">¿Eres expositor? Entra a tu panel y Coffee Shop</a>
+      </p>
+    </section>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -92,8 +106,14 @@
   <script src="js/fidelizacion-common.js"></script>
   <script src="js/qr-render.js"></script>
   <script src="js/pasaporte-pwa.js"></script>
+  <script src="js/event-config.js"></script>
+  <script src="js/pasaporte-feria.js"></script>
   <script>
     (function () {
+      if (window.PasaporteFeria && PasaporteFeria.mount) {
+        PasaporteFeria.mount('feriaResumen');
+      }
+
       var params = new URLSearchParams(window.location.search);
       var clienteId = params.get('id');
       if (!clienteId && window.Fidelizacion && Fidelizacion.leerPasaporteLocal) {
