@@ -46,31 +46,63 @@
     if (backendMode) return Promise.resolve(backendMode);
     if (!backendReady) {
       backendReady = new Promise(function (resolve) {
-        if (!global.firebase || !global.FIREBASE_FIDELIZACION_CONFIG ||
-            global.FIREBASE_FIDELIZACION_CONFIG.apiKey === 'TU_API_KEY') {
-          backendMode = sheetsApi() && sheetsApi().isAvailable() ? 'sheets' : 'sheets';
-          resolve(backendMode);
-          return;
-        }
-        try {
-          var testDb = readyFirestore();
-          testDb.collection('fidelizacion_clientes').limit(1).get()
-            .then(function () {
-              backendMode = 'firestore';
-              resolve('firestore');
-            })
-            .catch(function (err) {
-              console.warn('Firestore no disponible, usando Google Sheets:', err && err.message);
+        var api = sheetsApi();
+        if (api && api.isAvailable() && api.probe) {
+          api.probe().then(function (pasaportesReady) {
+            if (pasaportesReady) {
               backendMode = 'sheets';
               resolve('sheets');
-            });
-        } catch (err) {
-          backendMode = 'sheets';
-          resolve('sheets');
+              return;
+            }
+            tryFirestoreOrSheets(resolve);
+          }).catch(function () {
+            tryFirestoreOrSheets(resolve);
+          });
+          return;
         }
+        tryFirestoreOrSheets(resolve);
       });
     }
     return backendReady;
+  }
+
+  function tryFirestoreOrSheets(resolve) {
+    if (!global.firebase || !global.FIREBASE_FIDELIZACION_CONFIG ||
+        global.FIREBASE_FIDELIZACION_CONFIG.apiKey === 'TU_API_KEY') {
+      backendMode = sheetsApi() && sheetsApi().isAvailable() ? 'sheets' : 'sheets';
+      resolve(backendMode);
+      return;
+    }
+    try {
+      var testDb = readyFirestore();
+      var settled = false;
+      var timer = setTimeout(function () {
+        if (settled) return;
+        settled = true;
+        console.warn('Firestore timeout, usando Google Sheets.');
+        backendMode = 'sheets';
+        resolve('sheets');
+      }, 4000);
+      testDb.collection('fidelizacion_clientes').limit(1).get()
+        .then(function () {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          backendMode = 'firestore';
+          resolve('firestore');
+        })
+        .catch(function (err) {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          console.warn('Firestore no disponible, usando Google Sheets:', err && err.message);
+          backendMode = 'sheets';
+          resolve('sheets');
+        });
+    } catch (err) {
+      backendMode = 'sheets';
+      resolve('sheets');
+    }
   }
 
   function readyFirestore() {
@@ -230,6 +262,9 @@
   function crearORecuperarCliente(datos) {
     return resolveBackend().then(function (mode) {
       if (mode === 'sheets') {
+        if (!sheetsApi()) {
+          return Promise.reject(new Error('Falta js/fidelizacion-sheets.js en esta página. Actualiza el sitio (deploy).'));
+        }
         return sheetsApi().crearORecuperarCliente(datos).then(function (res) {
           guardarPasaporteLocal(res.id);
           return res;
