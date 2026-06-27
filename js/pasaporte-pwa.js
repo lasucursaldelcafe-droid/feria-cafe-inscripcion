@@ -47,6 +47,27 @@
     esStandalone: esStandalone
   };
 
+  function onSwUpdate(registration) {
+    if (!registration || !registration.waiting) return;
+    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    registration.addEventListener('updatefound', function () {
+      var worker = registration.installing;
+      if (!worker) return;
+      worker.addEventListener('statechange', function () {
+        if (worker.state === 'activated' && navigator.serviceWorker.controller) {
+          global.location.reload();
+        }
+      });
+    });
+  }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', function (event) {
+      if (event.data && event.data.type === 'RELOAD') global.location.reload();
+    });
+    navigator.serviceWorker.ready.then(onSwUpdate).catch(function () {});
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', registrarServiceWorker);
   } else {

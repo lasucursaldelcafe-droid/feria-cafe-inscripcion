@@ -317,11 +317,14 @@ def check_forms_pages(report: VerificationReport) -> None:
     pages: list[tuple[str, list[str]]] = [
         ("/inscripcion", ["form-submit.js", "sheets-config.js"]),
         ("/competencia", ["form-submit.js", "sheets-config.js"]),
-        ("/admin", ["admin-dashboard.js", "sheets-config.js"]),
+        ("/admin", ["admin-dashboard.js", "sheets-config.js", "fidelizacion-sheets.js"]),
         ("/stands", ["stands-map.js"]),
         ("/marcas", ["participantes-directory.js"]),
         ("/mi-stand", ["expositor-panel.js"]),
         ("/fidelizacion", ["site-links.js"]),
+        ("/pasaporte", ["fidelizacion-sheets.js", "fidelizacion-common.js", "pasaporte-pwa.js"]),
+        ("/registro-fidelizacion", ["fidelizacion-sheets.js", "fidelizacion-common.js"]),
+        ("/escanear-pasaporte", ["fidelizacion-sheets.js", "fidelizacion-common.js"]),
     ]
     for path, tokens in pages:
         status, html = http_text(SITE_BASE + path)
@@ -359,6 +362,30 @@ def check_fidelizacion_links(report: VerificationReport) -> None:
         remediation="py tools/deploy_firebase.py",
         optional=True,
     )
+
+    web_url = read_canonical_web_app_url() or read_web_app_url()
+    if web_url:
+        _, pas_body = http_json(web_url + ("&" if "?" in web_url else "?") + "action=pasaporte_list&limit=1")
+        pas_ok = bool(pas_body.get("ok")) and isinstance(pas_body.get("clientes"), list)
+        add(
+            report,
+            id="pasaporte_api",
+            category="backend",
+            passed=pas_ok,
+            detail="pasaporte_list con clientes[]" if pas_ok else "pasaporte_list no disponible en Apps Script",
+            remediation="Redeploy Code.gs: py tools/setup_admin.py",
+        )
+        _, cfg_body = http_text(f"{SITE_BASE}/js/sheets-config.js")
+        canonical = read_canonical_web_app_url()
+        cfg_ok = canonical and canonical.split("/macros/s/")[-1].split("/")[0] in cfg_body
+        add(
+            report,
+            id="sheets_url_prod_match",
+            category="backend",
+            passed=cfg_ok,
+            detail="sheets-config.js coincide con CANONICAL_SHEETS_URL.txt" if cfg_ok else "URL de producción distinta al canónico",
+            remediation="Fusionar deploy reciente o actualizar SHEETS_WEB_APP_URL en GitHub Secrets",
+        )
 
 
 def check_wallet_optional(report: VerificationReport) -> None:

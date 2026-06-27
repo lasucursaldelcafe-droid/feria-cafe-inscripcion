@@ -103,6 +103,13 @@
       }
 
       if (!clienteId) {
+        var registroUrl = (window.SiteLinks && SiteLinks.href)
+          ? SiteLinks.href('fidelizacionRegistro')
+          : '/registro-fidelizacion';
+        if (PasaportePWA.esStandalone && PasaportePWA.esStandalone()) {
+          window.location.replace(registroUrl);
+          return;
+        }
         mostrarError('Abre el enlace personal que recibiste al registrarte, o crea tu pasaporte ahora.');
         return;
       }
@@ -202,7 +209,11 @@
         });
       }).catch(function (err) {
         console.error(err);
-        mostrarError('Error al cargar el pasaporte. Intenta de nuevo.');
+        var msg = (err && err.message) ? err.message : 'Error al cargar el pasaporte.';
+        if (msg.indexOf('Apps Script') !== -1 || msg.indexOf('Firestore') !== -1) {
+          msg += ' Recarga la página (o borra la app instalada y vuelve a abrir desde el navegador).';
+        }
+        mostrarError(msg);
       });
     })();
   </script>

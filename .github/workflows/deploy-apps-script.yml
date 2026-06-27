@@ -42,8 +42,13 @@ jobs:
           fi
           mkdir -p tools/credentials
           echo "$OAUTH_SCRIPT_TOKEN" > tools/credentials/.oauth-script-token.json
-          if [ -n "$SHEETS_WEB_APP_URL" ]; then
-            printf "window.SHEETS_CONFIG = {\n  WEB_APP_URL: '%s'\n};\n" "$SHEETS_WEB_APP_URL" > js/sheets-config.js
+          CANONICAL=""
+          if [ -f tools/CANONICAL_SHEETS_URL.txt ]; then
+            CANONICAL="$(tr -d '\r\n' < tools/CANONICAL_SHEETS_URL.txt)"
+          fi
+          FINAL_URL="${CANONICAL:-$SHEETS_WEB_APP_URL}"
+          if [ -n "$FINAL_URL" ]; then
+            printf "window.SHEETS_CONFIG = {\n  WEB_APP_URL: '%s'\n};\n" "$FINAL_URL" > js/sheets-config.js
           fi
           ENV_FILE="tools/.env"
           touch "$ENV_FILE"
@@ -52,10 +57,10 @@ jobs:
               sed -i "s|^APPS_SCRIPT_ID=.*|APPS_SCRIPT_ID=$APPS_SCRIPT_ID|" "$ENV_FILE" || \
               echo "APPS_SCRIPT_ID=$APPS_SCRIPT_ID" >> "$ENV_FILE"
           fi
-          if [ -n "$SHEETS_WEB_APP_URL" ]; then
+          if [ -n "$FINAL_URL" ]; then
             grep -q '^SHEETS_WEB_APP_URL=' "$ENV_FILE" && \
-              sed -i "s|^SHEETS_WEB_APP_URL=.*|SHEETS_WEB_APP_URL=$SHEETS_WEB_APP_URL|" "$ENV_FILE" || \
-              echo "SHEETS_WEB_APP_URL=$SHEETS_WEB_APP_URL" >> "$ENV_FILE"
+              sed -i "s|^SHEETS_WEB_APP_URL=.*|SHEETS_WEB_APP_URL=$FINAL_URL|" "$ENV_FILE" || \
+              echo "SHEETS_WEB_APP_URL=$FINAL_URL" >> "$ENV_FILE"
           fi
 
       - name: Deploy Code.gs
