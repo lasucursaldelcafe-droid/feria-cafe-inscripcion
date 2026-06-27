@@ -35,7 +35,8 @@
     if (!global.firebase) {
       throw new Error('Firebase SDK no cargó. Revisa que los <script> de firebase estén antes de este archivo.');
     }
-    app = global.firebase.apps.length ? global.firebase.app() : global.firebase.initializeApp(global.FIREBASE_FIDELIZACION_CONFIG);
+    var apps = global.firebase.apps;
+    app = apps && apps.length ? global.firebase.app() : global.firebase.initializeApp(global.FIREBASE_FIDELIZACION_CONFIG);
     db = global.firebase.firestore();
     return db;
   }

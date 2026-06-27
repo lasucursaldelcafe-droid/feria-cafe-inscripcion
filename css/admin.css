@@ -1,4 +1,73 @@
-/* Panel admin — tema oscuro, enfoque analíticas (sin logos) */
+/* Panel admin — tema oscuro, administración unificada */
+
+.admin-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.admin-nav {
+  flex: 0 0 220px;
+  width: 220px;
+  background: var(--admin-surface);
+  border-right: 1px solid var(--admin-border);
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  min-height: calc(100vh - 120px);
+}
+
+.admin-nav__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--admin-text-muted);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-nav__item:hover {
+  background: var(--admin-surface-2);
+  color: var(--admin-text);
+}
+
+.admin-nav__item--active {
+  background: rgba(91, 159, 212, 0.15);
+  color: var(--admin-accent-blue);
+}
+
+.admin-layout .admin-main {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+}
+
+.admin-section-panel[hidden] {
+  display: none !important;
+}
+
+.admin-quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-quick-links a.admin-btn {
+  text-decoration: none;
+}
 
 :root {
   --admin-bg: #0f0f0f;
@@ -473,6 +542,31 @@
 .admin-table--directorio td:nth-last-child(1),
 .admin-table--directorio td:nth-last-child(2) {
   white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-nav {
+    flex: none;
+    width: 100%;
+    min-height: 0;
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: none;
+    border-bottom: 1px solid var(--admin-border);
+    padding: 0.75rem;
+  }
+
+  .admin-nav__item {
+    flex: 1 1 auto;
+    width: auto;
+    font-size: 0.78rem;
+    padding: 0.45rem 0.55rem;
+  }
 }
 
 @media (max-width: 600px) {

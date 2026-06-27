@@ -179,6 +179,18 @@ def read_web_app_url(config_path: Path | None = None) -> str:
     return url
 
 
+def read_canonical_web_app_url() -> str:
+    """URL /exec canónica del proyecto (tools/CANONICAL_SHEETS_URL.txt)."""
+    path = TOOLS_DIR / "CANONICAL_SHEETS_URL.txt"
+    if not path.is_file():
+        return ""
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "/exec" in line:
+            return line
+    return ""
+
+
 def write_sheets_config(web_app_url: str) -> Path:
     """Escribe js/sheets-config.js en la raíz del proyecto."""
     target = SHEETS_CONFIG_PATH

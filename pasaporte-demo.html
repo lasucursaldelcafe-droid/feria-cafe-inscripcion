@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#5D3A1A">
+  <title>Demo — Pasaporte Cafetero | La Sucursal del Café</title>
+  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/brand.css?v=20260625d">
+  <link rel="stylesheet" href="css/fidelizacion.css?v=20260625d">
+  <link rel="stylesheet" href="css/pasaporte.css?v=20260625d">
+  <style>
+    .demo-banner {
+      text-align: center;
+      padding: 12px 16px;
+      background: rgba(232, 168, 76, 0.2);
+      color: #f5e6c8;
+      font-size: 0.85rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+  </style>
+</head>
+<body class="pasaporte-page">
+  <p class="demo-banner">Vista previa de diseño — datos de demostración (no es un pasaporte real)</p>
+  <div class="pasaporte-shell">
+    <article class="pasaporte-card">
+      <div class="pasaporte-card__top">
+        <div class="pasaporte-card__brand">
+          <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="100" height="40">
+        </div>
+        <span class="pasaporte-card__badge" style="background:#C99B33">Oro</span>
+      </div>
+
+      <h1 class="pasaporte-card__title">Pasaporte Cafetero</h1>
+      <p class="pasaporte-card__subtitle">La Sucursal del Café · Feria 2026</p>
+
+      <p class="pasaporte-card__saludo">Hola, <strong>María</strong></p>
+      <p class="pasaporte-card__puntos">340</p>
+      <p class="pasaporte-card__puntos-label">puntos disponibles</p>
+
+      <div class="pasaporte-card__progreso">
+        <div class="pasaporte-card__progreso-fill" style="width:68%"></div>
+      </div>
+      <p class="pasaporte-card__progreso-text">160 pts para Diamante</p>
+
+      <div class="pasaporte-qr-box">
+        <div id="qrContainer" aria-label="Código QR de demostración"></div>
+        <p class="pasaporte-qr-hint">Muestra este QR en cada stand. El expositor lo escanea y sumas puntos al instante.</p>
+      </div>
+
+      <div class="pasaporte-actions">
+        <button type="button" class="pasaporte-btn pasaporte-btn--primary">Descargar QR</button>
+        <button type="button" class="pasaporte-btn pasaporte-btn--wa">WhatsApp</button>
+        <button type="button" class="pasaporte-btn pasaporte-btn--muted">Copiar enlace</button>
+      </div>
+
+      <section class="pasaporte-historial">
+        <h3>Últimos movimientos</h3>
+        <ul>
+          <li><span>Visita stand Café del Valle<br><small>24 jun, 15:30</small></span><span class="pts-pos">+10</span></li>
+          <li><span>Visita stand Origem<br><small>24 jun, 12:10</small></span><span class="pts-pos">+10</span></li>
+          <li><span>Canje — taza edición feria<br><small>23 jun, 18:00</small></span><span class="pts-neg">-50</span></li>
+        </ul>
+      </section>
+    </article>
+  </div>
+
+  <script src="js/qr-render.js"></script>
+  <script>
+    QRRender.toCanvas(document.getElementById('qrContainer'), 'LSCPAS:DEMO-PASAPORTE-2026', {
+      width: 200,
+      ariaLabel: 'QR demo Pasaporte Cafetero'
+    });
+  </script>
+</body>
+</html>
