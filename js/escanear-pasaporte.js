@@ -115,10 +115,12 @@
     btn.disabled = true;
     btn.textContent = 'Verificando…';
 
-    Fidelizacion.verificarOperador(
-      document.getElementById('loginUsuario').value,
-      document.getElementById('loginPin').value
-    ).then(function (op) {
+    Fidelizacion.initBackend().then(function () {
+      return Fidelizacion.verificarOperador(
+        document.getElementById('loginUsuario').value,
+        document.getElementById('loginPin').value
+      );
+    }).then(function (op) {
       mostrarScanner(op);
     }).catch(function (err) {
       loginError.textContent = err.message;
@@ -139,6 +141,10 @@
 
   var sesion = leerSesion();
   if (sesion && sesion.id) {
-    mostrarScanner(sesion);
+    Fidelizacion.initBackend().then(function () {
+      mostrarScanner(sesion);
+    }).catch(function () {
+      mostrarLogin();
+    });
   }
 })();

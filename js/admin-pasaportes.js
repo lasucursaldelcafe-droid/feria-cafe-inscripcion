@@ -19,14 +19,6 @@
       .replace(/"/g, '&quot;');
   }
 
-  function firestoreErrorMessage(err) {
-    var msg = (err && err.message) ? err.message : String(err || '');
-    if (msg.indexOf('SERVICE_DISABLED') !== -1 || msg.indexOf('permission-denied') !== -1) {
-      return 'Firestore no está habilitado. Activa la API en Firebase Console → Firestore Database.';
-    }
-    return msg;
-  }
-
   function renderShell() {
     var el = root();
     if (!el || mounted) return;
@@ -35,7 +27,7 @@
     el.innerHTML =
       '<div class="admin-card">' +
         '<h4 class="admin-card__title">Crear Pasaporte Cafetero</h4>' +
-        '<p class="admin-table-meta">Genera la tarjeta digital con QR para un visitante.</p>' +
+        '<p class="admin-table-meta">Genera la tarjeta digital con QR para un visitante. Funciona con Firestore o Google Sheets.</p>' +
         '<form id="formAdminPasaporte" class="admin-inline-form">' +
           '<div class="admin-inline-form__row">' +
             '<label class="admin-inline-form__field"><span>Nombre *</span>' +
@@ -71,16 +63,18 @@
       btn.textContent = 'Creando…';
       resultEl.hidden = true;
 
-      global.Fidelizacion.crearORecuperarCliente({
-        nombre: nombre,
-        telefono: telefono,
-        email: email,
-        origen: 'admin'
+      global.Fidelizacion.initBackend().then(function () {
+        return global.Fidelizacion.crearORecuperarCliente({
+          nombre: nombre,
+          telefono: telefono,
+          email: email,
+          origen: 'admin'
+        });
       }).then(function (res) {
         btn.disabled = false;
         btn.textContent = 'Crear pasaporte';
         var url = global.Fidelizacion.urlPasaporte(res.id);
-        var existed = res.existed ? ' (ya existía, enlace recuperado)' : '';
+        var existed = res.existed ? ' (ya existía)' : '';
         resultEl.innerHTML =
           '<p><strong>Pasaporte listo' + existed + ':</strong> ' + escapeHtml(nombre) + '</p>' +
           '<p><a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">Abrir pasaporte</a> · ' +
@@ -94,7 +88,8 @@
       }).catch(function (err) {
         btn.disabled = false;
         btn.textContent = 'Crear pasaporte';
-        resultEl.innerHTML = '<p class="admin-error" style="margin:0">' + escapeHtml(firestoreErrorMessage(err)) + '</p>';
+        resultEl.innerHTML = '<p style="margin:0;color:var(--admin-accent-red,#e07070)">' +
+          escapeHtml(err.message || 'No se pudo crear el pasaporte. ¿Redesplegaste Code.gs?') + '</p>';
         resultEl.hidden = false;
       });
     });
@@ -124,39 +119,35 @@
   function listenClientes() {
     var statusEl = document.getElementById('adminPasFirestoreStatus');
     if (unsubClientes) {
-      unsubClientes();
+      if (typeof unsubClientes === 'function') unsubClientes();
       unsubClientes = null;
     }
 
-    try {
-      global.Fidelizacion.db();
-      if (statusEl) statusEl.textContent = 'Sincronizado con Firestore en tiempo real.';
-      unsubClientes = global.Fidelizacion.db()
-        .collection('fidelizacion_clientes')
-        .limit(25)
-        .onSnapshot(function (snap) {
-          var items = [];
-          snap.forEach(function (doc) {
-            var d = doc.data();
-            items.push({
-              id: doc.id,
-              nombre: d.nombre || '',
-              telefono: d.telefono || '',
-              nivel: d.nivel || 'Bronce',
-              puntos: d.puntos || 0,
-              fecha: d.fechaRegistro && d.fechaRegistro.toMillis ? d.fechaRegistro.toMillis() : 0
-            });
+    global.Fidelizacion.initBackend().then(function (mode) {
+      if (statusEl) {
+        statusEl.textContent = mode === 'firestore'
+          ? 'Sincronizado con Firestore.'
+          : 'Sincronizado con Google Sheets (Apps Script).';
+      }
+      unsubClientes = global.Fidelizacion.db().collection('fidelizacion_clientes').onSnapshot(function (snap) {
+        var items = [];
+        snap.forEach(function (doc) {
+          var d = doc.data();
+          items.push({
+            id: doc.id,
+            nombre: d.nombre || '',
+            telefono: d.telefono || '',
+            nivel: d.nivel || 'Bronce',
+            puntos: d.puntos || 0
           });
-          items.sort(function (a, b) { return b.fecha - a.fecha; });
-          renderClientesTable(items);
-        }, function (err) {
-          if (statusEl) statusEl.textContent = firestoreErrorMessage(err);
-          renderClientesTable([]);
         });
-    } catch (err) {
-      if (statusEl) statusEl.textContent = firestoreErrorMessage(err);
+        items.sort(function (a, b) { return String(b.id).localeCompare(String(a.id)); });
+        renderClientesTable(items.slice(0, 25));
+      });
+    }).catch(function (err) {
+      if (statusEl) statusEl.textContent = err.message || 'Error de conexión.';
       renderClientesTable([]);
-    }
+    });
   }
 
   function onShow() {

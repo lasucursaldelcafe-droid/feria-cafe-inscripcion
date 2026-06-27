@@ -44,8 +44,11 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="js/sheets-config.js"></script>
   <script src="js/firebase-fidelizacion-config.js"></script>
   <script src="js/site-links.js"></script>
+  <script src="js/fidelizacion-sheets.js"></script>
+  <script src="js/fidelizacion-db-shim.js"></script>
   <script src="js/fidelizacion-common.js"></script>
   <script>
     (function () {
@@ -75,7 +78,9 @@
         btn.disabled = true;
         btn.textContent = 'Creando…';
 
-        Fidelizacion.crearORecuperarCliente(Object.assign({}, datos, { origen: 'registro' })).then(function (res) {
+        Fidelizacion.initBackend().then(function () {
+          return Fidelizacion.crearORecuperarCliente(Object.assign({}, datos, { origen: 'registro' }));
+        }).then(function (res) {
           window.location.href = Fidelizacion.urlPasaporte(res.id);
         }).catch(function (err) {
           console.error(err);

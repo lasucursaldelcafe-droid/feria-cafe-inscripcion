@@ -492,6 +492,7 @@
 
     if (section === 'pasaportes' && global.AdminPasaportes && global.AdminPasaportes.onShow) {
       global.AdminPasaportes.onShow();
+      loadFidEmbed();
     }
     if (section === 'operadores' && global.AdminOperadores && global.AdminOperadores.onShow) {
       global.AdminOperadores.onShow();
@@ -507,6 +508,34 @@
     var hash = (global.location.hash || '').replace(/^#/, '').trim().toLowerCase();
     if (hash && ADMIN_SECTIONS.indexOf(hash) !== -1) return hash;
     return 'resumen';
+  }
+
+  function loadFidEmbed() {
+    var iframe = document.getElementById('adminFidIframe');
+    var hint = document.getElementById('adminPasBackendHint');
+    if (!iframe) return;
+    var src = global.SiteLinks ? global.SiteLinks.href('panelFidelizacion') : 'dashboard-fidelizacion.html';
+    if (iframe.getAttribute('data-loaded') !== '1') {
+      iframe.src = src;
+      iframe.setAttribute('data-loaded', '1');
+    }
+    if (global.Fidelizacion && global.Fidelizacion.probePasaportesBackend) {
+      global.Fidelizacion.probePasaportesBackend().then(function (probe) {
+        if (hint) {
+          hint.textContent = probe.ready
+            ? probe.message
+            : probe.message + ' El panel embebido puede mostrar datos vacíos hasta el redeploy.';
+        }
+      });
+    } else if (global.Fidelizacion && global.Fidelizacion.initBackend) {
+      global.Fidelizacion.initBackend().then(function (mode) {
+        if (hint) {
+          hint.textContent = mode === 'firestore'
+            ? 'Backend: Firestore (tiempo real).'
+            : 'Backend: Google Sheets (respaldo automático — redepliega Code.gs para sincronizar).';
+        }
+      });
+    }
   }
 
   function bindAdminNav() {
@@ -921,6 +950,67 @@
     }
   }
 
+  function showBackendWarn(html) {
+    var el = document.getElementById('adminBackendWarn');
+    if (!el) return;
+    if (html) {
+      el.innerHTML = html;
+      el.hidden = false;
+    } else {
+      el.hidden = true;
+      el.innerHTML = '';
+    }
+  }
+
+  function checkAppsScriptFeatures() {
+    var url = getWebAppUrl();
+    if (!url) return;
+
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    var warnings = [];
+
+    Promise.all([
+      fetchJson(url + sep + 'action=participante_publico&id=__probe__'),
+      fetchJson(url + sep + 'action=pasaporte_list&limit=1'),
+      fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'admin_create_competitor', nombre: '' })
+      }).then(function (res) { return res.json(); }).catch(function () { return {}; })
+    ]).then(function (results) {
+      var participante = results[0] || {};
+      var pasaportes = results[1] || {};
+      var competitor = results[2] || {};
+
+      var participanteOk = participante.formType === 'participante_publico' ||
+        (participante.error && String(participante.error).toLowerCase().indexOf('no encontrada') !== -1);
+      var pasaportesOk = pasaportes.ok && Array.isArray(pasaportes.clientes);
+      var competitorOk = competitor.error && String(competitor.error).indexOf('formType inválido') === -1;
+
+      if (!participanteOk) {
+        warnings.push('Perfiles de marca (<code>participante_publico</code>) y alta de stands no están en el deploy.');
+      }
+      if (!pasaportesOk) {
+        warnings.push('Pasaportes Cafetero (<code>pasaporte_*</code>) no están en el deploy.');
+      }
+      if (!competitorOk) {
+        warnings.push('Alta manual de competidores y visitantes (<code>admin_create_*</code>) no está en el deploy.');
+      }
+
+      if (!warnings.length) {
+        showBackendWarn('');
+        return;
+      }
+
+      showBackendWarn(
+        '<strong>Apps Script desactualizado.</strong> ' + warnings.join(' ') +
+        ' Ejecuta <code>py tools/setup_admin.py</code>, redepliega la Web App y corre ' +
+        '<code>sincronizarEncabezados()</code> en el editor de Apps Script.'
+      );
+    }).catch(function () { /* ignore probe errors */ });
+  }
+
   function pickRows(data, key) {
     if (data[key]) return data[key];
     if (key === 'allFeria' && data.recentFeria) return data.recentFeria;
@@ -1106,7 +1196,7 @@
           origen: 'admin-feria'
         }).then(function (res) { return res.id; })
           .catch(function (err) {
-            throw new Error('Pasaporte: ' + (err.message || 'Firestore no disponible. Habilita Firestore en Firebase Console.'));
+            throw new Error('Pasaporte: ' + (err.message || 'Redespliega Code.gs con py tools/setup_admin.py'));
           });
       }
 
@@ -1178,6 +1268,7 @@
     bindAdminCreateCompetidorForm();
     bindAdminCreateVisitanteForm();
     showAdminSection(readHashSection());
+    checkAppsScriptFeatures();
     loadDashboard();
   }
 

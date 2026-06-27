@@ -287,6 +287,24 @@ def cmd_verificar() -> int:
         except json.JSONDecodeError:
             pass
 
+    pasaporte_status, pasaporte_body = http_request(
+        url + ("&" if "?" in url else "?") + "action=pasaporte_list&limit=1",
+        "GET",
+    )
+    if pasaporte_status == 200:
+        try:
+            pas_payload = json.loads(pasaporte_body)
+            if pas_payload.get("ok") and isinstance(pas_payload.get("clientes"), list):
+                ok("Backend Pasaportes (Sheets) disponible en Apps Script.")
+            elif pas_payload.get("ok") and pas_payload.get("forms"):
+                warn("pasaporte_list no implementado — health check genérico. Redepliega Code.gs.")
+            else:
+                warn("pasaporte_list respondió sin clientes — redepliega Code.gs.")
+        except json.JSONDecodeError:
+            warn("pasaporte_list no devolvió JSON — Code.gs desactualizado.")
+    else:
+        warn("Falta pasaporte_list en Apps Script — redepliega Code.gs para pasaportes.")
+
     return 0
 
 

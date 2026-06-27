@@ -71,6 +71,22 @@ var SHEET_PATROCINADORES_COMPETENCIA = 'Patrocinadores competencia';
 var HEADERS_PATROCINADORES_COMPETENCIA = [
   'ID', 'Nombre', 'Instagram handle', 'Red social enlace', 'Logo enlace', 'Habilitado', 'Orden', 'Notas admin'
 ];
+var SHEET_PASAPORTES = 'Pasaportes';
+var SHEET_PASAPORTE_TX = 'Pasaporte transacciones';
+var SHEET_PASAPORTE_OPS = 'Pasaporte operadores';
+var SHEET_PASAPORTE_ESCANEOS = 'Pasaporte escaneos';
+var HEADERS_PASAPORTES = [
+  'Fecha registro', 'ID', 'Nombre', 'Teléfono', 'Correo', 'Puntos', 'Puntos históricos', 'Nivel', 'Activo', 'Origen'
+];
+var HEADERS_PASAPORTE_TX = [
+  'Fecha', 'ID', 'Cliente ID', 'Tipo', 'Puntos', 'Descripción', 'Sede', 'Operador ID'
+];
+var HEADERS_PASAPORTE_OPS = [
+  'Fecha creación', 'ID', 'Stand nombre', 'Usuario', 'PIN hash', 'Puntos por escaneo', 'Activo'
+];
+var HEADERS_PASAPORTE_ESCANEOS = [
+  'Fecha', 'ID escaneo', 'Operador ID', 'Cliente ID', 'Stand nombre', 'Puntos', 'Día'
+];
 var SITE_PUBLIC_BASE_URL = 'https://la-sucursal-del-cafe.web.app';
 var PASAPORTE_REGISTRO_PATH = '/registro-fidelizacion';
 var PASAPORTE_ESCANER_PATH = '/escanear-pasaporte';
@@ -109,13 +125,29 @@ function doGet(e) {
   if (params.action === 'patrocinadores_competencia_publico') {
     return jsonResponse(getPatrocinadoresCompetenciaPublico_());
   }
+  if (params.action === 'pasaporte_get') {
+    return jsonResponse(getPasaporteCliente_(params.id || ''));
+  }
+  if (params.action === 'pasaporte_list') {
+    return jsonResponse(listPasaportesAdmin_(parseInt(params.limit, 10) || 50));
+  }
+  if (params.action === 'pasaporte_tx') {
+    return jsonResponse(listPasaporteTransacciones_(params.clienteId || '', parseInt(params.limit, 10) || 20));
+  }
+  if (params.action === 'pasaporte_ops') {
+    return jsonResponse(listPasaporteOperadores_());
+  }
+  if (params.action === 'pasaporte_config') {
+    return jsonResponse(getPasaporteConfig_(params.key || 'niveles'));
+  }
   return jsonResponse({
     ok: true,
     message: 'API de inscripciones — La Sucursal del Café',
     forms: [
       'feria', 'competencia', 'stands', 'lista_espera', 'participantes_publico',
-      'patrocinadores_competencia_publico', 'admin', 'analytics'
-    ]
+      'patrocinadores_competencia_publico', 'admin', 'analytics', 'pasaportes'
+    ],
+    pasaportesBackend: true
   });
 }
 
@@ -163,6 +195,27 @@ function doPost(e) {
     }
     if (action === 'admin_create_feria') {
       return jsonResponse(handleAdminCreateFeria_(payload));
+    }
+    if (action === 'pasaporte_create') {
+      return jsonResponse(handlePasaporteCreate_(payload));
+    }
+    if (action === 'pasaporte_transaccion') {
+      return jsonResponse(handlePasaporteTransaccion_(payload));
+    }
+    if (action === 'pasaporte_operador_create') {
+      return jsonResponse(handlePasaporteOperadorCreate_(payload));
+    }
+    if (action === 'pasaporte_operador_verify') {
+      return jsonResponse(handlePasaporteOperadorVerify_(payload));
+    }
+    if (action === 'pasaporte_operador_toggle') {
+      return jsonResponse(handlePasaporteOperadorToggle_(payload));
+    }
+    if (action === 'pasaporte_escaneo') {
+      return jsonResponse(handlePasaporteEscaneo_(payload));
+    }
+    if (action === 'pasaporte_config_save') {
+      return jsonResponse(savePasaporteConfig_(payload));
     }
     if (action === 'expositor_update_profile') {
       return jsonResponse(handleExpositorUpdateProfile_(payload));
@@ -239,9 +292,13 @@ function sincronizarEncabezados() {
     getOrCreateSheet_(SHEET_PATROCINADORES_COMPETENCIA, HEADERS_PATROCINADORES_COMPETENCIA),
     HEADERS_PATROCINADORES_COMPETENCIA
   );
+  applyHeaders_(getOrCreateSheet_(SHEET_PASAPORTES, HEADERS_PASAPORTES), HEADERS_PASAPORTES);
+  applyHeaders_(getOrCreateSheet_(SHEET_PASAPORTE_TX, HEADERS_PASAPORTE_TX), HEADERS_PASAPORTE_TX);
+  applyHeaders_(getOrCreateSheet_(SHEET_PASAPORTE_OPS, HEADERS_PASAPORTE_OPS), HEADERS_PASAPORTE_OPS);
+  applyHeaders_(getOrCreateSheet_(SHEET_PASAPORTE_ESCANEOS, HEADERS_PASAPORTE_ESCANEOS), HEADERS_PASAPORTE_ESCANEOS);
   ensureDefaultPatrocinadoresCompetencia_();
   Logger.log(
-    'Encabezados sincronizados: Feria, Competencia, Stands, Lista de espera, Analytics, Novedades, Patrocinadores competencia.'
+    'Encabezados sincronizados: Feria, Competencia, Stands, Lista de espera, Analytics, Novedades, Patrocinadores, Pasaportes.'
   );
 }
 
@@ -2623,4 +2680,356 @@ function getSheetRowCount_(sheetName, headers) {
   var sheet = getOrCreateSheet_(sheetName, headers);
   var lastRow = sheet.getLastRow();
   return lastRow > 1 ? lastRow - 1 : 0;
+}
+
+// --- Pasaporte Cafetero (respaldo en Google Sheets cuando Firestore no está disponible) ---
+
+function calcularNivelPasaporte_(puntosHistoricos) {
+  var pts = parseInt(puntosHistoricos, 10) || 0;
+  if (pts >= 1000) return 'Diamante';
+  if (pts >= 500) return 'Oro';
+  if (pts >= 200) return 'Plata';
+  return 'Bronce';
+}
+
+function pasaporteRowToClient_(row) {
+  if (!row) return null;
+  return {
+    id: row['ID'] || '',
+    nombre: row['Nombre'] || '',
+    telefono: row['Teléfono'] || '',
+    email: row['Correo'] || '',
+    puntos: parseInt(row['Puntos'], 10) || 0,
+    puntosHistoricos: parseInt(row['Puntos históricos'], 10) || 0,
+    nivel: row['Nivel'] || 'Bronce',
+    activo: String(row['Activo'] || 'Sí').toLowerCase() !== 'no',
+    origen: row['Origen'] || '',
+    fechaRegistro: row['Fecha registro'] || ''
+  };
+}
+
+function findPasaporteRowById_(id) {
+  var sheet = getOrCreateSheet_(SHEET_PASAPORTES, HEADERS_PASAPORTES);
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2 || !id) return null;
+  var values = sheet.getRange(2, 1, lastRow, HEADERS_PASAPORTES.length).getValues();
+  for (var i = 0; i < values.length; i++) {
+    var row = rowObjectFromValues_(HEADERS_PASAPORTES, values[i]);
+    if (row['ID'] === id) return { sheet: sheet, rowNum: i + 2, row: row };
+  }
+  return null;
+}
+
+function findPasaporteRowByTelefono_(telefono) {
+  var tel = String(telefono || '').replace(/\D/g, '');
+  if (!tel) return null;
+  var sheet = getOrCreateSheet_(SHEET_PASAPORTES, HEADERS_PASAPORTES);
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return null;
+  var values = sheet.getRange(2, 1, lastRow, HEADERS_PASAPORTES.length).getValues();
+  for (var i = values.length - 1; i >= 0; i--) {
+    var row = rowObjectFromValues_(HEADERS_PASAPORTES, values[i]);
+    var rowTel = String(row['Teléfono'] || '').replace(/\D/g, '');
+    if (rowTel && rowTel === tel) return { sheet: sheet, rowNum: i + 2, row: row };
+  }
+  return null;
+}
+
+function getPasaporteCliente_(id) {
+  var found = findPasaporteRowById_(id);
+  if (!found) return { ok: false, error: 'Pasaporte no encontrado.' };
+  return { ok: true, cliente: pasaporteRowToClient_(found.row) };
+}
+
+function listPasaportesAdmin_(limit) {
+  var max = Math.min(Math.max(limit || 50, 1), 200);
+  var rows = readAllSheetRows_(SHEET_PASAPORTES, HEADERS_PASAPORTES, true).slice(0, max);
+  return {
+    ok: true,
+    clientes: rows.map(pasaporteRowToClient_).filter(function (c) { return c && c.id; })
+  };
+}
+
+function listPasaporteTransacciones_(clienteId, limit) {
+  var max = Math.min(Math.max(limit || 20, 1), 100);
+  var sheet = getOrCreateSheet_(SHEET_PASAPORTE_TX, HEADERS_PASAPORTE_TX);
+  var lastRow = sheet.getLastRow();
+  var items = [];
+  if (lastRow >= 2) {
+    var values = sheet.getRange(2, 1, lastRow, HEADERS_PASAPORTE_TX.length).getValues();
+    for (var i = values.length - 1; i >= 0; i--) {
+      var row = rowObjectFromValues_(HEADERS_PASAPORTE_TX, values[i]);
+      if (clienteId && row['Cliente ID'] !== clienteId) continue;
+      items.push({
+        id: row['ID'] || '',
+        clienteId: row['Cliente ID'] || '',
+        tipo: row['Tipo'] || '',
+        puntos: parseInt(row['Puntos'], 10) || 0,
+        descripcion: row['Descripción'] || '',
+        sede: row['Sede'] || '',
+        operadorId: row['Operador ID'] || '',
+        fecha: row['Fecha'] || ''
+      });
+      if (items.length >= max) break;
+    }
+  }
+  return { ok: true, transacciones: items };
+}
+
+function handlePasaporteCreate_(payload) {
+  var nombre = String(payload.nombre || '').trim();
+  var telefono = String(payload.telefono || payload.celular || '').trim();
+  var correo = String(payload.email || payload.correo || '').trim().toLowerCase();
+  if (!nombre) return { ok: false, error: 'Nombre obligatorio.' };
+
+  var existing = telefono ? findPasaporteRowByTelefono_(telefono) : null;
+  if (existing) {
+    return { ok: true, id: existing.row['ID'], existed: true, cliente: pasaporteRowToClient_(existing.row) };
+  }
+
+  var id = String(payload.id || ('PAS-' + Date.now().toString(36).toUpperCase())).trim();
+  var sheet = getOrCreateSheet_(SHEET_PASAPORTES, HEADERS_PASAPORTES);
+  sheet.appendRow([
+    new Date().toISOString(),
+    id,
+    nombre,
+    telefono,
+    correo,
+    0,
+    0,
+    'Bronce',
+    'Sí',
+    String(payload.origen || 'registro').trim()
+  ]);
+
+  return {
+    ok: true,
+    id: id,
+    existed: false,
+    cliente: {
+      id: id,
+      nombre: nombre,
+      telefono: telefono,
+      email: correo,
+      puntos: 0,
+      puntosHistoricos: 0,
+      nivel: 'Bronce',
+      activo: true,
+      origen: payload.origen || 'registro'
+    }
+  };
+}
+
+function handlePasaporteTransaccion_(payload) {
+  var clienteId = String(payload.clienteId || '').trim();
+  var tipo = String(payload.tipo || 'acumulacion').trim();
+  var puntos = parseInt(payload.puntos, 10) || 0;
+  if (!clienteId || !puntos) return { ok: false, error: 'clienteId y puntos son obligatorios.' };
+
+  var found = findPasaporteRowById_(clienteId);
+  if (!found) return { ok: false, error: 'Cliente no encontrado.' };
+
+  var delta = tipo === 'canje' ? -Math.abs(puntos) : Math.abs(puntos);
+  var data = found.row;
+  var nuevosPuntos = (parseInt(data['Puntos'], 10) || 0) + delta;
+  if (nuevosPuntos < 0) return { ok: false, error: 'El cliente no tiene suficientes puntos para este canje.' };
+  var nuevosHistoricos = (parseInt(data['Puntos históricos'], 10) || 0) + (delta > 0 ? delta : 0);
+  var nivel = calcularNivelPasaporte_(nuevosHistoricos);
+
+  found.sheet.getRange(found.rowNum, 6).setValue(nuevosPuntos);
+  found.sheet.getRange(found.rowNum, 7).setValue(nuevosHistoricos);
+  found.sheet.getRange(found.rowNum, 8).setValue(nivel);
+
+  var txSheet = getOrCreateSheet_(SHEET_PASAPORTE_TX, HEADERS_PASAPORTE_TX);
+  txSheet.appendRow([
+    new Date().toISOString(),
+    'TX-' + Date.now().toString(36).toUpperCase(),
+    clienteId,
+    tipo,
+    delta,
+    String(payload.descripcion || '').trim(),
+    String(payload.sede || '').trim(),
+    String(payload.operadorId || '').trim()
+  ]);
+
+  return {
+    ok: true,
+    clienteId: clienteId,
+    puntos: nuevosPuntos,
+    puntosHistoricos: nuevosHistoricos,
+    nivel: nivel
+  };
+}
+
+function listPasaporteOperadores_() {
+  var rows = readAllSheetRows_(SHEET_PASAPORTE_OPS, HEADERS_PASAPORTE_OPS, false);
+  var operadores = rows.map(function (row) {
+    return {
+      id: row['ID'] || '',
+      standNombre: row['Stand nombre'] || '',
+      usuario: row['Usuario'] || '',
+      puntosPorEscaneo: parseInt(row['Puntos por escaneo'], 10) || 10,
+      activo: String(row['Activo'] || 'Sí').toLowerCase() !== 'no'
+    };
+  });
+  return { ok: true, operadores: operadores };
+}
+
+function handlePasaporteOperadorCreate_(payload) {
+  var usuario = String(payload.usuario || '').trim().toLowerCase();
+  var standNombre = String(payload.standNombre || '').trim();
+  var pinHash = String(payload.pinHash || '').trim();
+  if (!usuario || usuario.length < 3) return { ok: false, error: 'Usuario inválido (mínimo 3 caracteres).' };
+  if (!standNombre) return { ok: false, error: 'Nombre del stand es obligatorio.' };
+  if (!pinHash) return { ok: false, error: 'PIN hash requerido.' };
+
+  var sheet = getOrCreateSheet_(SHEET_PASAPORTE_OPS, HEADERS_PASAPORTE_OPS);
+  var lastRow = sheet.getLastRow();
+  if (lastRow >= 2) {
+    var values = sheet.getRange(2, 1, lastRow, HEADERS_PASAPORTE_OPS.length).getValues();
+    for (var i = 0; i < values.length; i++) {
+      var row = rowObjectFromValues_(HEADERS_PASAPORTE_OPS, values[i]);
+      if (String(row['Usuario'] || '').toLowerCase() === usuario) {
+        return { ok: false, error: 'Ese usuario ya existe.' };
+      }
+    }
+  }
+
+  var id = 'OP-' + Date.now().toString(36).toUpperCase();
+  sheet.appendRow([
+    new Date().toISOString(),
+    id,
+    standNombre,
+    usuario,
+    pinHash,
+    parseInt(payload.puntosPorEscaneo, 10) || 10,
+    'Sí'
+  ]);
+
+  return { ok: true, id: id, usuario: usuario, standNombre: standNombre };
+}
+
+function handlePasaporteOperadorVerify_(payload) {
+  var usuario = String(payload.usuario || '').trim().toLowerCase();
+  var pinHash = String(payload.pinHash || '').trim();
+  if (!usuario || !pinHash) return { ok: false, error: 'Usuario y PIN son obligatorios.' };
+
+  var sheet = getOrCreateSheet_(SHEET_PASAPORTE_OPS, HEADERS_PASAPORTE_OPS);
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { ok: false, error: 'Usuario o PIN incorrectos.' };
+
+  var values = sheet.getRange(2, 1, lastRow, HEADERS_PASAPORTE_OPS.length).getValues();
+  for (var i = 0; i < values.length; i++) {
+    var row = rowObjectFromValues_(HEADERS_PASAPORTE_OPS, values[i]);
+    if (String(row['Usuario'] || '').toLowerCase() !== usuario) continue;
+    if (String(row['Activo'] || 'Sí').toLowerCase() === 'no') {
+      return { ok: false, error: 'Este operador está desactivado.' };
+    }
+    if (String(row['PIN hash'] || '') !== pinHash) {
+      return { ok: false, error: 'Usuario o PIN incorrectos.' };
+    }
+    return {
+      ok: true,
+      operador: {
+        id: row['ID'] || '',
+        standNombre: row['Stand nombre'] || '',
+        usuario: row['Usuario'] || '',
+        puntosPorEscaneo: parseInt(row['Puntos por escaneo'], 10) || 10
+      }
+    };
+  }
+  return { ok: false, error: 'Usuario o PIN incorrectos.' };
+}
+
+function handlePasaporteOperadorToggle_(payload) {
+  var id = String(payload.id || '').trim();
+  var activo = payload.activo !== false && payload.activo !== 'false';
+  if (!id) return { ok: false, error: 'ID de operador requerido.' };
+
+  var sheet = getOrCreateSheet_(SHEET_PASAPORTE_OPS, HEADERS_PASAPORTE_OPS);
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { ok: false, error: 'Operador no encontrado.' };
+
+  var values = sheet.getRange(2, 1, lastRow, HEADERS_PASAPORTE_OPS.length).getValues();
+  for (var i = 0; i < values.length; i++) {
+    var row = rowObjectFromValues_(HEADERS_PASAPORTE_OPS, values[i]);
+    if (row['ID'] !== id) continue;
+    sheet.getRange(i + 2, 7).setValue(activo ? 'Sí' : 'No');
+    return { ok: true, id: id, activo: activo };
+  }
+  return { ok: false, error: 'Operador no encontrado.' };
+}
+
+function hoyColombiaPasaporte_() {
+  return Utilities.formatDate(new Date(), 'America/Bogota', 'yyyy-MM-dd');
+}
+
+function handlePasaporteEscaneo_(payload) {
+  var operadorId = String(payload.operadorId || '').trim();
+  var clienteId = String(payload.clienteId || '').trim();
+  var puntos = parseInt(payload.puntos, 10) || 10;
+  var standNombre = String(payload.standNombre || '').trim();
+  if (!operadorId || !clienteId) return { ok: false, error: 'operadorId y clienteId requeridos.' };
+
+  var dia = hoyColombiaPasaporte_();
+  var escaneoId = operadorId + '_' + clienteId + '_' + dia;
+  var escSheet = getOrCreateSheet_(SHEET_PASAPORTE_ESCANEOS, HEADERS_PASAPORTE_ESCANEOS);
+  var lastRow = escSheet.getLastRow();
+  if (lastRow >= 2) {
+    var values = escSheet.getRange(2, 1, lastRow, HEADERS_PASAPORTE_ESCANEOS.length).getValues();
+    for (var i = 0; i < values.length; i++) {
+      var row = rowObjectFromValues_(HEADERS_PASAPORTE_ESCANEOS, values[i]);
+      if (row['ID escaneo'] === escaneoId) {
+        return { ok: false, error: 'Este visitante ya recibió puntos en tu stand hoy.' };
+      }
+    }
+  }
+
+  var txResult = handlePasaporteTransaccion_({
+    clienteId: clienteId,
+    tipo: 'acumulacion',
+    puntos: puntos,
+    descripcion: 'Visita a stand — escaneo Pasaporte Cafetero',
+    sede: standNombre,
+    operadorId: operadorId
+  });
+  if (!txResult.ok) return txResult;
+
+  escSheet.appendRow([
+    new Date().toISOString(),
+    escaneoId,
+    operadorId,
+    clienteId,
+    standNombre,
+    puntos,
+    dia
+  ]);
+
+  var cliente = getPasaporteCliente_(clienteId);
+  return {
+    ok: true,
+    clienteId: clienteId,
+    nombre: cliente.ok && cliente.cliente ? cliente.cliente.nombre : 'Visitante',
+    puntosOtorgados: puntos,
+    puntosTotales: txResult.puntos,
+    nivel: txResult.nivel
+  };
+}
+
+function getPasaporteConfig_(key) {
+  var k = 'PASAPORTE_CFG_' + String(key || 'niveles').toUpperCase();
+  var raw = PropertiesService.getScriptProperties().getProperty(k) || '';
+  if (!raw) return { ok: true, key: key, data: null };
+  try {
+    return { ok: true, key: key, data: JSON.parse(raw) };
+  } catch (e) {
+    return { ok: true, key: key, data: null };
+  }
+}
+
+function savePasaporteConfig_(payload) {
+  var key = String(payload.key || 'niveles').trim();
+  var k = 'PASAPORTE_CFG_' + key.toUpperCase();
+  PropertiesService.getScriptProperties().setProperty(k, JSON.stringify(payload.data || {}));
+  return { ok: true, key: key };
 }

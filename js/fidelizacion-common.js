@@ -26,9 +26,54 @@
     }
   }
   var PIN_SALT = 'LSC-Pasaporte2026';
+  var backendMode = null;
+  var backendReady = null;
 
-  function ready() {
-    if (db) return db;
+  function sheetsApi() {
+    return global.FidelizacionSheets;
+  }
+
+  function isFirestoreError(err) {
+    var msg = String((err && err.message) || err || '');
+    var code = String((err && err.code) || '');
+    return msg.indexOf('SERVICE_DISABLED') !== -1 ||
+      msg.indexOf('permission-denied') !== -1 ||
+      code === 'permission-denied' ||
+      msg.indexOf('Failed to get document') !== -1;
+  }
+
+  function resolveBackend() {
+    if (backendMode) return Promise.resolve(backendMode);
+    if (!backendReady) {
+      backendReady = new Promise(function (resolve) {
+        if (!global.firebase || !global.FIREBASE_FIDELIZACION_CONFIG ||
+            global.FIREBASE_FIDELIZACION_CONFIG.apiKey === 'TU_API_KEY') {
+          backendMode = sheetsApi() && sheetsApi().isAvailable() ? 'sheets' : 'sheets';
+          resolve(backendMode);
+          return;
+        }
+        try {
+          var testDb = readyFirestore();
+          testDb.collection('fidelizacion_clientes').limit(1).get()
+            .then(function () {
+              backendMode = 'firestore';
+              resolve('firestore');
+            })
+            .catch(function (err) {
+              console.warn('Firestore no disponible, usando Google Sheets:', err && err.message);
+              backendMode = 'sheets';
+              resolve('sheets');
+            });
+        } catch (err) {
+          backendMode = 'sheets';
+          resolve('sheets');
+        }
+      });
+    }
+    return backendReady;
+  }
+
+  function readyFirestore() {
     if (!global.FIREBASE_FIDELIZACION_CONFIG || global.FIREBASE_FIDELIZACION_CONFIG.apiKey === 'TU_API_KEY') {
       throw new Error('Falta configurar js/firebase-fidelizacion-config.js con tus credenciales reales de Firebase.');
     }
@@ -39,6 +84,14 @@
     app = apps && apps.length ? global.firebase.app() : global.firebase.initializeApp(global.FIREBASE_FIDELIZACION_CONFIG);
     db = global.firebase.firestore();
     return db;
+  }
+
+  function ready() {
+    if (backendMode === 'sheets') {
+      if (global.FidelizacionDbShim) return global.FidelizacionDbShim.create();
+      throw new Error('Backend Sheets: falta js/fidelizacion-db-shim.js');
+    }
+    return readyFirestore();
   }
 
   var NIVELES_DEFAULT = [
@@ -143,8 +196,8 @@
     return Promise.resolve('legacy_' + Math.abs(h).toString(16));
   }
 
-  function crearCliente(datos) {
-    var firestore = ready();
+  function crearClienteFirestore(datos) {
+    var firestore = readyFirestore();
     return firestore.collection('fidelizacion_clientes').add({
       nombre: datos.nombre || '',
       telefono: datos.telefono || '',
@@ -162,63 +215,94 @@
     });
   }
 
+  function crearCliente(datos) {
+    return resolveBackend().then(function (mode) {
+      if (mode === 'sheets') {
+        return sheetsApi().crearORecuperarCliente(datos).then(function (res) {
+          guardarPasaporteLocal(res.id);
+          return { id: res.id };
+        });
+      }
+      return crearClienteFirestore(datos);
+    });
+  }
+
   function crearORecuperarCliente(datos) {
-    var tel = String(datos.telefono || datos.celular || '').trim();
-    if (!tel) {
-      return crearCliente(datos).then(function (ref) {
-        return { id: ref.id, existed: false };
-      });
-    }
-    return ready().collection('fidelizacion_clientes')
-      .where('telefono', '==', tel)
-      .limit(1)
-      .get()
-      .then(function (snap) {
-        if (!snap.empty) {
-          var doc = snap.docs[0];
-          guardarPasaporteLocal(doc.id);
-          return { id: doc.id, existed: true };
-        }
-        return crearCliente(Object.assign({}, datos, { telefono: tel, origen: datos.origen || 'registro' })).then(function (ref) {
+    return resolveBackend().then(function (mode) {
+      if (mode === 'sheets') {
+        return sheetsApi().crearORecuperarCliente(datos).then(function (res) {
+          guardarPasaporteLocal(res.id);
+          return res;
+        });
+      }
+      var tel = String(datos.telefono || datos.celular || '').trim();
+      if (!tel) {
+        return crearClienteFirestore(datos).then(function (ref) {
           return { id: ref.id, existed: false };
         });
-      });
+      }
+      return readyFirestore().collection('fidelizacion_clientes')
+        .where('telefono', '==', tel)
+        .limit(1)
+        .get()
+        .then(function (snap) {
+          if (!snap.empty) {
+            var doc = snap.docs[0];
+            guardarPasaporteLocal(doc.id);
+            return { id: doc.id, existed: true };
+          }
+          return crearClienteFirestore(Object.assign({}, datos, { telefono: tel, origen: datos.origen || 'registro' })).then(function (ref) {
+            return { id: ref.id, existed: false };
+          });
+        });
+    });
   }
 
   function obtenerCliente(clienteId) {
-    return ready().collection('fidelizacion_clientes').doc(clienteId).get();
+    return resolveBackend().then(function (mode) {
+      if (mode === 'sheets') return sheetsApi().obtenerCliente(clienteId);
+      return readyFirestore().collection('fidelizacion_clientes').doc(clienteId).get();
+    });
   }
 
   function escucharCliente(clienteId, callback) {
-    return ready().collection('fidelizacion_clientes').doc(clienteId).onSnapshot(callback);
+    return resolveBackend().then(function (mode) {
+      if (mode === 'sheets') return sheetsApi().escucharCliente(clienteId, callback);
+      return readyFirestore().collection('fidelizacion_clientes').doc(clienteId).onSnapshot(callback);
+    });
   }
 
   function listarTransaccionesCliente(clienteId, limite) {
-    var max = limite || 20;
-    return ready().collection('fidelizacion_transacciones')
-      .where('clienteId', '==', clienteId)
-      .get()
-      .then(function (snap) {
-        var items = [];
-        snap.forEach(function (d) { items.push({ id: d.id, data: d.data() }); });
-        items.sort(function (a, b) {
-          var ta = a.data.fecha && a.data.fecha.toMillis ? a.data.fecha.toMillis() : 0;
-          var tb = b.data.fecha && b.data.fecha.toMillis ? b.data.fecha.toMillis() : 0;
-          return tb - ta;
+    return resolveBackend().then(function (mode) {
+      if (mode === 'sheets') return sheetsApi().listarTransaccionesCliente(clienteId, limite);
+      var max = limite || 20;
+      return readyFirestore().collection('fidelizacion_transacciones')
+        .where('clienteId', '==', clienteId)
+        .get()
+        .then(function (snap) {
+          var items = [];
+          snap.forEach(function (d) { items.push({ id: d.id, data: d.data() }); });
+          items.sort(function (a, b) {
+            var ta = a.data.fecha && a.data.fecha.toMillis ? a.data.fecha.toMillis() : 0;
+            var tb = b.data.fecha && b.data.fecha.toMillis ? b.data.fecha.toMillis() : 0;
+            return tb - ta;
+          });
+          return {
+            empty: items.length === 0,
+            forEach: function (fn) {
+              items.slice(0, max).forEach(function (item) {
+                fn({ data: function () { return item.data; } });
+              });
+            }
+          };
         });
-        return {
-          empty: items.length === 0,
-          forEach: function (fn) {
-            items.slice(0, max).forEach(function (item) {
-              fn({ data: function () { return item.data; } });
-            });
-          }
-        };
-      });
+    });
   }
 
   function registrarTransaccion(clienteId, tipo, puntos, detalle) {
-    var firestore = ready();
+    return resolveBackend().then(function (mode) {
+      if (mode === 'sheets') return sheetsApi().registrarTransaccion(clienteId, tipo, puntos, detalle);
+      var firestore = readyFirestore();
     var refCliente = firestore.collection('fidelizacion_clientes').doc(clienteId);
     var refTx = firestore.collection('fidelizacion_transacciones').doc();
     var delta = tipo === 'canje' ? -Math.abs(puntos) : Math.abs(puntos);
@@ -250,6 +334,7 @@
         });
       });
     });
+    });
   }
 
   function crearOperador(datos) {
@@ -258,96 +343,148 @@
     if (!datos.standNombre) return Promise.reject(new Error('Nombre del stand es obligatorio.'));
     if (!datos.pin || String(datos.pin).length < 4) return Promise.reject(new Error('PIN de al menos 4 dígitos.'));
 
-    var firestore = ready();
-    return firestore.collection('fidelizacion_operadores')
-      .where('usuario', '==', usuario)
-      .limit(1)
-      .get()
-      .then(function (snap) {
-        if (!snap.empty) throw new Error('Ese usuario ya existe.');
-        return hashPin(datos.pin);
-      })
-      .then(function (pinHash) {
-        return firestore.collection('fidelizacion_operadores').add({
-          standNombre: datos.standNombre,
-          usuario: usuario,
-          pinHash: pinHash,
-          puntosPorEscaneo: parseInt(datos.puntosPorEscaneo, 10) || PUNTOS_DEFAULT,
-          activo: true,
-          fechaCreacion: global.firebase.firestore.FieldValue.serverTimestamp()
+    return resolveBackend().then(function (mode) {
+      if (mode === 'sheets') return sheetsApi().crearOperador(datos);
+      var firestore = readyFirestore();
+      return firestore.collection('fidelizacion_operadores')
+        .where('usuario', '==', usuario)
+        .limit(1)
+        .get()
+        .then(function (snap) {
+          if (!snap.empty) throw new Error('Ese usuario ya existe.');
+          return hashPin(datos.pin);
+        })
+        .then(function (pinHash) {
+          return firestore.collection('fidelizacion_operadores').add({
+            standNombre: datos.standNombre,
+            usuario: usuario,
+            pinHash: pinHash,
+            puntosPorEscaneo: parseInt(datos.puntosPorEscaneo, 10) || PUNTOS_DEFAULT,
+            activo: true,
+            fechaCreacion: global.firebase.firestore.FieldValue.serverTimestamp()
+          });
         });
-      });
+    });
   }
 
   function verificarOperador(usuario, pin) {
     var u = String(usuario || '').trim().toLowerCase();
     if (!u || !pin) return Promise.reject(new Error('Usuario y PIN son obligatorios.'));
 
-    return hashPin(pin).then(function (pinHash) {
-      return ready().collection('fidelizacion_operadores')
-        .where('usuario', '==', u)
-        .limit(1)
-        .get()
-        .then(function (snap) {
-          if (snap.empty) throw new Error('Usuario o PIN incorrectos.');
-          var doc = snap.docs[0];
-          var data = doc.data();
-          if (!data.activo) throw new Error('Este operador está desactivado.');
-          if (data.pinHash !== pinHash) throw new Error('Usuario o PIN incorrectos.');
-          return { id: doc.id, standNombre: data.standNombre, puntosPorEscaneo: data.puntosPorEscaneo || PUNTOS_DEFAULT, usuario: data.usuario };
-        });
+    return resolveBackend().then(function (mode) {
+      if (mode === 'sheets') return sheetsApi().verificarOperador(u, pin);
+      return hashPin(pin).then(function (pinHash) {
+        return readyFirestore().collection('fidelizacion_operadores')
+          .where('usuario', '==', u)
+          .limit(1)
+          .get()
+          .then(function (snap) {
+            if (snap.empty) throw new Error('Usuario o PIN incorrectos.');
+            var doc = snap.docs[0];
+            var data = doc.data();
+            if (!data.activo) throw new Error('Este operador está desactivado.');
+            if (data.pinHash !== pinHash) throw new Error('Usuario o PIN incorrectos.');
+            return { id: doc.id, standNombre: data.standNombre, puntosPorEscaneo: data.puntosPorEscaneo || PUNTOS_DEFAULT, usuario: data.usuario };
+          });
+      });
     });
   }
 
   function yaEscaneadoHoy(operadorId, clienteId) {
-    var dia = hoyColombia();
-    var escaneoId = operadorId + '_' + clienteId + '_' + dia;
-    return ready().collection('fidelizacion_escaneos').doc(escaneoId).get().then(function (snap) {
-      return snap.exists;
+    return resolveBackend().then(function (mode) {
+      if (mode === 'sheets') return Promise.resolve(false);
+      var dia = hoyColombia();
+      var escaneoId = operadorId + '_' + clienteId + '_' + dia;
+      return readyFirestore().collection('fidelizacion_escaneos').doc(escaneoId).get().then(function (snap) {
+        return snap.exists;
+      });
     });
   }
 
   function registrarPuntosEscaneo(operador, clienteId, textoQr) {
-    var parsed = parseClienteIdDesdeQr(textoQr || clienteId);
-    if (!parsed) return Promise.reject(new Error('QR no reconocido. Usa el Pasaporte Cafetero.'));
+    return resolveBackend().then(function (mode) {
+      if (mode === 'sheets') return sheetsApi().registrarPuntosEscaneo(operador, clienteId, textoQr);
+      var parsed = parseClienteIdDesdeQr(textoQr || clienteId);
+      if (!parsed) return Promise.reject(new Error('QR no reconocido. Usa el Pasaporte Cafetero.'));
 
-    return yaEscaneadoHoy(operador.id, parsed).then(function (ya) {
-      if (ya) throw new Error('Este visitante ya recibió puntos en tu stand hoy.');
+      return yaEscaneadoHoy(operador.id, parsed).then(function (ya) {
+        if (ya) throw new Error('Este visitante ya recibió puntos en tu stand hoy.');
 
-      var puntos = operador.puntosPorEscaneo || PUNTOS_DEFAULT;
-      var escaneoId = operador.id + '_' + parsed + '_' + hoyColombia();
-      var firestore = ready();
+        var puntos = operador.puntosPorEscaneo || PUNTOS_DEFAULT;
+        var escaneoId = operador.id + '_' + parsed + '_' + hoyColombia();
+        var firestore = readyFirestore();
 
-      return registrarTransaccion(parsed, 'acumulacion', puntos, {
-        descripcion: 'Visita a stand — escaneo Pasaporte Cafetero',
-        sede: operador.standNombre,
-        operadorId: operador.id
-      }).then(function () {
-        return firestore.collection('fidelizacion_escaneos').doc(escaneoId).set({
-          operadorId: operador.id,
-          clienteId: parsed,
-          standNombre: operador.standNombre,
-          puntos: puntos,
-          dia: hoyColombia(),
-          fecha: global.firebase.firestore.FieldValue.serverTimestamp()
-        });
-      }).then(function () {
-        return obtenerCliente(parsed).then(function (snap) {
-          var data = snap.exists ? snap.data() : {};
-          return {
+        return registrarTransaccion(parsed, 'acumulacion', puntos, {
+          descripcion: 'Visita a stand — escaneo Pasaporte Cafetero',
+          sede: operador.standNombre,
+          operadorId: operador.id
+        }).then(function () {
+          return firestore.collection('fidelizacion_escaneos').doc(escaneoId).set({
+            operadorId: operador.id,
             clienteId: parsed,
-            nombre: data.nombre || 'Visitante',
-            puntosOtorgados: puntos,
-            puntosTotales: data.puntos || 0,
-            nivel: data.nivel || 'Bronce'
-          };
+            standNombre: operador.standNombre,
+            puntos: puntos,
+            dia: hoyColombia(),
+            fecha: global.firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }).then(function () {
+          return obtenerCliente(parsed).then(function (snap) {
+            var data = snap.exists ? snap.data() : {};
+            return {
+              clienteId: parsed,
+              nombre: data.nombre || 'Visitante',
+              puntosOtorgados: puntos,
+              puntosTotales: data.puntos || 0,
+              nivel: data.nivel || 'Bronce'
+            };
+          });
         });
       });
     });
   }
 
+  function db() {
+    return resolveBackend().then(function (mode) {
+      if (mode === 'sheets') {
+        if (global.FidelizacionDbShim) return global.FidelizacionDbShim.create();
+        throw new Error('Backend Sheets: falta js/fidelizacion-db-shim.js');
+      }
+      return readyFirestore();
+    });
+  }
+
+  function probePasaportesBackend() {
+    var api = sheetsApi();
+    if (!api || !api.isAvailable()) {
+      return Promise.resolve({ ready: false, message: 'URL de Apps Script no configurada.' });
+    }
+    return api.isPasaportesBackendReady().then(function (ready) {
+      return {
+        ready: ready,
+        message: ready
+          ? 'Backend Pasaportes (Google Sheets) operativo.'
+          : 'Apps Script desactualizado: ejecuta py tools/setup_admin.py y sincronizarEncabezados() en el editor.'
+      };
+    });
+  }
+
   global.Fidelizacion = {
-    db: ready,
+    db: function () {
+      if (backendMode === 'sheets' && global.FidelizacionDbShim) {
+        return global.FidelizacionDbShim.create();
+      }
+      if (backendMode === 'firestore' || db) {
+        try { return readyFirestore(); } catch (e) { /* fall through */ }
+      }
+      resolveBackend();
+      if (backendMode === 'sheets' && global.FidelizacionDbShim) {
+        return global.FidelizacionDbShim.create();
+      }
+      return readyFirestore();
+    },
+    initBackend: resolveBackend,
+    probePasaportesBackend: probePasaportesBackend,
+    getBackendMode: function () { return backendMode; },
     QR_PREFIX: QR_PREFIX,
     PUNTOS_DEFAULT: PUNTOS_DEFAULT,
     NIVELES_DEFAULT: NIVELES_DEFAULT,
