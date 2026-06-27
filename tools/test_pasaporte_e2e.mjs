@@ -137,7 +137,7 @@ async function main() {
   // Apps Script feria (con pasaporteId)
   const sheetsUrl =
     process.env.SHEETS_WEB_APP_URL ||
-    'https://script.google.com/macros/s/AKfycbwT_Lz93DhTqIWtC7qBgla5oH_THxIit4tabo7YojKm2o5jiRpw4ozI1pMncoozpMxz/exec';
+    'https://script.google.com/macros/s/AKfycby9M6WaffK8H0wLA6bOsQ8GccAFeQ89y6gWhP3aN1xrkSrtd-2RvsI-nMUrlaLd_WJb/exec';
 
   try {
     const payload = {
