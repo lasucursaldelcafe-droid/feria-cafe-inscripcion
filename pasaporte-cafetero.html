@@ -71,8 +71,11 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="js/sheets-config.js"></script>
   <script src="js/firebase-fidelizacion-config.js"></script>
   <script src="js/site-links.js"></script>
+  <script src="js/fidelizacion-sheets.js"></script>
+  <script src="js/fidelizacion-db-shim.js"></script>
   <script src="js/fidelizacion-common.js"></script>
   <script src="js/qr-render.js"></script>
   <script src="js/pasaporte-pwa.js"></script>
@@ -155,7 +158,9 @@
         });
       }
 
-      Fidelizacion.obtenerCliente(clienteId).then(function (snap) {
+      Fidelizacion.initBackend().then(function () {
+        return Fidelizacion.obtenerCliente(clienteId);
+      }).then(function (snap) {
         if (!snap.exists) {
           mostrarError('No encontramos este pasaporte. Verifica el enlace o regístrate de nuevo.');
           return;

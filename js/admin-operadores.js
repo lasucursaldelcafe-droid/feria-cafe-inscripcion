@@ -19,14 +19,6 @@
       .replace(/"/g, '&quot;');
   }
 
-  function firestoreErrorMessage(err) {
-    var msg = (err && err.message) ? err.message : String(err || '');
-    if (msg.indexOf('SERVICE_DISABLED') !== -1 || msg.indexOf('permission-denied') !== -1) {
-      return 'Firestore no está habilitado. Activa la API en Firebase Console → Firestore Database.';
-    }
-    return msg;
-  }
-
   function escanerUrl() {
     return global.SiteLinks ? global.SiteLinks.absUrl('escanearPasaporte') : '/escanear-pasaporte';
   }
@@ -39,7 +31,7 @@
     el.innerHTML =
       '<div class="admin-card">' +
         '<h4 class="admin-card__title">Crear operador de confianza</h4>' +
-        '<p class="admin-table-meta">Usuario y PIN para que un stand escanee Pasaportes en ' +
+        '<p class="admin-table-meta">Usuario y PIN para escanear Pasaportes en ' +
         '<a href="' + escapeHtml(escanerUrl()) + '" target="_blank" rel="noopener">' + escapeHtml(escanerUrl()) + '</a>.</p>' +
         '<form id="formAdminOperador" class="admin-inline-form">' +
           '<div class="admin-inline-form__row">' +
@@ -77,11 +69,13 @@
       btn.textContent = 'Creando…';
       resultEl.hidden = true;
 
-      global.Fidelizacion.crearOperador({
-        standNombre: stand,
-        usuario: usuario,
-        pin: pin,
-        puntosPorEscaneo: puntos
+      global.Fidelizacion.initBackend().then(function () {
+        return global.Fidelizacion.crearOperador({
+          standNombre: stand,
+          usuario: usuario,
+          pin: pin,
+          puntosPorEscaneo: puntos
+        });
       }).then(function () {
         btn.disabled = false;
         btn.textContent = 'Crear operador';
@@ -96,7 +90,7 @@
         btn.disabled = false;
         btn.textContent = 'Crear operador';
         resultEl.innerHTML = '<p style="margin:0;color:var(--admin-accent-red,#e07070)">' +
-          escapeHtml(firestoreErrorMessage(err)) + '</p>';
+          escapeHtml(err.message || 'Error al crear operador.') + '</p>';
         resultEl.hidden = false;
       });
     });
@@ -138,33 +132,28 @@
 
   function listenOperadores() {
     var statusEl = document.getElementById('adminOpFirestoreStatus');
-    if (unsubOps) {
-      unsubOps();
-      unsubOps = null;
-    }
+    if (unsubOps && typeof unsubOps === 'function') unsubOps();
 
-    try {
-      global.Fidelizacion.db();
-      if (statusEl) statusEl.textContent = '';
-      unsubOps = global.Fidelizacion.db()
-        .collection('fidelizacion_operadores')
-        .onSnapshot(function (snap) {
-          var items = [];
-          snap.forEach(function (doc) {
-            items.push(Object.assign({ id: doc.id }, doc.data()));
-          });
-          items.sort(function (a, b) {
-            return String(a.standNombre || '').localeCompare(String(b.standNombre || ''), 'es');
-          });
-          renderTable(items);
-        }, function (err) {
-          if (statusEl) statusEl.textContent = firestoreErrorMessage(err);
-          renderTable([]);
+    global.Fidelizacion.initBackend().then(function (mode) {
+      if (statusEl) {
+        statusEl.textContent = mode === 'firestore'
+          ? 'Backend Firestore activo.'
+          : 'Backend Google Sheets activo.';
+      }
+      unsubOps = global.Fidelizacion.db().collection('fidelizacion_operadores').onSnapshot(function (snap) {
+        var items = [];
+        snap.forEach(function (doc) {
+          items.push(Object.assign({ id: doc.id }, doc.data()));
         });
-    } catch (err) {
-      if (statusEl) statusEl.textContent = firestoreErrorMessage(err);
+        items.sort(function (a, b) {
+          return String(a.standNombre || '').localeCompare(String(b.standNombre || ''), 'es');
+        });
+        renderTable(items);
+      });
+    }).catch(function (err) {
+      if (statusEl) statusEl.textContent = err.message || 'Error de conexión.';
       renderTable([]);
-    }
+    });
   }
 
   function onShow() {

@@ -17,6 +17,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="js/firebase-fidelizacion-config.js"></script>
   <script src="js/site-links.js"></script>
+  <script src="js/sheets-config.js"></script>
+  <script src="js/fidelizacion-sheets.js"></script>
+  <script src="js/fidelizacion-db-shim.js"></script>
   <script src="js/fidelizacion-common.js"></script>
 </head>
 <body class="fid-admin-body">
@@ -39,15 +42,17 @@
     function useFirestoreReady() {
       const [ready, setReady] = useState(false);
       const [error, setError] = useState(null);
+      const [backend, setBackend] = useState('');
       useEffect(() => {
-        try {
-          Fidelizacion.db();
+        Fidelizacion.initBackend().then(function (mode) {
+          try { Fidelizacion.db(); } catch (e) { /* shim o firestore */ }
+          setBackend(mode);
           setReady(true);
-        } catch (e) {
-          setError(e.message);
-        }
+        }).catch(function (e) {
+          setError(e.message || 'No se pudo conectar al backend de pasaportes.');
+        });
       }, []);
-      return { ready, error };
+      return { ready, error, backend };
     }
 
     function StatCard({ num, label }) {

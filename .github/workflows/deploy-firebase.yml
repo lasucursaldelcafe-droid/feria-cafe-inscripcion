@@ -32,7 +32,9 @@ jobs:
           if [ -f tools/CANONICAL_SHEETS_URL.txt ]; then
             CANONICAL="$(tr -d '\r\n' < tools/CANONICAL_SHEETS_URL.txt)"
           fi
-          FINAL_URL="${SHEETS_URL:-$CANONICAL}"
+          # Prioridad: URL canónica del repo (sincronizada con Code.gs) > secreto GitHub
+          FINAL_URL="${CANONICAL:-$SHEETS_URL}"
+          echo "sheets-config.js → ${FINAL_URL:-(vacío)}"
           if [ -n "$FINAL_URL" ]; then
             printf "window.SHEETS_CONFIG = {\n  WEB_APP_URL: '%s'\n};\n" "$FINAL_URL" > js/sheets-config.js
           else

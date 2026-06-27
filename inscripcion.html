@@ -295,6 +295,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="js/firebase-fidelizacion-config.js"></script>
+  <script src="js/fidelizacion-sheets.js"></script>
+  <script src="js/fidelizacion-db-shim.js"></script>
   <script src="js/fidelizacion-common.js"></script>
   <script src="js/event-config.js?v=20260620ig"></script>
   <script src="js/site-links.js"></script>
@@ -509,11 +511,13 @@
         function prepararPasaporte(entry) {
           if (!window.Fidelizacion) return Promise.resolve(entry);
           try {
-            return Fidelizacion.crearORecuperarCliente({
-              nombre: entry.nombre,
-              telefono: entry.celular,
-              email: entry.correo,
-              origen: 'feria'
+            return Fidelizacion.initBackend().then(function () {
+              return Fidelizacion.crearORecuperarCliente({
+                nombre: entry.nombre,
+                telefono: entry.celular,
+                email: entry.correo,
+                origen: 'feria'
+              });
             }).then(function (res) {
               entry.pasaporteId = res.id;
               if (window.Fidelizacion && Fidelizacion.guardarPasaporteLocal) {

@@ -1,0 +1,70 @@
+name: Deploy Apps Script
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - tools/google-apps-script/Code.gs
+      - tools/google-apps-script/appsscript.json
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: pip install -r tools/requirements.txt
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Restore OAuth token
+        env:
+          OAUTH_SCRIPT_TOKEN: ${{ secrets.OAUTH_SCRIPT_TOKEN }}
+          APPS_SCRIPT_ID: ${{ secrets.APPS_SCRIPT_ID }}
+          SHEETS_WEB_APP_URL: ${{ secrets.SHEETS_WEB_APP_URL }}
+        run: |
+          if [ -z "$OAUTH_SCRIPT_TOKEN" ]; then
+            echo "::warning::Sin OAUTH_SCRIPT_TOKEN — omitiendo deploy de Apps Script."
+            echo "Genera el token con: py tools/setup_admin.py (local)"
+            exit 0
+          fi
+          mkdir -p tools/credentials
+          echo "$OAUTH_SCRIPT_TOKEN" > tools/credentials/.oauth-script-token.json
+          if [ -n "$SHEETS_WEB_APP_URL" ]; then
+            printf "window.SHEETS_CONFIG = {\n  WEB_APP_URL: '%s'\n};\n" "$SHEETS_WEB_APP_URL" > js/sheets-config.js
+          fi
+          ENV_FILE="tools/.env"
+          touch "$ENV_FILE"
+          if [ -n "$APPS_SCRIPT_ID" ]; then
+            grep -q '^APPS_SCRIPT_ID=' "$ENV_FILE" && \
+              sed -i "s|^APPS_SCRIPT_ID=.*|APPS_SCRIPT_ID=$APPS_SCRIPT_ID|" "$ENV_FILE" || \
+              echo "APPS_SCRIPT_ID=$APPS_SCRIPT_ID" >> "$ENV_FILE"
+          fi
+          if [ -n "$SHEETS_WEB_APP_URL" ]; then
+            grep -q '^SHEETS_WEB_APP_URL=' "$ENV_FILE" && \
+              sed -i "s|^SHEETS_WEB_APP_URL=.*|SHEETS_WEB_APP_URL=$SHEETS_WEB_APP_URL|" "$ENV_FILE" || \
+              echo "SHEETS_WEB_APP_URL=$SHEETS_WEB_APP_URL" >> "$ENV_FILE"
+          fi
+
+      - name: Deploy Code.gs
+        env:
+          OAUTH_SCRIPT_TOKEN: ${{ secrets.OAUTH_SCRIPT_TOKEN }}
+        run: |
+          if [ -z "$OAUTH_SCRIPT_TOKEN" ]; then exit 0; fi
+          python3 tools/setup_admin.py --sin-firebase
+
+      - name: Verificar pasaportes
+        run: python3 tools/conectar_sheets.py --verificar
+        continue-on-error: true
