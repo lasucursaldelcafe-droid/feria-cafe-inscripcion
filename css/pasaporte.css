@@ -21,6 +21,68 @@ body.pasaporte-page {
   color: rgba(255,255,255,0.9);
 }
 
+.pasaporte-login-form {
+  text-align: left;
+  margin: 24px auto 0;
+  max-width: 320px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  padding: 20px 18px;
+}
+
+.pasaporte-login-form h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.pasaporte-login-hint {
+  margin: 0 0 16px;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.75);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.pasaporte-login-form label {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.pasaporte-login-form input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.95);
+  color: #2a1a12;
+  font-size: 1rem;
+}
+
+.pasaporte-login-error {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(193,39,45,0.35);
+  color: #ffe8e8;
+  font-size: 0.85rem;
+}
+
+.pasaporte-error-links {
+  margin: 20px 0 0;
+  font-size: 0.88rem;
+}
+
+.pasaporte-error-links a {
+  color: #f5d9a8;
+  text-decoration: underline;
+}
+
 .pasaporte-card {
   background: linear-gradient(145deg, #6B4423 0%, #4B352A 50%, #3d2a1f 100%);
   border-radius: 24px;
@@ -178,8 +240,6 @@ body.pasaporte-page {
 .pasaporte-btn--primary { background: #C1272D; }
 .pasaporte-btn--wa { background: #25D366; }
 .pasaporte-btn--muted { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); }
-.pasaporte-btn--wallet { background: #4285F4; width: 100%; flex: none; margin-top: 4px; }
-
 .pasaporte-install {
   background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.2);

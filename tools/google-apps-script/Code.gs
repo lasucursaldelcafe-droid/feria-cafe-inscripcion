@@ -199,6 +199,9 @@ function doPost(e) {
     if (action === 'pasaporte_create') {
       return jsonResponse(handlePasaporteCreate_(payload));
     }
+    if (action === 'pasaporte_login') {
+      return jsonResponse(handlePasaporteLogin_(payload));
+    }
     if (action === 'pasaporte_transaccion') {
       return jsonResponse(handlePasaporteTransaccion_(payload));
     }
@@ -2721,7 +2724,7 @@ function findPasaporteRowById_(id) {
 }
 
 function findPasaporteRowByTelefono_(telefono) {
-  var tel = String(telefono || '').replace(/\D/g, '');
+  var tel = normalizePasaporteTelefono_(telefono);
   if (!tel) return null;
   var sheet = getOrCreateSheet_(SHEET_PASAPORTES, HEADERS_PASAPORTES);
   var lastRow = sheet.getLastRow();
@@ -2729,10 +2732,50 @@ function findPasaporteRowByTelefono_(telefono) {
   var values = sheet.getRange(2, 1, lastRow, HEADERS_PASAPORTES.length).getValues();
   for (var i = values.length - 1; i >= 0; i--) {
     var row = rowObjectFromValues_(HEADERS_PASAPORTES, values[i]);
-    var rowTel = String(row['Teléfono'] || '').replace(/\D/g, '');
+    var rowTel = normalizePasaporteTelefono_(row['Teléfono']);
     if (rowTel && rowTel === tel) return { sheet: sheet, rowNum: i + 2, row: row };
   }
   return null;
+}
+
+function normalizePasaporteTelefono_(telefono) {
+  return String(telefono || '').replace(/\D/g, '');
+}
+
+function normalizePasaporteNombre_(nombre) {
+  return String(nombre || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function isPasaporteEmailValido_(email) {
+  var e = String(email || '').trim().toLowerCase();
+  return !!e && e.indexOf('@') !== -1 && e.indexOf('.') !== -1;
+}
+
+function findPasaporteRowByCredentials_(nombre, telefono) {
+  var found = findPasaporteRowByTelefono_(telefono);
+  if (!found) return null;
+  var nombreNorm = normalizePasaporteNombre_(nombre);
+  var rowNombre = normalizePasaporteNombre_(found.row['Nombre']);
+  if (!nombreNorm || nombreNorm !== rowNombre) return null;
+  if (String(found.row['Activo'] || '').trim().toLowerCase() === 'no') return null;
+  return found;
+}
+
+function handlePasaporteLogin_(payload) {
+  var nombre = String(payload.nombre || '').trim();
+  var telefono = String(payload.telefono || payload.celular || '').trim();
+  if (!nombre || !telefono) {
+    return { ok: false, error: 'Nombre y celular son obligatorios.' };
+  }
+  var found = findPasaporteRowByCredentials_(nombre, telefono);
+  if (!found) {
+    return { ok: false, error: 'Nombre o celular incorrectos. Revisa que coincidan con tu registro.' };
+  }
+  return {
+    ok: true,
+    id: found.row['ID'],
+    cliente: pasaporteRowToClient_(found.row)
+  };
 }
 
 function getPasaporteCliente_(id) {
@@ -2781,8 +2824,12 @@ function handlePasaporteCreate_(payload) {
   var telefono = String(payload.telefono || payload.celular || '').trim();
   var correo = String(payload.email || payload.correo || '').trim().toLowerCase();
   if (!nombre) return { ok: false, error: 'Nombre obligatorio.' };
+  if (!telefono) return { ok: false, error: 'Celular obligatorio.' };
+  if (!isPasaporteEmailValido_(correo)) {
+    return { ok: false, error: 'Correo electrónico válido obligatorio.' };
+  }
 
-  var existing = telefono ? findPasaporteRowByTelefono_(telefono) : null;
+  var existing = findPasaporteRowByTelefono_(telefono);
   if (existing) {
     return { ok: true, id: existing.row['ID'], existed: true, cliente: pasaporteRowToClient_(existing.row) };
   }

@@ -112,6 +112,16 @@
     return probe();
   }
 
+  function iniciarSesionPasaporte(nombre, telefono) {
+    return sheetsPost({
+      action: 'pasaporte_login',
+      nombre: nombre || '',
+      telefono: telefono || ''
+    }).then(function (res) {
+      return { id: res.id, cliente: res.cliente };
+    });
+  }
+
   function crearORecuperarCliente(datos) {
     return sheetsPost({
       action: 'pasaporte_create',
@@ -263,6 +273,7 @@
     isPasaportesBackendReady: isPasaportesBackendReady,
     pasaportesBackendReady: pasaportesBackendReady,
     crearORecuperarCliente: crearORecuperarCliente,
+    iniciarSesionPasaporte: iniciarSesionPasaporte,
     obtenerCliente: obtenerCliente,
     escucharCliente: escucharCliente,
     listarTransaccionesCliente: listarTransaccionesCliente,

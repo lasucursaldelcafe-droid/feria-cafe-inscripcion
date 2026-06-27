@@ -16,8 +16,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/brand.css?v=20260625a">
-  <link rel="stylesheet" href="css/fidelizacion.css?v=20260625a">
-  <link rel="stylesheet" href="css/pasaporte.css?v=20260625a">
+  <link rel="stylesheet" href="css/fidelizacion.css?v=20260626a">
+  <link rel="stylesheet" href="css/pasaporte.css?v=20260626a">
 </head>
 <body class="pasaporte-page">
   <div class="pasaporte-shell">
@@ -27,7 +27,21 @@
 
     <div id="errorBox" class="pasaporte-error" hidden>
       <p id="errorMsg"></p>
-      <p style="margin-top:16px"><a data-link="fidelizacionRegistro" href="fidelizacion-registro.html" style="color:#E9E6DD">Crear mi pasaporte</a></p>
+      <form id="formPasaporteLogin" class="pasaporte-login-form" hidden novalidate>
+        <h2>Iniciar sesión</h2>
+        <p class="pasaporte-login-hint">Usuario: tu nombre completo · Clave: tu celular</p>
+        <label for="pasLoginNombre">Nombre completo</label>
+        <input type="text" id="pasLoginNombre" required autocomplete="name">
+        <label for="pasLoginTelefono">Celular</label>
+        <input type="tel" id="pasLoginTelefono" required autocomplete="tel" placeholder="3001234567">
+        <p id="pasLoginError" class="pasaporte-login-error" hidden role="alert"></p>
+        <button type="submit" class="pasaporte-btn pasaporte-btn--primary" id="btnPasLogin">Entrar a mi pasaporte</button>
+      </form>
+      <p class="pasaporte-error-links">
+        <a data-link="fidelizacionRegistro" href="fidelizacion-registro.html">Crear pasaporte</a>
+        ·
+        <a data-link="fidelizacionRegistro" href="fidelizacion-registro.html?modo=login">Iniciar sesión</a>
+      </p>
     </div>
 
     <article id="pasaporte" class="pasaporte-card" hidden>
@@ -53,7 +67,6 @@
       <div class="pasaporte-qr-box">
         <div id="qrContainer" aria-label="Código QR del pasaporte"></div>
         <p class="pasaporte-qr-hint">Muestra este QR en cada stand. El expositor lo escanea y sumas puntos al instante.</p>
-        <button type="button" id="btnWallet" class="pasaporte-btn pasaporte-btn--wallet" hidden>+ Google Wallet (opcional)</button>
       </div>
 
       <div class="pasaporte-actions">
@@ -96,10 +109,43 @@
 
       PasaportePWA.mostrarBannerInstalar('installBanner');
 
-      function mostrarError(msg) {
+      function mostrarError(msg, showLogin) {
         loading.hidden = true;
         document.getElementById('errorMsg').textContent = msg;
+        var loginForm = document.getElementById('formPasaporteLogin');
+        if (loginForm) loginForm.hidden = !showLogin;
         errorBox.hidden = false;
+      }
+
+      function bindPasaporteLogin() {
+        var form = document.getElementById('formPasaporteLogin');
+        if (!form || form.getAttribute('data-bound') === '1') return;
+        form.setAttribute('data-bound', '1');
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var errEl = document.getElementById('pasLoginError');
+          var btn = document.getElementById('btnPasLogin');
+          var nombre = document.getElementById('pasLoginNombre').value.trim();
+          var telefono = document.getElementById('pasLoginTelefono').value.trim();
+          errEl.hidden = true;
+          if (!nombre || !telefono) {
+            errEl.textContent = 'Nombre y celular son obligatorios.';
+            errEl.hidden = false;
+            return;
+          }
+          btn.disabled = true;
+          btn.textContent = 'Entrando…';
+          Fidelizacion.initBackend().then(function () {
+            return Fidelizacion.iniciarSesionPasaporte(nombre, telefono);
+          }).then(function (res) {
+            window.location.href = Fidelizacion.urlPasaporte(res.id);
+          }).catch(function (err) {
+            errEl.textContent = (err && err.message) ? err.message : 'No pudimos iniciar sesión.';
+            errEl.hidden = false;
+            btn.disabled = false;
+            btn.textContent = 'Entrar a mi pasaporte';
+          });
+        });
       }
 
       if (!clienteId) {
@@ -107,10 +153,11 @@
           ? SiteLinks.href('fidelizacionRegistro')
           : '/registro-fidelizacion';
         if (PasaportePWA.esStandalone && PasaportePWA.esStandalone()) {
-          window.location.replace(registroUrl);
+          window.location.replace(registroUrl + '?modo=login');
           return;
         }
-        mostrarError('Abre el enlace personal que recibiste al registrarte, o crea tu pasaporte ahora.');
+        bindPasaporteLogin();
+        mostrarError('Inicia sesión con tu nombre y celular, o crea un pasaporte nuevo.', true);
         return;
       }
 
@@ -169,7 +216,8 @@
         return Fidelizacion.obtenerCliente(clienteId);
       }).then(function (snap) {
         if (!snap.exists) {
-          mostrarError('No encontramos este pasaporte. Verifica el enlace o regístrate de nuevo.');
+          bindPasaporteLogin();
+          mostrarError('No encontramos este pasaporte. Inicia sesión con tu nombre y celular o crea uno nuevo.', true);
           return;
         }
         var data = snap.data();

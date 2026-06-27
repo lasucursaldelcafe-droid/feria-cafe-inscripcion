@@ -34,8 +34,8 @@
             '<input type="text" id="adminPasNombre" required maxlength="120"></label>' +
             '<label class="admin-inline-form__field"><span>Teléfono (WhatsApp) *</span>' +
             '<input type="tel" id="adminPasTelefono" required maxlength="30"></label>' +
-            '<label class="admin-inline-form__field"><span>Correo</span>' +
-            '<input type="email" id="adminPasEmail" maxlength="120"></label>' +
+            '<label class="admin-inline-form__field"><span>Correo *</span>' +
+            '<input type="email" id="adminPasEmail" required maxlength="120"></label>' +
           '</div>' +
           '<div class="admin-inline-form__actions">' +
             '<button type="submit" class="admin-btn admin-btn--primary" id="adminPasSubmit">Crear pasaporte</button>' +
@@ -58,6 +58,11 @@
       var email = document.getElementById('adminPasEmail').value.trim();
 
       if (!nombre || !telefono) return;
+      if (!global.Fidelizacion.isEmailPasaporteValido(email)) {
+        resultEl.innerHTML = '<p style="margin:0;color:var(--admin-accent-red,#e07070)">Correo electrónico válido obligatorio.</p>';
+        resultEl.hidden = false;
+        return;
+      }
 
       btn.disabled = true;
       btn.textContent = 'Creando…';
