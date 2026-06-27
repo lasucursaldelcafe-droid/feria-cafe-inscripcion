@@ -155,5 +155,8 @@
     listenClientes();
   }
 
-  global.AdminPasaportes = { onShow: onShow };
+  global.AdminPasaportes = {
+    mount: renderShell,
+    onShow: onShow
+  };
 })(window);

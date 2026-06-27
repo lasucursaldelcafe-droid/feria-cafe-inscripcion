@@ -161,5 +161,8 @@
     listenOperadores();
   }
 
-  global.AdminOperadores = { onShow: onShow };
+  global.AdminOperadores = {
+    mount: renderShell,
+    onShow: onShow
+  };
 })(window);
