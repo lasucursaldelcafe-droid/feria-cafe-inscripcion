@@ -9,6 +9,20 @@
   "background_color": "#4B352A",
   "theme_color": "#5D3A1A",
   "lang": "es-CO",
+  "shortcuts": [
+    {
+      "name": "Crear pasaporte",
+      "short_name": "Registro",
+      "url": "/registro-fidelizacion",
+      "icons": [{ "src": "/assets/logo-la-sucursal-del-cafe.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Escanear QR",
+      "short_name": "Escanear",
+      "url": "/escanear-pasaporte",
+      "icons": [{ "src": "/assets/logo-la-sucursal-del-cafe.png", "sizes": "192x192" }]
+    }
+  ],
   "icons": [
     {
       "src": "/assets/logo-la-sucursal-del-cafe.png",
