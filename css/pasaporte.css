@@ -8,6 +8,17 @@ body.pasaporte-page {
   color: #fff;
 }
 
+.pasaporte-page :focus-visible {
+  outline: 3px solid rgba(245, 217, 168, 0.9);
+  outline-offset: 3px;
+}
+
+.pasaporte-page button,
+.pasaporte-page a,
+.pasaporte-page input {
+  -webkit-tap-highlight-color: rgba(245, 217, 168, 0.2);
+}
+
 .pasaporte-shell {
   max-width: 420px;
   margin: 0 auto;
@@ -235,6 +246,16 @@ body.pasaporte-page {
   align-items: center;
   justify-content: center;
   gap: 4px;
+  transition: transform 0.14s ease, filter 0.14s ease, border-color 0.14s ease;
+}
+
+.pasaporte-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.pasaporte-btn:active {
+  transform: translateY(0);
 }
 
 .pasaporte-btn--primary { background: #C1272D; }
