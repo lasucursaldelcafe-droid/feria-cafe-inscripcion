@@ -29,6 +29,31 @@
   line-height: 1.55;
 }
 
+.expositor-page :focus-visible {
+  outline: 3px solid rgba(187, 94, 60, 0.8);
+  outline-offset: 3px;
+}
+
+.expositor-page button,
+.expositor-page a,
+.expositor-page input,
+.expositor-page select,
+.expositor-page textarea {
+  -webkit-tap-highlight-color: rgba(187, 94, 60, 0.2);
+}
+
+.expositor-btn {
+  transition: transform 0.14s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.expositor-btn:hover {
+  transform: translateY(-1px);
+}
+
+.expositor-btn:active {
+  transform: translateY(0);
+}
+
 .expositor-header {
   background: linear-gradient(155deg, #2a1f18 0%, #4b352a 100%);
   border-bottom: 1px solid var(--exp-border);

@@ -108,6 +108,34 @@
   line-height: 1.5;
 }
 
+.admin-page :focus-visible {
+  outline: 3px solid rgba(91, 159, 212, 0.75);
+  outline-offset: 3px;
+}
+
+.admin-page button,
+.admin-page a,
+.admin-page input,
+.admin-page select,
+.admin-page textarea {
+  -webkit-tap-highlight-color: rgba(91, 159, 212, 0.18);
+}
+
+.admin-btn,
+.admin-nav__item {
+  transition: transform 0.14s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-btn:hover,
+.admin-nav__item:hover {
+  transform: translateY(-1px);
+}
+
+.admin-btn:active,
+.admin-nav__item:active {
+  transform: translateY(0);
+}
+
 .admin-header {
   background: var(--admin-surface);
   border-bottom: 1px solid var(--admin-border);
