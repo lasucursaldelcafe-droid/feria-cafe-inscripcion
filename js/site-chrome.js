@@ -136,6 +136,7 @@
       var key = el.getAttribute('data-bind');
       if (key === 'feria.fecha' && feria.fecha) el.textContent = feria.fecha;
       if (key === 'torneo.fecha' && ev.fecha) el.textContent = ev.fecha;
+      if (key === 'torneo.hora' && ev.horaInicio) el.textContent = ev.horaInicio;
       if (key === 'torneo.lugar' && ev.sede) el.textContent = torneoLugar();
       if (key === 'feria.lugar') el.textContent = feriaLugar();
     });

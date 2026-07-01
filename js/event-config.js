@@ -143,17 +143,18 @@ window.EVENT_CONFIG = {
     clasificatoria: '1.ª de 2 preliminares',
     fecha: 'Por confirmar',
     fechaCorta: 'Por confirmar',
+    horaInicio: '5:30 p. m.',
     sede: 'Por confirmar',
     ciudad: 'Cali',
     mapsQuery: 'Cali Valle del Cauca',
     horario: [
-      { hora: '08:00', actividad: 'Registro, entrega de café de ronda y sorteo de método (dados)' },
-      { hora: '18:00', actividad: 'Ronda clasificatoria — estaciones en competencia' },
-      { hora: '12:00', actividad: 'Pausa / catación clasificatoria (estimado)' },
-      { hora: '14:00', actividad: 'Semifinal (si aplica el cronograma del día)' },
-      { hora: '16:00', actividad: 'Final y premiación (sujeto a avance de rondas)' }
+      { hora: '5:30 p. m.', actividad: 'Registro, bienvenida y entrega de café de ronda' },
+      { hora: '6:00 p. m.', actividad: 'Sorteo de método y explicación del protocolo' },
+      { hora: '6:30 p. m.', actividad: 'Ronda clasificatoria — estaciones en competencia' },
+      { hora: '7:45 p. m.', actividad: 'Catación / evaluación de jueces (estimado)' },
+      { hora: '8:30 p. m.', actividad: 'Resultados y cierre de la edición' }
     ],
-    horarioNota: 'Horario referencial; el juez principal confirmará tiempos exactos el día del evento.',
+    horarioNota: 'La 1.ª edición inicia a las 5:30 p. m.; el juez principal confirmará tiempos exactos el día del evento.',
     whatsappGrupoUrl: 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9',
     whatsappGrupoNombre: 'V60 Championship — competidores'
   },
