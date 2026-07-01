@@ -1228,6 +1228,14 @@ function ensureDefaultPatrocinadoresCompetencia_() {
     [
       'PC-2', 'Palmetto Plaza', '@palmettoplaza', 'https://www.instagram.com/palmettoplaza/',
       SITE_PUBLIC_BASE_URL + '/assets/sponsors/palmetto-plaza.png', 'Sí', 2, 'Migrado desde event-config'
+    ],
+    [
+      'PC-3', 'Ghost Specialty Coffee', '@ghost_specialty_coffee', 'https://www.instagram.com/ghost_specialty_coffee/',
+      '', 'Sí', 3, 'Café invitado — tarjeta destacada'
+    ],
+    [
+      'PC-4', 'Medium Café', '@medium_cafe', 'https://www.instagram.com/medium_cafe/',
+      '', 'Sí', 4, 'Coffee Shop — tarjeta destacada'
     ]
   ];
   defaults.forEach(function (row) {

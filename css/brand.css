@@ -2835,6 +2835,28 @@ body.page-rules {
   list-style: none;
 }
 
+.festival-sponsor-card--featured .festival-sponsor-card__link {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(187, 94, 60, 0.16), transparent 34%),
+    linear-gradient(145deg, #fffdf9 0%, var(--surface-warm) 100%);
+  border-color: rgba(187, 94, 60, 0.28);
+}
+
+.festival-sponsor-card--featured .festival-sponsor-card__link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(255,255,255,0.55), transparent 42%);
+}
+
+.festival-sponsor-card--featured .festival-sponsor-card__avatar {
+  border-color: rgba(187, 94, 60, 0.38);
+  box-shadow: 0 10px 24px rgba(75, 53, 42, 0.12);
+}
+
 .festival-sponsor-card__link {
   display: flex;
   flex-direction: column;

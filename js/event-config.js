@@ -221,12 +221,20 @@ window.EVENT_CONFIG = {
     {
       name: 'Ghost Specialty Coffee',
       instagramUrl: 'https://www.instagram.com/ghost_specialty_coffee/',
-      instagramHandle: '@ghost_specialty_coffee'
+      instagramHandle: '@ghost_specialty_coffee',
+      badge: 'Café invitado',
+      featured: true,
+      tagline: 'Café especial con identidad propia',
+      description: 'Una marca referente para conectar a visitantes y competidores con perfiles de taza, cultura barista y experiencias alrededor del café.'
     },
     {
       name: 'Medium Café',
       instagramUrl: 'https://www.instagram.com/medium_cafe/',
-      instagramHandle: '@medium_cafe'
+      instagramHandle: '@medium_cafe',
+      badge: 'Coffee Shop',
+      featured: true,
+      tagline: 'Café de especialidad para descubrir en feria',
+      description: 'Espacio para vivir café, conversación y producto local; una vitrina ideal para visitantes que quieren llevarse una experiencia de la feria.'
     },
     {
       name: 'Elixir Café'
