@@ -24,6 +24,8 @@
 
   var activeAdminTab = 'expositores';
   var activeAdminSection = 'resumen';
+  var ADMIN_TAB_KEY = 'feria_admin_tab';
+  var ADMIN_SECTION_KEY = 'feria_admin_section';
 
   var ADMIN_SECTIONS = [
     'resumen', 'analiticas', 'competidores', 'stands', 'visitantes', 'sitio', 'pasaportes', 'operadores'
@@ -173,6 +175,49 @@
     patrocinadores: 'Zona Gran Reserva'
   };
 
+  function setText(id, value) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+
+  function inferStandSection(row) {
+    var tipo = String(row['Tipo participante'] || '').trim().toLowerCase();
+    var plan = String(row['Plan stand'] || '').trim();
+    if (tipo === 'aliado' || plan === 'Aliado Patrocinador') return 'aliados';
+    if (tipo === 'patrocinador' || plan === 'Zona Gran Reserva') return 'patrocinadores';
+    if (tipo === 'expositor' || plan === 'Zona Origen') return 'expositores';
+    return 'expositores';
+  }
+
+  function filterStandsBySection(rows, section) {
+    return (rows || []).filter(function (row) {
+      return inferStandSection(row) === section;
+    });
+  }
+
+  function saveAdminUiState() {
+    try {
+      sessionStorage.setItem(ADMIN_TAB_KEY, activeAdminTab);
+      sessionStorage.setItem(ADMIN_SECTION_KEY, activeAdminSection);
+    } catch (e) { /* ignore */ }
+  }
+
+  function restoreAdminTabFromStorage() {
+    try {
+      var tab = sessionStorage.getItem(ADMIN_TAB_KEY);
+      if (tab && MARCA_PLAN_BY_TAB[tab]) activeAdminTab = tab;
+    } catch (e) { /* ignore */ }
+  }
+
+  function syncAdminTabUi() {
+    document.querySelectorAll('[data-admin-tab]').forEach(function (tab) {
+      var key = tab.getAttribute('data-admin-tab') || 'expositores';
+      var active = key === activeAdminTab;
+      tab.classList.toggle('admin-tab--active', active);
+      tab.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+  }
+
   function syncMarcaPlanFromTab() {
     var planSelect = document.getElementById('adminMarcaPlan');
     var defaultPlan = MARCA_PLAN_BY_TAB[activeAdminTab];
@@ -191,7 +236,52 @@
       result.hidden = true;
       result.innerHTML = '';
     }
+    clearAdminMarcaLogoPreview();
     syncMarcaPlanFromTab();
+  }
+
+  function clearAdminMarcaLogoPreview() {
+    var preview = document.getElementById('adminMarcaLogoPreview');
+    var logoInput = document.getElementById('adminMarcaLogo');
+    if (logoInput) logoInput.value = '';
+    if (preview) {
+      preview.classList.remove('visible');
+      preview.innerHTML = '';
+    }
+  }
+
+  function bindAdminMarcaLogoPreview() {
+    var logoInput = document.getElementById('adminMarcaLogo');
+    var preview = document.getElementById('adminMarcaLogoPreview');
+    if (!logoInput || !preview) return;
+
+    logoInput.addEventListener('change', function () {
+      var file = logoInput.files && logoInput.files[0];
+      if (!file) {
+        clearAdminMarcaLogoPreview();
+        return;
+      }
+      if (!file.type || file.type.indexOf('image/') !== 0) {
+        clearAdminMarcaLogoPreview();
+        showError('El logo debe ser una imagen (JPG, PNG o WebP).');
+        return;
+      }
+      readFileAsDataUrl(file).then(function (dataUrl) {
+        preview.innerHTML =
+          '<img src="' + dataUrl + '" alt="Vista previa del logo">' +
+          '<button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" id="adminMarcaLogoClear">Quitar</button>';
+        preview.classList.add('visible');
+        var clearBtn = document.getElementById('adminMarcaLogoClear');
+        if (clearBtn) {
+          clearBtn.addEventListener('click', function () {
+            clearAdminMarcaLogoPreview();
+          });
+        }
+      }).catch(function () {
+        clearAdminMarcaLogoPreview();
+        showError('No se pudo leer el logo.');
+      });
+    });
   }
 
   function showAdminCreateMarcaResult(html) {
@@ -287,13 +377,7 @@
           html += '</p>';
         }
         showAdminCreateMarcaResult(html);
-        var form = document.getElementById('formAdminCreateMarca');
-        if (form) form.reset();
-        var hab = document.getElementById('adminMarcaHabilitado');
-        var vis = document.getElementById('adminMarcaVisible');
-        if (hab) hab.checked = true;
-        if (vis) vis.checked = true;
-        if (logoInput) logoInput.value = '';
+        resetAdminCreateMarcaForm();
         loadDashboard();
       }).catch(function (err) {
         if (submitBtn) {
@@ -323,17 +407,6 @@
 
   function savePatrocinadorCompetencia(payload) {
     return postAdminAction(Object.assign({ action: 'admin_save_patrocinador_competencia' }, payload));
-  }
-
-  function filterStandsBySection(rows, section) {
-    return (rows || []).filter(function (row) {
-      var tipo = String(row['Tipo participante'] || '').trim().toLowerCase();
-      var plan = String(row['Plan stand'] || '').trim();
-      if (section === 'expositores') return tipo === 'expositor' || plan === 'Zona Origen';
-      if (section === 'aliados') return tipo === 'aliado' || plan === 'Aliado Patrocinador';
-      if (section === 'patrocinadores') return tipo === 'patrocinador' && plan !== 'Aliado Patrocinador';
-      return true;
-    });
   }
 
   function renderStatusBadge(enabled) {
@@ -465,11 +538,8 @@
     document.querySelectorAll('[data-admin-tab]').forEach(function (tab) {
       tab.addEventListener('click', function () {
         activeAdminTab = tab.getAttribute('data-admin-tab') || 'expositores';
-        document.querySelectorAll('[data-admin-tab]').forEach(function (t) {
-          var active = t === tab;
-          t.classList.toggle('admin-tab--active', active);
-          t.setAttribute('aria-selected', active ? 'true' : 'false');
-        });
+        syncAdminTabUi();
+        saveAdminUiState();
         renderAdminTabPanels(lastDashboardData);
         syncMarcaPlanFromTab();
       });
@@ -490,12 +560,24 @@
       panel.hidden = !show;
     });
 
+    if (section === 'stands') {
+      syncAdminTabUi();
+      syncMarcaPlanFromTab();
+    }
+
     if (section === 'pasaportes' && global.AdminPasaportes && global.AdminPasaportes.onShow) {
       global.AdminPasaportes.onShow();
       loadFidEmbed();
     }
     if (section === 'operadores' && global.AdminOperadores && global.AdminOperadores.onShow) {
       global.AdminOperadores.onShow();
+    }
+
+    saveAdminUiState();
+
+    var main = document.querySelector('.admin-main');
+    if (main && typeof main.scrollTo === 'function') {
+      main.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     if (global.history && global.history.replaceState) {
@@ -507,6 +589,10 @@
   function readHashSection() {
     var hash = (global.location.hash || '').replace(/^#/, '').trim().toLowerCase();
     if (hash && ADMIN_SECTIONS.indexOf(hash) !== -1) return hash;
+    try {
+      var stored = sessionStorage.getItem(ADMIN_SECTION_KEY);
+      if (stored && ADMIN_SECTIONS.indexOf(stored) !== -1) return stored;
+    } catch (e) { /* ignore */ }
     return 'resumen';
   }
 
@@ -1024,32 +1110,27 @@
     lastDashboardData = data;
     var stats = data.stats || {};
 
-    document.getElementById('statVisitsToday').textContent = formatNumber(stats.visitsToday);
-    document.getElementById('statVisitsTotal').textContent = formatNumber(stats.visitsTotal);
-    var visitsTodayA = document.getElementById('statVisitsTodayAnalytics');
-    var visitsTotalA = document.getElementById('statVisitsTotalAnalytics');
-    if (visitsTodayA) visitsTodayA.textContent = formatNumber(stats.visitsToday);
-    if (visitsTotalA) visitsTotalA.textContent = formatNumber(stats.visitsTotal);
-    var uniqueToday = document.getElementById('statUniquePathsToday');
-    if (uniqueToday) uniqueToday.textContent = formatNumber(stats.uniquePathsToday);
-    var uniqueTotal = document.getElementById('statUniquePathsTotal');
-    if (uniqueTotal) uniqueTotal.textContent = formatNumber(stats.uniquePathsTotal);
-    document.getElementById('statFeria').textContent = formatNumber(stats.feriaRegistrations);
-    document.getElementById('statCompetencia').textContent = formatNumber(stats.competenciaRegistrations);
-    var statStands = document.getElementById('statStands');
-    if (statStands) statStands.textContent = formatNumber(stats.standsRegistrations);
-    var statLista = document.getElementById('statLista');
-    if (statLista) statLista.textContent = formatNumber(stats.listaEspera);
+    setText('statVisitsToday', formatNumber(stats.visitsToday));
+    setText('statVisitsTotal', formatNumber(stats.visitsTotal));
+    setText('statVisitsTodayAnalytics', formatNumber(stats.visitsToday));
+    setText('statVisitsTotalAnalytics', formatNumber(stats.visitsTotal));
+    setText('statUniquePathsToday', formatNumber(stats.uniquePathsToday));
+    setText('statUniquePathsTotal', formatNumber(stats.uniquePathsTotal));
+    setText('statFeria', formatNumber(stats.feriaRegistrations));
+    setText('statCompetencia', formatNumber(stats.competenciaRegistrations));
+    setText('statStands', formatNumber(stats.standsRegistrations));
+    setText('statLista', formatNumber(stats.listaEspera));
 
     var cupo = stats.competenciaCupo || {};
-    document.getElementById('statCupo').textContent =
+    setText('statCupo',
       formatNumber(cupo.count) + ' / ' + formatNumber(cupo.max || 36) +
-      (cupo.completo ? ' (completo)' : '');
+      (cupo.completo ? ' (completo)' : ''));
 
-    document.getElementById('statConvFeria').textContent = (stats.conversionFeriaPct || 0) + '%';
-    document.getElementById('statConvComp').textContent = (stats.conversionCompetenciaPct || 0) + '%';
+    setText('statConvFeria', (stats.conversionFeriaPct || 0) + '%');
+    setText('statConvComp', (stats.conversionCompetenciaPct || 0) + '%');
 
-    document.getElementById('topPagesToday').innerHTML = renderTopPages(stats.topPagesToday, 10);
+    var topToday = document.getElementById('topPagesToday');
+    if (topToday) topToday.innerHTML = renderTopPages(stats.topPagesToday, 10);
     var topAllEl = document.getElementById('topPagesAll');
     if (topAllEl) topAllEl.innerHTML = renderTopPages(stats.topPagesAll, 10);
     var sourceEl = document.getElementById('analyticsSource');
@@ -1254,12 +1335,16 @@
     });
   }
 
-  function init() {
-    if (!getWebAppUrl()) {
-      showError('Configura js/sheets-config.js con la URL de Apps Script.');
-      setLoading(false);
-      return;
+  function preMountAdminModules() {
+    if (global.AdminPasaportes && global.AdminPasaportes.mount) {
+      global.AdminPasaportes.mount();
     }
+    if (global.AdminOperadores && global.AdminOperadores.mount) {
+      global.AdminOperadores.mount();
+    }
+  }
+
+  function init() {
     bindEvents();
     bindAdminNav();
     bindAdminTabs();
@@ -1267,7 +1352,19 @@
     bindAdminCreateMarcaForm();
     bindAdminCreateCompetidorForm();
     bindAdminCreateVisitanteForm();
+    bindAdminMarcaLogoPreview();
+    restoreAdminTabFromStorage();
+    syncAdminTabUi();
+    syncMarcaPlanFromTab();
     showAdminSection(readHashSection());
+    preMountAdminModules();
+
+    if (!getWebAppUrl()) {
+      showError('Configura js/sheets-config.js con la URL de Apps Script.');
+      setLoading(false);
+      return;
+    }
+
     checkAppsScriptFeatures();
     loadDashboard();
   }

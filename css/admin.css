@@ -658,6 +658,26 @@
   font-size: 0.95rem;
 }
 
+.admin-logo-preview {
+  margin-top: 0.5rem;
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.admin-logo-preview.visible {
+  display: flex;
+}
+
+.admin-logo-preview img {
+  max-width: 160px;
+  max-height: 120px;
+  border-radius: 8px;
+  background: #fff;
+  padding: 0.35rem;
+}
+
 .admin-table__link {
   font-size: 0.78rem;
   white-space: nowrap;

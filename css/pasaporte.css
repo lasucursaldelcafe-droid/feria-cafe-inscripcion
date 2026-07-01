@@ -21,6 +21,68 @@ body.pasaporte-page {
   color: rgba(255,255,255,0.9);
 }
 
+.pasaporte-login-form {
+  text-align: left;
+  margin: 24px auto 0;
+  max-width: 320px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  padding: 20px 18px;
+}
+
+.pasaporte-login-form h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.pasaporte-login-hint {
+  margin: 0 0 16px;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.75);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.pasaporte-login-form label {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.pasaporte-login-form input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.95);
+  color: #2a1a12;
+  font-size: 1rem;
+}
+
+.pasaporte-login-error {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(193,39,45,0.35);
+  color: #ffe8e8;
+  font-size: 0.85rem;
+}
+
+.pasaporte-error-links {
+  margin: 20px 0 0;
+  font-size: 0.88rem;
+}
+
+.pasaporte-error-links a {
+  color: #f5d9a8;
+  text-decoration: underline;
+}
+
 .pasaporte-card {
   background: linear-gradient(145deg, #6B4423 0%, #4B352A 50%, #3d2a1f 100%);
   border-radius: 24px;
@@ -178,8 +240,6 @@ body.pasaporte-page {
 .pasaporte-btn--primary { background: #C1272D; }
 .pasaporte-btn--wa { background: #25D366; }
 .pasaporte-btn--muted { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); }
-.pasaporte-btn--wallet { background: #4285F4; width: 100%; flex: none; margin-top: 4px; }
-
 .pasaporte-install {
   background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.2);
@@ -224,6 +284,104 @@ body.pasaporte-page {
 
 .pasaporte-historial .pts-pos { color: #8fd48f; font-weight: 700; }
 .pasaporte-historial .pts-neg { color: #f5a5a5; font-weight: 700; }
+
+.pasaporte-feria {
+  margin-top: 20px;
+  background: rgba(0,0,0,0.22);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 16px 18px;
+}
+
+.pasaporte-feria h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.pasaporte-feria__meta {
+  margin: 0 0 14px;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.75);
+}
+
+.pasaporte-feria__lista {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+}
+
+.pasaporte-feria__item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-size: 0.82rem;
+}
+
+.pasaporte-feria__item:last-child { border-bottom: none; }
+
+.pasaporte-feria__icon {
+  font-size: 1.2rem;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.pasaporte-feria__item strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.88rem;
+}
+
+.pasaporte-feria__item p {
+  margin: 0;
+  color: rgba(255,255,255,0.8);
+  line-height: 1.35;
+}
+
+.pasaporte-feria__sub {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.pasaporte-feria__news {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  font-size: 0.82rem;
+}
+
+.pasaporte-feria__news p {
+  margin: 4px 0 0;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.35;
+}
+
+.pasaporte-feria__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pasaporte-feria__links .pasaporte-btn {
+  flex: 1;
+  min-width: 140px;
+  text-decoration: none;
+}
+
+.pasaporte-feria__expositor-wrap {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 0.82rem;
+}
+
+.pasaporte-feria__expositor {
+  color: #f5d9a8;
+  text-decoration: underline;
+}
 
 /* Escáner stands */
 body.escaner-page {

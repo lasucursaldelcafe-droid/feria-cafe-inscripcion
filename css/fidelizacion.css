@@ -139,6 +139,42 @@
   font-size: 0.85rem;
 }
 
+.fid-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  color: var(--text-muted, #7a6a5c);
+  line-height: 1.45;
+}
+
+.fid-tabs {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.fid-tab {
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--coffee-deep, #4B352A);
+  background: #fff;
+  color: var(--coffee-deep, #4B352A);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.fid-tab--active {
+  background: var(--coffee-deep, #4B352A);
+  color: #fff;
+}
+
+.fid-tab-panel[hidden] {
+  display: none !important;
+}
+
 /* ---- Panel admin (dashboard-fidelizacion.html) ---- */
 .fid-admin-body { background: #f4f1ec; font-family: 'Inter', system-ui, sans-serif; margin: 0; }
 .fid-admin-shell { max-width: 1200px; margin: 0 auto; padding: 24px; }
