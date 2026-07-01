@@ -77,6 +77,54 @@
   background: #fff;
 }
 
+.admin-competitor-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.admin-competitor-card {
+  overflow: hidden;
+  border: 1px solid var(--admin-border);
+  border-radius: 14px;
+  background: #120d0a;
+}
+
+.admin-competitor-card__photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: linear-gradient(135deg, #3b291f, #1c120d);
+}
+
+.admin-competitor-card__body {
+  padding: 0.8rem;
+}
+
+.admin-competitor-card__body h5 {
+  margin: 0 0 0.25rem;
+  color: var(--admin-text);
+  font-size: 1rem;
+}
+
+.admin-competitor-card__body p {
+  margin: 0 0 0.7rem;
+  color: var(--admin-text-muted);
+  font-size: 0.82rem;
+}
+
+.admin-competitor-card__actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.admin-competitor-card__actions .admin-btn {
+  flex: 1;
+  min-width: 90px;
+}
+
 :root {
   --admin-bg: #0f0f0f;
   --admin-surface: #1a1a1a;

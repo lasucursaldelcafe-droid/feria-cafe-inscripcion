@@ -485,6 +485,288 @@
     });
   }
 
+  function driveThumb(url, size) {
+    var raw = String(url || '').trim();
+    if (!raw) return '';
+    var match = raw.match(/\/file\/d\/([^/]+)/) || raw.match(/[?&]id=([^&]+)/);
+    if (match) return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(match[1]) + '&sz=w' + (size || 1200);
+    return raw;
+  }
+
+  function val(row, keys) {
+    for (var i = 0; i < keys.length; i++) {
+      var value = row[keys[i]];
+      if (value !== undefined && value !== null && String(value).trim()) return String(value).trim();
+    }
+    return '';
+  }
+
+  function competitorDescription(row) {
+    var parts = [];
+    var representa = val(row, ['Representa']);
+    var rol = val(row, ['Rol']);
+    var experienciaCafe = val(row, ['Experiencia café', 'Experiencia cafe']);
+    var experienciaSwitch = val(row, ['Experiencia Switch', 'Experiencia V60']);
+    var ciudad = val(row, ['Ciudad']);
+
+    if (representa) parts.push('Representa: ' + representa);
+    if (rol) parts.push('Rol: ' + rol);
+    if (experienciaCafe) parts.push('Experiencia en café: ' + experienciaCafe);
+    if (experienciaSwitch) parts.push('Experiencia V60/B60: ' + experienciaSwitch);
+    if (ciudad) parts.push('Ciudad: ' + ciudad);
+    return parts.join(' · ');
+  }
+
+  function sanitizeFilename(name) {
+    return String(name || 'competidor')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 60) || 'competidor';
+  }
+
+  function loadCanvasImage(url) {
+    return new Promise(function (resolve) {
+      if (!url) {
+        resolve(null);
+        return;
+      }
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function () { resolve(img); };
+      img.onerror = function () { resolve(null); };
+      img.src = url;
+    });
+  }
+
+  function roundedRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  function drawCover(ctx, img, x, y, w, h) {
+    roundedRect(ctx, x, y, w, h, 34);
+    ctx.save();
+    ctx.clip();
+    if (!img) {
+      var grd = ctx.createLinearGradient(x, y, x + w, y + h);
+      grd.addColorStop(0, '#6b4423');
+      grd.addColorStop(1, '#1f130e');
+      ctx.fillStyle = grd;
+      ctx.fillRect(x, y, w, h);
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      ctx.font = '700 44px Inter, Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Foto del competidor', x + w / 2, y + h / 2);
+    } else {
+      var scale = Math.max(w / img.width, h / img.height);
+      var sw = w / scale;
+      var sh = h / scale;
+      var sx = (img.width - sw) / 2;
+      var sy = (img.height - sh) / 2;
+      ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+    }
+    ctx.restore();
+  }
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+    var words = String(text || '').split(/\s+/).filter(Boolean);
+    var line = '';
+    var lines = [];
+    for (var n = 0; n < words.length; n++) {
+      var testLine = line ? line + ' ' + words[n] : words[n];
+      if (ctx.measureText(testLine).width > maxWidth && line) {
+        lines.push(line);
+        line = words[n];
+      } else {
+        line = testLine;
+      }
+      if (lines.length === maxLines) break;
+    }
+    if (line && lines.length < maxLines) lines.push(line);
+    if (words.length && lines.length === maxLines && lines[lines.length - 1].length > 3) {
+      lines[lines.length - 1] = lines[lines.length - 1].replace(/[.,;:]?$/, '') + '…';
+    }
+    lines.forEach(function (l, idx) {
+      ctx.fillText(l, x, y + idx * lineHeight);
+    });
+    return y + lines.length * lineHeight;
+  }
+
+  function createCompetitorCardCanvas(row) {
+    var photoUrl = driveThumb(val(row, ['Foto participante enlace Drive']), 1600);
+    return loadCanvasImage(photoUrl).then(function (img) {
+      var canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1350;
+      var ctx = canvas.getContext('2d');
+      var name = val(row, ['Nombre']) || 'Competidor';
+      var id = val(row, ['ID']);
+      var description = competitorDescription(row);
+
+      var bg = ctx.createLinearGradient(0, 0, 1080, 1350);
+      bg.addColorStop(0, '#2a1a12');
+      bg.addColorStop(0.55, '#5d3a1a');
+      bg.addColorStop(1, '#120d0a');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, 1080, 1350);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+      ctx.beginPath();
+      ctx.arc(950, 90, 280, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(80, 1270, 260, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#f6ead8';
+      ctx.font = '800 44px Inter, Arial, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('RETO B60', 72, 95);
+
+      ctx.font = '600 28px Inter, Arial, sans-serif';
+      ctx.fillStyle = 'rgba(246,234,216,0.78)';
+      ctx.fillText('Edición Purist Marbella', 72, 135);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#e8a84c';
+      ctx.font = '700 25px Inter, Arial, sans-serif';
+      ctx.fillText(id || 'Competidor', 1008, 95);
+      ctx.fillStyle = 'rgba(246,234,216,0.75)';
+      ctx.font = '600 22px Inter, Arial, sans-serif';
+      ctx.fillText('La Sucursal del Café', 1008, 130);
+
+      drawCover(ctx, img, 72, 185, 936, 650);
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 68px Inter, Arial, sans-serif';
+      var afterName = wrapText(ctx, name, 72, 930, 936, 72, 2);
+
+      ctx.fillStyle = '#f5d9a8';
+      ctx.font = '700 30px Inter, Arial, sans-serif';
+      ctx.fillText('Competidor oficial', 72, afterName + 18);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      ctx.font = '500 30px Inter, Arial, sans-serif';
+      wrapText(ctx, description || 'Participante del reto de café filtrado.', 72, afterName + 72, 936, 40, 5);
+
+      ctx.fillStyle = 'rgba(0,0,0,0.28)';
+      roundedRect(ctx, 72, 1218, 936, 72, 20);
+      ctx.fill();
+      ctx.fillStyle = '#f6ead8';
+      ctx.font = '700 26px Inter, Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Café filtrado · Plaza Marbella · Purist', 540, 1264);
+
+      return canvas;
+    });
+  }
+
+  function downloadCanvas(canvas, filename) {
+    try {
+      canvas.toBlob(function (blob) {
+        if (!blob) {
+          alert('No se pudo generar la imagen. Si la foto de Drive bloquea la descarga, abre la foto en Drive y vuelve a intentar.');
+          return;
+        }
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      }, 'image/png', 0.95);
+    } catch (err) {
+      alert('No se pudo descargar el PNG por permisos de la foto. Prueba con una foto pública en Drive.');
+    }
+  }
+
+  function downloadCompetitorCard(row, button) {
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Generando…';
+    }
+    createCompetitorCardCanvas(row).then(function (canvas) {
+      var name = sanitizeFilename(val(row, ['Nombre']));
+      downloadCanvas(canvas, 'reto-b60-purist-marbella-' + name + '.png');
+    }).finally(function () {
+      if (button) {
+        button.disabled = false;
+        button.textContent = 'PNG';
+      }
+    });
+  }
+
+  function renderCompetitorCards(rows) {
+    var root = document.getElementById('competidorCardsRoot');
+    if (!root) return;
+    var enabledRows = (rows || []).filter(function (row) {
+      return isHabilitadoValue(row['Habilitado']);
+    });
+    if (!enabledRows.length) {
+      root.innerHTML = '<p class="admin-empty">Aún no hay competidores habilitados para generar imágenes.</p>';
+      return;
+    }
+    root.innerHTML = enabledRows.map(function (row, idx) {
+      var photo = driveThumb(val(row, ['Foto participante enlace Drive']), 600);
+      var name = val(row, ['Nombre']) || 'Competidor';
+      var desc = competitorDescription(row) || 'Participante del reto de café filtrado.';
+      return '<article class="admin-competitor-card">' +
+        (photo
+          ? '<img class="admin-competitor-card__photo" src="' + escapeHtml(photo) + '" alt="Foto de ' + escapeHtml(name) + '" loading="lazy" referrerpolicy="no-referrer">'
+          : '<div class="admin-competitor-card__photo" aria-hidden="true"></div>') +
+        '<div class="admin-competitor-card__body">' +
+          '<h5>' + escapeHtml(name) + '</h5>' +
+          '<p>' + escapeHtml(desc) + '</p>' +
+          '<div class="admin-competitor-card__actions">' +
+            '<button type="button" class="admin-btn admin-btn--primary admin-competitor-png" data-competitor-idx="' + idx + '">PNG</button>' +
+            (photo ? '<a class="admin-btn admin-btn--secondary" href="' + escapeHtml(val(row, ['Foto participante enlace Drive'])) + '" target="_blank" rel="noopener">Foto</a>' : '') +
+          '</div>' +
+        '</div>' +
+      '</article>';
+    }).join('');
+
+    root.querySelectorAll('.admin-competitor-png').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var idx = parseInt(btn.getAttribute('data-competitor-idx'), 10);
+        downloadCompetitorCard(enabledRows[idx], btn);
+      });
+    });
+
+    var allBtn = document.getElementById('downloadCompetitorCardsBtn');
+    if (allBtn && allBtn.getAttribute('data-bound') !== '1') {
+      allBtn.setAttribute('data-bound', '1');
+      allBtn.addEventListener('click', function () {
+        var rowsNow = pickRows(lastDashboardData || {}, 'allCompetencia').filter(function (row) {
+          return isHabilitadoValue(row['Habilitado']);
+        });
+        rowsNow.reduce(function (chain, row) {
+          return chain.then(function () {
+            return createCompetitorCardCanvas(row).then(function (canvas) {
+              var name = sanitizeFilename(val(row, ['Nombre']));
+              downloadCanvas(canvas, 'reto-b60-purist-marbella-' + name + '.png');
+            });
+          }).then(function () {
+            return new Promise(function (resolve) { setTimeout(resolve, 350); });
+          });
+        }, Promise.resolve());
+      });
+    }
+  }
+
   function renderAdminTabPanels(data) {
     if (!data) return;
 
@@ -500,6 +782,8 @@
           metaText: compRows.length + ' competidores — más recientes primero.'
         }) + '</div>';
     }
+
+    renderCompetitorCards(compRows);
 
     var panelFeria = document.getElementById('adminTabPanelsFeria');
     if (panelFeria) {
