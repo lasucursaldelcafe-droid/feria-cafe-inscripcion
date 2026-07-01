@@ -111,16 +111,22 @@ window.EVENT_CONFIG = {
     }
   },
   circuito: {
-    clasificatoriasTotal: 3,
-    clasificatoriaActual: 1,
+    preliminaresTotal: 2,
+    preliminarActual: 1,
     resumen:
-      'Tres competencias clasificatorias antes de la gran final. En cada una compites por cupo a la competencia principal, reconocimientos de patrocinadores y experiencia de fogueo bajo presión real.',
-    motivoClasificatorias:
-      'Las clasificatorias son tu escenario de práctica oficial: mismo formato, mismos jueces, misma exigencia que la competencia principal. Ganas confianza, cupos y experiencia para llegar más fuerte a la final.',
+      'Dos ediciones preliminares antes de la gran final (29 y 30 de agosto de 2026). En cada una compites por cupo a la competencia principal, reconocimientos de patrocinadores y experiencia de fogueo bajo presión real.',
+    motivoPreliminares:
+      'Las preliminares son tu escenario de práctica oficial: mismo formato, mismos jueces, misma exigencia que la competencia principal. Ganas confianza, cupos y experiencia para llegar más fuerte a la final.',
     cupoDirecto:
       'También puedes inscribirte con cupo directo a la competencia principal — la cita donde se disputan los premios más importantes, incluido el viaje a World of Coffee Panamá.',
     principal: {
       nombre: 'Competencia principal — La Sucursal del Café',
+      fecha: '29 y 30 de agosto de 2026',
+      fechaCorta: '29–30 ago 2026',
+      fechaIso: '2026-08-29',
+      sede: 'Palmetto Plaza',
+      ciudad: 'Cali',
+      mapsQuery: 'Palmetto Plaza Cali',
       premioDestacado: 'Plata + viaje a World of Coffee Panamá (noviembre) + premios de patrocinadores',
       wcpPanama: {
         nombre: 'World of Coffee Panamá',
@@ -132,14 +138,14 @@ window.EVENT_CONFIG = {
     }
   },
   evento1: {
-    nombre: 'V60 Championship — Evento 1',
-    clasificatoria: '1.ª de 3 clasificatorias',
-    fecha: '4 de julio de 2026',
-    fechaCorta: '4 jul 2026',
-    fechaIso: '2026-07-04',
-    sede: 'Plaza Marbella',
-    ciudad: 'Centro Comercial (Curis)',
-    mapsQuery: 'Plaza Marbella Curis Cali',
+    nombre: 'V60 Championship — Preliminar 1',
+    preliminar: '1.ª de 2 preliminares',
+    clasificatoria: '1.ª de 2 preliminares',
+    fecha: 'Por confirmar',
+    fechaCorta: 'Por confirmar',
+    sede: 'Por confirmar',
+    ciudad: 'Cali',
+    mapsQuery: 'Cali Valle del Cauca',
     horario: [
       { hora: '08:00', actividad: 'Registro, entrega de café de ronda y sorteo de método (dados)' },
       { hora: '18:00', actividad: 'Ronda clasificatoria — estaciones en competencia' },
@@ -159,8 +165,14 @@ window.EVENT_CONFIG = {
     titular: 'Manuel Barraza'
   },
   proximosEventos: [
-    { num: 2, estado: 'Por confirmar', fecha: 'Por anunciar', sede: 'Por anunciar' },
-    { num: 3, estado: 'Por confirmar', fecha: 'Por anunciar', sede: 'Por anunciar' }
+    { num: 2, label: 'Preliminar 2', estado: 'Por confirmar', fecha: 'Por confirmar', sede: 'Por confirmar' },
+    {
+      num: 3,
+      label: 'Competencia principal',
+      estado: 'Confirmado',
+      fecha: '29 y 30 de agosto de 2026',
+      sede: 'Palmetto Plaza, Cali'
+    }
   ],
   cupoCompetencia: 36,
   /** Patrocinadores confirmados — imagen local o remota; Instagram opcional. */

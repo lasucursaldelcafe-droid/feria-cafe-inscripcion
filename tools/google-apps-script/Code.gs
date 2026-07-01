@@ -1872,7 +1872,7 @@ function buildWaMeUrl_(phone, text) {
 function buildCompetenciaWaOrganizadorUrl_(data) {
   var nombre = String(data.nombre || 'Participante').trim();
   var id = String(data.id || '').trim();
-  var msg = 'Hola, me inscribí al V60 Championship (1.ª clasificatoria). ' +
+  var msg = 'Hola, me inscribí al V60 Championship (1.ª preliminar). ' +
     'Nombre: ' + nombre + '. Inscripción: ' + (id || 'pendiente') + '. Confirmo mi participación.';
   return buildWaMeUrl_(WHATSAPP_ORGANIZADOR, msg);
 }
@@ -1894,16 +1894,17 @@ function buildCompetenciaEmailPlain_(data) {
   var lines = [
     'Hola ' + nombre + ',',
     '',
-    '¡Bienvenido/a al V60 Championship! Recibimos tu inscripción a la 1.ª clasificatoria del circuito de café filtrado con V60.',
+    '¡Bienvenido/a al V60 Championship! Recibimos tu inscripción a la 1.ª preliminar del circuito de café filtrado con V60.',
     '',
     'Número de inscripción: ' + id,
-    'Fecha: 4 de julio de 2026',
-    'Sede: Plaza Marbella, Centro Comercial (Curis), Cali',
+    'Preliminar 1: Por confirmar (te avisaremos fecha y sede)',
+    'Competencia principal: 29 y 30 de agosto de 2026 · Palmetto Plaza, Cali',
     'Pago: $90.000 COP a Nubank @mbl616 (Manuel Barraza)',
     '',
     '—— Reglamento (resumen) ——',
     '• Método obligatorio: V60 (extracción manual).',
-    '• Formato: clasificatoria, semifinal y final.',
+    '• Circuito: 2 preliminares + final (29–30 ago 2026).',
+    '• Formato por fecha: clasificatoria, semifinal y final.',
     '• Sin reembolso por retiro o no asistencia (salvo cancelación total del evento).',
     '• Debes cumplir tiempos, protocolo y criterios del jurado.',
     'Reglamento completo: ' + reglasUrl,
@@ -1927,7 +1928,7 @@ function buildCompetenciaEmailPlain_(data) {
   lines.push('Dudas: ' + ORGANIZER_EMAIL);
   lines.push('');
   lines.push('— La Sucursal del Café');
-  lines.push('V60 Championship · 1.ª clasificatoria');
+  lines.push('V60 Championship · 1.ª preliminar');
   return lines.join('\n');
 }
 
@@ -1949,17 +1950,18 @@ function buildCompetenciaEmailHtml_(data) {
   return [
     '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#3d2b1f;max-width:600px;">',
     '<p style="margin:0 0 16px;">Hola <strong>' + nombre + '</strong>,</p>',
-    '<p style="margin:0 0 16px;">¡Bienvenido/a al <strong>V60 Championship</strong>! Recibimos tu inscripción a la <strong>1.ª clasificatoria</strong> del circuito de café filtrado con V60, organizado por La Sucursal del Café.</p>',
+    '<p style="margin:0 0 16px;">¡Bienvenido/a al <strong>V60 Championship</strong>! Recibimos tu inscripción a la <strong>1.ª preliminar</strong> del circuito de café filtrado con V60 (2 preliminares + final 29–30 ago 2026), organizado por La Sucursal del Café.</p>',
     '<table style="width:100%;border-collapse:collapse;margin:0 0 20px;font-size:14px;">',
     '<tr><td style="padding:6px 0;color:#6b5344;width:38%;">Número de inscripción</td><td style="padding:6px 0;"><strong>' + id + '</strong></td></tr>',
-    '<tr><td style="padding:6px 0;color:#6b5344;">Fecha</td><td style="padding:6px 0;">4 de julio de 2026</td></tr>',
-    '<tr><td style="padding:6px 0;color:#6b5344;">Sede</td><td style="padding:6px 0;">Plaza Marbella, Centro Comercial (Curis), Cali</td></tr>',
+    '<tr><td style="padding:6px 0;color:#6b5344;">Preliminar 1</td><td style="padding:6px 0;">Por confirmar (te avisaremos fecha y sede)</td></tr>',
+    '<tr><td style="padding:6px 0;color:#6b5344;">Competencia principal</td><td style="padding:6px 0;">29 y 30 de agosto de 2026 · Palmetto Plaza, Cali</td></tr>',
     '<tr><td style="padding:6px 0;color:#6b5344;">Pago</td><td style="padding:6px 0;">$90.000 COP · Nubank <strong>@mbl616</strong> (Manuel Barraza)</td></tr>',
     '</table>',
     '<h2 style="font-size:17px;color:#5f4a3a;margin:24px 0 10px;">Reglamento</h2>',
     '<ul style="margin:0 0 12px;padding-left:20px;">',
     '<li style="margin-bottom:6px;">Método obligatorio: <strong>V60</strong> (extracción manual).</li>',
-    '<li style="margin-bottom:6px;">Formato: clasificatoria, semifinal y final.</li>',
+    '<li style="margin-bottom:6px;">Circuito: 2 preliminares + final (29–30 ago 2026).</li>',
+    '<li style="margin-bottom:6px;">Formato por fecha: clasificatoria, semifinal y final.</li>',
     '<li style="margin-bottom:6px;">Sin reembolso por retiro o no asistencia (salvo cancelación total del evento).</li>',
     '<li style="margin-bottom:6px;">Debes cumplir tiempos, protocolo y criterios del jurado.</li>',
     '</ul>',
@@ -1973,7 +1975,7 @@ function buildCompetenciaEmailHtml_(data) {
     '<p style="margin:0 0 8px;font-size:13px;color:#888;">WhatsApp no puede enviarse automáticamente desde este sistema; usa los botones anteriores para unirte al grupo o contactarnos.</p>',
     '<p style="margin:16px 0 0;">Dudas: <a href="mailto:' + organizerEmail + '" style="color:#8b4513;">' + organizerEmail + '</a></p>',
     '<hr style="border:none;border-top:1px solid #e0d5c8;margin:24px 0;">',
-    '<p style="margin:0;font-size:13px;color:#888;">— La Sucursal del Café<br>V60 Championship · 1.ª clasificatoria</p>',
+    '<p style="margin:0;font-size:13px;color:#888;">— La Sucursal del Café<br>V60 Championship · 1.ª preliminar</p>',
     '</div>'
   ].join('');
 }

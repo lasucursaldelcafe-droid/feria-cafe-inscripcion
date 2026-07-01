@@ -11,12 +11,24 @@ window.EVENT_CONFIG = {
   alerts: {
     email: 'tu-correo@gmail.com'
   },
+  circuito: {
+    preliminaresTotal: 2,
+    preliminarActual: 1,
+    principal: {
+      fecha: '29 y 30 de agosto de 2026',
+      fechaCorta: '29–30 ago 2026',
+      fechaIso: '2026-08-29',
+      sede: 'Palmetto Plaza',
+      ciudad: 'Cali'
+    }
+  },
   evento1: {
-    nombre: 'V60 Championship — Evento 1',
-    fecha: '4 de julio de 2026',
-    fechaCorta: '4 jul 2026',
-    sede: 'Plaza Marbella',
-    ciudad: 'Ciudad Jardín',
+    nombre: 'V60 Championship — Preliminar 1',
+    preliminar: '1.ª de 2 preliminares',
+    fecha: 'Por confirmar',
+    fechaCorta: 'Por confirmar',
+    sede: 'Por confirmar',
+    ciudad: 'Cali',
     whatsappGrupoUrl: 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9',
     whatsappGrupoNombre: 'V60 Championship — competidores'
   },

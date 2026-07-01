@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
   <link rel="apple-touch-icon" href="assets/logo-la-sucursal-del-cafe.png">
-  <meta name="description" content="Inscripción V60 Championship Cali 2026: competencia de café filtrado V60. 1.ª clasificatoria, 4 julio, Plaza Marbella. La Sucursal del Café.">
+  <meta name="description" content="Inscripción V60 Championship Cali 2026: competencia de café filtrado V60. 1.ª preliminar · final 29–30 ago · Palmetto Plaza. La Sucursal del Café.">
   <link rel="canonical" href="https://la-sucursal-del-cafe.web.app/competencia">
   <meta property="og:title" content="V60 Championship Cali 2026 | Inscripción competencia café">
-  <meta property="og:description" content="1.ª clasificatoria · 4 de julio 2026 · Plaza Marbella, Centro Comercial (Curis) · $90.000 COP">
+  <meta property="og:description" content="1.ª preliminar · final 29–30 ago 2026 · Palmetto Plaza, Cali · $90.000 COP">
   <meta property="og:url" content="https://la-sucursal-del-cafe.web.app/competencia">
   <meta property="og:image" content="https://la-sucursal-del-cafe.web.app/assets/logo-la-sucursal-del-cafe.png">
   <meta property="og:locale" content="es_CO">
@@ -40,12 +40,12 @@
   <div class="site-shell">
     <header class="site-hero site-hero--coffee">
       <div class="festival-sub-hero">
-        <p class="festival-kicker">V60 Championship · 1.ª clasificatoria</p>
+        <p class="festival-kicker">V60 Championship · 1.ª preliminar</p>
         <h1 id="event-title" class="festival-sub-hero__title">Competencia</h1>
-        <p class="festival-sub-hero__lead">Café filtrado con V60 · 4 de julio de 2026 · Plaza Marbella</p>
+        <p class="festival-sub-hero__lead">Café filtrado con V60 · 2 preliminares + final 29–30 ago 2026</p>
         <div class="hero-meta">
-          <span class="badge">📅 4 jul 2026</span>
-          <span class="badge">📍 Plaza Marbella</span>
+          <span class="badge">📅 Preliminar 1: por confirmar</span>
+          <span class="badge">🏆 Final: 29–30 ago</span>
           <span class="badge price">$90.000 COP</span>
           <span class="badge">Cupo: 36</span>
         </div>
@@ -58,14 +58,15 @@
         <div id="formPanel" class="form-panel card-body">
         <div class="info-box" role="note">
           <p style="margin:0 0 0.5rem"><a data-link="festival" href="index.html">← Volver al evento</a></p>
-          <strong>V60 Championship — Evento 1</strong> — competencia de café filtrado con V60 (cupo: 36 · inscripción $90.000 COP).
+          <strong>V60 Championship — Preliminar 1</strong> — competencia de café filtrado con V60 (cupo: 36 · inscripción $90.000 COP).
           <p style="margin:0.5rem 0 0">
-            <strong>Fecha:</strong> viernes <span data-bind="torneo.fecha">4 de julio de 2026</span> ·
-            <strong>Sede:</strong> <span data-bind="torneo.lugar">Plaza Marbella, Centro Comercial (Curis)</span>.
+            <strong>Preliminar 1:</strong> <span data-bind="torneo.fecha">Por confirmar</span> ·
+            <strong>Sede:</strong> <span data-bind="torneo.lugar">Por confirmar</span>.
+            <strong>Final:</strong> 29 y 30 de agosto de 2026 · Palmetto Plaza, Cali.
           </p>
           <p class="hint" style="margin:0.5rem 0 0">Inscripción de pago solo para este torneo. La <a data-link="feria" href="inscripcion.html">feria</a> (29–30 ago, Palmetto Plaza) no tiene costo de ingreso; el registro como visitante es opcional. ¿Expones una marca? <a data-link="stands" href="stands.html">Adquiere tu stand</a>.</p>
           <div class="info-box info-box--nested" style="margin-top:0.75rem;background:rgba(75,53,42,0.04);border-left:4px solid var(--brown-warm,#BB5E3C)">
-            <p style="margin:0 0 0.5rem"><strong>1.ª clasificatoria del V60 Championship</strong></p>
+            <p style="margin:0 0 0.5rem"><strong>1.ª preliminar del V60 Championship</strong> (2 preliminares + final 29–30 ago)</p>
             <p style="margin:0">
               Circuito, premios del festival, logística e inscripción paso a paso:
               <a data-link="comoFunciona" href="como-funciona-evento.html" target="_blank" rel="noopener"><strong>¿Cómo funciona el evento?</strong></a>.
@@ -490,8 +491,8 @@
         <div class="festival-footer__contact">
           <p class="festival-footer__col-title">Contacto</p>
           <p class="festival-footer__dates">
-            Competencia · <span data-bind="torneo.fecha">4 de julio de 2026</span><br>
-            <span data-bind="torneo.lugar">Plaza Marbella, Centro Comercial (Curis)</span>
+            Competencia · Preliminar 1: <span data-bind="torneo.fecha">Por confirmar</span> · Final: 29–30 ago 2026<br>
+            <span data-bind="torneo.lugar">Por confirmar</span>
           </p>
           <div class="festival-contact-actions">
             <a class="btn-submit" id="waContact" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
@@ -521,8 +522,8 @@
       const CUPO_MAX = cfg.cupoCompetencia || 36;
       const PRECIO = pago.monto || 90000;
       const METODO_PAGO = pago.metodo || "Nubank (@mbl616) — Manuel Barraza";
-      const EVENTO_NOMBRE = ev.nombre || "V60 Championship — Evento 1";
-      const EVENTO_FECHA = ev.fecha || "4 de julio de 2026";
+      const EVENTO_NOMBRE = ev.nombre || "V60 Championship — Preliminar 1";
+      const EVENTO_FECHA = ev.fecha || "Por confirmar";
       const EVENTO_SEDE = (window.SiteChrome && SiteChrome.torneoLugar) ? SiteChrome.torneoLugar() : (ev.sede + (ev.ciudad ? ", " + ev.ciudad : ""));
       const DEFAULT_WHATSAPP_GRUPO_URL = "https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9";
 
@@ -549,7 +550,7 @@
         var nombre = String(entry.nombre || "Participante").trim();
         var id = String(entry.id || "").trim();
         var msg =
-          "Hola, me inscribí al V60 Championship (1.ª clasificatoria). " +
+          "Hola, me inscribí al V60 Championship (1.ª preliminar). " +
           "Nombre: " + nombre + ". Inscripción: " + (id || "pendiente") + ". Confirmo mi participación.";
         return "https://wa.me/" + phone + "?text=" + encodeURIComponent(msg);
       }
@@ -1119,14 +1120,15 @@
         if (successLead) {
           successLead.textContent =
             "Cumpliste todos los requisitos. Tu registro en el V60 Championship " +
-            "(1.ª de 3 clasificatorias) fue enviado correctamente.";
+            "(1.ª de 2 preliminares) fue enviado correctamente.";
         }
         if (successSummary) {
           successSummary.innerHTML =
             "<ul>" +
             "<li><strong>Número de inscripción:</strong> " + entry.id + "</li>" +
-            "<li><strong>Evento:</strong> " + EVENTO_NOMBRE + " — 1.ª clasificatoria</li>" +
-            "<li><strong>Fecha y sede:</strong> " + EVENTO_FECHA + " · " + EVENTO_SEDE + "</li>" +
+            "<li><strong>Evento:</strong> " + EVENTO_NOMBRE + " — 1.ª preliminar</li>" +
+            "<li><strong>Preliminar 1:</strong> " + EVENTO_FECHA + " · " + EVENTO_SEDE + "</li>" +
+            "<li><strong>Final:</strong> 29 y 30 de agosto de 2026 · Palmetto Plaza, Cali</li>" +
             "<li><strong>Pago:</strong> $90.000 COP a Nubank <code>@mbl616</code> (Manuel Barraza)</li>" +
             "<li><strong>Café de práctica:</strong> 150 a 200 g a la dirección indicada, tras validar el pago</li>" +
             "<li><strong>Foto:</strong> " + fotoLine + "</li>" +

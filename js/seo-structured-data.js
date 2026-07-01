@@ -76,6 +76,8 @@
   }
 
   function torneoEvent() {
+    var principal = (cfg.circuito && cfg.circuito.principal) || {};
+    var preliminarLabel = ev.preliminar || ev.clasificatoria || 'Preliminar';
     var offer = pago.monto
       ? {
           '@type': 'Offer',
@@ -86,15 +88,13 @@
         }
       : undefined;
 
-    return {
+    var eventNode = {
       '@type': 'Event',
-      name: 'V60 Championship — ' + (ev.clasificatoria || 'Clasificatoria'),
+      name: 'V60 Championship — ' + preliminarLabel,
       alternateName: 'V60 Championship Cali 2026',
       description:
-        'Competencia de café filtrado con V60 en Cali. ' +
-        (ev.clasificatoria || '') +
-        '.',
-      startDate: ev.fechaIso || '2026-07-04',
+        'Competencia de café filtrado con V60 en Cali. Circuito: 2 preliminares + final ' +
+        (principal.fecha || '29 y 30 de agosto de 2026') + '. ' + preliminarLabel + '.',
       eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
       eventStatus: 'https://schema.org/EventScheduled',
       isAccessibleForFree: false,
@@ -105,6 +105,13 @@
       url: absUrl('competencia'),
       image: siteUrl + '/assets/logo-la-sucursal-del-cafe.png'
     };
+    if (ev.fechaIso) {
+      eventNode.startDate = ev.fechaIso;
+    }
+    if (principal.fechaIso) {
+      eventNode.endDate = '2026-08-30';
+    }
+    return eventNode;
   }
 
   function standsEvent() {
