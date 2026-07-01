@@ -1,0 +1,161 @@
+{
+  "siteUrl": "https://la-sucursal-del-cafe.web.app",
+  "lastmod": "2026-07-01",
+  "aliases": {
+    "como-funciona": "comoFunciona"
+  },
+  "routes": [
+    {
+      "key": "festival",
+      "local": "index.html",
+      "hosted": "/",
+      "rewrite": "/index.html",
+      "legacySources": ["/festival", "/festival.html"],
+      "sitemap": { "changefreq": "weekly", "priority": "1.0" }
+    },
+    {
+      "key": "evento",
+      "local": "el-evento.html",
+      "hosted": "/el-evento",
+      "sitemap": { "changefreq": "weekly", "priority": "0.9" }
+    },
+    {
+      "key": "actividades",
+      "local": "actividades.html",
+      "hosted": "/actividades",
+      "sitemap": { "changefreq": "weekly", "priority": "0.8" }
+    },
+    {
+      "key": "patrocinadores",
+      "local": "patrocinadores.html",
+      "hosted": "/patrocinadores",
+      "sitemap": { "changefreq": "monthly", "priority": "0.7" }
+    },
+    {
+      "key": "marcas",
+      "local": "marcas.html",
+      "hosted": "/marcas",
+      "sitemap": { "changefreq": "weekly", "priority": "0.75" }
+    },
+    {
+      "key": "marcaPerfil",
+      "local": "marca-perfil.html",
+      "hosted": "/marcas",
+      "rewrite": null,
+      "htmlRedirect": false
+    },
+    {
+      "key": "stands",
+      "local": "stands.html",
+      "hosted": "/stands",
+      "sitemap": { "changefreq": "weekly", "priority": "0.8" }
+    },
+    {
+      "key": "feria",
+      "local": "inscripcion.html",
+      "hosted": "/inscripcion",
+      "sitemap": { "changefreq": "weekly", "priority": "0.8" }
+    },
+    {
+      "key": "competencia",
+      "local": "competencia.html",
+      "hosted": "/competencia",
+      "sitemap": { "changefreq": "weekly", "priority": "0.8" }
+    },
+    {
+      "key": "reglas",
+      "local": "reglas-v60-championship.html",
+      "hosted": "/reglas",
+      "sitemap": { "changefreq": "monthly", "priority": "0.6" }
+    },
+    {
+      "key": "reglasPdf",
+      "local": "assets/reglas-v60-championship.pdf",
+      "hosted": "/assets/reglas-v60-championship.pdf",
+      "rewrite": null,
+      "redirectSlash": false,
+      "htmlRedirect": false
+    },
+    {
+      "key": "comoFunciona",
+      "local": "como-funciona-evento.html",
+      "hosted": "/como-funciona",
+      "sitemap": { "changefreq": "monthly", "priority": "0.6" }
+    },
+    {
+      "key": "privacidad",
+      "local": "privacidad.html",
+      "hosted": "/privacidad",
+      "sitemap": { "changefreq": "yearly", "priority": "0.3" }
+    },
+    {
+      "key": "qr",
+      "local": "qr-inscripcion.html",
+      "hosted": "/qr",
+      "sitemap": { "changefreq": "monthly", "priority": "0.5" }
+    },
+    {
+      "key": "admin",
+      "local": "admin.html",
+      "hosted": "/admin",
+      "sitemap": false
+    },
+    {
+      "key": "expositor",
+      "local": "expositor.html",
+      "hosted": "/expositor",
+      "sitemap": false
+    },
+    {
+      "key": "miStand",
+      "local": "expositor.html",
+      "hosted": "/mi-stand",
+      "htmlRedirect": false,
+      "sitemap": false
+    },
+    {
+      "key": "fidelizacion",
+      "local": "fidelizacion.html",
+      "hosted": "/fidelizacion",
+      "sitemap": { "changefreq": "monthly", "priority": "0.5" }
+    },
+    {
+      "key": "fidelizacionRegistro",
+      "local": "fidelizacion-registro.html",
+      "hosted": "/registro-fidelizacion",
+      "sitemap": false
+    },
+    {
+      "key": "miTarjeta",
+      "local": "pasaporte-cafetero.html",
+      "hosted": "/pasaporte",
+      "legacySources": ["/mi-tarjeta"],
+      "sitemap": false
+    },
+    {
+      "key": "pasaporte",
+      "local": "pasaporte-cafetero.html",
+      "hosted": "/pasaporte",
+      "sitemap": false
+    },
+    {
+      "key": "escanearPasaporte",
+      "local": "escanear-pasaporte.html",
+      "hosted": "/escanear-pasaporte",
+      "sitemap": false
+    },
+    {
+      "key": "panelFidelizacion",
+      "local": "dashboard-fidelizacion.html",
+      "hosted": "/panel-fidelizacion",
+      "sitemap": false
+    }
+  ],
+  "dynamicRewrites": [
+    { "source": "/marcas/:marcaId", "destination": "/marca-perfil.html" }
+  ],
+  "staticRewrites": [
+    { "source": "/manifest-pasaporte.webmanifest", "destination": "/manifest-pasaporte.webmanifest" },
+    { "source": "/sw-pasaporte.js", "destination": "/sw-pasaporte.js" }
+  ]
+}

@@ -1,5 +1,6 @@
 /**
  * Rutas canónicas del sitio (local .html vs URLs limpias en Firebase Hosting).
+ * Generado por tools/sync_routes.py desde tools/routes.json.
  */
 (function (global) {
   'use strict';
@@ -9,6 +10,8 @@
     evento: 'el-evento.html',
     actividades: 'actividades.html',
     patrocinadores: 'patrocinadores.html',
+    marcas: 'marcas.html',
+    marcaPerfil: 'marca-perfil.html',
     stands: 'stands.html',
     feria: 'inscripcion.html',
     competencia: 'competencia.html',
@@ -17,8 +20,6 @@
     comoFunciona: 'como-funciona-evento.html',
     privacidad: 'privacidad.html',
     qr: 'qr-inscripcion.html',
-    marcas: 'marcas.html',
-    marcaPerfil: 'marca-perfil.html',
     admin: 'admin.html',
     expositor: 'expositor.html',
     miStand: 'expositor.html',
@@ -35,6 +36,8 @@
     evento: '/el-evento',
     actividades: '/actividades',
     patrocinadores: '/patrocinadores',
+    marcas: '/marcas',
+    marcaPerfil: '/marcas',
     stands: '/stands',
     feria: '/inscripcion',
     competencia: '/competencia',
@@ -43,8 +46,6 @@
     comoFunciona: '/como-funciona',
     privacidad: '/privacidad',
     qr: '/qr',
-    marcas: '/marcas',
-    marcaPerfil: '/marcas',
     admin: '/admin',
     expositor: '/expositor',
     miStand: '/mi-stand',

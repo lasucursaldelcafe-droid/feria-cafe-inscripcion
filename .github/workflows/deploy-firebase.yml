@@ -17,6 +17,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Sincronizar rutas Firebase/site-links/sitemap
+        run: python3 tools/sync_routes.py --check
+
       - name: Validar secretos de CI
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
