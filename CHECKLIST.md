@@ -73,10 +73,12 @@ Push a `main` → despliegue automático vía `.github/workflows/deploy-firebase
 Tras cambiar `Code.gs`, actualizar secretos o desplegar:
 
 ```powershell
-py tools/automatizar_manual.py --todo
+py tools/automatizar_google.py mantenimiento
 ```
 
-Orquesta Apps Script, `sheets-config.js`, secretos GitHub, Firebase Hosting y `verify_admin.py`. Ver [`tools/PLANTILLA-ENV.md`](tools/PLANTILLA-ENV.md).
+Equivalente a `automatizar_manual.py --todo`. Orquesta Apps Script, `sheets-config.js`, secretos GitHub, Firebase Hosting y `verify_admin.py`. Ver [`tools/GOOGLE-ECOSISTEMA.md`](tools/GOOGLE-ECOSISTEMA.md) y [`tools/PLANTILLA-ENV.md`](tools/PLANTILLA-ENV.md).
+
+**CI Apps Script:** push a `main` con cambios en `tools/google-apps-script/**` dispara `.github/workflows/deploy-apps-script.yml` (requiere secretos `APPS_SCRIPT_OAUTH_TOKEN`, `APPS_SCRIPT_ID`, `SHEETS_WEB_APP_URL`). Sincronizar: `py tools/setup_github_ci.py --apps-script`.
 
 ### Sincronizar secretos desde tu PC
 

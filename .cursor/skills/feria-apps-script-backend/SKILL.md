@@ -81,6 +81,10 @@ Variables en `tools/.env` (gitignored): `APPS_SCRIPT_ID`, `GOOGLE_SHEET_ID`, `SH
 
 Sube Code.gs, crea deployment Web App, actualiza `js/sheets-config.js` y corre checks.
 
+**Entrada unificada:** `py tools/automatizar_google.py mantenimiento` (ver `tools/GOOGLE-ECOSISTEMA.md`).
+
+**CI automático:** push a `main` con cambios en `tools/google-apps-script/**` → workflow `deploy-apps-script.yml`. Secretos: `py tools/setup_github_ci.py --apps-script`.
+
 ### Opción B — clasp manual
 
 ```powershell

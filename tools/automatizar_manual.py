@@ -191,6 +191,15 @@ def step_ci(*, wait_sa: bool = False, run_workflow: bool = False) -> bool:
         info("Diagnóstico: py tools/validate_ci_secrets.py")
         return False
 
+    if OAUTH_TOKEN.is_file():
+        info("Sincronizando secretos Apps Script (CI automático)…")
+        rc_apps = subprocess.run(
+            [sys.executable, "tools/setup_github_ci.py", "--apps-script"],
+            cwd=str(PROJECT_ROOT),
+        ).returncode
+        if rc_apps != 0:
+            warn("Secretos Apps Script no sincronizados — ejecuta: py tools/setup_github_ci.py --apps-script")
+
     run_script("validate_ci_secrets.py", required=False)
     return rc == 0
 

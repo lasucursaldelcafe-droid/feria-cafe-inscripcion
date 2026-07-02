@@ -29,6 +29,7 @@ from _util import (
 )
 
 FIREBASE_HOSTING_SA = TOOLS_DIR / "credentials" / "firebase-hosting-sa.json"
+OAUTH_TOKEN_PATH = TOOLS_DIR / "credentials" / ".oauth-script-token.json"
 ENV_PATH = TOOLS_DIR / ".env"
 
 
@@ -181,8 +182,42 @@ def check_ci_env_secrets() -> tuple[bool, str]:
         return False, "SHEETS_WEB_APP_URL debe terminar en /exec"
 
     if sheets:
-        return True, f"FIREBASE_SERVICE_ACCOUNT OK; SHEETS_WEB_APP_URL presente"
+        return True, "FIREBASE_SERVICE_ACCOUNT OK; SHEETS_WEB_APP_URL presente"
     return True, "FIREBASE_SERVICE_ACCOUNT OK; SHEETS_WEB_APP_URL opcional ausente"
+
+
+def validate_oauth_token_json(raw: str) -> tuple[bool, str]:
+    raw = raw.strip()
+    if not raw:
+        return False, "Falta APPS_SCRIPT_OAUTH_TOKEN."
+    if looks_like_placeholder(raw):
+        return False, "APPS_SCRIPT_OAUTH_TOKEN parece texto de ejemplo, no JSON OAuth."
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        return False, f"APPS_SCRIPT_OAUTH_TOKEN no es JSON valido: {exc}"
+    for key in ("token", "refresh_token", "client_id"):
+        if key not in data:
+            return False, f"Falta campo '{key}' en APPS_SCRIPT_OAUTH_TOKEN."
+    return True, "token OAuth válido"
+
+
+def check_ci_apps_script_secrets() -> tuple[bool, str]:
+    import os
+
+    ok_oauth, msg_oauth = validate_oauth_token_json(os.environ.get("APPS_SCRIPT_OAUTH_TOKEN", ""))
+    if not ok_oauth:
+        return False, msg_oauth
+
+    script_id = os.environ.get("APPS_SCRIPT_ID", "").strip()
+    if not script_id:
+        return False, "Falta APPS_SCRIPT_ID."
+
+    sheets = os.environ.get("SHEETS_WEB_APP_URL", "").strip()
+    if not sheets or "/exec" not in sheets:
+        return False, "Falta SHEETS_WEB_APP_URL (debe terminar en /exec)."
+
+    return True, f"Apps Script CI OK — script {script_id[:12]}…"
 
 
 
@@ -211,7 +246,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--ci",
         action="store_true",
-        help="Modo GitHub Actions: valida secretos desde variables de entorno.",
+        help="Modo GitHub Actions: valida secretos Firebase desde variables de entorno.",
+    )
+    parser.add_argument(
+        "--ci-apps-script",
+        action="store_true",
+        help="Modo GitHub Actions: valida secretos Apps Script (OAuth + script ID + URL).",
     )
     return parser.parse_args()
 
@@ -228,7 +268,7 @@ def main() -> int:
         print_gh_secret_commands()
 
     if args.ci:
-        print("=== validate_ci_secrets.py (CI) ===\n")
+        print("=== validate_ci_secrets.py (CI Firebase) ===\n")
         ok_ci, detail = check_ci_env_secrets()
         if ok_ci:
             ok(detail)
@@ -236,7 +276,19 @@ def main() -> int:
         error(detail)
         print()
         info("Regenera la clave en Firebase Console y ejecuta:")
-        print("  .\\tools\\sync_github_secrets.ps1")
+        print("  py tools/setup_github_ci.py")
+        return 1
+
+    if args.ci_apps_script:
+        print("=== validate_ci_secrets.py (CI Apps Script) ===\n")
+        ok_ci, detail = check_ci_apps_script_secrets()
+        if ok_ci:
+            ok(detail)
+            return 0
+        error(detail)
+        print()
+        info("Configura secretos con:")
+        print("  py tools/setup_github_ci.py --apps-script")
         return 1
 
     print("=== validate_ci_secrets.py ===\n")

@@ -1,13 +1,12 @@
 name: Deploy Apps Script
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
     paths:
-      - tools/google-apps-script/Code.gs
-      - tools/google-apps-script/appsscript.json
+      - "tools/google-apps-script/**"
+  workflow_dispatch:
 
 jobs:
   deploy:
