@@ -202,6 +202,9 @@ function doPost(e) {
     if (action === 'admin_create_competitor') {
       return jsonResponse(handleAdminCreateCompetitor_(payload));
     }
+    if (action === 'admin_save_competidor') {
+      return jsonResponse(handleAdminSaveCompetidor_(payload));
+    }
     if (action === 'admin_create_feria') {
       return jsonResponse(handleAdminCreateFeria_(payload));
     }
@@ -1167,6 +1170,122 @@ function handleAdminCreateCompetitor_(payload) {
   sheet.appendRow(compRow);
 
   return { ok: true, id: data.id, nombre: data.nombre };
+}
+
+function findCompetidorRowIndex_(sheet, id) {
+  var idCol = HEADERS_COMPETENCIA.indexOf('ID') + 1;
+  if (idCol <= 0) return -1;
+
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return -1;
+
+  var ids = sheet.getRange(2, idCol, lastRow, 1).getValues();
+  for (var i = 0; i < ids.length; i++) {
+    if (String(ids[i][0] || '').trim() === id) return i + 2;
+  }
+  return -1;
+}
+
+function competidorRowToValues_(row) {
+  return HEADERS_COMPETENCIA.map(function (header) {
+    return row[header] !== undefined && row[header] !== null ? row[header] : '';
+  });
+}
+
+function ynCompetidorAdmin_(value, defaultYes) {
+  if (value === undefined || value === null || value === '') {
+    return defaultYes ? 'Sí' : 'No';
+  }
+  if (value === true || value === 'true' || value === 1 || value === '1') return 'Sí';
+  if (value === false || value === 'false' || value === 0 || value === '0') return 'No';
+  var v = String(value).trim().toLowerCase();
+  if (v === 'sí' || v === 'si' || v === 'yes') return 'Sí';
+  if (v === 'no') return 'No';
+  return defaultYes ? 'Sí' : 'No';
+}
+
+function handleAdminSaveCompetidor_(payload) {
+  var access = assertAdminAccess_(payload.idToken || '');
+  if (!access.ok) {
+    return { ok: false, error: access.error };
+  }
+
+  var id = String(payload.id || '').trim();
+  if (!id) {
+    return { ok: false, error: 'ID del competidor requerido.' };
+  }
+
+  var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
+  var rowIndex = findCompetidorRowIndex_(sheet, id);
+  if (rowIndex < 0) {
+    return { ok: false, error: 'Competidor no encontrado.' };
+  }
+
+  var currentValues = sheet.getRange(rowIndex, 1, rowIndex, HEADERS_COMPETENCIA.length).getValues()[0];
+  var row = rowObjectFromValues_(HEADERS_COMPETENCIA, currentValues);
+
+  if (payload.nombre !== undefined) row['Nombre'] = String(payload.nombre || '').trim();
+  if (payload.documento !== undefined) row['Documento'] = String(payload.documento || '').trim();
+  if (payload.edad !== undefined) row['Edad'] = String(payload.edad || '').trim();
+  if (payload.ciudad !== undefined) row['Ciudad'] = String(payload.ciudad || '').trim();
+  if (payload.celular !== undefined) row['Celular'] = String(payload.celular || '').trim();
+  if (payload.correo !== undefined) row['Correo'] = String(payload.correo || '').trim().toLowerCase();
+  if (payload.representa !== undefined) row['Representa'] = String(payload.representa || '').trim();
+  if (payload.rol !== undefined) row['Rol'] = String(payload.rol || '').trim();
+  if (payload.experienciaCafe !== undefined) {
+    row['Experiencia café'] = String(payload.experienciaCafe || '').trim();
+  }
+  if (payload.experienciaSwitch !== undefined) {
+    row['Experiencia Switch'] = String(payload.experienciaSwitch || '').trim();
+  }
+  if (payload.torneosPrevios !== undefined) {
+    row['Torneos previos'] = String(payload.torneosPrevios || '').trim();
+  }
+  if (payload.observaciones !== undefined) row['Observaciones'] = String(payload.observaciones || '').trim();
+  if (payload.estadoPago !== undefined) row['Estado pago'] = String(payload.estadoPago || '').trim();
+  if (payload.cupoConfirmado !== undefined) {
+    row['Cupo confirmado'] = ynCompetidorAdmin_(payload.cupoConfirmado, true);
+  }
+  if (payload.habilitado !== undefined) {
+    row['Habilitado'] = ynCompetidorAdmin_(payload.habilitado, true);
+  }
+  if (payload.notasAdmin !== undefined) row['Notas admin'] = String(payload.notasAdmin || '').trim();
+
+  if (payload.fotoBase64) {
+    var fotoUrl = saveFileToDriveFolder_(
+      id,
+      payload.fotoNombre || 'foto-participante.jpg',
+      payload.fotoTipo || 'image/jpeg',
+      payload.fotoBase64,
+      DRIVE_FOTOS_FOLDER_NAME,
+      'foto'
+    );
+    if (fotoUrl) {
+      row['Foto participante enlace Drive'] = fotoUrl;
+      row['Foto participante nombre'] = String(payload.fotoNombre || 'foto-participante.jpg').trim();
+      row['Foto participante tipo'] = String(payload.fotoTipo || 'image/jpeg').trim();
+    }
+  } else if (payload.fotoEnlace !== undefined) {
+    row['Foto participante enlace Drive'] = String(payload.fotoEnlace || '').trim();
+  }
+
+  if (!String(row['Nombre'] || '').trim()) {
+    return { ok: false, error: 'El nombre es obligatorio.' };
+  }
+  if (!String(row['Correo'] || '').trim()) {
+    return { ok: false, error: 'El correo es obligatorio.' };
+  }
+  if (!String(row['Celular'] || '').trim()) {
+    return { ok: false, error: 'El celular es obligatorio.' };
+  }
+
+  sheet.getRange(rowIndex, 1, rowIndex, HEADERS_COMPETENCIA.length).setValues([competidorRowToValues_(row)]);
+
+  return {
+    ok: true,
+    id: id,
+    competidor: sanitizeCompetenciaRow_(row)
+  };
 }
 
 function handleAdminCreateFeria_(payload) {
