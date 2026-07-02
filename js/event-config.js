@@ -20,14 +20,56 @@ window.EVENT_CONFIG = {
     lema: 'La Sucursal es de los cafeteros',
     instagram: '@lasucursal.delcafe',
     instagramUrl: 'https://www.instagram.com/lasucursal.delcafe/',
+    heroLead:
+      'Café especial en Palmetto Plaza: cata, talleres y comunidad. Entrada gratis.',
     mensaje:
-      'Dos días para descubrir, probar y conectar con la comunidad cafetera de Cali. La feria no tiene precio de ingreso. El registro como visitante es opcional; si te registras, participas por premios exclusivos para visitantes registrados.',
+      'Dos días en Cali para probar, aprender y conectar. Entrada sin costo; registro opcional con premios.',
+    mensajeEvento:
+      'Productores, tostadores y baristas en un solo lugar para descubrir lo nuestro.',
+    exploreIntro: 'Elige por dónde empezar — puedes entrar sin registrarte.',
+    explore: [
+      {
+        id: 'evento',
+        label: 'El evento',
+        icon: '☕',
+        text: 'Qué es, fechas y por qué vale la pena asistir.',
+        link: 'evento',
+        cta: 'Ver el evento'
+      },
+      {
+        id: 'actividades',
+        label: 'Actividades',
+        icon: '📋',
+        text: 'Stands, fincas, cata, talleres y V60 en vivo.',
+        link: 'actividades',
+        cta: 'Ver programa'
+      },
+      {
+        id: 'visita',
+        label: 'Tu visita',
+        icon: '✓',
+        text: 'Entrada gratis. Regístrate solo si quieres premios de visitante.',
+        link: 'feria',
+        cta: 'Registro visitante'
+      },
+      {
+        id: 'competencia',
+        label: 'V60',
+        icon: '🏆',
+        text: 'Competencia de café filtrado — inscripción aparte y de pago.',
+        link: 'competencia',
+        cta: 'V60 Championship'
+      }
+    ],
     modal: {
-      eyebrow: 'Entrada sin costo · Registro opcional',
-      title: 'Registro de visitante (opcional)',
-      cta: 'Registrarme como visitante',
+      eyebrow: 'Entrada gratis · Registro opcional',
+      title: '¿Te registras como visitante?',
+      texto:
+        'El <strong>29 y 30 de agosto de 2026</strong> en <strong>Palmetto Plaza, Cali</strong>. ' +
+        'Puedes entrar sin registrarte. Si lo haces (gratis), participas por premios de visitante.',
+      cta: 'Registrarme',
       dismiss: 'Explorar primero',
-      note: '¿Compites en café filtrado? Eso es aparte: inscripción de pago al V60 Championship.'
+      note: '¿Compites en V60? Eso es aparte: inscripción de pago.'
     }
   },
   feria: {
@@ -55,7 +97,7 @@ window.EVENT_CONFIG = {
     premiosVisitante: {
       titulo: 'Premios para visitantes registrados',
       intro:
-        'Solo quienes completan el registro gratuito como visitante participan en sorteos y dinámicas exclusivas de la feria. Entrar sin registrarte no excluye de disfrutar la feria, pero sí de estos premios.',
+        'Con registro gratuito participas en sorteos de la feria. Entrar sin registrarte no quita acceso al evento.',
       items: [
         'Sorteos y dinámicas con aliados del festival (marcas expositoras y patrocinadores)',
         'Premios en productos de café: kits de degustación, equipos y experiencias de marcas aliadas',

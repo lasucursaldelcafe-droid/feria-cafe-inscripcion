@@ -67,8 +67,15 @@
     var visitante = feria.visitante || {};
 
     if (fest.slogan) setText('festivalSlogan', fest.slogan);
-    if (fest.mensaje) setText('festivalMensaje', fest.mensaje);
-    if (visitante.entradaSinCosto) {
+    var page = document.body.getAttribute('data-festival-page');
+    if (page === 'evento' && fest.mensajeEvento) {
+      setText('festivalMensaje', fest.mensajeEvento);
+    } else if (fest.mensaje) {
+      setText('festivalMensaje', fest.mensaje);
+    }
+    if (fest.heroLead) {
+      setText('festivalLead', fest.heroLead);
+    } else if (visitante.entradaSinCosto) {
       setText(
         'festivalLead',
         visitante.entradaSinCosto + ' ' + (visitante.registroOpcional || '')
@@ -93,7 +100,10 @@
     }
 
     var modalDates = document.getElementById('feriaModalDates');
-    if (modalDates && feria.fecha && feria.sede) {
+    var modalCfgEarly = fest.modal || {};
+    if (modalDates && modalCfgEarly.texto) {
+      modalDates.innerHTML = modalCfgEarly.texto;
+    } else if (modalDates && feria.fecha && feria.sede) {
       modalDates.innerHTML =
         'Sé parte de la comunidad cafetera el <strong>' + feria.fecha + '</strong> en ' +
         '<strong>' + feria.sede + ', ' + (feria.ciudad || 'Cali') + '</strong>. ' +
@@ -114,8 +124,10 @@
       var modalNote = document.querySelector('.feria-modal__note');
       if (modalNote) {
         modalNote.innerHTML =
-          '¿Compites en café filtrado? Eso es aparte: ' +
-          '<a data-link="competencia" href="competencia.html">inscripción de pago al V60 Championship</a>.';
+          modalCfg.note.indexOf('<') !== -1
+            ? modalCfg.note
+            : modalCfg.note +
+              ' <a data-link="competencia" href="competencia.html">V60 Championship</a>.';
         if (global.SiteLinks && global.SiteLinks.apply) global.SiteLinks.apply(modalNote);
       }
     }

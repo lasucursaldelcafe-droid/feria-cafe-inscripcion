@@ -17,9 +17,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/brand.css?v=20260701mg">
+  <link rel="stylesheet" href="css/brand.css?v=20260702min">
 </head>
-<body class="page-festival" data-festival-page="home">
+<body class="page-festival page-festival--minimal" data-festival-page="home">
   <a class="skip-link" href="#explorar">Explorar el festival</a>
 
   <header class="site-header">
@@ -43,117 +43,71 @@
 
   <div class="site-shell">
     <header class="site-hero site-hero--coffee">
-      <div class="festival-sub-hero">
+      <div class="festival-sub-hero festival-sub-hero--compact">
         <p class="festival-kicker" id="festivalSlogan">Café que conecta</p>
         <h1 class="festival-sub-hero__title" id="heroTitle">La Sucursal del Café</h1>
         <p class="festival-sub-hero__lead" id="festivalLead">
-          El punto de encuentro del café especial en Cali: productores, tostadores, cata y talleres en un solo lugar.
-          Entrada gratuita.
+          Café especial en Palmetto Plaza: cata, talleres y comunidad. Entrada gratis.
         </p>
-        <div class="hero-meta">
+        <div class="hero-meta hero-meta--compact">
           <span id="badgeFestivalFecha" class="badge">📅 29–30 ago 2026</span>
           <span id="badgeFestivalSede" class="badge">📍 Palmetto Plaza, Cali</span>
-          <span class="badge badge--green">✓ Entrada sin costo</span>
-          <span class="badge">🎁 Premios si te registras</span>
+          <span class="badge badge--green">✓ Entrada gratis</span>
         </div>
         <div class="festival-sub-cta">
-          <a class="btn-submit festival-btn-primary" data-link="feria" href="inscripcion.html">Registrarme como visitante</a>
-          <a class="btn-secondary festival-btn-secondary" data-link="evento" href="el-evento.html">Conoce el evento</a>
+          <a class="btn-submit festival-btn-primary" data-link="feria" href="inscripcion.html">Registrarme</a>
+          <a class="btn-secondary festival-btn-secondary" data-link="evento" href="el-evento.html">El evento</a>
         </div>
       </div>
       <div class="hero-accent" aria-hidden="true"></div>
     </header>
 
     <main class="site-main site-main--festival">
-      <section id="explorar" class="festival-section festival-section--light">
-        <div class="festival-wrap">
-          <p class="festival-kicker">Navegación</p>
-          <h2 class="section-title section-title--dark">Explora el festival</h2>
-          <p class="festival-section-intro" id="festivalMensaje">
-            Dos días para descubrir, probar y conectar con la comunidad cafetera de Cali.
-            Elige por dónde empezar. Puedes entrar sin registrarte; el registro como visitante es opcional y te da acceso a premios exclusivos para visitantes registrados.
+      <section id="explorar" class="festival-section festival-section--light festival-section--compact">
+        <div class="festival-wrap festival-wrap--narrow">
+          <h2 class="section-title section-title--dark section-title--minimal">Explora</h2>
+          <p class="festival-section-intro festival-section-intro--tight" id="festivalMensaje">
+            Dos días en Cali para probar, aprender y conectar. Entrada sin costo; registro opcional con premios.
           </p>
-          <p class="festival-lead festival-lead--dark">
-            En Palmetto Plaza encontrarás exposiciones de café tostado, fincas de origen, el V60 Championship,
-            además de cata y talleres con marcas como Purist, Ghost, Medium Café, Elixir y Black Coffee.
+          <p class="festival-section-intro festival-section-intro--tight" id="festivalExploreIntro">
+            Elige por dónde empezar — puedes entrar sin registrarte.
           </p>
-          <nav class="festival-home-nav" aria-label="Secciones del festival">
-            <a class="festival-home-card" data-link="evento" href="el-evento.html">
-              <span class="festival-home-card__icon" aria-hidden="true">☕</span>
-              <strong>El evento</strong>
-              <span>Por qué asistir, quién debería ir y qué vivirás</span>
-            </a>
-            <a class="festival-home-card" data-link="actividades" href="actividades.html">
-              <span class="festival-home-card__icon" aria-hidden="true">📋</span>
-              <strong>Actividades</strong>
-              <span>Exposiciones, fincas, competencias, cata y talleres</span>
-            </a>
-            <a class="festival-home-card" data-link="patrocinadores" href="patrocinadores.html">
-              <span class="festival-home-card__icon" aria-hidden="true">🤝</span>
-              <strong>Patrocinadores</strong>
-              <span>Aliados que impulsan la cultura del café en Cali</span>
-            </a>
-            <a class="festival-home-card festival-home-card--accent" data-link="feria" href="inscripcion.html">
-              <span class="festival-home-card__icon" aria-hidden="true">✓</span>
-              <strong>Registro de visitante</strong>
-              <span>Opcional · premios exclusivos si te registras</span>
-            </a>
-            <a class="festival-home-card festival-home-card--accent" data-link="competencia" href="competencia.html">
-              <span class="festival-home-card__icon" aria-hidden="true">🏆</span>
-              <strong>V60 Championship</strong>
-              <span>2 preliminares + final · 29–30 ago 2026 · Palmetto Plaza</span>
-            </a>
-            <a class="festival-home-card" href="#contacto">
-              <span class="festival-home-card__icon" aria-hidden="true">💬</span>
-              <strong>Contacto</strong>
-              <span>WhatsApp, correo e Instagram del festival</span>
-            </a>
-          </nav>
+          <div id="festivalExplore" class="festival-explore" data-initial-tab="evento"></div>
+          <nav class="festival-quick-links" id="festivalQuickLinks" aria-label="Enlaces rápidos"></nav>
         </div>
       </section>
 
-      <section class="festival-section festival-section--light" id="patrocinadores-competencia">
+      <section class="festival-section festival-section--beige festival-section--compact" id="patrocinadores">
         <div class="festival-wrap">
-          <p class="festival-kicker">V60 Championship</p>
-          <h2 class="section-title section-title--dark">Patrocinadores de la competencia</h2>
-          <p class="festival-section-intro">
-            Marcas que apoyan el circuito de café filtrado — preliminares y final hacia La Sucursal del Café.
-          </p>
-          <ul class="festival-sponsors festival-sponsors--grid festival-sponsors--cards" data-competition-sponsors-grid aria-label="Patrocinadores V60 Championship" hidden></ul>
-          <p class="festival-back-link">
-            <a data-link="competencia" href="competencia.html">Inscripción V60 Championship →</a>
-          </p>
-        </div>
-      </section>
-
-      <section class="festival-section festival-section--beige">
-        <div class="festival-wrap">
-          <p class="festival-kicker">Nuestros aliados</p>
-          <h2 class="section-title section-title--dark">Patrocinadores</h2>
-          <p class="festival-section-intro">
-            Marcas y aliados que impulsan la feria — desde la sede en Palmetto Plaza hasta cafeterías de especialidad en Cali.
-          </p>
-          <ul class="festival-sponsors festival-sponsors--strip" data-sponsors-strip aria-label="Patrocinadores del festival"></ul>
-          <p class="festival-back-link">
-            <a data-link="patrocinadores" href="patrocinadores.html">Ver todos los patrocinadores →</a>
-          </p>
-        </div>
-      </section>
-
-      <section class="festival-section festival-section--beige">
-        <div class="festival-wrap">
-          <article class="content-card content-card--cta">
-            <div class="card-body festival-save-card">
-              <p class="festival-kicker">Reserva la fecha</p>
-              <h2 class="section-title section-title--dark" id="saveDateTitle">No te lo pierdas</h2>
-              <p class="festival-save-card__dates">29 y 30 de agosto de 2026</p>
-              <p class="festival-save-card__venue">Palmetto Plaza · Cali, Valle del Cauca</p>
-              <p class="festival-section-intro">
-                La entrada no tiene costo. Regístrate como visitante (opcional) y participa por premios exclusivos para visitantes registrados.
-              </p>
-              <a class="btn-submit festival-btn-primary" data-link="feria" href="inscripcion.html">Registrarme como visitante</a>
+          <h2 class="section-title section-title--dark section-title--minimal">Aliados</h2>
+          <div id="festivalSponsorsUnified" class="festival-sponsors-unified" data-initial-tab="feria">
+            <div class="festival-explore__tabs festival-sponsors-unified__tabs" role="tablist" aria-label="Patrocinadores">
+              <button type="button" role="tab" class="festival-explore__tab is-active" data-tab="feria" aria-selected="true" tabindex="0">Feria</button>
+              <button type="button" role="tab" class="festival-explore__tab" data-tab="competencia" aria-selected="false" tabindex="-1">V60</button>
             </div>
-          </article>
+            <div role="tabpanel" class="festival-sponsors-unified__panel" data-panel="feria" aria-label="Patrocinadores de la feria">
+              <ul class="festival-sponsors festival-sponsors--strip" data-sponsors-strip aria-label="Patrocinadores del festival"></ul>
+              <p class="festival-back-link">
+                <a data-link="patrocinadores" href="patrocinadores.html">Ver todos →</a>
+              </p>
+            </div>
+            <div role="tabpanel" class="festival-sponsors-unified__panel" data-panel="competencia" hidden aria-label="Patrocinadores V60">
+              <ul class="festival-sponsors festival-sponsors--grid festival-sponsors--cards" data-competition-sponsors-grid aria-label="Patrocinadores V60 Championship" hidden></ul>
+              <p class="festival-back-link">
+                <a data-link="competencia" href="competencia.html">Inscripción V60 →</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="festival-section festival-section--cta-strip">
+        <div class="festival-wrap festival-cta-strip">
+          <p class="festival-cta-strip__text">
+            <span data-bind="feria.fecha">29 y 30 de agosto de 2026</span> ·
+            <span data-bind="feria.lugar">Palmetto Plaza, Cali</span> · Entrada gratis
+          </p>
+          <a class="btn-submit festival-btn-primary" data-link="feria" href="inscripcion.html">Registrarme</a>
         </div>
       </section>
     </main>
@@ -202,28 +156,27 @@
     <div class="feria-modal__panel" role="document">
       <button type="button" class="feria-modal__close" aria-label="Cerrar" data-modal-close>×</button>
       <img class="feria-modal__logo" src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café">
-      <p class="feria-modal__eyebrow" id="feriaModalEyebrow">Entrada sin costo · Registro opcional</p>
-      <h2 id="feriaModalTitle" class="feria-modal__title">Registro de visitante (opcional)</h2>
+      <p class="feria-modal__eyebrow" id="feriaModalEyebrow">Entrada gratis · Registro opcional</p>
+      <h2 id="feriaModalTitle" class="feria-modal__title">¿Te registras como visitante?</h2>
       <p class="feria-modal__text" id="feriaModalDates">
-        Sé parte de la comunidad cafetera el <strong>29 y 30 de agosto de 2026</strong> en
-        <strong>Palmetto Plaza, Cali</strong>. Cata, talleres, exposiciones y competencias te esperan.
-        <strong>La feria no tiene precio de ingreso.</strong> Puedes entrar sin registrarte.
-        Si te registras como visitante, participas por <strong>premios exclusivos para visitantes registrados</strong>.
+        El <strong>29 y 30 de agosto de 2026</strong> en <strong>Palmetto Plaza, Cali</strong>.
+        Puedes entrar sin registrarte. Si lo haces (gratis), participas por premios de visitante.
       </p>
       <div class="feria-modal__actions">
-        <a class="btn-submit feria-modal__cta" data-link="feria" data-modal-cta href="inscripcion.html">Registrarme como visitante</a>
+        <a class="btn-submit feria-modal__cta" data-link="feria" data-modal-cta href="inscripcion.html">Registrarme</a>
         <button type="button" class="btn-secondary feria-modal__dismiss" data-modal-close>Explorar primero</button>
       </div>
-      <p class="feria-modal__note">¿Compites en café filtrado? Eso es aparte: <a data-link="competencia" href="competencia.html">inscripción de pago al V60 Championship</a>.</p>
+      <p class="feria-modal__note">¿Compites en V60? Eso es aparte: <a data-link="competencia" href="competencia.html">inscripción de pago</a>.</p>
     </div>
   </div>
 
-  <script src="js/event-config.js?v=20260621pc"></script>
+  <script src="js/event-config.js?v=20260702min"></script>
   <script src="js/sheets-config.js?v=20260621pc"></script>
   <script src="js/site-links.js"></script>
   <script src="js/seo-structured-data.js"></script>
   <script src="js/site-chrome.js?v=20260701ux"></script>
-  <script src="js/festival-nav.js?v=20260701ux"></script>
+  <script src="js/festival-nav.js?v=20260702min"></script>
+  <script src="js/festival-explore.js?v=20260702min"></script>
   <script src="js/festival-modal.js"></script>
   <script src="js/form-submit.js?v=20260621pc"></script>
   <script src="js/sponsors.js?v=20260701mg"></script>
