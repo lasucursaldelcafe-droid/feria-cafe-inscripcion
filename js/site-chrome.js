@@ -136,6 +136,7 @@
       var key = el.getAttribute('data-bind');
       if (key === 'feria.fecha' && feria.fecha) el.textContent = feria.fecha;
       if (key === 'torneo.fecha' && ev.fecha) el.textContent = ev.fecha;
+      if (key === 'torneo.hora' && ev.horaInicio) el.textContent = ev.horaInicio;
       if (key === 'torneo.lugar' && ev.sede) el.textContent = torneoLugar();
       if (key === 'feria.lugar') el.textContent = feriaLugar();
     });
@@ -394,6 +395,103 @@
     document.body.appendChild(s);
   }
 
+  function ensureSkipLink() {
+    if (document.querySelector('.skip-link')) return;
+    var main = document.querySelector('main');
+    if (!main) return;
+    if (!main.id) main.id = 'contenido-principal';
+    var link = document.createElement('a');
+    link.className = 'skip-link';
+    link.href = '#' + main.id;
+    link.textContent = 'Saltar al contenido';
+    document.body.insertBefore(link, document.body.firstChild);
+  }
+
+  function enhanceExternalLinks() {
+    document.querySelectorAll('a[target="_blank"]').forEach(function (link) {
+      var rel = (link.getAttribute('rel') || '').split(/\s+/);
+      ['noopener', 'noreferrer'].forEach(function (token) {
+        if (rel.indexOf(token) === -1) rel.push(token);
+      });
+      link.setAttribute('rel', rel.filter(Boolean).join(' '));
+    });
+  }
+
+  function renderBackToTop() {
+    if (document.getElementById('backToTop') || document.body.classList.contains('admin-page')) return;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'backToTop';
+    btn.className = 'back-to-top';
+    btn.setAttribute('aria-label', 'Volver arriba');
+    btn.textContent = '↑';
+    btn.addEventListener('click', function () {
+      global.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    document.body.appendChild(btn);
+
+    function update() {
+      btn.classList.toggle('is-visible', global.scrollY > 620);
+    }
+    update();
+    global.addEventListener('scroll', update, { passive: true });
+  }
+
+  function setupReveal() {
+    var items = document.querySelectorAll(
+      '.festival-card, .content-card, .fid-section, .qr-card, .marca-card, .sponsor-card, .section, .info-box'
+    );
+    if (!items.length) return;
+
+    items.forEach(function (el) { el.classList.add('reveal-on-scroll'); });
+    if (!('IntersectionObserver' in global)) {
+      items.forEach(function (el) { el.classList.add('is-visible'); });
+      return;
+    }
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+
+    items.forEach(function (el) { observer.observe(el); });
+  }
+
+  function enhanceForms() {
+    document.querySelectorAll('form').forEach(function (form) {
+      if (form.getAttribute('data-ux-enhanced') === '1') return;
+      form.setAttribute('data-ux-enhanced', '1');
+
+      form.addEventListener('submit', function () {
+        var invalid = form.querySelector(':invalid');
+        if (!invalid) return;
+        invalid.classList.add('field-attention');
+        setTimeout(function () { invalid.classList.remove('field-attention'); }, 1300);
+        if (invalid.scrollIntoView) {
+          invalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, true);
+
+      form.querySelectorAll('input, select, textarea').forEach(function (field) {
+        field.addEventListener('input', function () {
+          field.classList.toggle('has-value', !!String(field.value || '').trim());
+        });
+        field.classList.toggle('has-value', !!String(field.value || '').trim());
+      });
+    });
+  }
+
+  function enhancePageUx() {
+    ensureSkipLink();
+    enhanceExternalLinks();
+    renderBackToTop();
+    setupReveal();
+    enhanceForms();
+  }
+
   function init() {
     if (global.SiteLinks && global.SiteLinks.apply) {
       global.SiteLinks.apply(document);
@@ -410,6 +508,7 @@
     renderSiteFooter();
     renderWhatsappFloat();
     ensureAnalytics();
+    enhancePageUx();
   }
 
   if (document.readyState === 'loading') {
@@ -423,6 +522,7 @@
     feriaLugar: feriaLugar,
     torneoLugar: torneoLugar,
     applyInstagramLink: applyInstagramLink,
-    instagramFromConfig: instagramFromConfig
+    instagramFromConfig: instagramFromConfig,
+    enhancePageUx: enhancePageUx
   };
 })(window);

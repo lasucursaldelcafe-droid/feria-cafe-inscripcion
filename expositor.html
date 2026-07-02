@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/expositor.css?v=20260625b">
+  <link rel="stylesheet" href="css/expositor.css?v=20260701ux">
 </head>
 <body class="expositor-page">
   <header class="expositor-header">
@@ -21,7 +21,7 @@
       </a>
       <div class="expositor-header__text">
         <h1>Panel del expositor</h1>
-        <p>Tu stand · novedades de la feria · contacto organizador</p>
+        <p>Tu stand · Coffee Shop · novedades de la feria</p>
       </div>
     </div>
   </header>
@@ -58,12 +58,12 @@
         <div id="standDetails"></div>
       </article>
 
-      <article class="expositor-card expositor-card--profile" aria-labelledby="profileTitle">
+      <article class="expositor-card expositor-card--coffeeshop" aria-labelledby="coffeeShopTitle">
         <div class="expositor-toolbar" style="margin-bottom:0.5rem">
-          <h2 id="profileTitle" style="margin:0">Perfil público de mi emprendimiento</h2>
-          <a id="viewPublicProfileBtn" class="expositor-btn expositor-btn--secondary" href="#" target="_blank" rel="noopener noreferrer" hidden>Ver en la web</a>
+          <h2 id="coffeeShopTitle" style="margin:0">Tu Coffee Shop</h2>
+          <a id="viewCoffeeShopBtn" class="expositor-btn expositor-btn--primary" href="#" target="_blank" rel="noopener noreferrer" hidden>Ver mi Coffee Shop</a>
         </div>
-        <p class="expositor-hint">Edita cómo te ven los visitantes en <strong>/marcas</strong>. Fotos y productos se publican en línea al guardar.</p>
+        <p class="expositor-hint">Publica los productos de tu marca en el directorio <strong>/marcas</strong>. Los visitantes los ven en tu vitrina digital (Coffee Shop) al guardar.</p>
         <form id="expositorProfileForm" class="expositor-profile-form" novalidate>
           <div class="expositor-field">
             <label for="profileTagline">Frase corta (tagline)</label>
@@ -113,15 +113,15 @@
             <p class="expositor-hint">Hasta 12 fotos. Se alojan en Google Drive y se muestran en tu página pública.</p>
           </div>
 
-          <div class="expositor-field">
-            <label>Productos</label>
+          <div class="expositor-field expositor-field--coffeeshop">
+            <label>Productos de tu Coffee Shop</label>
             <div id="profileProductosList" class="expositor-productos-editor"></div>
             <button type="button" id="addProductoBtn" class="expositor-btn expositor-btn--secondary">+ Agregar producto</button>
           </div>
 
           <span id="profileSaveStatus" class="expositor-hint" aria-live="polite"></span>
           <span id="profileSaveError" class="expositor-error" role="alert"></span>
-          <button type="submit" id="profileSaveBtn" class="expositor-btn expositor-btn--primary">Guardar y publicar perfil</button>
+          <button type="submit" id="profileSaveBtn" class="expositor-btn expositor-btn--primary">Guardar Coffee Shop y perfil</button>
         </form>
       </article>
 
@@ -149,6 +149,6 @@
   <script src="js/site-links.js"></script>
   <script src="js/sheets-config.js"></script>
   <script src="js/form-submit.js"></script>
-  <script src="js/expositor-panel.js?v=20260625b"></script>
+  <script src="js/expositor-panel.js?v=20260627a"></script>
 </body>
 </html>

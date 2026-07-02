@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/brand.css?v=20260621a">
+  <link rel="stylesheet" href="css/brand.css?v=20260701mg">
 </head>
 <body class="page-festival page-form" data-festival-page="competencia">
   <header class="site-header">
@@ -44,7 +44,8 @@
         <h1 id="event-title" class="festival-sub-hero__title">Competencia</h1>
         <p class="festival-sub-hero__lead">Café filtrado con V60 · 2 preliminares + final 29–30 ago 2026</p>
         <div class="hero-meta">
-          <span class="badge">📅 Preliminar 1: por confirmar</span>
+          <span class="badge">📅 Preliminar 1: <span data-bind="torneo.fecha">Por confirmar</span></span>
+          <span class="badge">🕠 Hora: <span data-bind="torneo.hora">5:30 p. m.</span></span>
           <span class="badge">🏆 Final: 29–30 ago</span>
           <span class="badge price">$90.000 COP</span>
           <span class="badge">Cupo: 36</span>
@@ -61,6 +62,7 @@
           <strong>V60 Championship — Preliminar 1</strong> — competencia de café filtrado con V60 (cupo: 36 · inscripción $90.000 COP).
           <p style="margin:0.5rem 0 0">
             <strong>Preliminar 1:</strong> <span data-bind="torneo.fecha">Por confirmar</span> ·
+            <strong>Hora:</strong> <span data-bind="torneo.hora">5:30 p. m.</span> ·
             <strong>Sede:</strong> <span data-bind="torneo.lugar">Por confirmar</span>.
             <strong>Final:</strong> 29 y 30 de agosto de 2026 · Palmetto Plaza, Cali.
           </p>
@@ -491,7 +493,7 @@
         <div class="festival-footer__contact">
           <p class="festival-footer__col-title">Contacto</p>
           <p class="festival-footer__dates">
-            Competencia · Preliminar 1: <span data-bind="torneo.fecha">Por confirmar</span> · Final: 29–30 ago 2026<br>
+            Competencia · Preliminar 1: <span data-bind="torneo.fecha">Por confirmar</span> · <span data-bind="torneo.hora">5:30 p. m.</span> · Final: 29–30 ago 2026<br>
             <span data-bind="torneo.lugar">Por confirmar</span>
           </p>
           <div class="festival-contact-actions">
@@ -504,14 +506,14 @@
     </footer>
   </div>
 
-  <script src="js/event-config.js?v=20260620ig"></script>
+  <script src="js/event-config.js?v=20260701v60"></script>
   <script src="js/site-links.js"></script>
   <script src="js/seo-structured-data.js"></script>
   <script src="js/sheets-config.js"></script>
   <script src="js/form-submit.js"></script>
   <script src="js/terms-disclosure.js"></script>
-  <script src="js/site-chrome.js?v=20260620ig"></script>
-  <script src="js/festival-nav.js?v=20260620ig"></script>
+  <script src="js/site-chrome.js?v=20260701ux"></script>
+  <script src="js/festival-nav.js?v=20260701ux"></script>
   <script>
     (function () {
       const cfg = window.EVENT_CONFIG || {};
@@ -524,6 +526,7 @@
       const METODO_PAGO = pago.metodo || "Nubank (@mbl616) — Manuel Barraza";
       const EVENTO_NOMBRE = ev.nombre || "V60 Championship — Preliminar 1";
       const EVENTO_FECHA = ev.fecha || "Por confirmar";
+      const EVENTO_HORA = ev.horaInicio || "5:30 p. m.";
       const EVENTO_SEDE = (window.SiteChrome && SiteChrome.torneoLugar) ? SiteChrome.torneoLugar() : (ev.sede + (ev.ciudad ? ", " + ev.ciudad : ""));
       const DEFAULT_WHATSAPP_GRUPO_URL = "https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9";
 
@@ -1127,7 +1130,7 @@
             "<ul>" +
             "<li><strong>Número de inscripción:</strong> " + entry.id + "</li>" +
             "<li><strong>Evento:</strong> " + EVENTO_NOMBRE + " — 1.ª preliminar</li>" +
-            "<li><strong>Preliminar 1:</strong> " + EVENTO_FECHA + " · " + EVENTO_SEDE + "</li>" +
+            "<li><strong>Preliminar 1:</strong> " + EVENTO_FECHA + " · " + EVENTO_HORA + " · " + EVENTO_SEDE + "</li>" +
             "<li><strong>Final:</strong> 29 y 30 de agosto de 2026 · Palmetto Plaza, Cali</li>" +
             "<li><strong>Pago:</strong> $90.000 COP a Nubank <code>@mbl616</code> (Manuel Barraza)</li>" +
             "<li><strong>Café de práctica:</strong> 150 a 200 g a la dirección indicada, tras validar el pago</li>" +
@@ -1182,7 +1185,7 @@
           return {
             id: id,
             fecha: new Date().toISOString(),
-            evento: EVENTO_NOMBRE + " · " + EVENTO_FECHA + " · " + EVENTO_SEDE,
+            evento: EVENTO_NOMBRE + " · " + EVENTO_FECHA + " · " + EVENTO_HORA + " · " + EVENTO_SEDE,
             valorInscripcion: PRECIO,
             nombre: document.getElementById("nombre").value.trim(),
             documento: document.getElementById("documento").value.trim(),

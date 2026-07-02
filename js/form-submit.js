@@ -226,6 +226,24 @@
     });
   }
 
+  function fetchFeriaResumen() {
+    var url = getWebAppUrl();
+    if (!url) {
+      return Promise.resolve({ ok: false, reason: 'no_url', novedades: [] });
+    }
+
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    return fetch(url + sep + 'action=feria_resumen&_=' + Date.now(), {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-store'
+    }).then(function (res) {
+      return res.json();
+    }).catch(function (err) {
+      return { ok: false, error: err.message || String(err), novedades: [] };
+    });
+  }
+
   function fetchParticipantesPublico() {
     var url = getWebAppUrl();
     if (!url) {
@@ -306,6 +324,7 @@
     fetchCupoCount: fetchCupoCount,
     fetchStandsMap: fetchStandsMap,
     fetchExpositorFeed: fetchExpositorFeed,
+    fetchFeriaResumen: fetchFeriaResumen,
     fetchParticipantesPublico: fetchParticipantesPublico,
     fetchParticipantePublico: fetchParticipantePublico,
     fetchPatrocinadoresCompetencia: fetchPatrocinadoresCompetencia,

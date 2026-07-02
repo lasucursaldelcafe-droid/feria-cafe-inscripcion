@@ -15,16 +15,30 @@
     var menu = document.getElementById('navMenu');
     if (!toggle || !menu) return;
 
-    toggle.addEventListener('click', function () {
-      var open = menu.classList.toggle('is-open');
+    function setOpen(open) {
+      menu.classList.toggle('is-open', open);
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      document.body.classList.toggle('nav-is-open', open);
+    }
+
+    toggle.addEventListener('click', function () {
+      setOpen(!menu.classList.contains('is-open'));
     });
 
     menu.querySelectorAll('a').forEach(function (link) {
       link.addEventListener('click', function () {
-        menu.classList.remove('is-open');
-        toggle.setAttribute('aria-expanded', 'false');
+        setOpen(false);
       });
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') setOpen(false);
+    });
+
+    document.addEventListener('click', function (event) {
+      if (!menu.classList.contains('is-open')) return;
+      if (menu.contains(event.target) || toggle.contains(event.target)) return;
+      setOpen(false);
     });
   }
 

@@ -31,6 +31,10 @@
     var handle = sponsor.instagramHandle ? escapeHtml(sponsor.instagramHandle) : '';
     var url = sponsor.instagramUrl || '';
     var alt = escapeHtml(sponsor.imageAlt || sponsor.name || 'Patrocinador');
+    var badge = sponsor.badge ? escapeHtml(sponsor.badge) : '';
+    var tagline = sponsor.tagline ? escapeHtml(sponsor.tagline) : '';
+    var description = sponsor.description ? escapeHtml(sponsor.description) : '';
+    var classes = 'festival-sponsor-card' + (sponsor.featured ? ' festival-sponsor-card--featured' : '');
     var avatar;
 
     if (sponsor.image) {
@@ -49,14 +53,17 @@
 
     var inner =
       avatar +
+      (badge ? '<span class="festival-sponsor-card__badge">' + badge + '</span>' : '') +
       '<span class="festival-sponsor-card__name">' +
       name +
       '</span>' +
+      (tagline ? '<span class="festival-sponsor-card__tagline">' + tagline + '</span>' : '') +
+      (description ? '<p class="festival-sponsor-card__desc">' + description + '</p>' : '') +
       (handle ? '<span class="festival-sponsor-card__handle">' + handle + '</span>' : '');
 
     if (url) {
       return (
-        '<li class="festival-sponsor-card">' +
+        '<li class="' + classes + '">' +
         '<a class="festival-sponsor-card__link" href="' +
         escapeHtml(url) +
         '" target="_blank" rel="noopener noreferrer" aria-label="Instagram ' +
@@ -67,7 +74,7 @@
       );
     }
 
-    return '<li class="festival-sponsor-card"><div class="festival-sponsor-card__link">' + inner + '</div></li>';
+    return '<li class="' + classes + '"><div class="festival-sponsor-card__link">' + inner + '</div></li>';
   }
 
   function renderInto(selector) {

@@ -9,37 +9,61 @@
   <link rel="manifest" href="manifest-pasaporte.webmanifest">
   <meta name="theme-color" content="#5D3A1A">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/brand.css?v=20260625a">
-  <link rel="stylesheet" href="css/fidelizacion.css?v=20260625a">
+  <link rel="stylesheet" href="css/brand.css?v=20260701mg">
+  <link rel="stylesheet" href="css/fidelizacion.css?v=20260626a">
 </head>
 <body class="page-festival">
   <div class="site-shell">
     <header class="site-hero site-hero--coffee">
       <div class="festival-sub-hero">
         <p class="festival-kicker">Pasaporte Cafetero</p>
-        <h1 class="festival-sub-hero__title">Crea tu pasaporte</h1>
-        <p class="festival-sub-hero__lead">Tarjeta digital con QR. Guárdala en tu celular y acumula puntos en cada stand de la feria.</p>
+        <h1 class="festival-sub-hero__title">Tu pasaporte digital</h1>
+        <p class="festival-sub-hero__lead">Crea tu tarjeta con QR o inicia sesión con tu nombre y celular si ya te registraste.</p>
       </div>
     </header>
 
     <main class="site-main site-main--festival">
       <section class="fid-section">
-        <form id="formRegistro" class="fid-form">
-          <div>
-            <label for="nombre">Nombre completo</label>
-            <input type="text" id="nombre" required autocomplete="name">
-          </div>
-          <div>
-            <label for="telefono">Teléfono (WhatsApp)</label>
-            <input type="tel" id="telefono" required autocomplete="tel" placeholder="3001234567">
-          </div>
-          <div>
-            <label for="email">Correo (opcional)</label>
-            <input type="email" id="email" autocomplete="email">
-          </div>
-          <p id="formError" class="form-error" hidden></p>
-          <button type="submit" class="btn-submit" id="btnRegistrar">Crear mi Pasaporte Cafetero</button>
-        </form>
+        <div class="fid-tabs" role="tablist" aria-label="Pasaporte Cafetero">
+          <button type="button" class="fid-tab fid-tab--active" id="tabCrear" role="tab" aria-selected="true" aria-controls="panelCrear">Crear pasaporte</button>
+          <button type="button" class="fid-tab" id="tabLogin" role="tab" aria-selected="false" aria-controls="panelLogin">Iniciar sesión</button>
+        </div>
+
+        <div id="panelCrear" class="fid-tab-panel" role="tabpanel" aria-labelledby="tabCrear">
+          <form id="formRegistro" class="fid-form">
+            <div>
+              <label for="nombre">Nombre completo</label>
+              <input type="text" id="nombre" required autocomplete="name">
+            </div>
+            <div>
+              <label for="telefono">Celular (WhatsApp)</label>
+              <input type="tel" id="telefono" required autocomplete="tel" placeholder="3001234567">
+              <p class="fid-hint">Usarás este número para volver a entrar a tu pasaporte.</p>
+            </div>
+            <div>
+              <label for="email">Correo electrónico</label>
+              <input type="email" id="email" required autocomplete="email" placeholder="nombre@correo.com">
+            </div>
+            <p id="formError" class="form-error" hidden></p>
+            <button type="submit" class="btn-submit" id="btnRegistrar">Crear mi Pasaporte Cafetero</button>
+          </form>
+        </div>
+
+        <div id="panelLogin" class="fid-tab-panel" hidden role="tabpanel" aria-labelledby="tabLogin">
+          <form id="formLogin" class="fid-form">
+            <p class="fid-hint">Ingresa exactamente el mismo nombre y celular con los que creaste tu pasaporte.</p>
+            <div>
+              <label for="loginNombre">Nombre completo</label>
+              <input type="text" id="loginNombre" required autocomplete="name">
+            </div>
+            <div>
+              <label for="loginTelefono">Celular</label>
+              <input type="tel" id="loginTelefono" required autocomplete="tel" placeholder="3001234567">
+            </div>
+            <p id="loginError" class="form-error" hidden></p>
+            <button type="submit" class="btn-submit" id="btnLogin">Entrar a mi pasaporte</button>
+          </form>
+        </div>
       </section>
     </main>
   </div>
@@ -56,8 +80,27 @@
     (function () {
       var params = new URLSearchParams(window.location.search);
       if (params.get('nombre')) document.getElementById('nombre').value = params.get('nombre');
-      if (params.get('telefono')) document.getElementById('telefono').value = params.get('telefono');
+      if (params.get('telefono')) {
+        document.getElementById('telefono').value = params.get('telefono');
+        document.getElementById('loginTelefono').value = params.get('telefono');
+      }
       if (params.get('email')) document.getElementById('email').value = params.get('email');
+      if (params.get('login') === '1' || params.get('modo') === 'login') {
+        showTab('login');
+      }
+
+      function showTab(which) {
+        var crear = which === 'crear';
+        document.getElementById('tabCrear').classList.toggle('fid-tab--active', crear);
+        document.getElementById('tabLogin').classList.toggle('fid-tab--active', !crear);
+        document.getElementById('tabCrear').setAttribute('aria-selected', crear ? 'true' : 'false');
+        document.getElementById('tabLogin').setAttribute('aria-selected', crear ? 'false' : 'true');
+        document.getElementById('panelCrear').hidden = !crear;
+        document.getElementById('panelLogin').hidden = crear;
+      }
+
+      document.getElementById('tabCrear').addEventListener('click', function () { showTab('crear'); });
+      document.getElementById('tabLogin').addEventListener('click', function () { showTab('login'); });
 
       document.getElementById('formRegistro').addEventListener('submit', function (e) {
         e.preventDefault();
@@ -72,7 +115,12 @@
         };
 
         if (!datos.nombre || !datos.telefono) {
-          errorEl.textContent = 'Nombre y teléfono son obligatorios.';
+          errorEl.textContent = 'Nombre y celular son obligatorios.';
+          errorEl.hidden = false;
+          return;
+        }
+        if (!Fidelizacion.isEmailPasaporteValido(datos.email)) {
+          errorEl.textContent = 'Ingresa un correo electrónico válido.';
           errorEl.hidden = false;
           return;
         }
@@ -90,6 +138,37 @@
           errorEl.hidden = false;
           btn.disabled = false;
           btn.textContent = 'Crear mi Pasaporte Cafetero';
+        });
+      });
+
+      document.getElementById('formLogin').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var errorEl = document.getElementById('loginError');
+        var btn = document.getElementById('btnLogin');
+        errorEl.hidden = true;
+
+        var nombre = document.getElementById('loginNombre').value.trim();
+        var telefono = document.getElementById('loginTelefono').value.trim();
+
+        if (!nombre || !telefono) {
+          errorEl.textContent = 'Nombre y celular son obligatorios.';
+          errorEl.hidden = false;
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Entrando…';
+
+        Fidelizacion.initBackend().then(function () {
+          return Fidelizacion.iniciarSesionPasaporte(nombre, telefono);
+        }).then(function (res) {
+          window.location.href = Fidelizacion.urlPasaporte(res.id);
+        }).catch(function (err) {
+          console.error(err);
+          errorEl.textContent = (err && err.message) ? err.message : 'No pudimos iniciar sesión.';
+          errorEl.hidden = false;
+          btn.disabled = false;
+          btn.textContent = 'Entrar a mi pasaporte';
         });
       });
     })();

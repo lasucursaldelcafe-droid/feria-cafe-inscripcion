@@ -116,6 +116,9 @@ function doGet(e) {
   if (params.action === 'expositor_feed') {
     return jsonResponse(getExpositorFeed_());
   }
+  if (params.action === 'feria_resumen') {
+    return jsonResponse(getFeriaResumen_());
+  }
   if (params.action === 'participantes_publico') {
     return jsonResponse(getParticipantesPublico_());
   }
@@ -198,6 +201,9 @@ function doPost(e) {
     }
     if (action === 'pasaporte_create') {
       return jsonResponse(handlePasaporteCreate_(payload));
+    }
+    if (action === 'pasaporte_login') {
+      return jsonResponse(handlePasaporteLogin_(payload));
     }
     if (action === 'pasaporte_transaccion') {
       return jsonResponse(handlePasaporteTransaccion_(payload));
@@ -528,6 +534,27 @@ function getExpositorFeed_() {
     }
   }
   return { ok: true, items: items };
+}
+
+function getFeriaResumen_() {
+  var sheet = getOrCreateSheet_(SHEET_NOVEDADES, HEADERS_NOVEDADES);
+  var lastRow = sheet.getLastRow();
+  var novedades = [];
+  if (lastRow >= 2) {
+    var values = sheet.getRange(2, 1, lastRow, HEADERS_NOVEDADES.length).getValues();
+    for (var i = values.length - 1; i >= 0; i--) {
+      var row = rowObjectFromValues_(HEADERS_NOVEDADES, values[i]);
+      var audiencia = String(row['Audiencia'] || 'todos').trim().toLowerCase();
+      if (audiencia !== 'todos' && audiencia !== 'visitantes') continue;
+      novedades.push({
+        timestamp: row['Timestamp'] || '',
+        titulo: row['Titulo'] || '',
+        cuerpo: row['Cuerpo'] || ''
+      });
+      if (novedades.length >= 6) break;
+    }
+  }
+  return { ok: true, novedades: novedades };
 }
 
 function findStandOccupied_(standId) {
@@ -1201,6 +1228,14 @@ function ensureDefaultPatrocinadoresCompetencia_() {
     [
       'PC-2', 'Palmetto Plaza', '@palmettoplaza', 'https://www.instagram.com/palmettoplaza/',
       SITE_PUBLIC_BASE_URL + '/assets/sponsors/palmetto-plaza.png', 'Sí', 2, 'Migrado desde event-config'
+    ],
+    [
+      'PC-3', 'Ghost Specialty Coffee', '@ghost_specialty_coffee', 'https://www.instagram.com/ghost_specialty_coffee/',
+      '', 'Sí', 3, 'Café invitado — tarjeta destacada'
+    ],
+    [
+      'PC-4', 'Medium Café', '@medium_cafe', 'https://www.instagram.com/medium_cafe/',
+      '', 'Sí', 4, 'Coffee Shop — tarjeta destacada'
     ]
   ];
   defaults.forEach(function (row) {
@@ -2723,7 +2758,7 @@ function findPasaporteRowById_(id) {
 }
 
 function findPasaporteRowByTelefono_(telefono) {
-  var tel = String(telefono || '').replace(/\D/g, '');
+  var tel = normalizePasaporteTelefono_(telefono);
   if (!tel) return null;
   var sheet = getOrCreateSheet_(SHEET_PASAPORTES, HEADERS_PASAPORTES);
   var lastRow = sheet.getLastRow();
@@ -2731,10 +2766,50 @@ function findPasaporteRowByTelefono_(telefono) {
   var values = sheet.getRange(2, 1, lastRow, HEADERS_PASAPORTES.length).getValues();
   for (var i = values.length - 1; i >= 0; i--) {
     var row = rowObjectFromValues_(HEADERS_PASAPORTES, values[i]);
-    var rowTel = String(row['Teléfono'] || '').replace(/\D/g, '');
+    var rowTel = normalizePasaporteTelefono_(row['Teléfono']);
     if (rowTel && rowTel === tel) return { sheet: sheet, rowNum: i + 2, row: row };
   }
   return null;
+}
+
+function normalizePasaporteTelefono_(telefono) {
+  return String(telefono || '').replace(/\D/g, '');
+}
+
+function normalizePasaporteNombre_(nombre) {
+  return String(nombre || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function isPasaporteEmailValido_(email) {
+  var e = String(email || '').trim().toLowerCase();
+  return !!e && e.indexOf('@') !== -1 && e.indexOf('.') !== -1;
+}
+
+function findPasaporteRowByCredentials_(nombre, telefono) {
+  var found = findPasaporteRowByTelefono_(telefono);
+  if (!found) return null;
+  var nombreNorm = normalizePasaporteNombre_(nombre);
+  var rowNombre = normalizePasaporteNombre_(found.row['Nombre']);
+  if (!nombreNorm || nombreNorm !== rowNombre) return null;
+  if (String(found.row['Activo'] || '').trim().toLowerCase() === 'no') return null;
+  return found;
+}
+
+function handlePasaporteLogin_(payload) {
+  var nombre = String(payload.nombre || '').trim();
+  var telefono = String(payload.telefono || payload.celular || '').trim();
+  if (!nombre || !telefono) {
+    return { ok: false, error: 'Nombre y celular son obligatorios.' };
+  }
+  var found = findPasaporteRowByCredentials_(nombre, telefono);
+  if (!found) {
+    return { ok: false, error: 'Nombre o celular incorrectos. Revisa que coincidan con tu registro.' };
+  }
+  return {
+    ok: true,
+    id: found.row['ID'],
+    cliente: pasaporteRowToClient_(found.row)
+  };
 }
 
 function getPasaporteCliente_(id) {
@@ -2783,8 +2858,12 @@ function handlePasaporteCreate_(payload) {
   var telefono = String(payload.telefono || payload.celular || '').trim();
   var correo = String(payload.email || payload.correo || '').trim().toLowerCase();
   if (!nombre) return { ok: false, error: 'Nombre obligatorio.' };
+  if (!telefono) return { ok: false, error: 'Celular obligatorio.' };
+  if (!isPasaporteEmailValido_(correo)) {
+    return { ok: false, error: 'Correo electrónico válido obligatorio.' };
+  }
 
-  var existing = telefono ? findPasaporteRowByTelefono_(telefono) : null;
+  var existing = findPasaporteRowByTelefono_(telefono);
   if (existing) {
     return { ok: true, id: existing.row['ID'], existed: true, cliente: pasaporteRowToClient_(existing.row) };
   }

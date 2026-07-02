@@ -25,6 +25,19 @@
       return '';
     }
   }
+
+  function normalizePasaporteNombre(nombre) {
+    return String(nombre || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  }
+
+  function normalizePasaporteTelefono(telefono) {
+    return String(telefono || '').replace(/\D/g, '');
+  }
+
+  function isEmailPasaporteValido(email) {
+    var e = String(email || '').trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
+  }
   var PIN_SALT = 'LSC-Pasaporte2026';
   var backendMode = null;
   var backendReady = null;
@@ -260,6 +273,9 @@
   }
 
   function crearORecuperarCliente(datos) {
+    if (!isEmailPasaporteValido(datos.email || datos.correo)) {
+      return Promise.reject(new Error('Correo electrónico válido obligatorio.'));
+    }
     return resolveBackend().then(function (mode) {
       if (mode === 'sheets') {
         if (!sheetsApi()) {
@@ -290,6 +306,42 @@
             return { id: ref.id, existed: false };
           });
         });
+    });
+  }
+
+  function iniciarSesionPasaporte(nombre, telefono) {
+    var nombreTrim = String(nombre || '').trim();
+    var telTrim = String(telefono || '').trim();
+    if (!nombreTrim || !telTrim) {
+      return Promise.reject(new Error('Nombre y celular son obligatorios.'));
+    }
+    return resolveBackend().then(function (mode) {
+      if (mode === 'sheets') {
+        if (!sheetsApi()) {
+          return Promise.reject(new Error('Falta js/fidelizacion-sheets.js en esta página.'));
+        }
+        return sheetsApi().iniciarSesionPasaporte(nombreTrim, telTrim).then(function (res) {
+          guardarPasaporteLocal(res.id);
+          return res;
+        });
+      }
+      var telNorm = normalizePasaporteTelefono(telTrim);
+      var nombreNorm = normalizePasaporteNombre(nombreTrim);
+      return readyFirestore().collection('fidelizacion_clientes').get().then(function (all) {
+        var match = null;
+        all.forEach(function (doc) {
+          var data = doc.data();
+          if (normalizePasaporteTelefono(data.telefono) === telNorm &&
+              normalizePasaporteNombre(data.nombre) === nombreNorm) {
+            match = doc;
+          }
+        });
+        if (!match) throw new Error('Nombre o celular incorrectos.');
+        var matchData = match.data();
+        if (matchData.activo === false) throw new Error('Este pasaporte está desactivado.');
+        guardarPasaporteLocal(match.id);
+        return { id: match.id };
+      });
     });
   }
 
@@ -536,8 +588,12 @@
     hashPin: hashPin,
     crearCliente: crearCliente,
     crearORecuperarCliente: crearORecuperarCliente,
+    iniciarSesionPasaporte: iniciarSesionPasaporte,
     guardarPasaporteLocal: guardarPasaporteLocal,
     leerPasaporteLocal: leerPasaporteLocal,
+    normalizePasaporteNombre: normalizePasaporteNombre,
+    normalizePasaporteTelefono: normalizePasaporteTelefono,
+    isEmailPasaporteValido: isEmailPasaporteValido,
     obtenerCliente: obtenerCliente,
     escucharCliente: escucharCliente,
     listarTransaccionesCliente: listarTransaccionesCliente,

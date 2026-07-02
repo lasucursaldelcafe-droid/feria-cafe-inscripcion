@@ -42,6 +42,13 @@
     var url = sponsor.instagramUrl || '';
     var imageUrl = resolveImageUrl(sponsor.image);
     var alt = escapeHtml(sponsor.imageAlt || sponsor.name || 'Patrocinador');
+    var lowerName = String(sponsor.name || '').toLowerCase();
+    var featured = /ghost|medium|más|mas/.test(lowerName);
+    var badge = featured ? (lowerName.indexOf('ghost') !== -1 ? 'Café invitado' : 'Coffee Shop') : '';
+    var tagline = featured ? (lowerName.indexOf('ghost') !== -1
+      ? 'Café especial con identidad propia'
+      : 'Café de especialidad para descubrir en feria') : '';
+    var classes = 'festival-sponsor-card' + (featured ? ' festival-sponsor-card--featured' : '');
     var avatar;
 
     if (imageUrl) {
@@ -60,14 +67,16 @@
 
     var inner =
       avatar +
+      (badge ? '<span class="festival-sponsor-card__badge">' + badge + '</span>' : '') +
       '<span class="festival-sponsor-card__name">' +
       name +
       '</span>' +
+      (tagline ? '<span class="festival-sponsor-card__tagline">' + tagline + '</span>' : '') +
       (handle ? '<span class="festival-sponsor-card__handle">' + handle + '</span>' : '');
 
     if (url) {
       return (
-        '<li class="festival-sponsor-card">' +
+        '<li class="' + classes + '">' +
         '<a class="festival-sponsor-card__link" href="' +
         escapeHtml(url) +
         '" target="_blank" rel="noopener noreferrer" aria-label="Instagram ' +
@@ -78,7 +87,7 @@
       );
     }
 
-    return '<li class="festival-sponsor-card"><div class="festival-sponsor-card__link">' + inner + '</div></li>';
+    return '<li class="' + classes + '"><div class="festival-sponsor-card__link">' + inner + '</div></li>';
   }
 
   function renderInto(selector, sponsors) {

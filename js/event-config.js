@@ -65,7 +65,33 @@ window.EVENT_CONFIG = {
         'El detalle de cada premio, fechas de sorteo y mecánica se comunicará a visitantes registrados por correo y redes oficiales. No aplica a quienes solo asistan sin registro.'
     },
     notaIndependencia:
-      'Organizado por el mismo equipo de La Sucursal del Café. El registro de visitante en la feria es independiente de la inscripción al V60 Championship.'
+      'Organizado por el mismo equipo de La Sucursal del Café. El registro de visitante en la feria es independiente de la inscripción al V60 Championship.',
+    programaCorto: [
+      {
+        icono: '☕',
+        tag: 'Stands',
+        titulo: 'Café tostado y cata',
+        texto: 'Recorre expositores, prueba perfiles de taza y conoce tostadores.'
+      },
+      {
+        icono: '🌱',
+        tag: 'Origen',
+        titulo: 'Fincas cafeteras',
+        texto: 'Productores comparten proceso, variedades e historias del grano.'
+      },
+      {
+        icono: '🏆',
+        tag: 'Competencia',
+        titulo: 'V60 Championship',
+        texto: 'Baristas compiten en café filtrado — técnica y emoción en vivo.'
+      },
+      {
+        icono: '📚',
+        tag: 'Talleres',
+        titulo: 'Cata y formación',
+        texto: 'Sesiones guiadas para entrenar paladar y métodos de extracción.'
+      }
+    ]
   },
   stands: {
     nav: 'Adquiere tu stand',
@@ -143,17 +169,18 @@ window.EVENT_CONFIG = {
     clasificatoria: '1.ª de 2 preliminares',
     fecha: 'Por confirmar',
     fechaCorta: 'Por confirmar',
+    horaInicio: '5:30 p. m.',
     sede: 'Por confirmar',
     ciudad: 'Cali',
     mapsQuery: 'Cali Valle del Cauca',
     horario: [
-      { hora: '08:00', actividad: 'Registro, entrega de café de ronda y sorteo de método (dados)' },
-      { hora: '18:00', actividad: 'Ronda clasificatoria — estaciones en competencia' },
-      { hora: '12:00', actividad: 'Pausa / catación clasificatoria (estimado)' },
-      { hora: '14:00', actividad: 'Semifinal (si aplica el cronograma del día)' },
-      { hora: '16:00', actividad: 'Final y premiación (sujeto a avance de rondas)' }
+      { hora: '5:30 p. m.', actividad: 'Registro, bienvenida y entrega de café de ronda' },
+      { hora: '6:00 p. m.', actividad: 'Sorteo de método y explicación del protocolo' },
+      { hora: '6:30 p. m.', actividad: 'Ronda clasificatoria — estaciones en competencia' },
+      { hora: '7:45 p. m.', actividad: 'Catación / evaluación de jueces (estimado)' },
+      { hora: '8:30 p. m.', actividad: 'Resultados y cierre de la edición' }
     ],
-    horarioNota: 'Horario referencial; el juez principal confirmará tiempos exactos el día del evento.',
+    horarioNota: 'La 1.ª edición inicia a las 5:30 p. m.; el juez principal confirmará tiempos exactos el día del evento.',
     whatsappGrupoUrl: 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9',
     whatsappGrupoNombre: 'V60 Championship — competidores'
   },
@@ -194,12 +221,20 @@ window.EVENT_CONFIG = {
     {
       name: 'Ghost Specialty Coffee',
       instagramUrl: 'https://www.instagram.com/ghost_specialty_coffee/',
-      instagramHandle: '@ghost_specialty_coffee'
+      instagramHandle: '@ghost_specialty_coffee',
+      badge: 'Café invitado',
+      featured: true,
+      tagline: 'Café especial con identidad propia',
+      description: 'Una marca referente para conectar a visitantes y competidores con perfiles de taza, cultura barista y experiencias alrededor del café.'
     },
     {
       name: 'Medium Café',
       instagramUrl: 'https://www.instagram.com/medium_cafe/',
-      instagramHandle: '@medium_cafe'
+      instagramHandle: '@medium_cafe',
+      badge: 'Coffee Shop',
+      featured: true,
+      tagline: 'Café de especialidad para descubrir en feria',
+      description: 'Espacio para vivir café, conversación y producto local; una vitrina ideal para visitantes que quieren llevarse una experiencia de la feria.'
     },
     {
       name: 'Elixir Café'

@@ -27,6 +27,7 @@ window.EVENT_CONFIG = {
     preliminar: '1.ª de 2 preliminares',
     fecha: 'Por confirmar',
     fechaCorta: 'Por confirmar',
+    horaInicio: '5:30 p. m.',
     sede: 'Por confirmar',
     ciudad: 'Cali',
     whatsappGrupoUrl: 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9',

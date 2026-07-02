@@ -137,7 +137,7 @@
     if (!root) return;
 
     if (!profileState.productos.length) {
-      root.innerHTML = '<p class="expositor-hint">Agrega los productos que quieres mostrar en tu página pública.</p>';
+      root.innerHTML = '<p class="expositor-hint">Agrega productos a tu Coffee Shop: nombre, precio, foto y descripción.</p>';
       return;
     }
 
@@ -204,7 +204,7 @@
     var redSocial = $('profileRedSocial');
     var redUrl = $('profileRedUrl');
     var publicado = $('profilePublicado');
-    var viewBtn = $('viewPublicProfileBtn');
+    var viewBtn = $('viewCoffeeShopBtn');
 
     if (tagline) tagline.value = perfil.tagline || '';
     if (descripcion) descripcion.value = stand.descripcion || '';
@@ -214,8 +214,10 @@
     if (publicado) publicado.checked = perfil.publicado !== false;
 
     if (viewBtn && stand.perfilUrl) {
-      viewBtn.href = stand.perfilUrl;
+      viewBtn.href = stand.perfilUrl + '#marcaPerfilProductos';
       viewBtn.hidden = false;
+    } else if (viewBtn) {
+      viewBtn.hidden = true;
     }
 
     renderProfileFotos(perfil.fotos || []);
@@ -363,7 +365,7 @@
     }).then(function (result) {
       if (btn) {
         btn.disabled = false;
-        btn.textContent = 'Guardar y publicar perfil';
+        btn.textContent = 'Guardar Coffee Shop y perfil';
       }
       if (!result || !result.ok || !result.stand) {
         setProfileError((result && result.error) || 'No se pudo guardar el perfil.');
@@ -377,7 +379,7 @@
     }).catch(function () {
       if (btn) {
         btn.disabled = false;
-        btn.textContent = 'Guardar y publicar perfil';
+        btn.textContent = 'Guardar Coffee Shop y perfil';
       }
       setProfileError('Error al guardar. Intenta de nuevo.');
     });

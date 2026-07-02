@@ -17,35 +17,229 @@
       "js/firebase-config.js"
     ],
     "redirects": [
-      { "source": "/festival/", "destination": "/festival", "type": 301 },
-      { "source": "/el-evento/", "destination": "/el-evento", "type": 301 },
-      { "source": "/actividades/", "destination": "/actividades", "type": 301 },
-      { "source": "/patrocinadores/", "destination": "/patrocinadores", "type": 301 },
-      { "source": "/marcas/", "destination": "/marcas", "type": 301 },
-      { "source": "/stands/", "destination": "/stands", "type": 301 },
-      { "source": "/inscripcion/", "destination": "/inscripcion", "type": 301 },
-      { "source": "/competencia/", "destination": "/competencia", "type": 301 },
-      { "source": "/reglas/", "destination": "/reglas", "type": 301 },
-      { "source": "/como-funciona/", "destination": "/como-funciona", "type": 301 },
-      { "source": "/privacidad/", "destination": "/privacidad", "type": 301 },
-      { "source": "/qr/", "destination": "/qr", "type": 301 },
-      { "source": "/admin/", "destination": "/admin", "type": 301 },
-      { "source": "/mi-stand/", "destination": "/mi-stand", "type": 301 },
-      { "source": "/expositor/", "destination": "/expositor", "type": 301 },
-      { "source": "/fidelizacion/", "destination": "/fidelizacion", "type": 301 },
-      { "source": "/registro-fidelizacion/", "destination": "/registro-fidelizacion", "type": 301 },
-      { "source": "/mi-tarjeta/", "destination": "/mi-tarjeta", "type": 301 },
-      { "source": "/panel-fidelizacion/", "destination": "/panel-fidelizacion", "type": 301 },
-      { "source": "/pasaporte/", "destination": "/pasaporte", "type": 301 },
-      { "source": "/escanear-pasaporte/", "destination": "/escanear-pasaporte", "type": 301 }
-    ],
-    "rewrites": [
+      {
+        "source": "/index.html",
+        "destination": "/",
+        "type": 301
+      },
       {
         "source": "/festival",
-        "destination": "/index.html"
+        "destination": "/",
+        "type": 301
+      },
+      {
+        "source": "/festival/",
+        "destination": "/",
+        "type": 301
       },
       {
         "source": "/festival.html",
+        "destination": "/",
+        "type": 301
+      },
+      {
+        "source": "/el-evento/",
+        "destination": "/el-evento",
+        "type": 301
+      },
+      {
+        "source": "/el-evento.html",
+        "destination": "/el-evento",
+        "type": 301
+      },
+      {
+        "source": "/actividades/",
+        "destination": "/actividades",
+        "type": 301
+      },
+      {
+        "source": "/actividades.html",
+        "destination": "/actividades",
+        "type": 301
+      },
+      {
+        "source": "/patrocinadores/",
+        "destination": "/patrocinadores",
+        "type": 301
+      },
+      {
+        "source": "/patrocinadores.html",
+        "destination": "/patrocinadores",
+        "type": 301
+      },
+      {
+        "source": "/marcas/",
+        "destination": "/marcas",
+        "type": 301
+      },
+      {
+        "source": "/marcas.html",
+        "destination": "/marcas",
+        "type": 301
+      },
+      {
+        "source": "/stands/",
+        "destination": "/stands",
+        "type": 301
+      },
+      {
+        "source": "/stands.html",
+        "destination": "/stands",
+        "type": 301
+      },
+      {
+        "source": "/inscripcion/",
+        "destination": "/inscripcion",
+        "type": 301
+      },
+      {
+        "source": "/inscripcion.html",
+        "destination": "/inscripcion",
+        "type": 301
+      },
+      {
+        "source": "/competencia/",
+        "destination": "/competencia",
+        "type": 301
+      },
+      {
+        "source": "/competencia.html",
+        "destination": "/competencia",
+        "type": 301
+      },
+      {
+        "source": "/reglas/",
+        "destination": "/reglas",
+        "type": 301
+      },
+      {
+        "source": "/reglas-v60-championship.html",
+        "destination": "/reglas",
+        "type": 301
+      },
+      {
+        "source": "/como-funciona/",
+        "destination": "/como-funciona",
+        "type": 301
+      },
+      {
+        "source": "/como-funciona-evento.html",
+        "destination": "/como-funciona",
+        "type": 301
+      },
+      {
+        "source": "/privacidad/",
+        "destination": "/privacidad",
+        "type": 301
+      },
+      {
+        "source": "/privacidad.html",
+        "destination": "/privacidad",
+        "type": 301
+      },
+      {
+        "source": "/qr/",
+        "destination": "/qr",
+        "type": 301
+      },
+      {
+        "source": "/qr-inscripcion.html",
+        "destination": "/qr",
+        "type": 301
+      },
+      {
+        "source": "/admin/",
+        "destination": "/admin",
+        "type": 301
+      },
+      {
+        "source": "/admin.html",
+        "destination": "/admin",
+        "type": 301
+      },
+      {
+        "source": "/expositor/",
+        "destination": "/expositor",
+        "type": 301
+      },
+      {
+        "source": "/expositor.html",
+        "destination": "/expositor",
+        "type": 301
+      },
+      {
+        "source": "/mi-stand/",
+        "destination": "/mi-stand",
+        "type": 301
+      },
+      {
+        "source": "/fidelizacion/",
+        "destination": "/fidelizacion",
+        "type": 301
+      },
+      {
+        "source": "/fidelizacion.html",
+        "destination": "/fidelizacion",
+        "type": 301
+      },
+      {
+        "source": "/registro-fidelizacion/",
+        "destination": "/registro-fidelizacion",
+        "type": 301
+      },
+      {
+        "source": "/fidelizacion-registro.html",
+        "destination": "/registro-fidelizacion",
+        "type": 301
+      },
+      {
+        "source": "/pasaporte/",
+        "destination": "/pasaporte",
+        "type": 301
+      },
+      {
+        "source": "/pasaporte-cafetero.html",
+        "destination": "/pasaporte",
+        "type": 301
+      },
+      {
+        "source": "/mi-tarjeta",
+        "destination": "/pasaporte",
+        "type": 301
+      },
+      {
+        "source": "/mi-tarjeta/",
+        "destination": "/pasaporte",
+        "type": 301
+      },
+      {
+        "source": "/escanear-pasaporte/",
+        "destination": "/escanear-pasaporte",
+        "type": 301
+      },
+      {
+        "source": "/escanear-pasaporte.html",
+        "destination": "/escanear-pasaporte",
+        "type": 301
+      },
+      {
+        "source": "/panel-fidelizacion/",
+        "destination": "/panel-fidelizacion",
+        "type": 301
+      },
+      {
+        "source": "/dashboard-fidelizacion.html",
+        "destination": "/panel-fidelizacion",
+        "type": 301
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/marcas/:marcaId",
+        "destination": "/marca-perfil.html"
+      },
+      {
+        "source": "/",
         "destination": "/index.html"
       },
       {
@@ -59,10 +253,6 @@
       {
         "source": "/patrocinadores",
         "destination": "/patrocinadores.html"
-      },
-      {
-        "source": "/marcas/:marcaId",
-        "destination": "/marca-perfil.html"
       },
       {
         "source": "/marcas",
@@ -101,11 +291,11 @@
         "destination": "/admin.html"
       },
       {
-        "source": "/mi-stand",
+        "source": "/expositor",
         "destination": "/expositor.html"
       },
       {
-        "source": "/expositor",
+        "source": "/mi-stand",
         "destination": "/expositor.html"
       },
       {
@@ -117,20 +307,16 @@
         "destination": "/fidelizacion-registro.html"
       },
       {
-        "source": "/mi-tarjeta",
-        "destination": "/pasaporte-cafetero.html"
-      },
-      {
-        "source": "/panel-fidelizacion",
-        "destination": "/dashboard-fidelizacion.html"
-      },
-      {
         "source": "/pasaporte",
         "destination": "/pasaporte-cafetero.html"
       },
       {
         "source": "/escanear-pasaporte",
         "destination": "/escanear-pasaporte.html"
+      },
+      {
+        "source": "/panel-fidelizacion",
+        "destination": "/dashboard-fidelizacion.html"
       },
       {
         "source": "/manifest-pasaporte.webmanifest",
