@@ -90,44 +90,60 @@
     return '<li class="' + classes + '"><div class="festival-sponsor-card__link">' + inner + '</div></li>';
   }
 
-  function renderInto(selector, sponsors) {
+  function renderInto(selector, sponsors, options) {
+    options = options || {};
     var el = document.querySelector(selector);
     if (!el) return;
     if (!sponsors || !sponsors.length) {
-      el.innerHTML = '';
-      el.hidden = true;
+      if (options.fallbackHtml) {
+        el.innerHTML = options.fallbackHtml;
+        el.hidden = false;
+      } else {
+        el.innerHTML = '';
+        el.hidden = true;
+      }
       return;
     }
     el.hidden = false;
     el.innerHTML = sponsors.map(renderCard).join('');
   }
 
-  function setSectionVisible(hasSponsors) {
+  function setSectionVisible() {
     var section = document.getElementById('patrocinadores-competencia');
-    if (section) section.hidden = !hasSponsors;
+    if (section) section.hidden = false;
   }
 
   function loadSponsors() {
     var grids = document.querySelectorAll('[data-competition-sponsors-grid], [data-competition-sponsors-strip]');
     if (!grids.length) return;
 
-    function apply(list) {
-      renderInto('[data-competition-sponsors-grid]', list);
-      renderInto('[data-competition-sponsors-strip]', list);
-      setSectionVisible(list.length > 0);
+    var fallbackHtml =
+      '<li class="festival-sponsors__empty">Patrocinadores del V60 Championship — próximamente.</li>';
+
+    function apply(list, opts) {
+      renderInto('[data-competition-sponsors-grid]', list, opts);
+      renderInto('[data-competition-sponsors-strip]', list, opts);
+      setSectionVisible();
     }
 
     if (!global.FormSubmit || typeof global.FormSubmit.fetchPatrocinadoresCompetencia !== 'function') {
-      apply([]);
+      apply([], { fallbackHtml: fallbackHtml });
       return;
     }
 
     global.FormSubmit.fetchPatrocinadoresCompetencia().then(function (data) {
       if (!data.ok) {
-        apply([]);
+        apply([], { fallbackHtml: fallbackHtml });
         return;
       }
-      apply(data.patrocinadores || []);
+      var list = data.patrocinadores || [];
+      if (!list.length) {
+        apply([], { fallbackHtml: fallbackHtml });
+        return;
+      }
+      apply(list);
+    }).catch(function () {
+      apply([], { fallbackHtml: fallbackHtml });
     });
   }
 

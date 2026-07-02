@@ -76,7 +76,6 @@
               <a data-link="reglas" href="reglas-v60-championship.html" target="_blank" rel="noopener"><strong>Reglamento</strong></a>.
             </p>
           </div>
-          <p style="margin:0.5rem 0 0">
           <p id="cupoStatus" class="cupo-status" aria-live="polite"></p>
           <div id="waitlistPanel" class="waitlist-panel" aria-live="polite">
             <h3 style="margin:0 0 0.5rem;color:var(--red-brand)">Cupo completo — Lista de espera</h3>
@@ -506,14 +505,14 @@
     </footer>
   </div>
 
-  <script src="js/event-config.js?v=20260703global"></script>
-  <script src="js/site-links.js?v=20260703global"></script>
+  <script src="js/event-config.js?v=20260701v60"></script>
+  <script src="js/site-links.js"></script>
   <script src="js/seo-structured-data.js"></script>
   <script src="js/sheets-config.js"></script>
   <script src="js/form-submit.js"></script>
   <script src="js/terms-disclosure.js"></script>
-  <script src="js/site-chrome.js?v=20260703global"></script>
-  <script src="js/festival-nav.js?v=20260703global"></script>
+  <script src="js/site-chrome.js?v=20260701ux"></script>
+  <script src="js/festival-nav.js?v=20260701ux"></script>
   <script>
     (function () {
       const cfg = window.EVENT_CONFIG || {};
@@ -650,7 +649,11 @@
         const lleno = count >= CUPO_MAX;
         const bloquear = lleno && !options.fetchError;
         btnSubmit.disabled = bloquear;
-        if (formPanel) formPanel.querySelector("#competenciaForm").style.display = bloquear ? "none" : "";
+        var formEl = formPanel ? formPanel.querySelector("#competenciaForm") : null;
+        if (formEl) {
+          formEl.classList.toggle("is-cupo-full", bloquear);
+          formEl.style.display = "";
+        }
         if (waitlistPanel) waitlistPanel.classList.toggle("visible", bloquear);
         cupoStatus.style.color = lleno && !options.fetchError ? "var(--red-brand)" : "";
         if (options.fetchError) {
@@ -1135,7 +1138,7 @@
             "<li><strong>Pago:</strong> $90.000 COP a Nubank <code>@mbl616</code> (Manuel Barraza)</li>" +
             "<li><strong>Café de práctica:</strong> 150 a 200 g a la dirección indicada, tras validar el pago</li>" +
             "<li><strong>Foto:</strong> " + fotoLine + "</li>" +
-            "<li><strong>Reglamento:</strong> <a href=\"reglas-v60-championship.html\" target=\"_blank\" rel=\"noopener\">Ver reglas oficiales</a></li>" +
+            "<li><strong>Reglamento:</strong> <a href=\"" + ((window.SiteLinks && SiteLinks.href('reglas')) || '/reglas') + "\" target=\"_blank\" rel=\"noopener\">Ver reglas oficiales</a></li>" +
             "<li><strong>Próximo paso:</strong> Únete al grupo de WhatsApp del torneo y revisa tu correo de confirmación</li>" +
             "</ul>";
         }
