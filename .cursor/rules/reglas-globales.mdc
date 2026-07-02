@@ -17,6 +17,7 @@ Antes de implementar, lee el skill en `.cursor/skills/`:
 | `Code.gs`, formularios, stands, expositor, `setup_admin`, `conectar_sheets` | `feria-apps-script-backend` |
 | Lazy load, cache, WebP, `brand.css`, `stands-map`, sponsors | `web-performance-static` |
 | Home minimal, bizcard, textos cortos, tabs/details en sitio público | `feria-ux-minimal` |
+| Auto-upgrade bizcard en páginas `page-festival` | `js/festival-bizcard.js` (cargado por `site-chrome.js`) |
 | Panel `/admin`, tema claro, paneles plegables `admin-fold` | `feria-admin-ux` |
 
 ## Arquitectura y archivos clave

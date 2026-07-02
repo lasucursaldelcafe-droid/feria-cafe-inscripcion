@@ -194,5 +194,5 @@
     init();
   }
 
-  global.FestivalNav = { init: init };
+  global.FestivalNav = { init: init, applyCopy: applyFestivalCopy };
 })(window);

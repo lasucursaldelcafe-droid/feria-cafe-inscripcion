@@ -1131,3 +1131,64 @@
     padding: 0.45rem 0.5rem;
   }
 }
+
+.admin-fold--stats {
+  margin-bottom: 0.35rem;
+}
+
+.admin-fold__inner--stats {
+  padding: 0.85rem 1rem 1rem;
+}
+
+.admin-fold__inner--stats .admin-stats {
+  margin: 0;
+}
+
+.admin-page--minimal .admin-toolbar__actions {
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.admin-page--minimal .admin-toolbar__actions .admin-btn--secondary {
+  font-size: 0.82rem;
+  padding: 0.4rem 0.65rem;
+}
+
+.admin-page--minimal .admin-main {
+  gap: 0.65rem;
+}
+
+.page-festival--bizcard.page-form .bizcard__body .content-card,
+.page-festival--bizcard.page-form .bizcard__body .form-panel {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+}
+
+.festival-details--card {
+  margin-bottom: 0.5rem;
+}
+
+.festival-details__summary--card {
+  font-size: 0.95rem;
+  padding: 0.75rem 0.95rem;
+}
+
+.festival-details--info {
+  margin: 0.75rem 0;
+}
+
+.festival-details__inner {
+  padding: 0 0.95rem 0.85rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.bizcard--pagehead .bizcard__title {
+  font-size: clamp(1.35rem, 4vw, 1.75rem);
+}
+
+.page-festival--bizcard-ready .site-hero {
+  display: none;
+}

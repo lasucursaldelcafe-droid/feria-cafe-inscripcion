@@ -42,6 +42,7 @@
       card.removeAttribute('id');
     }
     if (card.dataset.adminFoldOpen === 'true') {
+      details.dataset.adminFoldOpen = 'true';
       details.open = true;
     } else if (opts.open) {
       details.open = true;
@@ -84,14 +85,41 @@
     });
   }
 
+  function wrapStatsInSection(section) {
+    if (!section) return;
+    var stats = section.querySelector(':scope > .admin-stats');
+    if (!stats || stats.closest('details.admin-fold--stats')) return;
+
+    var details = document.createElement('details');
+    details.className = 'admin-fold admin-fold--stats';
+
+    var summary = document.createElement('summary');
+    summary.className = 'admin-fold__summary';
+    summary.textContent = 'Métricas';
+
+    var inner = document.createElement('div');
+    inner.className = 'admin-fold__inner admin-fold__inner--stats';
+    stats.parentNode.insertBefore(details, stats);
+    inner.appendChild(stats);
+    details.appendChild(summary);
+    details.appendChild(inner);
+  }
+
   function init() {
     document.querySelectorAll('[data-admin-section-panel]').forEach(function (section) {
-      wrapCardsIn(section, { openFirst: true });
+      wrapStatsInSection(section);
+      wrapCardsIn(section, { openFirst: false });
     });
 
     ['adminPasaportesRoot', 'adminOperadoresRoot'].forEach(function (id) {
       var root = document.getElementById(id);
-      wrapCardsIn(root, { openFirst: true });
+      wrapCardsIn(root, { openFirst: false });
+    });
+
+    document.querySelectorAll('.admin-fold').forEach(function (fold) {
+      if (fold.dataset.adminFoldOpen === 'true') {
+        fold.open = true;
+      }
     });
   }
 

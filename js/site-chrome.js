@@ -492,6 +492,16 @@
     enhanceForms();
   }
 
+  function ensureFestivalBizcard() {
+    if (!document.body.classList.contains('page-festival')) return;
+    if (document.body.getAttribute('data-bizcard-native') === '1') return;
+    if (document.querySelector('script[data-festival-bizcard]')) return;
+    var s = document.createElement('script');
+    s.src = 'js/festival-bizcard.js?v=20260703global';
+    s.setAttribute('data-festival-bizcard', '1');
+    document.body.appendChild(s);
+  }
+
   function init() {
     if (global.SiteLinks && global.SiteLinks.apply) {
       global.SiteLinks.apply(document);
@@ -508,6 +518,7 @@
     renderSiteFooter();
     renderWhatsappFloat();
     ensureAnalytics();
+    ensureFestivalBizcard();
     enhancePageUx();
   }
 

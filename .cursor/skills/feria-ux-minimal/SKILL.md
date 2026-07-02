@@ -17,6 +17,19 @@ description: >-
 4. **Aire y alineación** — padding generoso, grid con `gap` fijo, contenido centrado en tarjetas de identidad/contacto.
 5. **Sin duplicar** — un solo bloque de patrocinadores, un CTA principal, sin footer repetitivo si la info ya está arriba.
 
+## Auto-upgrade (`festival-bizcard.js`)
+
+Páginas `page-festival` legacy (sin `data-bizcard-native="1"`):
+
+1. `site-chrome.js` carga `festival-bizcard.js`
+2. Hero oscuro → `bizcard--pagehead`
+3. Cada `festival-section` → `article.bizcard`
+4. Footer → `bizcard--contact` (conserva `#waContact`, `#emailContact`, `#igLink`)
+5. Tarjetas de actividades → `<details>` plegables
+6. `info-box` en formularios → `<details>` (primer bloque abierto)
+
+`index.html` usa markup nativo: `data-bizcard-native="1"`.
+
 ## Patrones del repo
 
 | Patrón | Archivos |
