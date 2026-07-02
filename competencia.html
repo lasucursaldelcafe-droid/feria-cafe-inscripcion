@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/brand.css?v=20260703global">
+  <link rel="stylesheet" href="css/brand.css?v=20260701mg">
 </head>
 <body class="page-festival page-form" data-festival-page="competencia">
   <header class="site-header">
@@ -76,6 +76,7 @@
               <a data-link="reglas" href="reglas-v60-championship.html" target="_blank" rel="noopener"><strong>Reglamento</strong></a>.
             </p>
           </div>
+          <p style="margin:0.5rem 0 0">
           <p id="cupoStatus" class="cupo-status" aria-live="polite"></p>
           <div id="waitlistPanel" class="waitlist-panel" aria-live="polite">
             <h3 style="margin:0 0 0.5rem;color:var(--red-brand)">Cupo completo — Lista de espera</h3>
@@ -649,11 +650,7 @@
         const lleno = count >= CUPO_MAX;
         const bloquear = lleno && !options.fetchError;
         btnSubmit.disabled = bloquear;
-        var formEl = formPanel ? formPanel.querySelector("#competenciaForm") : null;
-        if (formEl) {
-          formEl.classList.toggle("is-cupo-full", bloquear);
-          formEl.style.display = "";
-        }
+        if (formPanel) formPanel.querySelector("#competenciaForm").style.display = bloquear ? "none" : "";
         if (waitlistPanel) waitlistPanel.classList.toggle("visible", bloquear);
         cupoStatus.style.color = lleno && !options.fetchError ? "var(--red-brand)" : "";
         if (options.fetchError) {
@@ -1138,7 +1135,7 @@
             "<li><strong>Pago:</strong> $90.000 COP a Nubank <code>@mbl616</code> (Manuel Barraza)</li>" +
             "<li><strong>Café de práctica:</strong> 150 a 200 g a la dirección indicada, tras validar el pago</li>" +
             "<li><strong>Foto:</strong> " + fotoLine + "</li>" +
-            "<li><strong>Reglamento:</strong> <a href=\"" + ((window.SiteLinks && SiteLinks.href('reglas')) || '/reglas') + "\" target=\"_blank\" rel=\"noopener\">Ver reglas oficiales</a></li>" +
+            "<li><strong>Reglamento:</strong> <a href=\"reglas-v60-championship.html\" target=\"_blank\" rel=\"noopener\">Ver reglas oficiales</a></li>" +
             "<li><strong>Próximo paso:</strong> Únete al grupo de WhatsApp del torneo y revisa tu correo de confirmación</li>" +
             "</ul>";
         }

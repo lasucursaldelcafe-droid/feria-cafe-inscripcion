@@ -17,7 +17,6 @@ Uso recomendado:
 from __future__ import annotations
 
 import argparse
-import json
 import subprocess
 import sys
 from pathlib import Path
@@ -41,19 +40,6 @@ def read_canonical_url() -> str:
     return path.read_text(encoding="utf-8").strip()
 
 
-def has_valid_oauth_token() -> bool:
-    if not OAUTH_TOKEN_PATH.exists():
-        return False
-    try:
-        raw = OAUTH_TOKEN_PATH.read_text(encoding="utf-8").strip()
-        if not raw:
-            return False
-        data = json.loads(raw)
-        return isinstance(data, dict) and bool(data.get("token") or data.get("refresh_token"))
-    except Exception:
-        return False
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Corre actualización completa del sitio.")
     parser.add_argument("--sin-deploy", action="store_true", help="No despliega Firebase Hosting.")
@@ -72,12 +58,10 @@ def main() -> int:
             print("[AVISO] Sin tools/CANONICAL_SHEETS_URL.txt; se omite sheets-config.js")
 
         if args.apps_script:
-            if has_valid_oauth_token():
-                code = run([sys.executable, "tools/setup_admin.py", "--sin-firebase"], allow_fail=True)
-                if code:
-                    print("[AVISO] Deploy Apps Script falló; se continúa con Firebase Hosting.")
+            if OAUTH_TOKEN_PATH.exists():
+                run([sys.executable, "tools/setup_admin.py", "--sin-firebase"])
             else:
-                print("[AVISO] Sin OAuth Apps Script válido; se omite deploy Code.gs.")
+                print("[AVISO] Sin OAuth Apps Script; se omite deploy Code.gs.")
 
         if not args.sin_verificar:
             verify_cmd = [sys.executable, "tools/verify_admin.py"]
