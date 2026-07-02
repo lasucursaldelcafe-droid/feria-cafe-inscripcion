@@ -513,46 +513,193 @@
     return '';
   }
 
-  function competitorDescription(row) {
-    var parts = [];
-    var representa = val(row, ['Representa']);
-    var rol = val(row, ['Rol']);
-    var experienciaCafe = val(row, ['Experiencia café', 'Experiencia cafe']);
-    var experienciaSwitch = val(row, ['Experiencia Switch', 'Experiencia V60']);
-    var ciudad = val(row, ['Ciudad']);
-    var torneos = val(row, ['Torneos previos']);
+  function cleanCompetitorText(raw) {
+    var text = String(raw || '').trim();
+    if (!text) return '';
+    var colonIdx = text.indexOf(':');
+    if (colonIdx >= 0) text = text.slice(colonIdx + 1).trim();
+    return text;
+  }
 
-    if (representa) parts.push('Representa: ' + representa);
-    if (rol) parts.push('Rol: ' + rol);
-    if (experienciaCafe) parts.push('Experiencia en café: ' + experienciaCafe);
-    if (experienciaSwitch) parts.push('Experiencia V60: ' + experienciaSwitch);
-    if (torneos) parts.push('Torneos previos: ' + torneos);
-    if (ciudad) parts.push('Ciudad: ' + ciudad);
+  function competitorField(row, keys) {
+    return cleanCompetitorText(val(row, keys));
+  }
+
+  function dedupeCompetitorParts(parts) {
+    var seen = {};
+    return (parts || []).filter(function (part) {
+      var key = String(part || '').trim().toLowerCase();
+      if (!key || seen[key]) return false;
+      seen[key] = true;
+      return true;
+    });
+  }
+
+  function competitorCardSubtitle(row) {
+    var parts = dedupeCompetitorParts([
+      competitorField(row, ['Rol']),
+      competitorField(row, ['Representa'])
+    ]);
+    return parts.length ? parts.join(' · ') : 'Competidor oficial';
+  }
+
+  function competitorDescription(row) {
+    var parts = dedupeCompetitorParts([
+      competitorField(row, ['Representa']),
+      competitorField(row, ['Rol']),
+      competitorField(row, ['Experiencia café', 'Experiencia cafe']),
+      competitorField(row, ['Experiencia Switch', 'Experiencia V60']),
+      competitorField(row, ['Torneos previos']),
+      competitorField(row, ['Ciudad'])
+    ]);
     return parts.join(' · ');
   }
 
   function competitorProfileLines(row) {
+    var ciudad = competitorField(row, ['Ciudad']);
+    var experienciaCafe = competitorField(row, ['Experiencia café', 'Experiencia cafe']);
+    var experienciaSwitch = competitorField(row, ['Experiencia Switch', 'Experiencia V60']);
+    var torneos = competitorField(row, ['Torneos previos']);
     var lines = [];
-    var representa = val(row, ['Representa']);
-    var rol = val(row, ['Rol']);
-    var experienciaCafe = val(row, ['Experiencia café', 'Experiencia cafe']);
-    var experienciaSwitch = val(row, ['Experiencia Switch', 'Experiencia V60']);
-    var torneos = val(row, ['Torneos previos']);
-    var ciudad = val(row, ['Ciudad']);
+    if (ciudad) lines.push(ciudad);
+    var experiencia = dedupeCompetitorParts([experienciaCafe, experienciaSwitch]);
+    if (experiencia.length) lines.push(experiencia.join(' · '));
+    if (torneos) lines.push(torneos);
+    return lines.slice(0, 3);
+  }
 
-    if (rol || representa) {
-      lines.push((rol || 'Competidor/a') + (representa ? ' · Representa: ' + representa : ''));
+  function measureWrappedLines(ctx, text, maxWidth, maxLines) {
+    var words = String(text || '').split(/\s+/).filter(Boolean);
+    if (!words.length) return [];
+    var line = '';
+    var lines = [];
+    for (var n = 0; n < words.length; n++) {
+      var testLine = line ? line + ' ' + words[n] : words[n];
+      if (ctx.measureText(testLine).width > maxWidth && line) {
+        lines.push(line);
+        line = words[n];
+      } else {
+        line = testLine;
+      }
+      if (lines.length === maxLines) break;
     }
-    if (experienciaCafe || experienciaSwitch) {
-      lines.push('Experiencia: ' + [
-        experienciaCafe ? 'café ' + experienciaCafe : '',
-        experienciaSwitch ? 'V60 ' + experienciaSwitch : ''
-      ].filter(Boolean).join(' · '));
+    if (line && lines.length < maxLines) lines.push(line);
+    if (words.length && lines.length === maxLines && lines[lines.length - 1].length > 3) {
+      lines[lines.length - 1] = lines[lines.length - 1].replace(/[.,;:]?$/, '') + '…';
     }
-    if (torneos) lines.push('Torneos previos: ' + torneos);
-    if (ciudad) lines.push('Ciudad: ' + ciudad);
+    return lines;
+  }
 
-    return lines.length ? lines : ['Perfil barista registrado para el Reto V60.'];
+  function buildCompetitorCardTextBlocks(row, ctx, maxWidth, maxProfileLines) {
+    maxProfileLines = maxProfileLines || 3;
+    var blocks = [
+      {
+        kind: 'name',
+        text: val(row, ['Nombre']) || 'Competidor',
+        font: '800 50px Inter, Arial, sans-serif',
+        lineHeight: 56,
+        maxLines: 2,
+        color: '#ffffff'
+      },
+      {
+        kind: 'subtitle',
+        text: competitorCardSubtitle(row),
+        font: '700 24px Inter, Arial, sans-serif',
+        lineHeight: 30,
+        maxLines: 2,
+        color: '#f5d9a8'
+      }
+    ];
+    competitorProfileLines(row).slice(0, maxProfileLines).forEach(function (line) {
+      blocks.push({
+        kind: 'profile',
+        text: line,
+        font: '500 22px Inter, Arial, sans-serif',
+        lineHeight: 28,
+        maxLines: 2,
+        color: 'rgba(255,255,255,0.92)'
+      });
+    });
+    var gap = 12;
+    return blocks.map(function (block) {
+      ctx.font = block.font;
+      var lines = measureWrappedLines(ctx, block.text, maxWidth, block.maxLines);
+      return Object.assign({}, block, {
+        lines: lines,
+        height: lines.length * block.lineHeight
+      });
+    }).filter(function (block) {
+      return block.lines.length > 0;
+    });
+  }
+
+  function totalBlockStackHeight(blocks, gap) {
+    if (!blocks.length) return 0;
+    var total = 0;
+    blocks.forEach(function (block, idx) {
+      total += block.height;
+      if (idx < blocks.length - 1) total += gap;
+    });
+    return total;
+  }
+
+  function layoutCompetitorCardText(row, ctx, bounds) {
+    var gap = 12;
+    var padY = 24;
+    var maxWidth = bounds.width;
+    var maxHeight = bounds.maxHeight - padY * 2;
+    var blocks = buildCompetitorCardTextBlocks(row, ctx, maxWidth, 3);
+    var attempts = 0;
+    while (totalBlockStackHeight(blocks, gap) > maxHeight && attempts < 4) {
+      attempts += 1;
+      if (attempts === 1) {
+        blocks = buildCompetitorCardTextBlocks(row, ctx, maxWidth, 2);
+      } else if (attempts === 2) {
+        blocks.forEach(function (block) {
+          if (block.kind === 'name') {
+            block.font = '800 44px Inter, Arial, sans-serif';
+            block.lineHeight = 50;
+          } else if (block.kind === 'subtitle') {
+            block.font = '700 22px Inter, Arial, sans-serif';
+            block.lineHeight = 28;
+          } else {
+            block.font = '500 20px Inter, Arial, sans-serif';
+            block.lineHeight = 26;
+          }
+          ctx.font = block.font;
+          block.lines = measureWrappedLines(ctx, block.text, maxWidth, block.maxLines);
+          block.height = block.lines.length * block.lineHeight;
+        });
+      } else {
+        blocks = blocks.filter(function (block) {
+          return block.kind !== 'profile' || block === blocks[blocks.length - 1];
+        });
+        if (blocks.length > 2) blocks = blocks.slice(0, 2);
+      }
+    }
+    var stackH = totalBlockStackHeight(blocks, gap);
+    var y = bounds.top + padY + Math.max(0, (maxHeight - stackH) / 2);
+    blocks.forEach(function (block) {
+      block.x = bounds.left + bounds.width / 2;
+      block.y = y;
+      y += block.height + gap;
+    });
+    return {
+      blocks: blocks,
+      bottom: bounds.top + padY + stackH,
+      top: bounds.top
+    };
+  }
+
+  function drawCompetitorCardTextBlocks(ctx, layout) {
+    ctx.textAlign = 'center';
+    layout.blocks.forEach(function (block) {
+      ctx.fillStyle = block.color;
+      ctx.font = block.font;
+      block.lines.forEach(function (line, idx) {
+        ctx.fillText(line, block.x, block.y + idx * block.lineHeight + block.lineHeight * 0.82);
+      });
+    });
   }
 
   function sanitizeFilename(name) {
@@ -605,7 +752,11 @@
       .catch(function () { return null; });
   }
 
-  function loadCompetitorPhotoForCanvas(row) {
+  function loadCompetitorPhotoForCanvas(row, inlinePhotoDataUrl) {
+    if (inlinePhotoDataUrl) {
+      return loadCanvasImage(inlinePhotoDataUrl);
+    }
+
     var driveUrl = val(row, ['Foto participante enlace Drive']);
     var fileId = driveFileId(driveUrl);
     if (!fileId) return Promise.resolve(null);
@@ -751,20 +902,27 @@
     return y + lines.length * lineHeight;
   }
 
-  function createCompetitorCardCanvas(row) {
-    return loadCompetitorPhotoForCanvas(row).then(function (img) {
+  function createCompetitorCardCanvas(row, options) {
+    options = options || {};
+    return loadCompetitorPhotoForCanvas(row, options.inlinePhotoDataUrl).then(function (img) {
       var W = 1080;
       var H = 1440;
       var PAD = 48;
       var CONTENT_W = W - PAD * 2;
       var CX = W / 2;
+      var HEADER_END = 132;
+      var FOOTER_H = 64;
+      var FOOTER_GAP = 20;
+      var footerTop = H - FOOTER_H - FOOTER_GAP;
+      var INFO_MIN = 240;
+      var INFO_MAX = 400;
+      var PHOTO_MIN = 520;
+      var id = val(row, ['ID']);
 
       var canvas = document.createElement('canvas');
       canvas.width = W;
       canvas.height = H;
       var ctx = canvas.getContext('2d');
-      var name = val(row, ['Nombre']) || 'Competidor';
-      var id = val(row, ['ID']);
 
       var bg = ctx.createLinearGradient(0, 0, W, H);
       bg.addColorStop(0, '#2a1a12');
@@ -773,57 +931,73 @@
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
 
-      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+      ctx.fillStyle = 'rgba(255,255,255,0.04)';
       ctx.beginPath();
-      ctx.arc(W - 60, 100, 220, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(70, H - 80, 200, 0, Math.PI * 2);
+      ctx.arc(W - 60, 90, 180, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.textAlign = 'center';
       ctx.fillStyle = '#f6ead8';
-      ctx.font = '800 42px Inter, Arial, sans-serif';
-      ctx.fillText('RETO V60', CX, 72);
+      ctx.font = '800 40px Inter, Arial, sans-serif';
+      ctx.fillText('RETO V60', CX, 56);
 
-      ctx.font = '600 26px Inter, Arial, sans-serif';
+      ctx.font = '600 24px Inter, Arial, sans-serif';
       ctx.fillStyle = 'rgba(246,234,216,0.78)';
-      ctx.fillText('Edición Purist Marbella', CX, 108);
+      ctx.fillText('Edición Purist Marbella', CX, 88);
 
       ctx.fillStyle = '#e8a84c';
-      ctx.font = '700 22px Inter, Arial, sans-serif';
-      ctx.fillText(id || 'Competidor', CX, 138);
+      ctx.font = '700 20px Inter, Arial, sans-serif';
+      ctx.fillText(id || 'Competidor', CX, 116);
 
-      var photoY = 158;
-      var photoH = 920;
-      drawPortraitPhoto(ctx, img, PAD, photoY, CONTENT_W, photoH);
+      var infoHeight = INFO_MAX;
+      var photoHeight = footerTop - HEADER_END - infoHeight;
+      if (photoHeight < PHOTO_MIN) {
+        photoHeight = PHOTO_MIN;
+        infoHeight = footerTop - HEADER_END - photoHeight;
+      }
+      infoHeight = Math.max(INFO_MIN, Math.min(INFO_MAX, infoHeight));
 
-      var textY = photoY + photoH + 44;
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '800 62px Inter, Arial, sans-serif';
-      var afterName = wrapTextCentered(ctx, name, CX, textY, CONTENT_W, 66, 2);
+      var photoY = HEADER_END;
+      var infoY = photoY + photoHeight;
+      var infoBottom = footerTop;
 
-      ctx.fillStyle = '#f5d9a8';
-      ctx.font = '700 28px Inter, Arial, sans-serif';
-      ctx.fillText('Competidor oficial', CX, afterName + 20);
+      drawPortraitPhoto(ctx, img, PAD, photoY, CONTENT_W, photoHeight);
 
-      ctx.fillStyle = 'rgba(255,255,255,0.82)';
-      ctx.font = '600 24px Inter, Arial, sans-serif';
-      ctx.fillText('Perfil del barista', CX, afterName + 64);
+      var infoBg = ctx.createLinearGradient(0, infoY, 0, infoBottom);
+      infoBg.addColorStop(0, 'rgba(12,9,7,0.96)');
+      infoBg.addColorStop(1, 'rgba(22,16,12,0.98)');
+      ctx.fillStyle = infoBg;
+      ctx.fillRect(PAD, infoY, CONTENT_W, infoBottom - infoY);
 
-      var profileY = afterName + 98;
-      competitorProfileLines(row).slice(0, 4).forEach(function (line) {
-        ctx.fillStyle = 'rgba(255,255,255,0.9)';
-        ctx.font = '500 24px Inter, Arial, sans-serif';
-        profileY = wrapTextCentered(ctx, line, CX, profileY, CONTENT_W - 40, 32, 2) + 8;
+      ctx.strokeStyle = 'rgba(232,168,76,0.35)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(PAD + 24, infoY);
+      ctx.lineTo(PAD + CONTENT_W - 24, infoY);
+      ctx.stroke();
+
+      var textLayout = layoutCompetitorCardText(row, ctx, {
+        left: PAD,
+        top: infoY,
+        width: CONTENT_W,
+        maxHeight: infoBottom - infoY
       });
+      drawCompetitorCardTextBlocks(ctx, textLayout);
 
-      var footerY = H - 68;
-      ctx.fillStyle = 'rgba(0,0,0,0.32)';
-      roundedRect(ctx, PAD, footerY - 36, CONTENT_W, 56, 18);
+      if (textLayout.blocks.length) {
+        var lastBlock = textLayout.blocks[textLayout.blocks.length - 1];
+        var textBottom = lastBlock.y + lastBlock.height;
+        if (textBottom > infoBottom - 6) {
+          console.warn('Competitor PNG: texto cerca del límite', { textBottom: textBottom, infoBottom: infoBottom });
+        }
+      }
+
+      var footerY = H - FOOTER_GAP - 18;
+      ctx.fillStyle = 'rgba(0,0,0,0.38)';
+      roundedRect(ctx, PAD, footerTop, CONTENT_W, FOOTER_H, 16);
       ctx.fill();
       ctx.fillStyle = '#f6ead8';
-      ctx.font = '700 24px Inter, Arial, sans-serif';
+      ctx.font = '700 22px Inter, Arial, sans-serif';
       ctx.fillText('Café filtrado · Plaza Marbella · Purist', CX, footerY);
 
       return canvas;
@@ -877,11 +1051,12 @@
     var photo = driveThumb(val(row, ['Foto participante enlace Drive']), 900);
     var name = val(row, ['Nombre']) || 'Competidor';
     var id = val(row, ['ID']);
-    var rol = val(row, ['Rol']);
-    var representa = val(row, ['Representa']);
-    var desc = competitorDescription(row) || 'Perfil barista del Reto V60.';
+    var rol = competitorField(row, ['Rol']);
+    var representa = competitorField(row, ['Representa']);
+    var descParts = competitorProfileLines(row);
+    var desc = descParts.length ? descParts.join(' · ') : 'Perfil barista del Reto V60.';
     var enabled = isHabilitadoValue(row['Habilitado']);
-    var roleLine = (rol || 'Competidor/a') + (representa ? ' · ' + representa : '');
+    var roleLine = dedupeCompetitorParts([rol || 'Competidor/a', representa]).join(' · ');
 
     return '<div class="admin-competidor-hero__head admin-competidor-hero__head--center">' +
         '<p class="admin-competidor-hero__kicker">Reto V60</p>' +
