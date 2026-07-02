@@ -63,22 +63,24 @@
       );
     }
 
-    function Resumen({ clientes, transacciones }) {
-      const totalClientes = clientes.length;
-      const activos = clientes.filter(c => {
+    function Resumen({ clientes = [], transacciones = [] }) {
+      const listaClientes = Array.isArray(clientes) ? clientes : [];
+      const listaTransacciones = Array.isArray(transacciones) ? transacciones : [];
+      const totalClientes = listaClientes.length;
+      const activos = listaClientes.filter(c => {
         if (!c.ultimaVisita || !c.ultimaVisita.toDate) return false;
         const dias = (Date.now() - c.ultimaVisita.toDate().getTime()) / 86400000;
         return dias <= 30;
       }).length;
-      const puntosEmitidos = transacciones.filter(t => t.tipo === 'acumulacion').reduce((s, t) => s + (t.puntos || 0), 0);
-      const puntosCanjeados = Math.abs(transacciones.filter(t => t.tipo === 'canje').reduce((s, t) => s + (t.puntos || 0), 0));
+      const puntosEmitidos = listaTransacciones.filter(t => t.tipo === 'acumulacion').reduce((s, t) => s + (t.puntos || 0), 0);
+      const puntosCanjeados = Math.abs(listaTransacciones.filter(t => t.tipo === 'canje').reduce((s, t) => s + (t.puntos || 0), 0));
 
       const porNivel = ['Bronce', 'Plata', 'Oro', 'Diamante'].map(n => ({
         nivel: n,
-        total: clientes.filter(c => (c.nivel || 'Bronce') === n).length
+        total: listaClientes.filter(c => (c.nivel || 'Bronce') === n).length
       }));
 
-      const top = clientes.slice().sort((a, b) => (b.puntosHistoricos || 0) - (a.puntosHistoricos || 0)).slice(0, 5);
+      const top = listaClientes.slice().sort((a, b) => (b.puntosHistoricos || 0) - (a.puntosHistoricos || 0)).slice(0, 5);
 
       return (
         <div>
@@ -144,11 +146,12 @@
       );
     }
 
-    function Clientes({ clientes, refrescar }) {
+    function Clientes({ clientes = [], refrescar }) {
+      const listaClientes = Array.isArray(clientes) ? clientes : [];
       const [busqueda, setBusqueda] = useState('');
       const [seleccionado, setSeleccionado] = useState(null);
 
-      const filtrados = clientes.filter(c =>
+      const filtrados = listaClientes.filter(c =>
         (c.nombre || '').toLowerCase().includes(busqueda.toLowerCase()) ||
         (c.telefono || '').includes(busqueda)
       );
@@ -189,7 +192,8 @@
       );
     }
 
-    function ColeccionCRUD({ coleccion, campos, titulo }) {
+    function ColeccionCRUD({ coleccion, campos = [], titulo }) {
+      const columnas = Array.isArray(campos) ? campos : [];
       const [items, setItems] = useState([]);
       const [nuevo, setNuevo] = useState({});
 
@@ -219,18 +223,18 @@
         <div className="fid-admin-card">
           <h3>{titulo}</h3>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
-            {campos.map(c => (
+            {columnas.map(c => (
               <input key={c.key} className="fid-admin-input" placeholder={c.label} type={c.type || 'text'}
                 value={nuevo[c.key] || ''} onChange={e => setNuevo({ ...nuevo, [c.key]: e.target.value })} />
             ))}
             <button className="fid-admin-btn" onClick={agregar}>Agregar</button>
           </div>
           <table className="fid-admin-table">
-            <thead><tr>{campos.map(c => <th key={c.key}>{c.label}</th>)}<th>Estado</th><th></th></tr></thead>
+            <thead><tr>{columnas.map(c => <th key={c.key}>{c.label}</th>)}<th>Estado</th><th></th></tr></thead>
             <tbody>
               {items.map(item => (
                 <tr key={item.id}>
-                  {campos.map(c => <td key={c.key}>{item[c.key]}</td>)}
+                  {columnas.map(c => <td key={c.key}>{item[c.key]}</td>)}
                   <td>{item.activa ? 'Activa' : 'Inactiva'}</td>
                   <td>
                     <button className="fid-admin-btn fid-admin-btn--ghost" onClick={() => toggle(item)}>{item.activa ? 'Desactivar' : 'Activar'}</button>{' '}
@@ -238,21 +242,22 @@
                   </td>
                 </tr>
               ))}
-              {items.length === 0 && <tr><td colSpan={(campos && campos.length ? campos.length : 3) + 2}>Sin registros aún.</td></tr>}
+              {items.length === 0 && <tr><td colSpan={columnas.length + 2}>Sin registros aún.</td></tr>}
             </tbody>
           </table>
         </div>
       );
     }
 
-    function CRM({ clientes }) {
-      const vip = clientes.filter(c => c.nivel === 'Oro' || c.nivel === 'Diamante');
-      const frecuentes = clientes.filter(c => {
+    function CRM({ clientes = [] }) {
+      const listaClientes = Array.isArray(clientes) ? clientes : [];
+      const vip = listaClientes.filter(c => c.nivel === 'Oro' || c.nivel === 'Diamante');
+      const frecuentes = listaClientes.filter(c => {
         if (!c.ultimaVisita || !c.ultimaVisita.toDate) return false;
         const dias = (Date.now() - c.ultimaVisita.toDate().getTime()) / 86400000;
         return dias <= 14;
       });
-      const inactivos = clientes.filter(c => {
+      const inactivos = listaClientes.filter(c => {
         if (!c.ultimaVisita || !c.ultimaVisita.toDate) return true;
         const dias = (Date.now() - c.ultimaVisita.toDate().getTime()) / 86400000;
         return dias > 45;
@@ -368,12 +373,15 @@
 
       useEffect(() => {
         Fidelizacion.db().collection('fidelizacion_config').doc('niveles').get().then(snap => {
-          if (snap.exists && snap.data().lista) setNiveles(snap.data().lista);
+          if (snap.exists && Array.isArray(snap.data().lista) && snap.data().lista.length) {
+            setNiveles(snap.data().lista);
+          }
         });
       }, []);
 
       function actualizar(i, campo, valor) {
-        const copia = niveles.slice();
+        const base = Array.isArray(niveles) && niveles.length ? niveles : Fidelizacion.NIVELES_DEFAULT;
+        const copia = base.slice();
         copia[i] = { ...copia[i], [campo]: campo === 'minimo' ? parseInt(valor, 10) || 0 : valor };
         setNiveles(copia);
       }

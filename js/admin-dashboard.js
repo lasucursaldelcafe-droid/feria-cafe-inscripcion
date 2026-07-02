@@ -1872,11 +1872,13 @@
   }
 
   function pickRows(data, key) {
-    if (data[key]) return data[key];
-    if (key === 'allFeria' && data.recentFeria) return data.recentFeria;
-    if (key === 'allCompetencia' && data.recentCompetencia) return data.recentCompetencia;
-    if (key === 'allStands' && data.recentStands) return data.recentStands;
-    if (key === 'allPatrocinadoresCompetencia') return data.allPatrocinadoresCompetencia;
+    if (Array.isArray(data[key])) return data[key];
+    if (key === 'allFeria' && Array.isArray(data.recentFeria)) return data.recentFeria;
+    if (key === 'allCompetencia' && Array.isArray(data.recentCompetencia)) return data.recentCompetencia;
+    if (key === 'allStands' && Array.isArray(data.recentStands)) return data.recentStands;
+    if (key === 'allPatrocinadoresCompetencia' && Array.isArray(data.allPatrocinadoresCompetencia)) {
+      return data.allPatrocinadoresCompetencia;
+    }
     return [];
   }
 
