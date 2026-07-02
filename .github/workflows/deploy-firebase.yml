@@ -24,7 +24,6 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           SHEETS_WEB_APP_URL: ${{ secrets.SHEETS_WEB_APP_URL }}
         run: python3 tools/validate_ci_secrets.py --ci
-        continue-on-error: true
 
       - name: Generar js/sheets-config.js
         env:
@@ -89,7 +88,6 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           projectId: la-sucursal-del-cafe
           channelId: live
-        continue-on-error: true
 
       - name: Verificar rutas en producción
         run: |

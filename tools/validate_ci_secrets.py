@@ -120,7 +120,10 @@ def check_github_secrets() -> tuple[bool, str]:
         errors="replace",
     )
     if result.returncode != 0:
-        return False, "No se pudo listar secretos (¿repo correcto?)"
+        stderr = (result.stderr or "").strip()
+        if "403" in stderr or "Resource not accessible" in stderr:
+            return True, "gh sin permisos para listar secretos (normal en tokens limitados); comprueba en GitHub → Settings → Secrets"
+        return False, f"No se pudo listar secretos: {stderr[:120] or '¿repo correcto?'}"
 
     names = {line.split()[0] for line in result.stdout.splitlines() if line.strip()}
     missing = []
