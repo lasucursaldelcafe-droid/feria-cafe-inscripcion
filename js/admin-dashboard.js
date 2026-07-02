@@ -870,6 +870,30 @@
     }
   }
 
+  function scrollToAdminTarget(targetId) {
+    if (!targetId) return;
+    var target = document.getElementById(targetId);
+    if (!target) return;
+    setTimeout(function () {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      target.classList.add('admin-highlight-target');
+      setTimeout(function () { target.classList.remove('admin-highlight-target'); }, 1400);
+    }, 80);
+  }
+
+  function downloadAllCompetitorCardsFromToolbar() {
+    var btn = document.getElementById('downloadCompetitorCardsBtn');
+    if (btn) {
+      btn.click();
+      return;
+    }
+    showAdminSection('competidores');
+    setTimeout(function () {
+      var delayed = document.getElementById('downloadCompetitorCardsBtn');
+      if (delayed) delayed.click();
+    }, 200);
+  }
+
   function readHashSection() {
     var hash = (global.location.hash || '').replace(/^#/, '').trim().toLowerCase();
     if (hash && ADMIN_SECTIONS.indexOf(hash) !== -1) return hash;
@@ -918,7 +942,18 @@
     document.querySelectorAll('.admin-goto-section').forEach(function (btn) {
       btn.addEventListener('click', function () {
         showAdminSection(btn.getAttribute('data-goto') || 'resumen');
+        scrollToAdminTarget(btn.getAttribute('data-scroll-target') || '');
       });
+    });
+
+    document.querySelectorAll('.admin-scroll-target').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        scrollToAdminTarget(btn.getAttribute('data-scroll-target') || '');
+      });
+    });
+
+    document.querySelectorAll('.admin-download-competitor-cards').forEach(function (btn) {
+      btn.addEventListener('click', downloadAllCompetitorCardsFromToolbar);
     });
 
     global.addEventListener('hashchange', function () {

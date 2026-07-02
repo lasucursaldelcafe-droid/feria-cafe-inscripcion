@@ -65,6 +65,19 @@
   gap: 0.5rem;
 }
 
+.admin-highlight-target {
+  animation: adminHighlightTarget 1.35s ease;
+}
+
+@keyframes adminHighlightTarget {
+  0%, 100% {
+    box-shadow: none;
+  }
+  35% {
+    box-shadow: 0 0 0 4px rgba(232, 168, 76, 0.32), 0 0 36px rgba(232, 168, 76, 0.16);
+  }
+}
+
 .admin-fid-embed {
   margin-top: 1rem;
 }
