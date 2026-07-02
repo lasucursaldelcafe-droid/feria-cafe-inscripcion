@@ -113,9 +113,6 @@ function doGet(e) {
   if (params.action === 'admin_export') {
     return handleAdminExport_(params.idToken || '', params.dataset || '');
   }
-  if (params.action === 'competidor_foto') {
-    return getCompetidorFotoBinaryResponse_(params.id || params.fileId || params.url || '');
-  }
   if (params.action === 'competidor_foto_data') {
     return jsonResponse(getCompetidorFotoData_(params.id || params.fileId || params.url || ''));
   }
@@ -201,9 +198,6 @@ function doPost(e) {
     }
     if (action === 'admin_create_competitor') {
       return jsonResponse(handleAdminCreateCompetitor_(payload));
-    }
-    if (action === 'admin_save_competidor') {
-      return jsonResponse(handleAdminSaveCompetidor_(payload));
     }
     if (action === 'admin_create_feria') {
       return jsonResponse(handleAdminCreateFeria_(payload));
@@ -336,28 +330,18 @@ function normalizeDoc_(v) {
   return String(v || '').replace(/\D/g, '');
 }
 
-function findDuplicateInSheet_(sheet, headers, correo, documento, exceptId) {
+function findDuplicateInSheet_(sheet, headers, correo, documento) {
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return false;
 
   var correoCol = headers.indexOf('Correo') + 1;
   var docCol = headers.indexOf('Documento') + 1;
-  var idCol = headers.indexOf('ID') + 1;
   var emailNorm = normalizeEmail_(correo);
   var docNorm = documento ? normalizeDoc_(documento) : '';
-  var exceptNorm = exceptId ? String(exceptId).trim() : '';
-
-  function isExcludedRow(rowIndex) {
-    if (!exceptNorm || idCol <= 0) return false;
-    var rowId = String(sheet.getRange(rowIndex, idCol).getValue() || '').trim();
-    return rowId === exceptNorm;
-  }
 
   if (emailNorm && correoCol > 0) {
     var emails = sheet.getRange(2, correoCol, lastRow - 1, 1).getValues();
     for (var i = 0; i < emails.length; i++) {
-      var rowNum = i + 2;
-      if (isExcludedRow(rowNum)) continue;
       if (normalizeEmail_(emails[i][0]) === emailNorm) return true;
     }
   }
@@ -365,8 +349,6 @@ function findDuplicateInSheet_(sheet, headers, correo, documento, exceptId) {
   if (docNorm && docCol > 0) {
     var docs = sheet.getRange(2, docCol, lastRow - 1, 1).getValues();
     for (var j = 0; j < docs.length; j++) {
-      var docRowNum = j + 2;
-      if (isExcludedRow(docRowNum)) continue;
       if (normalizeDoc_(docs[j][0]) === docNorm) return true;
     }
   }
@@ -566,47 +548,6 @@ function extractDriveFileId_(raw) {
   return '';
 }
 
-function fetchDriveImageBytes_(fileId, maxWidth) {
-  var width = maxWidth || 1200;
-  try {
-    var thumbUrl = 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(fileId) + '&sz=w' + width;
-    var thumbResp = UrlFetchApp.fetch(thumbUrl, { muteHttpExceptions: true, followRedirects: true });
-    if (thumbResp.getResponseCode() === 200) {
-      var thumbBlob = thumbResp.getBlob();
-      var thumbType = thumbBlob.getContentType() || 'image/jpeg';
-      if (thumbType.indexOf('image/') === 0) {
-        return { bytes: thumbBlob.getBytes(), contentType: thumbType, source: 'thumbnail' };
-      }
-    }
-  } catch (thumbErr) {
-    Logger.log('fetchDriveImageBytes_ thumbnail: ' + thumbErr);
-  }
-
-  var file = DriveApp.getFileById(fileId);
-  var blob = file.getBlob();
-  var contentType = blob.getContentType() || 'image/jpeg';
-  if (contentType.indexOf('image/') !== 0) {
-    throw new Error('El archivo no es una imagen.');
-  }
-  return { bytes: blob.getBytes(), contentType: contentType, source: 'drive' };
-}
-
-function getCompetidorFotoBinaryResponse_(rawIdOrUrl) {
-  var fileId = extractDriveFileId_(rawIdOrUrl);
-  if (!fileId) {
-    return ContentService.createTextOutput('ID de foto inválido.')
-      .setMimeType(ContentService.MimeType.TEXT);
-  }
-
-  try {
-    var image = fetchDriveImageBytes_(fileId, 1200);
-    return ContentService.createBlobOutput(image.bytes).setMimeType(image.contentType);
-  } catch (err) {
-    return ContentService.createTextOutput('No se pudo leer la foto: ' + (err && err.message ? err.message : err))
-      .setMimeType(ContentService.MimeType.TEXT);
-  }
-}
-
 function getCompetidorFotoData_(rawIdOrUrl) {
   var fileId = extractDriveFileId_(rawIdOrUrl);
   if (!fileId) {
@@ -614,13 +555,20 @@ function getCompetidorFotoData_(rawIdOrUrl) {
   }
 
   try {
-    var image = fetchDriveImageBytes_(fileId, 1200);
+    var file = DriveApp.getFileById(fileId);
+    var blob = file.getBlob();
+    var contentType = blob.getContentType() || 'image/jpeg';
+    if (contentType.indexOf('image/') !== 0) {
+      return { ok: false, error: 'El archivo no es una imagen.' };
+    }
+
+    var bytes = blob.getBytes();
+    var base64 = Utilities.base64Encode(bytes);
     return {
       ok: true,
       fileId: fileId,
-      contentType: image.contentType,
-      source: image.source || 'drive',
-      dataUrl: 'data:' + image.contentType + ';base64,' + Utilities.base64Encode(image.bytes)
+      contentType: contentType,
+      dataUrl: 'data:' + contentType + ';base64,' + base64
     };
   } catch (err) {
     return {
@@ -1182,128 +1130,6 @@ function handleAdminCreateCompetitor_(payload) {
   sheet.appendRow(compRow);
 
   return { ok: true, id: data.id, nombre: data.nombre };
-}
-
-function findCompetidorRowIndex_(sheet, id) {
-  var idCol = HEADERS_COMPETENCIA.indexOf('ID') + 1;
-  if (idCol <= 0) return -1;
-
-  var lastRow = sheet.getLastRow();
-  if (lastRow < 2) return -1;
-
-  var ids = sheet.getRange(2, idCol, lastRow, 1).getValues();
-  for (var i = 0; i < ids.length; i++) {
-    if (String(ids[i][0] || '').trim() === id) return i + 2;
-  }
-  return -1;
-}
-
-function competidorRowToValues_(row) {
-  return HEADERS_COMPETENCIA.map(function (header) {
-    return row[header] !== undefined && row[header] !== null ? row[header] : '';
-  });
-}
-
-function ynCompetidorAdmin_(value, defaultYes) {
-  if (value === undefined || value === null || value === '') {
-    return defaultYes ? 'Sí' : 'No';
-  }
-  if (value === true || value === 'true' || value === 1 || value === '1') return 'Sí';
-  if (value === false || value === 'false' || value === 0 || value === '0') return 'No';
-  var v = String(value).trim().toLowerCase();
-  if (v === 'sí' || v === 'si' || v === 'yes') return 'Sí';
-  if (v === 'no') return 'No';
-  return defaultYes ? 'Sí' : 'No';
-}
-
-function handleAdminSaveCompetidor_(payload) {
-  var access = assertAdminAccess_(payload.idToken || '');
-  if (!access.ok) {
-    return { ok: false, error: access.error };
-  }
-
-  var id = String(payload.id || '').trim();
-  if (!id) {
-    return { ok: false, error: 'ID del competidor requerido.' };
-  }
-
-  var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
-  var rowIndex = findCompetidorRowIndex_(sheet, id);
-  if (rowIndex < 0) {
-    return { ok: false, error: 'Competidor no encontrado.' };
-  }
-
-  var currentValues = sheet.getRange(rowIndex, 1, rowIndex, HEADERS_COMPETENCIA.length).getValues()[0];
-  var row = rowObjectFromValues_(HEADERS_COMPETENCIA, currentValues);
-
-  if (payload.nombre !== undefined) row['Nombre'] = String(payload.nombre || '').trim();
-  if (payload.documento !== undefined) row['Documento'] = String(payload.documento || '').trim();
-  if (payload.edad !== undefined) row['Edad'] = String(payload.edad || '').trim();
-  if (payload.ciudad !== undefined) row['Ciudad'] = String(payload.ciudad || '').trim();
-  if (payload.celular !== undefined) row['Celular'] = String(payload.celular || '').trim();
-  if (payload.correo !== undefined) row['Correo'] = String(payload.correo || '').trim().toLowerCase();
-  if (payload.representa !== undefined) row['Representa'] = String(payload.representa || '').trim();
-  if (payload.rol !== undefined) row['Rol'] = String(payload.rol || '').trim();
-  if (payload.experienciaCafe !== undefined) {
-    row['Experiencia café'] = String(payload.experienciaCafe || '').trim();
-  }
-  if (payload.experienciaSwitch !== undefined) {
-    row['Experiencia Switch'] = String(payload.experienciaSwitch || '').trim();
-  }
-  if (payload.torneosPrevios !== undefined) {
-    row['Torneos previos'] = String(payload.torneosPrevios || '').trim();
-  }
-  if (payload.observaciones !== undefined) row['Observaciones'] = String(payload.observaciones || '').trim();
-  if (payload.estadoPago !== undefined) row['Estado pago'] = String(payload.estadoPago || '').trim();
-  if (payload.cupoConfirmado !== undefined) {
-    row['Cupo confirmado'] = ynCompetidorAdmin_(payload.cupoConfirmado, true);
-  }
-  if (payload.habilitado !== undefined) {
-    row['Habilitado'] = ynCompetidorAdmin_(payload.habilitado, true);
-  }
-  if (payload.notasAdmin !== undefined) row['Notas admin'] = String(payload.notasAdmin || '').trim();
-
-  if (payload.fotoBase64) {
-    var fotoUrl = saveFileToDriveFolder_(
-      id,
-      payload.fotoNombre || 'foto-participante.jpg',
-      payload.fotoTipo || 'image/jpeg',
-      payload.fotoBase64,
-      DRIVE_FOTOS_FOLDER_NAME,
-      'foto'
-    );
-    if (fotoUrl) {
-      row['Foto participante enlace Drive'] = fotoUrl;
-      row['Foto participante nombre'] = String(payload.fotoNombre || 'foto-participante.jpg').trim();
-      row['Foto participante tipo'] = String(payload.fotoTipo || 'image/jpeg').trim();
-    }
-  } else if (payload.fotoEnlace !== undefined) {
-    row['Foto participante enlace Drive'] = String(payload.fotoEnlace || '').trim();
-  }
-
-  if (!String(row['Nombre'] || '').trim()) {
-    return { ok: false, error: 'El nombre es obligatorio.' };
-  }
-  if (!String(row['Correo'] || '').trim()) {
-    return { ok: false, error: 'El correo es obligatorio.' };
-  }
-  if (!String(row['Celular'] || '').trim()) {
-    return { ok: false, error: 'El celular es obligatorio.' };
-  }
-
-  var correoCheck = String(row['Correo'] || '').trim();
-  var documentoCheck = String(row['Documento'] || '').trim();
-  if (findDuplicateInSheet_(sheet, HEADERS_COMPETENCIA, correoCheck, documentoCheck || null, id)) {
-    return { ok: false, error: 'Ya existe otro competidor con este correo o documento.' };
-  }
-
-  sheet.getRange(rowIndex, 1, rowIndex, HEADERS_COMPETENCIA.length).setValues([competidorRowToValues_(row)]);
-
-  return {
-    ok: true,
-    id: id,
-    competidor: sanitizeCompetenciaRow_(row)
-  };
 }
 
 function handleAdminCreateFeria_(payload) {
