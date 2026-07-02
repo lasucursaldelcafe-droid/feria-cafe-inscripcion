@@ -12,7 +12,8 @@
 
   var deps = {
     buildAdminUrl: null,
-    fetchJson: null
+    fetchJson: null,
+    loadPhoto: null
   };
 
   function clone(obj) {
@@ -38,7 +39,7 @@
       id: 'portrait-classic',
       name: 'Retrato clásico',
       description: 'Foto grande arriba, texto abajo (estilo Instagram 3:4).',
-      background: { stops: ['#2a1a12', '#4a2f18', '#120d0a'] },
+      background: { stops: ['#1a0f0a', '#3d2618', '#0c0806'], accent: '#e8a84c' },
       safeMargin: 48,
       zones: baseZones()
     },
@@ -46,7 +47,7 @@
       id: 'portrait-compact',
       name: 'Retrato compacto',
       description: 'Más espacio para perfil; foto un poco más baja.',
-      background: { stops: ['#24160f', '#3d2818', '#0f0a08'] },
+      background: { stops: ['#150d08', '#322018', '#080504'], accent: '#d4a054' },
       safeMargin: 56,
       zones: (function () {
         var z = baseZones();
@@ -63,7 +64,7 @@
       id: 'photo-hero',
       name: 'Foto héroe',
       description: 'Foto casi a pantalla completa; texto en franja inferior.',
-      background: { stops: ['#1a100c', '#2a1a12', '#0a0604'] },
+      background: { stops: ['#0a0604', '#241610', '#050302'], accent: '#f0c878' },
       safeMargin: 40,
       zones: [
         { id: 'photo', label: 'Foto', type: 'photo', x: 0, y: 0, w: W, h: 1180, radius: 0, faceY: 0.22 },
@@ -79,7 +80,7 @@
       id: 'split-left',
       name: 'Dividido izquierda',
       description: 'Foto a la izquierda; datos a la derecha.',
-      background: { stops: ['#2c1c14', '#45301e', '#110c09'] },
+      background: { stops: ['#1c120c', '#3a2818', '#0a0705'], accent: '#e8b45c' },
       safeMargin: 44,
       zones: [
         { id: 'kicker', label: 'Encabezado', type: 'text', field: 'kicker', x: 48, y: 40, w: 984, h: 40, fontSize: 38, fontWeight: '800', color: '#f6ead8', align: 'left', maxLines: 1 },
@@ -96,7 +97,7 @@
       id: 'minimal-center',
       name: 'Minimal centrado',
       description: 'Foto mediana centrada; mucho aire alrededor.',
-      background: { stops: ['#1f1410', '#2e2016', '#0d0907'] },
+      background: { stops: ['#120c08', '#2a1c12', '#060403'], accent: '#c9a066' },
       safeMargin: 72,
       zones: [
         { id: 'kicker', label: 'Encabezado', type: 'text', field: 'kicker', x: 72, y: 56, w: 936, h: 40, fontSize: 34, fontWeight: '800', color: '#f6ead8', align: 'center', maxLines: 1 },
@@ -111,7 +112,7 @@
       id: 'bold-footer',
       name: 'Pie destacado',
       description: 'Foto alta; bloque inferior amplio para perfil.',
-      background: { stops: ['#261810', '#4a3020', '#100a07'] },
+      background: { stops: ['#180f0a', '#422818', '#080504'], accent: '#f5d9a8' },
       safeMargin: 48,
       zones: [
         { id: 'photo', label: 'Foto', type: 'photo', x: 48, y: 48, w: 984, h: 860, radius: 30, faceY: 0.26 },
@@ -232,32 +233,51 @@
     });
   }
 
+  function tryLoadPhotoUrls(urls, index) {
+    if (index >= urls.length) return Promise.resolve(null);
+    return loadCanvasImage(urls[index]).then(function (img) {
+      if (img && img.width > 0) return img;
+      return tryLoadPhotoUrls(urls, index + 1);
+    });
+  }
+
+  function drivePhotoCandidates(fileId, driveUrl) {
+    var id = encodeURIComponent(fileId);
+    var list = [
+      driveThumb(driveUrl, 1600),
+      'https://drive.google.com/uc?export=view&id=' + id,
+      'https://drive.google.com/thumbnail?id=' + id + '&sz=w1600',
+      'https://lh3.googleusercontent.com/d/' + id + '=w1600'
+    ];
+    var seen = {};
+    return list.filter(function (url) {
+      if (!url || seen[url]) return false;
+      seen[url] = true;
+      return true;
+    });
+  }
+
   function loadCompetitorPhoto(row) {
+    if (deps.loadPhoto) return deps.loadPhoto(row);
+
     var driveUrl = val(row, ['Foto participante enlace Drive']);
     var fileId = driveFileId(driveUrl);
-    if (!fileId || !deps.buildAdminUrl) return Promise.resolve(null);
+    if (!fileId) return Promise.resolve(null);
 
-    var photoUrl = deps.buildAdminUrl('competidor_foto', { id: fileId });
-    return fetch(photoUrl, { method: 'GET', mode: 'cors', cache: 'no-store' })
-      .then(function (res) {
-        if (!res.ok) return null;
-        var type = (res.headers.get('content-type') || '').toLowerCase();
-        if (type.indexOf('image/') !== 0) return null;
-        return res.blob();
-      })
-      .catch(function () { return null; })
-      .then(function (blob) {
-        if (blob && blob.size > 0) {
-          var objectUrl = URL.createObjectURL(blob);
-          return loadCanvasImage(objectUrl, { revokeObjectUrl: objectUrl });
+    var dataUrlEndpoint = deps.buildAdminUrl
+      ? deps.buildAdminUrl('competidor_foto_data', { id: fileId })
+      : '';
+
+    if (dataUrlEndpoint && deps.fetchJson) {
+      return deps.fetchJson(dataUrlEndpoint).then(function (res) {
+        if (res && res.ok && res.dataUrl) {
+          return loadCanvasImage(res.dataUrl);
         }
-        var dataUrlEndpoint = deps.buildAdminUrl('competidor_foto_data', { id: fileId });
-        if (!dataUrlEndpoint || !deps.fetchJson) return loadCanvasImage(driveThumb(driveUrl, 1600));
-        return deps.fetchJson(dataUrlEndpoint).then(function (res) {
-          if (res && res.ok && res.dataUrl) return loadCanvasImage(res.dataUrl);
-          return loadCanvasImage(driveThumb(driveUrl, 1600));
-        });
+        return tryLoadPhotoUrls(drivePhotoCandidates(fileId, driveUrl), 0);
       });
+    }
+
+    return tryLoadPhotoUrls(drivePhotoCandidates(fileId, driveUrl), 0);
   }
 
   function roundedRect(ctx, x, y, w, h, r) {
@@ -276,24 +296,53 @@
   }
 
   function drawBackground(ctx, layout) {
-    var stops = (layout.background && layout.background.stops) || ['#2a1a12', '#4a2f18', '#120d0a'];
-    var bg = ctx.createLinearGradient(0, 0, W, H);
+    var stops = (layout.background && layout.background.stops) || ['#1a0f0a', '#3d2618', '#0c0806'];
+    var accent = (layout.background && layout.background.accent) || '#e8a84c';
+    var margin = layout.safeMargin || 48;
+
+    var bg = ctx.createLinearGradient(0, 0, W * 0.3, H);
     bg.addColorStop(0, stops[0]);
-    bg.addColorStop(0.5, stops[1] || stops[0]);
+    bg.addColorStop(0.45, stops[1] || stops[0]);
     bg.addColorStop(1, stops[2] || stops[1] || stops[0]);
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
-    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    var vignette = ctx.createRadialGradient(W / 2, H * 0.45, H * 0.15, W / 2, H * 0.5, H * 0.95);
+    vignette.addColorStop(0, 'rgba(0,0,0,0)');
+    vignette.addColorStop(1, 'rgba(0,0,0,0.42)');
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
     ctx.beginPath();
-    ctx.arc(W - 60, 100, 220, 0, Math.PI * 2);
+    ctx.arc(W - 80, 120, 260, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(70, H - 80, 200, 0, Math.PI * 2);
+    ctx.arc(60, H - 60, 220, 0, Math.PI * 2);
     ctx.fill();
+
+    ctx.strokeStyle = 'rgba(232,168,76,0.22)';
+    ctx.lineWidth = 1;
+    roundedRect(ctx, margin - 8, margin - 8, W - (margin - 8) * 2, H - (margin - 8) * 2, 20);
+    ctx.stroke();
+
+    ctx.strokeStyle = accent;
+    ctx.globalAlpha = 0.55;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(margin, margin - 4);
+    ctx.lineTo(W - margin, margin - 4);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    var shine = ctx.createLinearGradient(0, 0, 0, H * 0.35);
+    shine.addColorStop(0, 'rgba(255,255,255,0.06)');
+    shine.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = shine;
+    ctx.fillRect(0, 0, W, H * 0.35);
   }
 
-  function drawPhoto(ctx, img, zone) {
+  function drawPhoto(ctx, img, zone, accent) {
     var x = zone.x;
     var y = zone.y;
     var w = zone.w;
@@ -304,13 +353,14 @@
     ctx.clip();
 
     var grd = ctx.createLinearGradient(x, y, x + w, y + h);
-    grd.addColorStop(0, '#3b291f');
-    grd.addColorStop(1, '#14100d');
+    grd.addColorStop(0, '#4a3224');
+    grd.addColorStop(0.5, '#2a1c14');
+    grd.addColorStop(1, '#0f0a08');
     ctx.fillStyle = grd;
     ctx.fillRect(x, y, w, h);
 
     if (img) {
-      var scale = Math.min(w / img.width, h / img.height);
+      var scale = Math.max(w / img.width, h / img.height);
       var dw = img.width * scale;
       var dh = img.height * scale;
       var dx = x + (w - dw) / 2;
@@ -319,12 +369,35 @@
         dy = y + Math.max(0, (h - dh) * (zone.faceY != null ? zone.faceY : 0.28));
       }
       ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, dw, dh);
+
+      var photoShade = ctx.createLinearGradient(x, y + h * 0.55, x, y + h);
+      photoShade.addColorStop(0, 'rgba(0,0,0,0)');
+      photoShade.addColorStop(1, 'rgba(0,0,0,0.35)');
+      ctx.fillStyle = photoShade;
+      ctx.fillRect(x, y, w, h);
     } else {
-      ctx.fillStyle = 'rgba(255,255,255,0.75)';
-      ctx.font = '700 36px Inter, Arial, sans-serif';
+      ctx.fillStyle = 'rgba(246,234,216,0.55)';
+      ctx.font = '600 32px Inter, Arial, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('Foto', x + w / 2, y + h / 2);
+      ctx.fillText('Sin foto', x + w / 2, y + h / 2 - 8);
+      ctx.font = '500 20px Inter, Arial, sans-serif';
+      ctx.fillStyle = 'rgba(246,234,216,0.4)';
+      ctx.fillText('Vincula Drive en el perfil', x + w / 2, y + h / 2 + 24);
     }
+    ctx.restore();
+
+    ctx.strokeStyle = accent || 'rgba(232,168,76,0.55)';
+    ctx.lineWidth = 3;
+    roundedRect(ctx, x + 1.5, y + 1.5, w - 3, h - 3, Math.max(0, r - 2));
+    ctx.stroke();
+  }
+
+  function withTextShadow(ctx, fn) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.55)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 3;
+    fn();
     ctx.restore();
   }
 
@@ -360,6 +433,7 @@
 
   function renderCanvas(row, layout) {
     layout = layout || loadLayout();
+    var accent = (layout.background && layout.background.accent) || '#e8a84c';
     return loadCompetitorPhoto(row).then(function (img) {
       var canvas = document.createElement('canvas');
       canvas.width = W;
@@ -369,37 +443,54 @@
 
       layout.zones.forEach(function (zone) {
         if (zone.type === 'overlay') {
-          ctx.fillStyle = zone.color || 'rgba(0,0,0,0.4)';
+          var ov = ctx.createLinearGradient(zone.x, zone.y, zone.x, zone.y + zone.h);
+          ov.addColorStop(0, 'rgba(0,0,0,0)');
+          ov.addColorStop(0.35, zone.color || 'rgba(0,0,0,0.35)');
+          ov.addColorStop(1, zone.color || 'rgba(0,0,0,0.72)');
+          ctx.fillStyle = ov;
           ctx.fillRect(zone.x, zone.y, zone.w, zone.h);
           return;
         }
         if (zone.type === 'photo') {
-          drawPhoto(ctx, img, zone);
+          drawPhoto(ctx, img, zone, accent);
           return;
         }
         if (zone.type === 'footer') {
-          ctx.fillStyle = 'rgba(0,0,0,0.32)';
+          var fg = ctx.createLinearGradient(zone.x, zone.y, zone.x, zone.y + zone.h);
+          fg.addColorStop(0, 'rgba(0,0,0,0.15)');
+          fg.addColorStop(1, 'rgba(0,0,0,0.45)');
+          ctx.fillStyle = fg;
           roundedRect(ctx, zone.x, zone.y, zone.w, zone.h, zone.radius || 16);
           ctx.fill();
-          ctx.fillStyle = zone.color || '#f6ead8';
-          ctx.font = (zone.fontWeight || '700') + ' ' + (zone.fontSize || 24) + 'px Inter, Arial, sans-serif';
-          wrapText(ctx, zone.text || fieldText('footer', row, zone), Object.assign({}, zone, { y: zone.y + zone.h / 2 - 12, h: zone.h }));
+          ctx.strokeStyle = 'rgba(232,168,76,0.35)';
+          ctx.lineWidth = 1;
+          roundedRect(ctx, zone.x + 1, zone.y + 1, zone.w - 2, zone.h - 2, zone.radius || 15);
+          ctx.stroke();
+          withTextShadow(ctx, function () {
+            ctx.fillStyle = zone.color || '#f6ead8';
+            ctx.font = (zone.fontWeight || '700') + ' ' + (zone.fontSize || 24) + 'px Inter, Arial, sans-serif';
+            wrapText(ctx, zone.text || fieldText('footer', row, zone), Object.assign({}, zone, { y: zone.y + zone.h / 2 - 12, h: zone.h }));
+          });
           return;
         }
         if (zone.type === 'profileLines') {
-          ctx.fillStyle = zone.color || '#fff';
-          ctx.font = (zone.fontWeight || '500') + ' ' + (zone.fontSize || 24) + 'px Inter, Arial, sans-serif';
-          var lines = competitorProfileLines(row).slice(0, zone.maxLines || 4);
-          var block = Object.assign({}, zone);
-          lines.forEach(function (line, idx) {
-            wrapText(ctx, line, Object.assign({}, block, { y: zone.y + idx * (zone.lineHeight || 32), maxLines: 2 }));
+          withTextShadow(ctx, function () {
+            ctx.fillStyle = zone.color || '#fff';
+            ctx.font = (zone.fontWeight || '500') + ' ' + (zone.fontSize || 24) + 'px Inter, Arial, sans-serif';
+            var lines = competitorProfileLines(row).slice(0, zone.maxLines || 4);
+            var block = Object.assign({}, zone);
+            lines.forEach(function (line, idx) {
+              wrapText(ctx, line, Object.assign({}, block, { y: zone.y + idx * (zone.lineHeight || 32), maxLines: 2 }));
+            });
           });
           return;
         }
         if (zone.type === 'text') {
-          ctx.fillStyle = zone.color || '#fff';
-          ctx.font = (zone.fontWeight || '600') + ' ' + (zone.fontSize || 24) + 'px Inter, Arial, sans-serif';
-          wrapText(ctx, fieldText(zone.field, row, zone), zone);
+          withTextShadow(ctx, function () {
+            ctx.fillStyle = zone.color || '#fff';
+            ctx.font = (zone.fontWeight || '600') + ' ' + (zone.fontSize || 24) + 'px Inter, Arial, sans-serif';
+            wrapText(ctx, fieldText(zone.field, row, zone), zone);
+          });
         }
       });
 
@@ -426,6 +517,7 @@
     var layout = loadLayout();
     var selectedZoneId = layout.zones[0] ? layout.zones[0].id : '';
     var dragState = null;
+    var showGuides = true;
     var previewRow = options.sampleRow || sampleRow();
 
     container.innerHTML =
@@ -434,11 +526,16 @@
           '<label class="png-layout-editor__field">Plantilla' +
             '<select id="pngLayoutTemplate"></select>' +
           '</label>' +
+          '<label class="admin-toggle png-layout-editor__toggle">' +
+            '<input type="checkbox" id="pngLayoutShowGuides" checked> Líneas guía' +
+          '</label>' +
           '<button type="button" class="admin-btn admin-btn--secondary" id="pngLayoutReset">Restablecer plantilla</button>' +
           '<button type="button" class="admin-btn admin-btn--primary" id="pngLayoutSave">Guardar plantilla</button>' +
+          '<button type="button" class="admin-btn admin-btn--primary" id="pngLayoutSaveGenerate">Guardar y generar todos</button>' +
           '<button type="button" class="admin-btn admin-btn--secondary" id="pngLayoutPreviewPng">Vista previa PNG</button>' +
         '</div>' +
-        '<p class="admin-table-meta png-layout-editor__hint">Arrastra cada zona en el lienzo. Los márgenes seguros aparecen en línea punteada. Esta plantilla se usa para <strong>todos</strong> los PNG de competidores.</p>' +
+        '<p class="admin-table-meta png-layout-editor__hint">Arrastra cada zona en el lienzo. Las <strong>líneas guía</strong> marcan márgenes seguros, centro y tercios. Esta plantilla se usa para <strong>todos</strong> los PNG.</p>' +
+        '<div id="pngLayoutStatus" class="admin-create-result" hidden role="status"></div>' +
         '<div class="png-layout-editor__body">' +
           '<div class="png-layout-editor__stage-wrap">' +
             '<div class="png-layout-editor__stage" id="pngLayoutStage"></div>' +
@@ -561,19 +658,75 @@
       return Math.max(min, Math.min(max, n));
     }
 
+    function renderGuides(stageEl, margin) {
+      var guides = document.createElement('div');
+      guides.className = 'png-layout-editor__guides';
+      if (!showGuides) return guides;
+
+      function line(cls, style) {
+        var el = document.createElement('div');
+        el.className = 'png-layout-editor__guide-line ' + cls;
+        Object.keys(style).forEach(function (k) { el.style[k] = style[k]; });
+        guides.appendChild(el);
+      }
+
+      function label(text, style) {
+        var el = document.createElement('span');
+        el.className = 'png-layout-editor__guide-label';
+        el.textContent = text;
+        Object.keys(style).forEach(function (k) { el.style[k] = style[k]; });
+        guides.appendChild(el);
+      }
+
+      var s = PREVIEW_SCALE;
+      var safeL = Math.round(margin * s);
+      var safeT = Math.round(margin * s);
+      var safeW = Math.round((W - margin * 2) * s);
+      var safeH = Math.round((H - margin * 2) * s);
+
+      line('png-layout-editor__guide-line--safe', {
+        left: safeL + 'px', top: safeT + 'px', width: safeW + 'px', height: safeH + 'px'
+      });
+
+      label('margen ' + margin + 'px', { left: (safeL + 4) + 'px', top: (safeT - 18) + 'px' });
+
+      [W / 3, (W * 2) / 3].forEach(function (x) {
+        line('png-layout-editor__guide-line--third-v', {
+          left: Math.round(x * s) + 'px', top: '0', width: '1px', height: Math.round(H * s) + 'px'
+        });
+      });
+      [H / 3, (H * 2) / 3].forEach(function (y) {
+        line('png-layout-editor__guide-line--third-h', {
+          left: '0', top: Math.round(y * s) + 'px', width: Math.round(W * s) + 'px', height: '1px'
+        });
+      });
+
+      line('png-layout-editor__guide-line--center-v', {
+        left: Math.round((W / 2) * s) + 'px', top: '0', width: '1px', height: Math.round(H * s) + 'px'
+      });
+      line('png-layout-editor__guide-line--center-h', {
+        left: '0', top: Math.round((H / 2) * s) + 'px', width: Math.round(W * s) + 'px', height: '1px'
+      });
+
+      var zone = layout.zones.filter(function (z) { return z.id === selectedZoneId; })[0];
+      if (zone) {
+        var m = marginsFor(zone);
+        label('↑ ' + m.top, { left: Math.round(zone.x * s) + 'px', top: Math.round(zone.y * s - 16) + 'px' });
+        label('← ' + m.left, { left: Math.round(zone.x * s - 4) + 'px', top: Math.round(zone.y * s + 4) + 'px', transform: 'translateX(-100%)' });
+        label(m.right + ' →', { left: Math.round((zone.x + zone.w) * s + 4) + 'px', top: Math.round(zone.y * s + 4) + 'px' });
+        label('↓ ' + m.bottom, { left: Math.round(zone.x * s) + 'px', top: Math.round((zone.y + zone.h) * s + 2) + 'px' });
+      }
+
+      return guides;
+    }
+
     function renderStage() {
       var margin = layout.safeMargin || 48;
       stage.innerHTML = '';
       stage.style.width = Math.round(W * PREVIEW_SCALE) + 'px';
       stage.style.height = Math.round(H * PREVIEW_SCALE) + 'px';
 
-      var safe = document.createElement('div');
-      safe.className = 'png-layout-editor__safe';
-      safe.style.left = Math.round(margin * PREVIEW_SCALE) + 'px';
-      safe.style.top = Math.round(margin * PREVIEW_SCALE) + 'px';
-      safe.style.width = Math.round((W - margin * 2) * PREVIEW_SCALE) + 'px';
-      safe.style.height = Math.round((H - margin * 2) * PREVIEW_SCALE) + 'px';
-      stage.appendChild(safe);
+      stage.appendChild(renderGuides(stage, margin));
 
       layout.zones.forEach(function (zone) {
         var el = document.createElement('button');
@@ -622,6 +775,8 @@
     function refreshPreviewCanvas() {
       var canvas = container.querySelector('#pngLayoutPreviewCanvas');
       if (!canvas) return;
+      var row = options.getPreviewRow ? options.getPreviewRow() : previewRow;
+      previewRow = row || previewRow;
       renderCanvas(previewRow, layout).then(function (source) {
         var ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, W, H);
@@ -630,7 +785,46 @@
         var dataUrl = source.toDataURL('image/png');
         stage.style.backgroundImage = 'url(' + dataUrl + ')';
         stage.style.backgroundSize = '100% 100%';
-      }).catch(function () { /* sin foto de ejemplo */ });
+      }).catch(function () { /* sin foto */ });
+    }
+
+    function saveLayoutAndMaybeGenerate(generateAll) {
+      layout.templateId = templateSelect.value;
+      saveLayout(layout);
+      var statusEl = container.querySelector('#pngLayoutStatus');
+      if (!generateAll) {
+        if (statusEl) {
+          statusEl.innerHTML = '<p><strong>Plantilla guardada.</strong> Todos los PNG usarán este diseño.</p>';
+          statusEl.hidden = false;
+        }
+        return Promise.resolve();
+      }
+      if (!options.onGenerateAll) {
+        if (statusEl) {
+          statusEl.innerHTML = '<p><strong>Plantilla guardada.</strong> Usa «Descargar todas» en Imágenes PNG.</p>';
+          statusEl.hidden = false;
+        }
+        return Promise.resolve();
+      }
+      var btn = container.querySelector('#pngLayoutSaveGenerate');
+      if (btn) { btn.disabled = true; btn.textContent = 'Generando…'; }
+      if (statusEl) {
+        statusEl.innerHTML = '<p>Guardando plantilla y generando PNG de todos los competidores…</p>';
+        statusEl.hidden = false;
+      }
+      return options.onGenerateAll().then(function (count) {
+        if (statusEl) {
+          statusEl.innerHTML = '<p><strong>Listo:</strong> plantilla guardada y ' + count + ' PNG generados.</p>';
+          statusEl.hidden = false;
+        }
+      }).catch(function (err) {
+        if (statusEl) {
+          statusEl.innerHTML = '<p class="admin-create-result--error">' + escapeHtml(err.message || 'Error al generar PNG.') + '</p>';
+          statusEl.hidden = false;
+        }
+      }).finally(function () {
+        if (btn) { btn.disabled = false; btn.textContent = 'Guardar y generar todos'; }
+      });
     }
 
     function renderAll() {
@@ -644,10 +838,20 @@
       applyTemplate(templateSelect.value);
     });
 
+    var guidesToggle = container.querySelector('#pngLayoutShowGuides');
+    if (guidesToggle) {
+      guidesToggle.addEventListener('change', function () {
+        showGuides = guidesToggle.checked;
+        renderStage();
+      });
+    }
+
     container.querySelector('#pngLayoutSave').addEventListener('click', function () {
-      layout.templateId = templateSelect.value;
-      saveLayout(layout);
-      alert('Plantilla guardada. Todos los PNG usarán este diseño.');
+      saveLayoutAndMaybeGenerate(false);
+    });
+
+    container.querySelector('#pngLayoutSaveGenerate').addEventListener('click', function () {
+      saveLayoutAndMaybeGenerate(true);
     });
 
     container.querySelector('#pngLayoutReset').addEventListener('click', function () {
@@ -686,6 +890,7 @@
   function init(options) {
     deps.buildAdminUrl = options.buildAdminUrl;
     deps.fetchJson = options.fetchJson;
+    deps.loadPhoto = options.loadPhoto || null;
   }
 
   global.AdminCompetidorPng = {
