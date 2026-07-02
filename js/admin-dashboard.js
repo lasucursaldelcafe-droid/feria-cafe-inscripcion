@@ -605,7 +605,15 @@
       .catch(function () { return null; });
   }
 
-  function loadCompetitorPhotoForCanvas(row) {
+  function normalizeCompetidorId(id) {
+    return String(id || '').trim();
+  }
+
+  function loadCompetitorPhotoForCanvas(row, inlinePhotoDataUrl) {
+    if (inlinePhotoDataUrl) {
+      return loadCanvasImage(inlinePhotoDataUrl);
+    }
+
     var driveUrl = val(row, ['Foto participante enlace Drive']);
     var fileId = driveFileId(driveUrl);
     if (!fileId) return Promise.resolve(null);
@@ -751,8 +759,9 @@
     return y + lines.length * lineHeight;
   }
 
-  function createCompetitorCardCanvas(row) {
-    return loadCompetitorPhotoForCanvas(row).then(function (img) {
+  function createCompetitorCardCanvas(row, options) {
+    options = options || {};
+    return loadCompetitorPhotoForCanvas(row, options.inlinePhotoDataUrl).then(function (img) {
       var W = 1080;
       var H = 1440;
       var PAD = 48;
@@ -851,12 +860,12 @@
     }
   }
 
-  function downloadCompetitorCard(row, button) {
+  function downloadCompetitorCard(row, button, options) {
     if (button) {
       button.disabled = true;
       button.textContent = 'Generando…';
     }
-    createCompetitorCardCanvas(row).then(function (canvas) {
+    createCompetitorCardCanvas(row, options).then(function (canvas) {
       var name = sanitizeFilename(val(row, ['Nombre']));
       downloadCanvas(canvas, 'reto-v60-purist-marbella-' + name + '.png');
     }).catch(function (err) {
@@ -905,23 +914,67 @@
   }
 
   function findCompetidorRowById(id) {
-    if (!id || !lastDashboardData) return null;
+    var targetId = normalizeCompetidorId(id);
+    if (!targetId || !lastDashboardData) return null;
     var rows = pickRows(lastDashboardData, 'allCompetencia');
     for (var i = 0; i < rows.length; i++) {
-      if (rows[i]['ID'] === id) return rows[i];
+      if (normalizeCompetidorId(rows[i]['ID']) === targetId) return rows[i];
     }
     return null;
   }
 
   function updateLocalCompetidor(updatedRow) {
-    if (!lastDashboardData || !updatedRow || !updatedRow['ID']) return;
+    if (!lastDashboardData || !updatedRow) return;
+    var updatedId = normalizeCompetidorId(updatedRow['ID']);
+    if (!updatedId) return;
     var rows = lastDashboardData.allCompetencia || [];
     for (var i = 0; i < rows.length; i++) {
-      if (rows[i]['ID'] === updatedRow['ID']) {
+      if (normalizeCompetidorId(rows[i]['ID']) === updatedId) {
         rows[i] = Object.assign({}, rows[i], updatedRow);
         break;
       }
     }
+  }
+
+  function getCompetidorRowFromEditorForm() {
+    var id = normalizeCompetidorId(document.getElementById('competidorEditId') && document.getElementById('competidorEditId').value);
+    if (!id) return null;
+    var base = findCompetidorRowById(id);
+    if (!base) return null;
+
+    return Object.assign({}, base, {
+      'ID': id,
+      'Nombre': ((document.getElementById('competidorEditNombre') || {}).value || '').trim(),
+      'Documento': ((document.getElementById('competidorEditDocumento') || {}).value || '').trim(),
+      'Edad': ((document.getElementById('competidorEditEdad') || {}).value || '').trim(),
+      'Correo': ((document.getElementById('competidorEditCorreo') || {}).value || '').trim().toLowerCase(),
+      'Celular': ((document.getElementById('competidorEditCelular') || {}).value || '').trim(),
+      'Ciudad': ((document.getElementById('competidorEditCiudad') || {}).value || '').trim(),
+      'Representa': ((document.getElementById('competidorEditRepresenta') || {}).value || '').trim(),
+      'Rol': ((document.getElementById('competidorEditRol') || {}).value || '').trim(),
+      'Experiencia café': ((document.getElementById('competidorEditExpCafe') || {}).value || '').trim(),
+      'Experiencia Switch': ((document.getElementById('competidorEditExpV60') || {}).value || '').trim(),
+      'Torneos previos': ((document.getElementById('competidorEditTorneos') || {}).value || '').trim(),
+      'Foto participante enlace Drive': ((document.getElementById('competidorEditFotoEnlace') || {}).value || '').trim(),
+      'Estado pago': ((document.getElementById('competidorEditEstadoPago') || {}).value || '').trim(),
+      'Cupo confirmado': document.getElementById('competidorEditCupoConfirmado') && document.getElementById('competidorEditCupoConfirmado').checked ? 'Sí' : 'No',
+      'Habilitado': document.getElementById('competidorEditHabilitado') && document.getElementById('competidorEditHabilitado').checked ? 'Sí' : 'No',
+      'Observaciones': ((document.getElementById('competidorEditObservaciones') || {}).value || '').trim(),
+      'Notas admin': ((document.getElementById('competidorEditNotas') || {}).value || '').trim()
+    });
+  }
+
+  function refreshCompetidorEditorIfOpen() {
+    if (!selectedCompetidorId) return;
+    var panel = document.getElementById('competidorEditorPanel');
+    if (!panel || panel.hidden) return;
+    var row = findCompetidorRowById(selectedCompetidorId);
+    if (!row) {
+      closeCompetidorEditor();
+      return;
+    }
+    fillCompetidorEditorForm(row);
+    updateCompetidorEditorPreview(row);
   }
 
   function renderCompetidorDashboard(rows) {
@@ -941,7 +994,8 @@
 
     root.innerHTML = dashboardCompetidorRows.map(function (row) {
       var id = val(row, ['ID']);
-      var selected = id && id === selectedCompetidorId ? ' admin-competidor-hero--selected' : '';
+      var selected = id && normalizeCompetidorId(id) === normalizeCompetidorId(selectedCompetidorId)
+        ? ' admin-competidor-hero--selected' : '';
       return '<button type="button" class="admin-competidor-hero' + selected + '" data-competidor-id="' + escapeHtml(id) + '">' +
         renderCompetidorHeroInner(row) +
         '<div class="admin-competidor-hero__actions">' +
@@ -998,7 +1052,7 @@
 
   function openCompetidorEditor(row) {
     if (!row) return;
-    selectedCompetidorId = row['ID'] || '';
+    selectedCompetidorId = normalizeCompetidorId(row['ID']);
     renderCompetidorDashboard(pickRows(lastDashboardData || {}, 'allCompetencia'));
 
     var panel = document.getElementById('competidorEditorPanel');
@@ -1031,38 +1085,58 @@
     var pngBtn = document.querySelector('.admin-competidor-png-editor');
     if (pngBtn) {
       pngBtn.addEventListener('click', function () {
-        var id = document.getElementById('competidorEditId').value.trim();
-        var row = findCompetidorRowById(id);
-        if (row) downloadCompetitorCard(row, pngBtn);
+        var row = getCompetidorRowFromEditorForm();
+        if (!row) return;
+        var fileInput = document.getElementById('competidorEditFotoFile');
+        var file = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+        if (file) {
+          readFileAsDataUrl(file).then(function (dataUrl) {
+            downloadCompetitorCard(row, pngBtn, { inlinePhotoDataUrl: dataUrl });
+          }).catch(function () {
+            downloadCompetitorCard(row, pngBtn);
+          });
+        } else {
+          downloadCompetitorCard(row, pngBtn);
+        }
       });
     }
 
     var previewFields = [
       'competidorEditNombre', 'competidorEditRepresenta', 'competidorEditRol',
       'competidorEditExpCafe', 'competidorEditExpV60', 'competidorEditTorneos',
-      'competidorEditCiudad', 'competidorEditFotoEnlace'
+      'competidorEditCiudad', 'competidorEditFotoEnlace', 'competidorEditEstadoPago',
+      'competidorEditCupoConfirmado', 'competidorEditHabilitado'
     ];
     previewFields.forEach(function (fieldId) {
       var el = document.getElementById(fieldId);
       if (!el) return;
-      el.addEventListener('input', function () {
-        var id = document.getElementById('competidorEditId').value.trim();
-        if (!id) return;
-        var base = findCompetidorRowById(id);
-        if (!base) return;
-        var draft = Object.assign({}, base, {
-          'Nombre': document.getElementById('competidorEditNombre').value.trim(),
-          'Representa': document.getElementById('competidorEditRepresenta').value.trim(),
-          'Rol': document.getElementById('competidorEditRol').value.trim(),
-          'Experiencia café': document.getElementById('competidorEditExpCafe').value.trim(),
-          'Experiencia Switch': document.getElementById('competidorEditExpV60').value.trim(),
-          'Torneos previos': document.getElementById('competidorEditTorneos').value.trim(),
-          'Ciudad': document.getElementById('competidorEditCiudad').value.trim(),
-          'Foto participante enlace Drive': document.getElementById('competidorEditFotoEnlace').value.trim()
-        });
-        updateCompetidorEditorPreview(draft);
+      var eventName = el.type === 'checkbox' ? 'change' : 'input';
+      el.addEventListener(eventName, function () {
+        var draft = getCompetidorRowFromEditorForm();
+        if (draft) updateCompetidorEditorPreview(draft);
       });
     });
+
+    var fotoFileInput = document.getElementById('competidorEditFotoFile');
+    if (fotoFileInput) {
+      fotoFileInput.addEventListener('change', function () {
+        var draft = getCompetidorRowFromEditorForm();
+        if (!draft) return;
+        var file = fotoFileInput.files && fotoFileInput.files[0];
+        if (!file) {
+          updateCompetidorEditorPreview(draft);
+          return;
+        }
+        readFileAsDataUrl(file).then(function (dataUrl) {
+          updateCompetidorEditorPreview(draft);
+          var preview = document.getElementById('competidorEditorPreview');
+          if (!preview) return;
+          var wrap = preview.querySelector('.admin-competidor-hero__photo-wrap');
+          if (!wrap) return;
+          wrap.innerHTML = '<img class="admin-competidor-hero__photo" src="' + escapeHtml(dataUrl) + '" alt="Vista previa foto">';
+        });
+      });
+    }
 
     form.addEventListener('submit', function (event) {
       event.preventDefault();
@@ -1171,9 +1245,10 @@
       root.innerHTML = '<p class="admin-empty">Aún no hay competidores habilitados para generar imágenes.</p>';
       return;
     }
-    root.innerHTML = enabledRows.map(function (row, idx) {
+    root.innerHTML = enabledRows.map(function (row) {
       var photo = driveThumb(val(row, ['Foto participante enlace Drive']), 600);
       var name = val(row, ['Nombre']) || 'Competidor';
+      var id = val(row, ['ID']);
       var desc = competitorDescription(row) || 'Participante del reto de café filtrado.';
       return '<article class="admin-competitor-card">' +
         (photo
@@ -1183,17 +1258,18 @@
           '<h5>' + escapeHtml(name) + '</h5>' +
           '<p>' + escapeHtml(desc) + '</p>' +
           '<div class="admin-competitor-card__actions">' +
-            '<button type="button" class="admin-btn admin-btn--primary admin-competitor-png" data-competitor-idx="' + idx + '">PNG</button>' +
+            '<button type="button" class="admin-btn admin-btn--primary admin-competitor-png" data-competidor-id="' + escapeHtml(id) + '">PNG</button>' +
             (photo ? '<a class="admin-btn admin-btn--secondary" href="' + escapeHtml(val(row, ['Foto participante enlace Drive'])) + '" target="_blank" rel="noopener">Foto</a>' : '') +
           '</div>' +
         '</div>' +
       '</article>';
     }).join('');
 
-    root.querySelectorAll('.admin-competitor-png').forEach(function (btn) {
+    root.querySelectorAll('.admin-competitor-png[data-competidor-id]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var idx = parseInt(btn.getAttribute('data-competitor-idx'), 10);
-        downloadCompetitorCard(enabledRows[idx], btn);
+        var id = btn.getAttribute('data-competidor-id');
+        var row = findCompetidorRowById(id);
+        if (row) downloadCompetitorCard(row, btn);
       });
     });
 
@@ -1268,6 +1344,7 @@
     }
 
     bindToggleStatusButtons();
+    refreshCompetidorEditorIfOpen();
   }
 
   function bindAdminTabs() {

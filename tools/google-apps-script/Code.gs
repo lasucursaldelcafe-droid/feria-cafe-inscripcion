@@ -336,18 +336,28 @@ function normalizeDoc_(v) {
   return String(v || '').replace(/\D/g, '');
 }
 
-function findDuplicateInSheet_(sheet, headers, correo, documento) {
+function findDuplicateInSheet_(sheet, headers, correo, documento, exceptId) {
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return false;
 
   var correoCol = headers.indexOf('Correo') + 1;
   var docCol = headers.indexOf('Documento') + 1;
+  var idCol = headers.indexOf('ID') + 1;
   var emailNorm = normalizeEmail_(correo);
   var docNorm = documento ? normalizeDoc_(documento) : '';
+  var exceptNorm = exceptId ? String(exceptId).trim() : '';
+
+  function isExcludedRow(rowIndex) {
+    if (!exceptNorm || idCol <= 0) return false;
+    var rowId = String(sheet.getRange(rowIndex, idCol).getValue() || '').trim();
+    return rowId === exceptNorm;
+  }
 
   if (emailNorm && correoCol > 0) {
     var emails = sheet.getRange(2, correoCol, lastRow - 1, 1).getValues();
     for (var i = 0; i < emails.length; i++) {
+      var rowNum = i + 2;
+      if (isExcludedRow(rowNum)) continue;
       if (normalizeEmail_(emails[i][0]) === emailNorm) return true;
     }
   }
@@ -355,6 +365,8 @@ function findDuplicateInSheet_(sheet, headers, correo, documento) {
   if (docNorm && docCol > 0) {
     var docs = sheet.getRange(2, docCol, lastRow - 1, 1).getValues();
     for (var j = 0; j < docs.length; j++) {
+      var docRowNum = j + 2;
+      if (isExcludedRow(docRowNum)) continue;
       if (normalizeDoc_(docs[j][0]) === docNorm) return true;
     }
   }
@@ -1277,6 +1289,12 @@ function handleAdminSaveCompetidor_(payload) {
   }
   if (!String(row['Celular'] || '').trim()) {
     return { ok: false, error: 'El celular es obligatorio.' };
+  }
+
+  var correoCheck = String(row['Correo'] || '').trim();
+  var documentoCheck = String(row['Documento'] || '').trim();
+  if (findDuplicateInSheet_(sheet, HEADERS_COMPETENCIA, correoCheck, documentoCheck || null, id)) {
+    return { ok: false, error: 'Ya existe otro competidor con este correo o documento.' };
   }
 
   sheet.getRange(rowIndex, 1, rowIndex, HEADERS_COMPETENCIA.length).setValues([competidorRowToValues_(row)]);
