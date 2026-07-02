@@ -516,13 +516,39 @@
     var experienciaCafe = val(row, ['Experiencia café', 'Experiencia cafe']);
     var experienciaSwitch = val(row, ['Experiencia Switch', 'Experiencia V60']);
     var ciudad = val(row, ['Ciudad']);
+    var torneos = val(row, ['Torneos previos']);
 
     if (representa) parts.push('Representa: ' + representa);
     if (rol) parts.push('Rol: ' + rol);
     if (experienciaCafe) parts.push('Experiencia en café: ' + experienciaCafe);
-    if (experienciaSwitch) parts.push('Experiencia V60/B60: ' + experienciaSwitch);
+    if (experienciaSwitch) parts.push('Experiencia V60: ' + experienciaSwitch);
+    if (torneos) parts.push('Torneos previos: ' + torneos);
     if (ciudad) parts.push('Ciudad: ' + ciudad);
     return parts.join(' · ');
+  }
+
+  function competitorProfileLines(row) {
+    var lines = [];
+    var representa = val(row, ['Representa']);
+    var rol = val(row, ['Rol']);
+    var experienciaCafe = val(row, ['Experiencia café', 'Experiencia cafe']);
+    var experienciaSwitch = val(row, ['Experiencia Switch', 'Experiencia V60']);
+    var torneos = val(row, ['Torneos previos']);
+    var ciudad = val(row, ['Ciudad']);
+
+    if (rol || representa) {
+      lines.push((rol || 'Competidor/a') + (representa ? ' · Representa: ' + representa : ''));
+    }
+    if (experienciaCafe || experienciaSwitch) {
+      lines.push('Experiencia: ' + [
+        experienciaCafe ? 'café ' + experienciaCafe : '',
+        experienciaSwitch ? 'V60 ' + experienciaSwitch : ''
+      ].filter(Boolean).join(' · '));
+    }
+    if (torneos) lines.push('Torneos previos: ' + torneos);
+    if (ciudad) lines.push('Ciudad: ' + ciudad);
+
+    return lines.length ? lines : ['Perfil barista registrado para el Reto V60.'];
   }
 
   function sanitizeFilename(name) {
@@ -665,7 +691,6 @@
       var ctx = canvas.getContext('2d');
       var name = val(row, ['Nombre']) || 'Competidor';
       var id = val(row, ['ID']);
-      var description = competitorDescription(row);
 
       var bg = ctx.createLinearGradient(0, 0, 1080, 1350);
       bg.addColorStop(0, '#2a1a12');
@@ -685,7 +710,7 @@
       ctx.fillStyle = '#f6ead8';
       ctx.font = '800 44px Inter, Arial, sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText('RETO B60', 72, 95);
+      ctx.fillText('RETO V60', 72, 95);
 
       ctx.font = '600 28px Inter, Arial, sans-serif';
       ctx.fillStyle = 'rgba(246,234,216,0.78)';
@@ -712,7 +737,13 @@
 
       ctx.fillStyle = 'rgba(255,255,255,0.88)';
       ctx.font = '500 30px Inter, Arial, sans-serif';
-      wrapText(ctx, description || 'Participante del reto de café filtrado.', 72, afterName + 72, 936, 40, 5);
+      ctx.fillText('Perfil del barista', 72, afterName + 72);
+      var profileY = afterName + 116;
+      competitorProfileLines(row).slice(0, 5).forEach(function (line) {
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.font = '500 28px Inter, Arial, sans-serif';
+        profileY = wrapText(ctx, '• ' + line, 72, profileY, 936, 36, 2) + 6;
+      });
 
       ctx.fillStyle = 'rgba(0,0,0,0.28)';
       roundedRect(ctx, 72, 1218, 936, 72, 20);
@@ -754,7 +785,7 @@
     }
     createCompetitorCardCanvas(row).then(function (canvas) {
       var name = sanitizeFilename(val(row, ['Nombre']));
-      downloadCanvas(canvas, 'reto-b60-purist-marbella-' + name + '.png');
+      downloadCanvas(canvas, 'reto-v60-purist-marbella-' + name + '.png');
     }).catch(function (err) {
       console.error(err);
       alert('No se pudo generar el PNG con foto. Recarga el admin e intenta de nuevo.');
@@ -813,7 +844,7 @@
           return chain.then(function () {
             return createCompetitorCardCanvas(row).then(function (canvas) {
               var name = sanitizeFilename(val(row, ['Nombre']));
-              downloadCanvas(canvas, 'reto-b60-purist-marbella-' + name + '.png');
+              downloadCanvas(canvas, 'reto-v60-purist-marbella-' + name + '.png');
             });
           }).then(function () {
             return new Promise(function (resolve) { setTimeout(resolve, 350); });
