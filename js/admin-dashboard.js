@@ -293,6 +293,73 @@
     if (!result) return;
     result.innerHTML = html;
     result.hidden = false;
+    result.querySelectorAll('[data-copy]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var text = btn.getAttribute('data-copy') || '';
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(function () {
+          var label = btn.textContent;
+          btn.textContent = 'Copiado';
+          setTimeout(function () { btn.textContent = label; }, 1500);
+        });
+      });
+    });
+  }
+
+  function buildPanelLoginUrl(baseUrl, email, code) {
+    var url = (baseUrl || '').trim();
+    if (!url) {
+      url = global.SiteLinks && SiteLinks.absUrl
+        ? SiteLinks.absUrl('miStand')
+        : ((global.location.origin || 'https://la-sucursal-del-cafe.web.app') + '/mi-stand');
+    }
+    if (!/^https?:\/\//i.test(url)) {
+      url = (global.location.origin || 'https://la-sucursal-del-cafe.web.app') + url;
+    }
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    return url + sep + 'email=' + encodeURIComponent(email) + '&code=' + encodeURIComponent(code);
+  }
+
+  function renderExpositorCredentialsBox(opts) {
+    opts = opts || {};
+    var marca = opts.marca || '';
+    var id = opts.id || '';
+    var email = opts.email || '';
+    var code = opts.code || '';
+    var perfilLink = opts.perfilLink || '';
+    var panelLoginUrl = opts.panelLoginUrl || '';
+
+    var html = '<p><strong>Marca creada:</strong> ' + escapeHtml(marca) +
+      ' <span class="admin-badge admin-badge--on">ID ' + escapeHtml(id) + '</span></p>';
+
+    if (code) {
+      html += '<div class="admin-creds-box">' +
+        '<p class="admin-creds-box__title">Credenciales del expositor (compártelas por WhatsApp o correo)</p>' +
+        '<dl class="admin-creds-list">' +
+        '<div><dt>Correo</dt><dd><code>' + escapeHtml(email) + '</code> ' +
+        '<button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-copy="' + escapeHtml(email) + '">Copiar</button></dd></div>' +
+        '<div><dt>Código de acceso</dt><dd><code class="admin-creds-code">' + escapeHtml(code) + '</code> ' +
+        '<button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-copy="' + escapeHtml(code) + '">Copiar</button></dd></div>' +
+        '</dl>' +
+        '<p class="admin-creds-hint">No es una contraseña de Google: es un código de 8 letras/números solo para el panel <strong>/mi-stand</strong>.</p>' +
+        '<div class="admin-creds-actions">' +
+        '<a class="admin-btn admin-btn--primary admin-btn--sm" href="' + escapeHtml(panelLoginUrl) + '" target="_blank" rel="noopener">Abrir panel con enlace directo</a> ' +
+        '<button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-copy="' + escapeHtml(panelLoginUrl) + '">Copiar enlace</button>' +
+        '</div>' +
+        '<ol class="admin-creds-steps">' +
+        '<li>El expositor abre <strong>/mi-stand</strong> (o el enlace de arriba).</li>' +
+        '<li>Ingresa correo + código y marca <strong>Recordar en este dispositivo</strong>.</li>' +
+        '<li>Arma productos con foto y precio en «Perfil público».</li>' +
+        '<li>Pulsa <strong>Guardar y publicar perfil</strong> — sin eso no aparece en <strong>/marcas</strong>.</li>' +
+        '</ol>' +
+        '</div>';
+    }
+
+    if (perfilLink) {
+      html += '<p class="admin-creds-links"><a href="' + escapeHtml(perfilLink) + '" target="_blank" rel="noopener">Ver página pública /marcas</a></p>';
+    }
+
+    return html;
   }
 
   function tipoFromPlan(plan) {
@@ -367,19 +434,15 @@
         var perfilLink = result.perfilUrl || '';
         var panelLink = result.expositorPanelUrl || '';
         var code = result.accessCode || '';
-        var html = '<p><strong>Marca creada:</strong> ' + escapeHtml(result.marca || marca) +
-          ' <span class="admin-badge admin-badge--on">ID ' + escapeHtml(result.id || '') + '</span></p>';
-        if (code) {
-          html += '<p>Código de acceso panel expositor: <code>' + escapeHtml(code) +
-            '</code> (enviado también por correo al expositor).</p>';
-        }
-        if (perfilLink) {
-          html += '<p><a href="' + escapeHtml(perfilLink) + '" target="_blank" rel="noopener">Ver página pública</a>';
-          if (panelLink) {
-            html += ' · <a href="' + escapeHtml(panelLink) + '" target="_blank" rel="noopener">Panel expositor</a>';
-          }
-          html += '</p>';
-        }
+        var panelLoginUrl = code ? buildPanelLoginUrl(panelLink, correo, code) : panelLink;
+        var html = renderExpositorCredentialsBox({
+          marca: result.marca || marca,
+          id: result.id || '',
+          email: correo,
+          code: code,
+          perfilLink: perfilLink,
+          panelLoginUrl: panelLoginUrl
+        });
         showAdminCreateMarcaResult(html);
         resetAdminCreateMarcaForm();
         loadDashboard();

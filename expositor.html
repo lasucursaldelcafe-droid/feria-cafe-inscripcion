@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/expositor.css?v=20260701ux">
+  <link rel="stylesheet" href="css/expositor.css?v=20260703global">
 </head>
 <body class="expositor-page">
   <header class="expositor-header">
@@ -27,6 +27,8 @@
   </header>
 
   <main class="expositor-main">
+    <div id="expositorInstallBanner" class="expositor-install-wrap" aria-live="polite"></div>
+
     <section id="expositorLogin" class="expositor-login" aria-labelledby="loginTitle">
       <div class="expositor-card">
         <h2 id="loginTitle">Ingresa a tu panel</h2>
@@ -41,6 +43,12 @@
             <input type="text" id="loginAccessCode" name="accessCode" autocomplete="one-time-code" required minlength="6" maxlength="12" placeholder="Ej. AB12CD34" autocapitalize="characters" spellcheck="false">
             <p class="expositor-hint">Lo encontrarás en el correo de confirmación y en la pantalla de éxito al enviar tu solicitud.</p>
           </div>
+          <div class="expositor-field">
+            <label class="expositor-checkbox">
+              <input type="checkbox" id="loginRemember" checked>
+              Recordar en este dispositivo (no tendrás que volver a escribir el código)
+            </label>
+          </div>
           <span id="loginError" class="expositor-error" role="alert"></span>
           <button type="submit" id="loginSubmit" class="expositor-btn expositor-btn--primary">Entrar a mi panel</button>
         </form>
@@ -52,6 +60,21 @@
         <p class="expositor-toolbar__email">Sesión: <strong id="sessionEmail"></strong></p>
         <button type="button" id="logoutBtn" class="expositor-btn expositor-btn--secondary">Cerrar sesión</button>
       </div>
+
+      <article id="expositorOnboarding" class="expositor-card expositor-card--onboarding" aria-labelledby="onboardingTitle">
+        <h2 id="onboardingTitle">Cómo armar tu vitrina en la feria</h2>
+        <ol class="expositor-steps">
+          <li><strong>Completa tu perfil</strong> — frase, descripción e historia de tu emprendimiento.</li>
+          <li><strong>Sube fotos</strong> — imágenes de tu stand, productos o proceso.</li>
+          <li><strong>Agrega productos</strong> — nombre, precio, descripción y foto de cada uno (tu «copy shop» en línea).</li>
+          <li><strong>Pulsa «Guardar y publicar perfil»</strong> — sin este paso los cambios no se ven en la web.</li>
+          <li><strong>Comparte tu página</strong> — los visitantes te encuentran en <strong>/marcas</strong> con fotos y precios.</li>
+        </ol>
+        <div class="expositor-onboarding-actions">
+          <a id="onboardingPublicLink" class="expositor-btn expositor-btn--secondary" href="#" target="_blank" rel="noopener noreferrer" hidden>Ver mi página pública</a>
+          <button type="button" id="dismissOnboardingBtn" class="expositor-btn expositor-btn--primary">Entendido, empezar</button>
+        </div>
+      </article>
 
       <article class="expositor-card" aria-labelledby="standTitle">
         <h2 id="standTitle">Mi stand</h2>
@@ -149,6 +172,6 @@
   <script src="js/site-links.js?v=20260703global"></script>
   <script src="js/sheets-config.js"></script>
   <script src="js/form-submit.js"></script>
-  <script src="js/expositor-panel.js?v=20260627a"></script>
+  <script src="js/expositor-panel.js?v=20260703global"></script>
 </body>
 </html>
