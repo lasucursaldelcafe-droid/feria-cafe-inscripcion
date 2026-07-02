@@ -1,9 +1,6 @@
 name: Deploy Firebase Hosting
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 env:
@@ -84,23 +81,6 @@ jobs:
           rm -f /tmp/firebase-sa.json
         continue-on-error: true
 
-      - name: Deploy Wallet Function (opcional)
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          GOOGLE_WALLET_ISSUER_ID: ${{ env.GOOGLE_WALLET_ISSUER_ID }}
-        run: |
-          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then exit 0; fi
-          echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-sa.json
-          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
-          cd functions && npm install && cd ..
-          python3 tools/configure_wallet_firebase.py --enable-apis || true
-          npx -y firebase-tools@latest deploy \
-            --only functions:generateWalletPass \
-            --project la-sucursal-del-cafe \
-            --non-interactive || echo "Wallet function omitida (permisos/API)."
-          rm -f /tmp/firebase-sa.json
-        continue-on-error: true
-
       - name: Deploy Hosting (fallback)
         if: failure()
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -125,22 +105,3 @@ jobs:
           fi
         continue-on-error: true
 
-      - name: Verificar generateWalletPass
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: |
-          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
-            echo "Saltando verificación Wallet (sin SA)."
-            exit 0
-          fi
-          URL="https://us-central1-la-sucursal-del-cafe.cloudfunctions.net/generateWalletPass"
-          CODE=$(curl -sS -o /tmp/wallet-test.json -w "%{http_code}" \
-            -X POST "$URL" \
-            -H "Content-Type: application/json" \
-            -d '{"clienteId":"ci-test","nombre":"Test","puntos":0,"nivel":"Bronce"}' || echo "000")
-          echo "generateWalletPass → HTTP $CODE"
-          head -c 400 /tmp/wallet-test.json 2>/dev/null || true
-          echo ""
-          if [ "$CODE" = "404" ]; then
-            echo "::warning::Function aún no publicada (404)"
-          fi

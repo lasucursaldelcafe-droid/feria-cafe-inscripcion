@@ -22,6 +22,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+OAUTH_TOKEN_PATH = ROOT / "tools" / "credentials" / ".oauth-script-token.json"
 
 
 def run(args: list[str], *, allow_fail: bool = False) -> int:
@@ -57,7 +58,10 @@ def main() -> int:
             print("[AVISO] Sin tools/CANONICAL_SHEETS_URL.txt; se omite sheets-config.js")
 
         if args.apps_script:
-            run([sys.executable, "tools/setup_admin.py", "--sin-firebase"])
+            if OAUTH_TOKEN_PATH.exists():
+                run([sys.executable, "tools/setup_admin.py", "--sin-firebase"])
+            else:
+                print("[AVISO] Sin OAuth Apps Script; se omite deploy Code.gs.")
 
         if not args.sin_verificar:
             verify_cmd = [sys.executable, "tools/verify_admin.py"]

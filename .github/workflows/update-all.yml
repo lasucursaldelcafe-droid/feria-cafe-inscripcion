@@ -1,0 +1,85 @@
+name: Actualizar todo
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: update-all-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FIREBASE_PROJECT: la-sucursal-del-cafe
+
+jobs:
+  update-all:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instalar dependencias Python
+        run: pip install -r tools/requirements.txt
+
+      - name: Restaurar credenciales opcionales
+        env:
+          OAUTH_SCRIPT_TOKEN: ${{ secrets.OAUTH_SCRIPT_TOKEN }}
+          APPS_SCRIPT_ID: ${{ secrets.APPS_SCRIPT_ID }}
+          SHEETS_WEB_APP_URL: ${{ secrets.SHEETS_WEB_APP_URL }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p tools/credentials
+
+          if [ -n "${OAUTH_SCRIPT_TOKEN:-}" ]; then
+            printf "%s" "$OAUTH_SCRIPT_TOKEN" > tools/credentials/.oauth-script-token.json
+          else
+            echo "::notice::Sin OAUTH_SCRIPT_TOKEN; se omitirá deploy Apps Script."
+          fi
+
+          ENV_FILE="tools/.env"
+          touch "$ENV_FILE"
+
+          if [ -n "${APPS_SCRIPT_ID:-}" ]; then
+            grep -q '^APPS_SCRIPT_ID=' "$ENV_FILE" && \
+              sed -i "s|^APPS_SCRIPT_ID=.*|APPS_SCRIPT_ID=$APPS_SCRIPT_ID|" "$ENV_FILE" || \
+              echo "APPS_SCRIPT_ID=$APPS_SCRIPT_ID" >> "$ENV_FILE"
+          fi
+
+          CANONICAL=""
+          if [ -f tools/CANONICAL_SHEETS_URL.txt ]; then
+            CANONICAL="$(tr -d '\r\n' < tools/CANONICAL_SHEETS_URL.txt)"
+          fi
+          FINAL_URL="${CANONICAL:-${SHEETS_WEB_APP_URL:-}}"
+          if [ -n "$FINAL_URL" ]; then
+            grep -q '^SHEETS_WEB_APP_URL=' "$ENV_FILE" && \
+              sed -i "s|^SHEETS_WEB_APP_URL=.*|SHEETS_WEB_APP_URL=$FINAL_URL|" "$ENV_FILE" || \
+              echo "SHEETS_WEB_APP_URL=$FINAL_URL" >> "$ENV_FILE"
+          fi
+
+          if [ -n "${FIREBASE_SERVICE_ACCOUNT:-}" ]; then
+            printf "%s" "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-sa.json
+            echo "FIREBASE_SERVICE_ACCOUNT_JSON=/tmp/firebase-sa.json" >> "$GITHUB_ENV"
+          else
+            echo "::warning::Sin FIREBASE_SERVICE_ACCOUNT; no se podrá desplegar Hosting."
+          fi
+
+      - name: Actualización integral
+        run: python3 tools/actualizar_todo.py --apps-script
+
+      - name: Limpiar credenciales temporales
+        if: always()
+        run: rm -f /tmp/firebase-sa.json tools/credentials/.oauth-script-token.json tools/.env
