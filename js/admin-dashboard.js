@@ -751,7 +751,15 @@
     return y + lines.length * lineHeight;
   }
 
+  var selectedCompetidorId = '';
+  var dashboardCompetidorRows = [];
+  var pngLayoutEditorHandle = null;
+
   function createCompetitorCardCanvas(row) {
+    if (global.AdminCompetidorPng && global.AdminCompetidorPng.renderCanvas) {
+      var layout = global.AdminCompetidorPng.loadLayout();
+      return global.AdminCompetidorPng.renderCanvas(row, layout);
+    }
     return loadCompetitorPhotoForCanvas(row).then(function (img) {
       var W = 1080;
       var H = 1440;
@@ -830,6 +838,49 @@
     });
   }
 
+  function getCompetidorPreviewRow() {
+    var id = selectedCompetidorId;
+    if (!id) {
+      var idEl = document.getElementById('competidorEditId');
+      id = idEl ? idEl.value.trim() : '';
+    }
+    if (id) {
+      var row = findCompetidorRowById(id);
+      if (row) return row;
+    }
+    if (global.AdminCompetidorPng && global.AdminCompetidorPng.sampleRow) {
+      return global.AdminCompetidorPng.sampleRow();
+    }
+    return null;
+  }
+
+  function updateCompetidorPngPreview(row) {
+    if (!row || !global.AdminCompetidorPng) return;
+    if (pngLayoutEditorHandle && pngLayoutEditorHandle.setPreviewRow) {
+      pngLayoutEditorHandle.setPreviewRow(row);
+    }
+    var canvasEl = document.getElementById('competidorEditorPngCanvas');
+    if (!canvasEl) return;
+    global.AdminCompetidorPng.renderCanvas(row).then(function (source) {
+      var ctx = canvasEl.getContext('2d');
+      ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+      ctx.drawImage(source, 0, 0, canvasEl.width, canvasEl.height);
+    }).catch(function () { /* sin foto */ });
+  }
+
+  function mountCompetidorPngLayoutEditor() {
+    var root = document.getElementById('competidorPngLayoutRoot');
+    if (!root || !global.AdminCompetidorPng || root.getAttribute('data-mounted') === '1') return;
+    root.setAttribute('data-mounted', '1');
+    global.AdminCompetidorPng.init({
+      buildAdminUrl: buildAdminUrl,
+      fetchJson: fetchJson
+    });
+    pngLayoutEditorHandle = global.AdminCompetidorPng.mountEditor(root, {
+      getPreviewRow: getCompetidorPreviewRow
+    });
+  }
+
   function downloadCanvas(canvas, filename) {
     try {
       canvas.toBlob(function (blob) {
@@ -869,9 +920,6 @@
       }
     });
   }
-
-  var selectedCompetidorId = '';
-  var dashboardCompetidorRows = [];
 
   function renderCompetidorHeroInner(row) {
     var photo = driveThumb(val(row, ['Foto participante enlace Drive']), 900);
@@ -965,6 +1013,7 @@
     preview.innerHTML = renderCompetidorHeroInner(row);
     preview.className = 'admin-competidor-hero admin-competidor-hero--editor';
     preview.hidden = false;
+    updateCompetidorPngPreview(row);
   }
 
   function fillCompetidorEditorForm(row) {
@@ -2126,6 +2175,7 @@
     bindAdminCreateMarcaForm();
     bindAdminCreateCompetidorForm();
     bindCompetidorEditorForm();
+    mountCompetidorPngLayoutEditor();
     bindAdminCreateVisitanteForm();
     bindAdminMarcaLogoPreview();
     restoreAdminTabFromStorage();
