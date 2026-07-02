@@ -156,6 +156,10 @@
     return postAdminAction(Object.assign({ action: 'admin_create_competitor' }, payload || {}));
   }
 
+  function adminSaveCompetidor(payload) {
+    return postAdminAction(Object.assign({ action: 'admin_save_competidor' }, payload || {}));
+  }
+
   function adminCreateVisitante(payload) {
     return postAdminAction(Object.assign({ action: 'admin_create_feria' }, payload || {}));
   }
@@ -516,13 +520,39 @@
     var experienciaCafe = val(row, ['Experiencia café', 'Experiencia cafe']);
     var experienciaSwitch = val(row, ['Experiencia Switch', 'Experiencia V60']);
     var ciudad = val(row, ['Ciudad']);
+    var torneos = val(row, ['Torneos previos']);
 
     if (representa) parts.push('Representa: ' + representa);
     if (rol) parts.push('Rol: ' + rol);
     if (experienciaCafe) parts.push('Experiencia en café: ' + experienciaCafe);
-    if (experienciaSwitch) parts.push('Experiencia V60/B60: ' + experienciaSwitch);
+    if (experienciaSwitch) parts.push('Experiencia V60: ' + experienciaSwitch);
+    if (torneos) parts.push('Torneos previos: ' + torneos);
     if (ciudad) parts.push('Ciudad: ' + ciudad);
     return parts.join(' · ');
+  }
+
+  function competitorProfileLines(row) {
+    var lines = [];
+    var representa = val(row, ['Representa']);
+    var rol = val(row, ['Rol']);
+    var experienciaCafe = val(row, ['Experiencia café', 'Experiencia cafe']);
+    var experienciaSwitch = val(row, ['Experiencia Switch', 'Experiencia V60']);
+    var torneos = val(row, ['Torneos previos']);
+    var ciudad = val(row, ['Ciudad']);
+
+    if (rol || representa) {
+      lines.push((rol || 'Competidor/a') + (representa ? ' · Representa: ' + representa : ''));
+    }
+    if (experienciaCafe || experienciaSwitch) {
+      lines.push('Experiencia: ' + [
+        experienciaCafe ? 'café ' + experienciaCafe : '',
+        experienciaSwitch ? 'V60 ' + experienciaSwitch : ''
+      ].filter(Boolean).join(' · '));
+    }
+    if (torneos) lines.push('Torneos previos: ' + torneos);
+    if (ciudad) lines.push('Ciudad: ' + ciudad);
+
+    return lines.length ? lines : ['Perfil barista registrado para el Reto V60.'];
   }
 
   function sanitizeFilename(name) {
@@ -534,16 +564,22 @@
       .slice(0, 60) || 'competidor';
   }
 
-  function loadCanvasImage(url) {
+  function loadCanvasImage(url, options) {
+    options = options || {};
     return new Promise(function (resolve) {
       if (!url) {
         resolve(null);
         return;
       }
       var img = new Image();
-      var objectUrl = '';
+      var objectUrl = options.revokeObjectUrl || '';
+      var src = String(url);
+      var isInline = src.indexOf('data:') === 0 || src.indexOf('blob:') === 0;
+
       img.onload = function () {
-        if (objectUrl) setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 1000);
+        if (objectUrl) {
+          setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 2000);
+        }
         resolve(img);
       };
       img.onerror = function () {
@@ -551,30 +587,22 @@
         resolve(null);
       };
 
-      if (String(url).indexOf('data:') === 0) {
-        try {
-          objectUrl = dataUrlToObjectUrl(url);
-          img.src = objectUrl;
-        } catch (err) {
-          console.warn('No se pudo convertir dataUrl de foto:', err);
-          img.src = url;
-        }
-        return;
-      }
-
-      img.crossOrigin = 'anonymous';
-      img.src = url;
+      if (!isInline) img.crossOrigin = 'anonymous';
+      img.src = src;
     });
   }
 
-  function dataUrlToObjectUrl(dataUrl) {
-    var parts = String(dataUrl || '').match(/^data:([^;]+);base64,(.+)$/);
-    if (!parts) throw new Error('dataUrl inválido');
-    var contentType = parts[1] || 'image/jpeg';
-    var binary = atob(parts[2]);
-    var bytes = new Uint8Array(binary.length);
-    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return URL.createObjectURL(new Blob([bytes], { type: contentType }));
+  function fetchCompetitorPhotoBlob(fileId) {
+    var photoUrl = buildAdminUrl('competidor_foto', { id: fileId });
+    if (!photoUrl) return Promise.resolve(null);
+    return fetch(photoUrl, { method: 'GET', mode: 'cors', cache: 'no-store' })
+      .then(function (res) {
+        if (!res.ok) return null;
+        var type = (res.headers.get('content-type') || '').toLowerCase();
+        if (type.indexOf('image/') !== 0) return null;
+        return res.blob();
+      })
+      .catch(function () { return null; });
   }
 
   function loadCompetitorPhotoForCanvas(row) {
@@ -582,15 +610,22 @@
     var fileId = driveFileId(driveUrl);
     if (!fileId) return Promise.resolve(null);
 
-    var dataUrlEndpoint = buildAdminUrl('competidor_foto_data', { id: fileId });
-    if (!dataUrlEndpoint) return loadCanvasImage(driveThumb(driveUrl, 1600));
-
-    return fetchJson(dataUrlEndpoint).then(function (res) {
-      if (res && res.ok && res.dataUrl) {
-        return loadCanvasImage(res.dataUrl);
+    return fetchCompetitorPhotoBlob(fileId).then(function (blob) {
+      if (blob && blob.size > 0) {
+        var objectUrl = URL.createObjectURL(blob);
+        return loadCanvasImage(objectUrl, { revokeObjectUrl: objectUrl });
       }
-      console.warn('competidor_foto_data:', res && res.error ? res.error : 'sin dataUrl');
-      return loadCanvasImage(driveThumb(driveUrl, 1600));
+
+      var dataUrlEndpoint = buildAdminUrl('competidor_foto_data', { id: fileId });
+      if (!dataUrlEndpoint) return loadCanvasImage(driveThumb(driveUrl, 1600));
+
+      return fetchJson(dataUrlEndpoint).then(function (res) {
+        if (res && res.ok && res.dataUrl) {
+          return loadCanvasImage(res.dataUrl);
+        }
+        console.warn('competidor_foto_data:', res && res.error ? res.error : 'sin dataUrl');
+        return loadCanvasImage(driveThumb(driveUrl, 1600));
+      });
     });
   }
 
@@ -606,6 +641,65 @@
     ctx.lineTo(x, y + r);
     ctx.quadraticCurveTo(x, y, x + r, y);
     ctx.closePath();
+  }
+
+  function drawPortraitPhoto(ctx, img, x, y, w, h) {
+    roundedRect(ctx, x, y, w, h, 28);
+    ctx.save();
+    ctx.clip();
+
+    var bg = ctx.createLinearGradient(x, y, x + w, y + h);
+    bg.addColorStop(0, '#3b291f');
+    bg.addColorStop(1, '#14100d');
+    ctx.fillStyle = bg;
+    ctx.fillRect(x, y, w, h);
+
+    if (!img) {
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      ctx.font = '700 40px Inter, Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Foto del competidor', x + w / 2, y + h / 2);
+      ctx.restore();
+      return;
+    }
+
+    var scale = Math.min(w / img.width, h / img.height);
+    var dw = img.width * scale;
+    var dh = img.height * scale;
+    var dx = x + (w - dw) / 2;
+    var dy = y + (h - dh) / 2;
+
+    if (img.height >= img.width) {
+      dy = y + Math.max(0, (h - dh) * 0.28);
+    }
+
+    ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, dw, dh);
+    ctx.restore();
+  }
+
+  function wrapTextCentered(ctx, text, centerX, y, maxWidth, lineHeight, maxLines) {
+    var words = String(text || '').split(/\s+/).filter(Boolean);
+    var line = '';
+    var lines = [];
+    for (var n = 0; n < words.length; n++) {
+      var testLine = line ? line + ' ' + words[n] : words[n];
+      if (ctx.measureText(testLine).width > maxWidth && line) {
+        lines.push(line);
+        line = words[n];
+      } else {
+        line = testLine;
+      }
+      if (lines.length === maxLines) break;
+    }
+    if (line && lines.length < maxLines) lines.push(line);
+    if (words.length && lines.length === maxLines && lines[lines.length - 1].length > 3) {
+      lines[lines.length - 1] = lines[lines.length - 1].replace(/[.,;:]?$/, '') + '…';
+    }
+    ctx.textAlign = 'center';
+    lines.forEach(function (l, idx) {
+      ctx.fillText(l, centerX, y + idx * lineHeight);
+    });
+    return y + lines.length * lineHeight;
   }
 
   function drawCover(ctx, img, x, y, w, h) {
@@ -659,68 +753,78 @@
 
   function createCompetitorCardCanvas(row) {
     return loadCompetitorPhotoForCanvas(row).then(function (img) {
+      var W = 1080;
+      var H = 1440;
+      var PAD = 48;
+      var CONTENT_W = W - PAD * 2;
+      var CX = W / 2;
+
       var canvas = document.createElement('canvas');
-      canvas.width = 1080;
-      canvas.height = 1350;
+      canvas.width = W;
+      canvas.height = H;
       var ctx = canvas.getContext('2d');
       var name = val(row, ['Nombre']) || 'Competidor';
       var id = val(row, ['ID']);
-      var description = competitorDescription(row);
 
-      var bg = ctx.createLinearGradient(0, 0, 1080, 1350);
+      var bg = ctx.createLinearGradient(0, 0, W, H);
       bg.addColorStop(0, '#2a1a12');
-      bg.addColorStop(0.55, '#5d3a1a');
+      bg.addColorStop(0.5, '#4a2f18');
       bg.addColorStop(1, '#120d0a');
       ctx.fillStyle = bg;
-      ctx.fillRect(0, 0, 1080, 1350);
+      ctx.fillRect(0, 0, W, H);
 
-      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
       ctx.beginPath();
-      ctx.arc(950, 90, 280, 0, Math.PI * 2);
+      ctx.arc(W - 60, 100, 220, 0, Math.PI * 2);
       ctx.fill();
       ctx.beginPath();
-      ctx.arc(80, 1270, 260, 0, Math.PI * 2);
+      ctx.arc(70, H - 80, 200, 0, Math.PI * 2);
       ctx.fill();
 
+      ctx.textAlign = 'center';
       ctx.fillStyle = '#f6ead8';
-      ctx.font = '800 44px Inter, Arial, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('RETO B60', 72, 95);
+      ctx.font = '800 42px Inter, Arial, sans-serif';
+      ctx.fillText('RETO V60', CX, 72);
 
-      ctx.font = '600 28px Inter, Arial, sans-serif';
+      ctx.font = '600 26px Inter, Arial, sans-serif';
       ctx.fillStyle = 'rgba(246,234,216,0.78)';
-      ctx.fillText('Edición Purist Marbella', 72, 135);
+      ctx.fillText('Edición Purist Marbella', CX, 108);
 
-      ctx.textAlign = 'right';
       ctx.fillStyle = '#e8a84c';
-      ctx.font = '700 25px Inter, Arial, sans-serif';
-      ctx.fillText(id || 'Competidor', 1008, 95);
-      ctx.fillStyle = 'rgba(246,234,216,0.75)';
-      ctx.font = '600 22px Inter, Arial, sans-serif';
-      ctx.fillText('La Sucursal del Café', 1008, 130);
+      ctx.font = '700 22px Inter, Arial, sans-serif';
+      ctx.fillText(id || 'Competidor', CX, 138);
 
-      drawCover(ctx, img, 72, 185, 936, 650);
+      var photoY = 158;
+      var photoH = 920;
+      drawPortraitPhoto(ctx, img, PAD, photoY, CONTENT_W, photoH);
 
-      ctx.textAlign = 'left';
+      var textY = photoY + photoH + 44;
       ctx.fillStyle = '#ffffff';
-      ctx.font = '800 68px Inter, Arial, sans-serif';
-      var afterName = wrapText(ctx, name, 72, 930, 936, 72, 2);
+      ctx.font = '800 62px Inter, Arial, sans-serif';
+      var afterName = wrapTextCentered(ctx, name, CX, textY, CONTENT_W, 66, 2);
 
       ctx.fillStyle = '#f5d9a8';
-      ctx.font = '700 30px Inter, Arial, sans-serif';
-      ctx.fillText('Competidor oficial', 72, afterName + 18);
+      ctx.font = '700 28px Inter, Arial, sans-serif';
+      ctx.fillText('Competidor oficial', CX, afterName + 20);
 
-      ctx.fillStyle = 'rgba(255,255,255,0.88)';
-      ctx.font = '500 30px Inter, Arial, sans-serif';
-      wrapText(ctx, description || 'Participante del reto de café filtrado.', 72, afterName + 72, 936, 40, 5);
+      ctx.fillStyle = 'rgba(255,255,255,0.82)';
+      ctx.font = '600 24px Inter, Arial, sans-serif';
+      ctx.fillText('Perfil del barista', CX, afterName + 64);
 
-      ctx.fillStyle = 'rgba(0,0,0,0.28)';
-      roundedRect(ctx, 72, 1218, 936, 72, 20);
+      var profileY = afterName + 98;
+      competitorProfileLines(row).slice(0, 4).forEach(function (line) {
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.font = '500 24px Inter, Arial, sans-serif';
+        profileY = wrapTextCentered(ctx, line, CX, profileY, CONTENT_W - 40, 32, 2) + 8;
+      });
+
+      var footerY = H - 68;
+      ctx.fillStyle = 'rgba(0,0,0,0.32)';
+      roundedRect(ctx, PAD, footerY - 36, CONTENT_W, 56, 18);
       ctx.fill();
       ctx.fillStyle = '#f6ead8';
-      ctx.font = '700 26px Inter, Arial, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('Café filtrado · Plaza Marbella · Purist', 540, 1264);
+      ctx.font = '700 24px Inter, Arial, sans-serif';
+      ctx.fillText('Café filtrado · Plaza Marbella · Purist', CX, footerY);
 
       return canvas;
     });
@@ -754,7 +858,7 @@
     }
     createCompetitorCardCanvas(row).then(function (canvas) {
       var name = sanitizeFilename(val(row, ['Nombre']));
-      downloadCanvas(canvas, 'reto-b60-purist-marbella-' + name + '.png');
+      downloadCanvas(canvas, 'reto-v60-purist-marbella-' + name + '.png');
     }).catch(function (err) {
       console.error(err);
       alert('No se pudo generar el PNG con foto. Recarga el admin e intenta de nuevo.');
@@ -763,6 +867,300 @@
         button.disabled = false;
         button.textContent = 'PNG';
       }
+    });
+  }
+
+  var selectedCompetidorId = '';
+  var dashboardCompetidorRows = [];
+
+  function renderCompetidorHeroInner(row) {
+    var photo = driveThumb(val(row, ['Foto participante enlace Drive']), 900);
+    var name = val(row, ['Nombre']) || 'Competidor';
+    var id = val(row, ['ID']);
+    var rol = val(row, ['Rol']);
+    var representa = val(row, ['Representa']);
+    var desc = competitorDescription(row) || 'Perfil barista del Reto V60.';
+    var enabled = isHabilitadoValue(row['Habilitado']);
+    var roleLine = (rol || 'Competidor/a') + (representa ? ' · ' + representa : '');
+
+    return '<div class="admin-competidor-hero__head admin-competidor-hero__head--center">' +
+        '<p class="admin-competidor-hero__kicker">Reto V60</p>' +
+        '<p class="admin-competidor-hero__edition">Edición Purist Marbella · Instagram 3:4</p>' +
+        '<p class="admin-competidor-hero__id">' + escapeHtml(id || '') + '</p>' +
+      '</div>' +
+      '<div class="admin-competidor-hero__photo-wrap">' +
+        (photo
+          ? '<img class="admin-competidor-hero__photo" src="' + escapeHtml(photo) + '" alt="Foto de ' + escapeHtml(name) + '" loading="lazy" referrerpolicy="no-referrer">'
+          : '<div class="admin-competidor-hero__photo admin-competidor-hero__photo--empty">Sin foto</div>') +
+      '</div>' +
+      '<div class="admin-competidor-hero__body">' +
+        '<h3 class="admin-competidor-hero__name">' + escapeHtml(name) + '</h3>' +
+        '<p class="admin-competidor-hero__role">' + escapeHtml(roleLine) + '</p>' +
+        '<p class="admin-competidor-hero__desc">' + escapeHtml(desc) + '</p>' +
+        '<p class="admin-competidor-hero__status">' +
+          renderStatusBadge(enabled) +
+          '<span>' + escapeHtml(val(row, ['Estado pago']) || 'Sin estado de pago') + '</span>' +
+        '</p>' +
+      '</div>';
+  }
+
+  function findCompetidorRowById(id) {
+    if (!id || !lastDashboardData) return null;
+    var rows = pickRows(lastDashboardData, 'allCompetencia');
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i]['ID'] === id) return rows[i];
+    }
+    return null;
+  }
+
+  function updateLocalCompetidor(updatedRow) {
+    if (!lastDashboardData || !updatedRow || !updatedRow['ID']) return;
+    var rows = lastDashboardData.allCompetencia || [];
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i]['ID'] === updatedRow['ID']) {
+        rows[i] = Object.assign({}, rows[i], updatedRow);
+        break;
+      }
+    }
+  }
+
+  function renderCompetidorDashboard(rows) {
+    var root = document.getElementById('competidorDashboardRoot');
+    if (!root) return;
+
+    dashboardCompetidorRows = (rows || []).slice().sort(function (a, b) {
+      var an = String(a['Nombre'] || '');
+      var bn = String(b['Nombre'] || '');
+      return an.localeCompare(bn, 'es');
+    });
+
+    if (!dashboardCompetidorRows.length) {
+      root.innerHTML = '<p class="admin-empty">Aún no hay competidores registrados. Crea uno arriba o espera inscripciones del formulario.</p>';
+      return;
+    }
+
+    root.innerHTML = dashboardCompetidorRows.map(function (row) {
+      var id = val(row, ['ID']);
+      var selected = id && id === selectedCompetidorId ? ' admin-competidor-hero--selected' : '';
+      return '<button type="button" class="admin-competidor-hero' + selected + '" data-competidor-id="' + escapeHtml(id) + '">' +
+        renderCompetidorHeroInner(row) +
+        '<div class="admin-competidor-hero__actions">' +
+          '<span class="admin-btn admin-btn--primary admin-btn--sm">Editar perfil</span>' +
+        '</div>' +
+      '</button>';
+    }).join('');
+
+    root.querySelectorAll('.admin-competidor-hero[data-competidor-id]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-competidor-id');
+        var row = findCompetidorRowById(id);
+        if (row) openCompetidorEditor(row);
+      });
+    });
+  }
+
+  function updateCompetidorEditorPreview(row) {
+    var preview = document.getElementById('competidorEditorPreview');
+    if (!preview || !row) return;
+    preview.innerHTML = renderCompetidorHeroInner(row);
+    preview.className = 'admin-competidor-hero admin-competidor-hero--editor';
+    preview.hidden = false;
+  }
+
+  function fillCompetidorEditorForm(row) {
+    if (!row) return;
+    document.getElementById('competidorEditId').value = row['ID'] || '';
+    document.getElementById('competidorEditNombre').value = row['Nombre'] || '';
+    document.getElementById('competidorEditDocumento').value = row['Documento'] || '';
+    document.getElementById('competidorEditEdad').value = row['Edad'] || '';
+    document.getElementById('competidorEditCorreo').value = row['Correo'] || '';
+    document.getElementById('competidorEditCelular').value = row['Celular'] || '';
+    document.getElementById('competidorEditCiudad').value = row['Ciudad'] || '';
+    document.getElementById('competidorEditRepresenta').value = row['Representa'] || '';
+    document.getElementById('competidorEditRol').value = row['Rol'] || '';
+    document.getElementById('competidorEditExpCafe').value = val(row, ['Experiencia café', 'Experiencia cafe']);
+    document.getElementById('competidorEditExpV60').value = val(row, ['Experiencia Switch', 'Experiencia V60']);
+    document.getElementById('competidorEditTorneos').value = row['Torneos previos'] || '';
+    document.getElementById('competidorEditFotoEnlace').value = row['Foto participante enlace Drive'] || '';
+    document.getElementById('competidorEditEstadoPago').value = row['Estado pago'] || 'Confirmado por admin';
+    document.getElementById('competidorEditCupoConfirmado').checked = isHabilitadoValue(row['Cupo confirmado']);
+    document.getElementById('competidorEditHabilitado').checked = isHabilitadoValue(row['Habilitado']);
+    document.getElementById('competidorEditObservaciones').value = row['Observaciones'] || '';
+    document.getElementById('competidorEditNotas').value = row['Notas admin'] || '';
+    var fileInput = document.getElementById('competidorEditFotoFile');
+    if (fileInput) fileInput.value = '';
+
+    var meta = document.getElementById('competidorEditorMeta');
+    if (meta) {
+      meta.textContent = 'Editando: ' + (row['Nombre'] || 'Competidor') + ' · ID ' + (row['ID'] || '');
+    }
+  }
+
+  function openCompetidorEditor(row) {
+    if (!row) return;
+    selectedCompetidorId = row['ID'] || '';
+    renderCompetidorDashboard(pickRows(lastDashboardData || {}, 'allCompetencia'));
+
+    var panel = document.getElementById('competidorEditorPanel');
+    if (panel) panel.hidden = false;
+    if (global.AdminDisclosures && global.AdminDisclosures.openFold) {
+      global.AdminDisclosures.openFold('competidorEditorPanel');
+    }
+
+    fillCompetidorEditorForm(row);
+    updateCompetidorEditorPreview(row);
+
+    var resultEl = document.getElementById('competidorEditorResult');
+    if (resultEl) resultEl.hidden = true;
+
+    scrollToAdminTarget('competidorEditorPanel');
+  }
+
+  function closeCompetidorEditor() {
+    selectedCompetidorId = '';
+    var panel = document.getElementById('competidorEditorPanel');
+    if (panel) panel.hidden = true;
+    renderCompetidorDashboard(pickRows(lastDashboardData || {}, 'allCompetencia'));
+  }
+
+  function bindCompetidorEditorForm() {
+    var form = document.getElementById('formAdminEditCompetidor');
+    if (!form || form.getAttribute('data-bound') === '1') return;
+    form.setAttribute('data-bound', '1');
+
+    var closeBtn = document.getElementById('competidorEditorClose');
+    if (closeBtn) closeBtn.addEventListener('click', closeCompetidorEditor);
+
+    var pngBtn = document.querySelector('.admin-competidor-png-editor');
+    if (pngBtn) {
+      pngBtn.addEventListener('click', function () {
+        var id = document.getElementById('competidorEditId').value.trim();
+        var row = findCompetidorRowById(id);
+        if (row) downloadCompetitorCard(row, pngBtn);
+      });
+    }
+
+    var previewFields = [
+      'competidorEditNombre', 'competidorEditRepresenta', 'competidorEditRol',
+      'competidorEditExpCafe', 'competidorEditExpV60', 'competidorEditTorneos',
+      'competidorEditCiudad', 'competidorEditFotoEnlace'
+    ];
+    previewFields.forEach(function (fieldId) {
+      var el = document.getElementById(fieldId);
+      if (!el) return;
+      el.addEventListener('input', function () {
+        var id = document.getElementById('competidorEditId').value.trim();
+        if (!id) return;
+        var base = findCompetidorRowById(id);
+        if (!base) return;
+        var draft = Object.assign({}, base, {
+          'Nombre': document.getElementById('competidorEditNombre').value.trim(),
+          'Representa': document.getElementById('competidorEditRepresenta').value.trim(),
+          'Rol': document.getElementById('competidorEditRol').value.trim(),
+          'Experiencia café': document.getElementById('competidorEditExpCafe').value.trim(),
+          'Experiencia Switch': document.getElementById('competidorEditExpV60').value.trim(),
+          'Torneos previos': document.getElementById('competidorEditTorneos').value.trim(),
+          'Ciudad': document.getElementById('competidorEditCiudad').value.trim(),
+          'Foto participante enlace Drive': document.getElementById('competidorEditFotoEnlace').value.trim()
+        });
+        updateCompetidorEditorPreview(draft);
+      });
+    });
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      showError('');
+
+      var id = document.getElementById('competidorEditId').value.trim();
+      if (!id) {
+        showError('Selecciona un competidor en el dashboard.');
+        return;
+      }
+
+      var nombre = document.getElementById('competidorEditNombre').value.trim();
+      var correo = document.getElementById('competidorEditCorreo').value.trim().toLowerCase();
+      var celular = document.getElementById('competidorEditCelular').value.trim();
+      if (!nombre || !correo || !celular) {
+        showError('Nombre, correo y celular son obligatorios.');
+        return;
+      }
+
+      var submitBtn = document.getElementById('competidorEditSubmit');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Guardando…';
+      }
+
+      var payload = {
+        id: id,
+        nombre: nombre,
+        documento: document.getElementById('competidorEditDocumento').value.trim(),
+        edad: document.getElementById('competidorEditEdad').value.trim(),
+        correo: correo,
+        celular: celular,
+        ciudad: document.getElementById('competidorEditCiudad').value.trim(),
+        representa: document.getElementById('competidorEditRepresenta').value.trim(),
+        rol: document.getElementById('competidorEditRol').value.trim(),
+        experienciaCafe: document.getElementById('competidorEditExpCafe').value.trim(),
+        experienciaSwitch: document.getElementById('competidorEditExpV60').value.trim(),
+        torneosPrevios: document.getElementById('competidorEditTorneos').value.trim(),
+        fotoEnlace: document.getElementById('competidorEditFotoEnlace').value.trim(),
+        estadoPago: document.getElementById('competidorEditEstadoPago').value,
+        cupoConfirmado: document.getElementById('competidorEditCupoConfirmado').checked,
+        habilitado: document.getElementById('competidorEditHabilitado').checked,
+        observaciones: document.getElementById('competidorEditObservaciones').value.trim(),
+        notasAdmin: document.getElementById('competidorEditNotas').value.trim()
+      };
+
+      var fileInput = document.getElementById('competidorEditFotoFile');
+      var file = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+      var saveFlow = file
+        ? readFileAsDataUrl(file).then(function (dataUrl) {
+            payload.fotoBase64 = dataUrl;
+            payload.fotoNombre = file.name;
+            payload.fotoTipo = file.type || 'image/jpeg';
+            return adminSaveCompetidor(payload);
+          })
+        : Promise.resolve(adminSaveCompetidor(payload));
+
+      saveFlow.then(function (result) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Guardar perfil';
+        }
+        if (!result || !result.ok) {
+          var err = (result && result.error) || 'No se pudo guardar el competidor.';
+          if (err.indexOf('admin_save_competidor') !== -1 || err.indexOf('formType') !== -1) {
+            showError('Redespliega Apps Script con la acción admin_save_competidor (py tools/setup_admin.py).');
+          } else {
+            showError(err);
+          }
+          return;
+        }
+
+        var updated = result.competidor || null;
+        if (updated) {
+          updateLocalCompetidor(updated);
+          openCompetidorEditor(updated);
+        } else {
+          loadDashboard();
+        }
+
+        var resultEl = document.getElementById('competidorEditorResult');
+        if (resultEl) {
+          resultEl.innerHTML = '<p><strong>Perfil actualizado:</strong> ' + escapeHtml(nombre) + '</p>';
+          resultEl.hidden = false;
+        }
+
+        renderAdminTabPanels(lastDashboardData);
+        showError('');
+      }).catch(function (err) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Guardar perfil';
+        }
+        showError(err.message || 'Error al guardar el competidor.');
+      });
     });
   }
 
@@ -813,7 +1211,7 @@
           return chain.then(function () {
             return createCompetitorCardCanvas(row).then(function (canvas) {
               var name = sanitizeFilename(val(row, ['Nombre']));
-              downloadCanvas(canvas, 'reto-b60-purist-marbella-' + name + '.png');
+              downloadCanvas(canvas, 'reto-v60-purist-marbella-' + name + '.png');
             });
           }).then(function () {
             return new Promise(function (resolve) { setTimeout(resolve, 350); });
@@ -839,6 +1237,7 @@
         }) + '</div>';
     }
 
+    renderCompetidorDashboard(compRows);
     renderCompetitorCards(compRows);
 
     var panelFeria = document.getElementById('adminTabPanelsFeria');
@@ -1456,7 +1855,7 @@
         warnings.push('Pasaportes Cafetero (<code>pasaporte_*</code>) no están en el deploy.');
       }
       if (!competitorOk) {
-        warnings.push('Alta manual de competidores y visitantes (<code>admin_create_*</code>) no está en el deploy.');
+        warnings.push('Gestión de competidores (<code>admin_create_*</code> y <code>admin_save_competidor</code>) no está en el deploy.');
       }
 
       if (!warnings.length) {
@@ -1726,6 +2125,7 @@
     bindPatrocinadorCompetenciaForm();
     bindAdminCreateMarcaForm();
     bindAdminCreateCompetidorForm();
+    bindCompetidorEditorForm();
     bindAdminCreateVisitanteForm();
     bindAdminMarcaLogoPreview();
     restoreAdminTabFromStorage();
