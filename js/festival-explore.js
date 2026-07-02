@@ -115,11 +115,17 @@
       { key: 'patrocinadores', label: 'Patrocinadores' },
       { key: 'stands', label: 'Stands' },
       { key: 'fidelizacion', label: 'Pasaporte' },
-      { key: 'comoFunciona', label: 'Cómo funciona' }
+      { key: 'comoFunciona', label: 'Cómo funciona' },
+      { href: '#contacto', label: 'Contacto', isHash: true }
     ];
 
     nav.innerHTML = links
       .map(function (item) {
+        if (item.isHash) {
+          return (
+            '<a class="festival-quick-link" href="' + item.href + '">' + item.label + '</a>'
+          );
+        }
         return (
           '<a class="festival-quick-link" data-link="' + item.key + '" href="' + href(item.key) + '">' +
           item.label +

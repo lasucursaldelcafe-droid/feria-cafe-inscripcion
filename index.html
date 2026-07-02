@@ -17,138 +17,108 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/brand.css?v=20260702min">
+  <link rel="stylesheet" href="css/brand.css?v=20260702card">
 </head>
-<body class="page-festival page-festival--minimal" data-festival-page="home">
+<body class="page-festival page-festival--bizcard" data-festival-page="home">
   <a class="skip-link" href="#explorar">Explorar el festival</a>
 
-  <header class="site-header">
-    <nav class="festival-nav" aria-label="Navegación principal">
-      <a class="festival-nav__brand" data-link="festival" href="index.html">
-        <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="120" height="48">
-      </a>
-      <button type="button" class="festival-nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navMenu">Menú</button>
-      <ul class="festival-nav__menu" id="navMenu">
-        <li><a data-link="festival" data-nav="home" href="index.html">Inicio</a></li>
-        <li><a data-link="evento" data-nav="evento" href="el-evento.html">El evento</a></li>
-        <li><a data-link="actividades" data-nav="actividades" href="actividades.html">Actividades</a></li>
-        <li><a data-link="patrocinadores" data-nav="patrocinadores" href="patrocinadores.html">Patrocinadores</a></li>
-        <li><a data-link="stands" data-nav="stands" href="stands.html">Adquiere tu stand</a></li>
-        <li><a data-link="feria" data-nav="inscripcion" href="inscripcion.html">Registro visitante</a></li>
-        <li><a data-link="competencia" data-nav="competencia" href="competencia.html">Competencia</a></li>
-        <li><a data-link="fidelizacion" data-nav="fidelizacion" href="fidelizacion.html">Fidelización</a></li>
-      </ul>
-    </nav>
-  </header>
-
-  <div class="site-shell">
-    <header class="site-hero site-hero--coffee">
-      <div class="festival-sub-hero festival-sub-hero--compact">
-        <p class="festival-kicker" id="festivalSlogan">Café que conecta</p>
-        <h1 class="festival-sub-hero__title" id="heroTitle">La Sucursal del Café</h1>
-        <p class="festival-sub-hero__lead" id="festivalLead">
-          Café especial en Palmetto Plaza: cata, talleres y comunidad. Entrada gratis.
-        </p>
-        <div class="hero-meta hero-meta--compact">
-          <span id="badgeFestivalFecha" class="badge">📅 29–30 ago 2026</span>
-          <span id="badgeFestivalSede" class="badge">📍 Palmetto Plaza, Cali</span>
-          <span class="badge badge--green">✓ Entrada gratis</span>
-        </div>
-        <div class="festival-sub-cta">
-          <a class="btn-submit festival-btn-primary" data-link="feria" href="inscripcion.html">Registrarme</a>
-          <a class="btn-secondary festival-btn-secondary" data-link="evento" href="el-evento.html">El evento</a>
-        </div>
-      </div>
-      <div class="hero-accent" aria-hidden="true"></div>
+  <div class="site-shell site-shell--bizcard">
+    <header class="site-header site-header--bizcard">
+      <nav class="festival-nav festival-nav--bizcard" aria-label="Navegación principal">
+        <a class="festival-nav__brand" data-link="festival" href="index.html">
+          <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="120" height="48">
+        </a>
+        <button type="button" class="festival-nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navMenu">Menú</button>
+        <ul class="festival-nav__menu" id="navMenu">
+          <li><a data-link="festival" data-nav="home" href="index.html">Inicio</a></li>
+          <li><a data-link="evento" data-nav="evento" href="el-evento.html">El evento</a></li>
+          <li><a data-link="actividades" data-nav="actividades" href="actividades.html">Actividades</a></li>
+          <li><a data-link="patrocinadores" data-nav="patrocinadores" href="patrocinadores.html">Patrocinadores</a></li>
+          <li><a data-link="stands" data-nav="stands" href="stands.html">Adquiere tu stand</a></li>
+          <li><a data-link="feria" data-nav="inscripcion" href="inscripcion.html">Registro visitante</a></li>
+          <li><a data-link="competencia" data-nav="competencia" href="competencia.html">Competencia</a></li>
+          <li><a data-link="fidelizacion" data-nav="fidelizacion" href="fidelizacion.html">Fidelización</a></li>
+        </ul>
+      </nav>
     </header>
 
-    <main class="site-main site-main--festival">
-      <section id="explorar" class="festival-section festival-section--light festival-section--compact">
-        <div class="festival-wrap festival-wrap--narrow">
-          <h2 class="section-title section-title--dark section-title--minimal">Explora</h2>
-          <p class="festival-section-intro festival-section-intro--tight" id="festivalMensaje">
+    <main class="bizcard-layout" id="contenido">
+      <article class="bizcard bizcard--identity">
+        <div class="bizcard__body bizcard__body--center">
+          <img class="bizcard__logo" src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="200" height="80">
+          <p class="bizcard__kicker" id="festivalSlogan">Café que conecta</p>
+          <h1 class="bizcard__title" id="heroTitle">La Sucursal del Café</h1>
+          <p class="bizcard__lead" id="festivalLead">
+            Café especial en Palmetto Plaza: cata, talleres y comunidad. Entrada gratis.
+          </p>
+          <ul class="bizcard__meta" aria-label="Datos del evento">
+            <li><span id="badgeFestivalFecha" class="bizcard__chip">📅 29–30 ago 2026</span></li>
+            <li><span id="badgeFestivalSede" class="bizcard__chip">📍 Palmetto Plaza, Cali</span></li>
+            <li><span class="bizcard__chip bizcard__chip--accent">✓ Entrada gratis</span></li>
+          </ul>
+          <div class="bizcard__actions">
+            <a class="btn-submit festival-btn-primary" data-link="feria" href="inscripcion.html">Registrarme</a>
+            <a class="btn-secondary festival-btn-secondary" data-link="evento" href="el-evento.html">El evento</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="bizcard bizcard--explore" id="explorar">
+        <div class="bizcard__body">
+          <h2 class="bizcard__heading">Explora</h2>
+          <p class="bizcard__text" id="festivalMensaje">
             Dos días en Cali para probar, aprender y conectar. Entrada sin costo; registro opcional con premios.
           </p>
-          <p class="festival-section-intro festival-section-intro--tight" id="festivalExploreIntro">
+          <p class="bizcard__text bizcard__text--muted" id="festivalExploreIntro">
             Elige por dónde empezar — puedes entrar sin registrarte.
           </p>
-          <div id="festivalExplore" class="festival-explore" data-initial-tab="evento"></div>
-          <nav class="festival-quick-links" id="festivalQuickLinks" aria-label="Enlaces rápidos"></nav>
+          <div id="festivalExplore" class="festival-explore festival-explore--bizcard" data-initial-tab="evento"></div>
+          <nav class="festival-quick-links festival-quick-links--bizcard" id="festivalQuickLinks" aria-label="Enlaces rápidos"></nav>
         </div>
-      </section>
+      </article>
 
-      <section class="festival-section festival-section--beige festival-section--compact" id="patrocinadores">
-        <div class="festival-wrap">
-          <h2 class="section-title section-title--dark section-title--minimal">Aliados</h2>
-          <div id="festivalSponsorsUnified" class="festival-sponsors-unified" data-initial-tab="feria">
+      <article class="bizcard bizcard--sponsors" id="patrocinadores">
+        <div class="bizcard__body">
+          <h2 class="bizcard__heading">Aliados</h2>
+          <div id="festivalSponsorsUnified" class="festival-sponsors-unified festival-sponsors-unified--bizcard" data-initial-tab="feria">
             <div class="festival-explore__tabs festival-sponsors-unified__tabs" role="tablist" aria-label="Patrocinadores">
               <button type="button" role="tab" class="festival-explore__tab is-active" data-tab="feria" aria-selected="true" tabindex="0">Feria</button>
               <button type="button" role="tab" class="festival-explore__tab" data-tab="competencia" aria-selected="false" tabindex="-1">V60</button>
             </div>
             <div role="tabpanel" class="festival-sponsors-unified__panel" data-panel="feria" aria-label="Patrocinadores de la feria">
               <ul class="festival-sponsors festival-sponsors--strip" data-sponsors-strip aria-label="Patrocinadores del festival"></ul>
-              <p class="festival-back-link">
+              <p class="festival-back-link festival-back-link--bizcard">
                 <a data-link="patrocinadores" href="patrocinadores.html">Ver todos →</a>
               </p>
             </div>
             <div role="tabpanel" class="festival-sponsors-unified__panel" data-panel="competencia" hidden aria-label="Patrocinadores V60">
               <ul class="festival-sponsors festival-sponsors--grid festival-sponsors--cards" data-competition-sponsors-grid aria-label="Patrocinadores V60 Championship" hidden></ul>
-              <p class="festival-back-link">
+              <p class="festival-back-link festival-back-link--bizcard">
                 <a data-link="competencia" href="competencia.html">Inscripción V60 →</a>
               </p>
             </div>
           </div>
         </div>
-      </section>
+      </article>
 
-      <section class="festival-section festival-section--cta-strip">
-        <div class="festival-wrap festival-cta-strip">
-          <p class="festival-cta-strip__text">
-            <span data-bind="feria.fecha">29 y 30 de agosto de 2026</span> ·
-            <span data-bind="feria.lugar">Palmetto Plaza, Cali</span> · Entrada gratis
-          </p>
-          <a class="btn-submit festival-btn-primary" data-link="feria" href="inscripcion.html">Registrarme</a>
-        </div>
-      </section>
-    </main>
-
-    <footer id="contacto" class="festival-footer">
-      <div class="festival-wrap festival-footer__inner">
-        <div class="festival-footer__brand">
-          <p class="festival-footer__col-title">Evento</p>
-          <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="160" height="64" loading="lazy">
-          <p id="festivalInstagram" class="festival-social">
-            <a id="igLink" href="https://www.instagram.com/lasucursal.delcafe/" target="_blank" rel="noopener noreferrer" aria-label="Instagram @lasucursal.delcafe">@lasucursal.delcafe</a>
-          </p>
-        </div>
-        <nav class="festival-footer__nav" aria-label="Enlaces del sitio">
-          <p class="festival-footer__col-title">Navegación</p>
-          <a data-link="festival" href="index.html">Inicio</a>
-          <a data-link="evento" href="el-evento.html">El evento</a>
-          <a data-link="actividades" href="actividades.html">Actividades</a>
-          <a data-link="patrocinadores" href="patrocinadores.html">Patrocinadores</a>
-          <a data-link="stands" href="stands.html">Adquiere tu stand</a>
-          <a data-link="feria" href="inscripcion.html">Registro visitante</a>
-          <a data-link="competencia" href="competencia.html">V60 Championship</a>
-          <a data-link="fidelizacion" href="fidelizacion.html">Pasaporte Cafetero</a>
-          <a data-link="como-funciona" href="como-funciona-evento.html">Cómo funciona</a>
-          <a data-link="qr" href="qr-inscripcion.html">QR inscripción</a>
-          <a data-link="privacidad" href="privacidad.html">Privacidad</a>
-        </nav>
-        <div class="festival-footer__contact">
-          <p class="festival-footer__col-title">Contacto</p>
-          <p class="festival-footer__dates">
-            Feria · <span data-bind="feria.fecha">29 y 30 de agosto de 2026</span><br>
+      <article class="bizcard bizcard--contact" id="contacto">
+        <div class="bizcard__body bizcard__body--center">
+          <h2 class="bizcard__heading">Contacto</h2>
+          <p class="bizcard__text bizcard__text--center">
+            <span data-bind="feria.fecha">29 y 30 de agosto de 2026</span><br>
             <span data-bind="feria.lugar">Palmetto Plaza, Cali</span>
           </p>
-          <div class="festival-contact-actions">
+          <p id="festivalInstagram" class="bizcard__social">
+            <a id="igLink" href="https://www.instagram.com/lasucursal.delcafe/" target="_blank" rel="noopener noreferrer" aria-label="Instagram @lasucursal.delcafe">@lasucursal.delcafe</a>
+          </p>
+          <div class="bizcard__actions bizcard__actions--contact">
             <a class="btn-submit" id="waContact" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
             <a class="btn-secondary" id="emailContact" href="mailto:lasucursaldelcafe@gmail.com">Correo</a>
           </div>
+          <p class="bizcard__copy">© 2026 La Sucursal del Café</p>
         </div>
-        <p class="festival-footer__copy">© 2026 La Sucursal del Café · Apoya lo nuestro, toma café colombiano.</p>
-      </div>
-    </footer>
+      </article>
+    </main>
   </div>
 
   <div id="feriaModal" class="feria-modal" role="dialog" aria-modal="true" aria-labelledby="feriaModalTitle" hidden>
@@ -176,7 +146,7 @@
   <script src="js/seo-structured-data.js"></script>
   <script src="js/site-chrome.js?v=20260701ux"></script>
   <script src="js/festival-nav.js?v=20260702min"></script>
-  <script src="js/festival-explore.js?v=20260702min"></script>
+  <script src="js/festival-explore.js?v=20260702card"></script>
   <script src="js/festival-modal.js"></script>
   <script src="js/form-submit.js?v=20260621pc"></script>
   <script src="js/sponsors.js?v=20260701mg"></script>

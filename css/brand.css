@@ -5000,3 +5000,240 @@ textarea.has-value {
     flex-direction: column;
   }
 }
+
+/* —— Home tarjeta de presentación (bizcard) —— */
+
+.page-festival--bizcard {
+  background: var(--cream-muted);
+  min-height: 100vh;
+}
+
+.page-festival--bizcard .site-shell--bizcard {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.page-festival--bizcard .site-header--bizcard {
+  background: transparent;
+  border: none;
+}
+
+.page-festival--bizcard .festival-nav--bizcard {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0.65rem 1rem 0;
+}
+
+.bizcard-layout {
+  flex: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem 2rem;
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+@media (min-width: 768px) {
+  .bizcard-layout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.15rem;
+    padding: 1rem 1.25rem 2.5rem;
+  }
+
+  .bizcard--identity,
+  .bizcard--contact {
+    grid-column: 1 / -1;
+  }
+}
+
+.bizcard {
+  background: var(--cream-pale);
+  border: 1px solid rgba(93, 58, 26, 0.1);
+  border-radius: 18px;
+  box-shadow: 0 8px 28px rgba(75, 53, 42, 0.06);
+  overflow: hidden;
+}
+
+.bizcard__body {
+  padding: 1.35rem 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  height: 100%;
+}
+
+.bizcard__body--center {
+  align-items: center;
+  text-align: center;
+}
+
+.bizcard__logo {
+  display: block;
+  width: min(200px, 62vw);
+  height: auto;
+  object-fit: contain;
+  margin: 0 auto 0.25rem;
+}
+
+.bizcard__kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brown-warm);
+}
+
+.bizcard__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 4vw, 2rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--brown-deep);
+}
+
+.bizcard__heading {
+  margin: 0 0 0.15rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--brown-deep);
+  text-align: center;
+}
+
+.bizcard__lead {
+  margin: 0;
+  max-width: 30rem;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: rgba(75, 53, 42, 0.82);
+}
+
+.bizcard__text {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: rgba(75, 53, 42, 0.85);
+}
+
+.bizcard__text--muted {
+  color: rgba(75, 53, 42, 0.68);
+  font-size: 0.88rem;
+}
+
+.bizcard__text--center {
+  text-align: center;
+}
+
+.bizcard__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: center;
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+}
+
+.bizcard__chip {
+  display: inline-block;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--brown-deep);
+  background: var(--cream);
+  border: 1px solid rgba(93, 58, 26, 0.12);
+  border-radius: 999px;
+}
+
+.bizcard__chip--accent {
+  background: rgba(95, 127, 78, 0.1);
+  border-color: rgba(95, 127, 78, 0.28);
+  color: var(--green-primary);
+}
+
+.bizcard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.bizcard__actions--contact {
+  margin-top: 0.25rem;
+}
+
+.bizcard__social {
+  margin: 0;
+  text-align: center;
+}
+
+.bizcard__social a {
+  font-weight: 700;
+  color: var(--brown-warm);
+  text-decoration: none;
+}
+
+.bizcard__social a:hover {
+  color: var(--red-brand);
+  text-decoration: underline;
+}
+
+.bizcard__copy {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  color: rgba(75, 53, 42, 0.55);
+  text-align: center;
+}
+
+.bizcard--explore .bizcard__body,
+.bizcard--sponsors .bizcard__body {
+  justify-content: flex-start;
+}
+
+.festival-explore--bizcard {
+  margin-top: 0.35rem;
+}
+
+.festival-explore--bizcard .festival-explore__panel {
+  background: var(--cream);
+  border-color: rgba(93, 58, 26, 0.08);
+}
+
+.festival-quick-links--bizcard {
+  margin-top: auto;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(93, 58, 26, 0.08);
+}
+
+.festival-sponsors-unified--bizcard {
+  margin-top: 0.15rem;
+}
+
+.festival-back-link--bizcard {
+  margin: 0.85rem 0 0;
+  text-align: center;
+}
+
+.page-festival--bizcard .festival-sponsors--strip {
+  justify-content: center;
+}
+
+#contacto.bizcard {
+  scroll-margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+  .bizcard__body {
+    padding: 1.15rem 1rem 1.25rem;
+  }
+
+  .bizcard-layout {
+    padding-bottom: 1.5rem;
+  }
+}
