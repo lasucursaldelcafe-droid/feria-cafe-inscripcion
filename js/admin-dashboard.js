@@ -541,11 +541,40 @@
         return;
       }
       var img = new Image();
+      var objectUrl = '';
+      img.onload = function () {
+        if (objectUrl) setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 1000);
+        resolve(img);
+      };
+      img.onerror = function () {
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        resolve(null);
+      };
+
+      if (String(url).indexOf('data:') === 0) {
+        try {
+          objectUrl = dataUrlToObjectUrl(url);
+          img.src = objectUrl;
+        } catch (err) {
+          console.warn('No se pudo convertir dataUrl de foto:', err);
+          img.src = url;
+        }
+        return;
+      }
+
       img.crossOrigin = 'anonymous';
-      img.onload = function () { resolve(img); };
-      img.onerror = function () { resolve(null); };
       img.src = url;
     });
+  }
+
+  function dataUrlToObjectUrl(dataUrl) {
+    var parts = String(dataUrl || '').match(/^data:([^;]+);base64,(.+)$/);
+    if (!parts) throw new Error('dataUrl inválido');
+    var contentType = parts[1] || 'image/jpeg';
+    var binary = atob(parts[2]);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return URL.createObjectURL(new Blob([bytes], { type: contentType }));
   }
 
   function loadCompetitorPhotoForCanvas(row) {
@@ -726,6 +755,9 @@
     createCompetitorCardCanvas(row).then(function (canvas) {
       var name = sanitizeFilename(val(row, ['Nombre']));
       downloadCanvas(canvas, 'reto-b60-purist-marbella-' + name + '.png');
+    }).catch(function (err) {
+      console.error(err);
+      alert('No se pudo generar el PNG con foto. Recarga el admin e intenta de nuevo.');
     }).finally(function () {
       if (button) {
         button.disabled = false;
