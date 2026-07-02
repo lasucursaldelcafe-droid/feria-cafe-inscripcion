@@ -385,12 +385,50 @@
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
-.png-layout-editor__safe {
+.png-layout-editor__guides {
   position: absolute;
-  border: 1px dashed rgba(232, 168, 76, 0.45);
-  border-radius: 4px;
-  pointer-events: none;
+  inset: 0;
   z-index: 1;
+  pointer-events: none;
+}
+
+.png-layout-editor__guide-line {
+  position: absolute;
+  pointer-events: none;
+}
+
+.png-layout-editor__guide-line--safe {
+  border: 1px dashed rgba(232, 168, 76, 0.65);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.png-layout-editor__guide-line--center-v,
+.png-layout-editor__guide-line--center-h {
+  background: rgba(120, 200, 255, 0.45);
+}
+
+.png-layout-editor__guide-line--third-v,
+.png-layout-editor__guide-line--third-h {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.png-layout-editor__guide-label {
+  position: absolute;
+  z-index: 3;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #f5d9a8;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.png-layout-editor__toggle {
+  align-self: center;
+  font-size: 0.82rem;
 }
 
 .png-layout-zone {

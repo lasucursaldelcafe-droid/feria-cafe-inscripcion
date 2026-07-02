@@ -592,40 +592,38 @@
     });
   }
 
-  function fetchCompetitorPhotoBlob(fileId) {
-    var photoUrl = buildAdminUrl('competidor_foto', { id: fileId });
-    if (!photoUrl) return Promise.resolve(null);
-    return fetch(photoUrl, { method: 'GET', mode: 'cors', cache: 'no-store' })
-      .then(function (res) {
-        if (!res.ok) return null;
-        var type = (res.headers.get('content-type') || '').toLowerCase();
-        if (type.indexOf('image/') !== 0) return null;
-        return res.blob();
-      })
-      .catch(function () { return null; });
-  }
 
   function loadCompetitorPhotoForCanvas(row) {
     var driveUrl = val(row, ['Foto participante enlace Drive']);
     var fileId = driveFileId(driveUrl);
     if (!fileId) return Promise.resolve(null);
 
-    return fetchCompetitorPhotoBlob(fileId).then(function (blob) {
-      if (blob && blob.size > 0) {
-        var objectUrl = URL.createObjectURL(blob);
-        return loadCanvasImage(objectUrl, { revokeObjectUrl: objectUrl });
-      }
-
-      var dataUrlEndpoint = buildAdminUrl('competidor_foto_data', { id: fileId });
-      if (!dataUrlEndpoint) return loadCanvasImage(driveThumb(driveUrl, 1600));
-
+    var dataUrlEndpoint = buildAdminUrl('competidor_foto_data', { id: fileId });
+    if (dataUrlEndpoint) {
       return fetchJson(dataUrlEndpoint).then(function (res) {
         if (res && res.ok && res.dataUrl) {
           return loadCanvasImage(res.dataUrl);
         }
-        console.warn('competidor_foto_data:', res && res.error ? res.error : 'sin dataUrl');
-        return loadCanvasImage(driveThumb(driveUrl, 1600));
+        return loadCompetitorPhotoDriveFallback(fileId, driveUrl);
       });
+    }
+    return loadCompetitorPhotoDriveFallback(fileId, driveUrl);
+  }
+
+  function loadCompetitorPhotoDriveFallback(fileId, driveUrl) {
+    var urls = [
+      driveThumb(driveUrl, 1600),
+      'https://drive.google.com/uc?export=view&id=' + encodeURIComponent(fileId),
+      'https://drive.google.com/thumbnail?id=' + encodeURIComponent(fileId) + '&sz=w1600'
+    ];
+    return tryLoadCanvasImageUrls(urls, 0);
+  }
+
+  function tryLoadCanvasImageUrls(urls, index) {
+    if (index >= urls.length) return Promise.resolve(null);
+    return loadCanvasImage(urls[index]).then(function (img) {
+      if (img && img.width > 0) return img;
+      return tryLoadCanvasImageUrls(urls, index + 1);
     });
   }
 
@@ -848,6 +846,13 @@
       var row = findCompetidorRowById(id);
       if (row) return row;
     }
+    var rows = pickRows(lastDashboardData || {}, 'allCompetencia');
+    for (var i = 0; i < rows.length; i++) {
+      if (isHabilitadoValue(rows[i]['Habilitado']) && val(rows[i], ['Foto participante enlace Drive'])) {
+        return rows[i];
+      }
+    }
+    if (rows.length) return rows[0];
     if (global.AdminCompetidorPng && global.AdminCompetidorPng.sampleRow) {
       return global.AdminCompetidorPng.sampleRow();
     }
@@ -868,16 +873,39 @@
     }).catch(function () { /* sin foto */ });
   }
 
+  function downloadAllCompetitorPngsSequential() {
+    var rowsNow = pickRows(lastDashboardData || {}, 'allCompetencia').filter(function (row) {
+      return isHabilitadoValue(row['Habilitado']);
+    });
+    if (!rowsNow.length) {
+      return Promise.reject(new Error('No hay competidores habilitados para generar PNG.'));
+    }
+    return rowsNow.reduce(function (chain, row) {
+      return chain.then(function () {
+        return createCompetitorCardCanvas(row).then(function (canvas) {
+          var name = sanitizeFilename(val(row, ['Nombre']));
+          downloadCanvas(canvas, 'reto-v60-purist-marbella-' + name + '.png');
+        });
+      }).then(function () {
+        return new Promise(function (resolve) { setTimeout(resolve, 400); });
+      });
+    }, Promise.resolve()).then(function () {
+      return rowsNow.length;
+    });
+  }
+
   function mountCompetidorPngLayoutEditor() {
     var root = document.getElementById('competidorPngLayoutRoot');
     if (!root || !global.AdminCompetidorPng || root.getAttribute('data-mounted') === '1') return;
     root.setAttribute('data-mounted', '1');
     global.AdminCompetidorPng.init({
       buildAdminUrl: buildAdminUrl,
-      fetchJson: fetchJson
+      fetchJson: fetchJson,
+      loadPhoto: loadCompetitorPhotoForCanvas
     });
     pngLayoutEditorHandle = global.AdminCompetidorPng.mountEditor(root, {
-      getPreviewRow: getCompetidorPreviewRow
+      getPreviewRow: getCompetidorPreviewRow,
+      onGenerateAll: downloadAllCompetitorPngsSequential
     });
   }
 
@@ -1253,19 +1281,14 @@
     if (allBtn && allBtn.getAttribute('data-bound') !== '1') {
       allBtn.setAttribute('data-bound', '1');
       allBtn.addEventListener('click', function () {
-        var rowsNow = pickRows(lastDashboardData || {}, 'allCompetencia').filter(function (row) {
-          return isHabilitadoValue(row['Habilitado']);
+        allBtn.disabled = true;
+        allBtn.textContent = 'Generando…';
+        downloadAllCompetitorPngsSequential().catch(function (err) {
+          alert(err.message || 'No se pudieron generar los PNG.');
+        }).finally(function () {
+          allBtn.disabled = false;
+          allBtn.textContent = 'Descargar todas';
         });
-        rowsNow.reduce(function (chain, row) {
-          return chain.then(function () {
-            return createCompetitorCardCanvas(row).then(function (canvas) {
-              var name = sanitizeFilename(val(row, ['Nombre']));
-              downloadCanvas(canvas, 'reto-v60-purist-marbella-' + name + '.png');
-            });
-          }).then(function () {
-            return new Promise(function (resolve) { setTimeout(resolve, 350); });
-          });
-        }, Promise.resolve());
       });
     }
   }
@@ -1288,6 +1311,10 @@
 
     renderCompetidorDashboard(compRows);
     renderCompetitorCards(compRows);
+    if (pngLayoutEditorHandle && pngLayoutEditorHandle.setPreviewRow) {
+      var previewRow = getCompetidorPreviewRow();
+      if (previewRow) pngLayoutEditorHandle.setPreviewRow(previewRow);
+    }
 
     var panelFeria = document.getElementById('adminTabPanelsFeria');
     if (panelFeria) {
