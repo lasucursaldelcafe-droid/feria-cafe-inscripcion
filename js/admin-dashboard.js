@@ -293,73 +293,6 @@
     if (!result) return;
     result.innerHTML = html;
     result.hidden = false;
-    result.querySelectorAll('[data-copy]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var text = btn.getAttribute('data-copy') || '';
-        if (!text) return;
-        navigator.clipboard.writeText(text).then(function () {
-          var label = btn.textContent;
-          btn.textContent = 'Copiado';
-          setTimeout(function () { btn.textContent = label; }, 1500);
-        });
-      });
-    });
-  }
-
-  function buildPanelLoginUrl(baseUrl, email, code) {
-    var url = (baseUrl || '').trim();
-    if (!url) {
-      url = global.SiteLinks && SiteLinks.absUrl
-        ? SiteLinks.absUrl('miStand')
-        : ((global.location.origin || 'https://la-sucursal-del-cafe.web.app') + '/mi-stand');
-    }
-    if (!/^https?:\/\//i.test(url)) {
-      url = (global.location.origin || 'https://la-sucursal-del-cafe.web.app') + url;
-    }
-    var sep = url.indexOf('?') >= 0 ? '&' : '?';
-    return url + sep + 'email=' + encodeURIComponent(email) + '&code=' + encodeURIComponent(code);
-  }
-
-  function renderExpositorCredentialsBox(opts) {
-    opts = opts || {};
-    var marca = opts.marca || '';
-    var id = opts.id || '';
-    var email = opts.email || '';
-    var code = opts.code || '';
-    var perfilLink = opts.perfilLink || '';
-    var panelLoginUrl = opts.panelLoginUrl || '';
-
-    var html = '<p><strong>Marca creada:</strong> ' + escapeHtml(marca) +
-      ' <span class="admin-badge admin-badge--on">ID ' + escapeHtml(id) + '</span></p>';
-
-    if (code) {
-      html += '<div class="admin-creds-box">' +
-        '<p class="admin-creds-box__title">Credenciales del expositor (compártelas por WhatsApp o correo)</p>' +
-        '<dl class="admin-creds-list">' +
-        '<div><dt>Correo</dt><dd><code>' + escapeHtml(email) + '</code> ' +
-        '<button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-copy="' + escapeHtml(email) + '">Copiar</button></dd></div>' +
-        '<div><dt>Código de acceso</dt><dd><code class="admin-creds-code">' + escapeHtml(code) + '</code> ' +
-        '<button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-copy="' + escapeHtml(code) + '">Copiar</button></dd></div>' +
-        '</dl>' +
-        '<p class="admin-creds-hint">No es una contraseña de Google: es un código de 8 letras/números solo para el panel <strong>/mi-stand</strong>.</p>' +
-        '<div class="admin-creds-actions">' +
-        '<a class="admin-btn admin-btn--primary admin-btn--sm" href="' + escapeHtml(panelLoginUrl) + '" target="_blank" rel="noopener">Abrir panel con enlace directo</a> ' +
-        '<button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-copy="' + escapeHtml(panelLoginUrl) + '">Copiar enlace</button>' +
-        '</div>' +
-        '<ol class="admin-creds-steps">' +
-        '<li>El expositor abre <strong>/mi-stand</strong> (o el enlace de arriba).</li>' +
-        '<li>Ingresa correo + código y marca <strong>Recordar en este dispositivo</strong>.</li>' +
-        '<li>Arma productos con foto y precio en «Perfil público».</li>' +
-        '<li>Pulsa <strong>Guardar y publicar perfil</strong> — sin eso no aparece en <strong>/marcas</strong>.</li>' +
-        '</ol>' +
-        '</div>';
-    }
-
-    if (perfilLink) {
-      html += '<p class="admin-creds-links"><a href="' + escapeHtml(perfilLink) + '" target="_blank" rel="noopener">Ver página pública /marcas</a></p>';
-    }
-
-    return html;
   }
 
   function tipoFromPlan(plan) {
@@ -434,15 +367,19 @@
         var perfilLink = result.perfilUrl || '';
         var panelLink = result.expositorPanelUrl || '';
         var code = result.accessCode || '';
-        var panelLoginUrl = code ? buildPanelLoginUrl(panelLink, correo, code) : panelLink;
-        var html = renderExpositorCredentialsBox({
-          marca: result.marca || marca,
-          id: result.id || '',
-          email: correo,
-          code: code,
-          perfilLink: perfilLink,
-          panelLoginUrl: panelLoginUrl
-        });
+        var html = '<p><strong>Marca creada:</strong> ' + escapeHtml(result.marca || marca) +
+          ' <span class="admin-badge admin-badge--on">ID ' + escapeHtml(result.id || '') + '</span></p>';
+        if (code) {
+          html += '<p>Código de acceso panel expositor: <code>' + escapeHtml(code) +
+            '</code> (enviado también por correo al expositor).</p>';
+        }
+        if (perfilLink) {
+          html += '<p><a href="' + escapeHtml(perfilLink) + '" target="_blank" rel="noopener">Ver página pública</a>';
+          if (panelLink) {
+            html += ' · <a href="' + escapeHtml(panelLink) + '" target="_blank" rel="noopener">Panel expositor</a>';
+          }
+          html += '</p>';
+        }
         showAdminCreateMarcaResult(html);
         resetAdminCreateMarcaForm();
         loadDashboard();
@@ -580,9 +517,7 @@
     var text = String(raw || '').trim();
     if (!text) return '';
     var colonIdx = text.indexOf(':');
-    if (colonIdx >= 0) {
-      text = text.slice(colonIdx + 1).trim();
-    }
+    if (colonIdx >= 0) text = text.slice(colonIdx + 1).trim();
     return text;
   }
 
@@ -625,16 +560,146 @@
     var experienciaCafe = competitorField(row, ['Experiencia café', 'Experiencia cafe']);
     var experienciaSwitch = competitorField(row, ['Experiencia Switch', 'Experiencia V60']);
     var torneos = competitorField(row, ['Torneos previos']);
-
     var lines = [];
     if (ciudad) lines.push(ciudad);
-
     var experiencia = dedupeCompetitorParts([experienciaCafe, experienciaSwitch]);
     if (experiencia.length) lines.push(experiencia.join(' · '));
-
     if (torneos) lines.push(torneos);
-
     return lines.slice(0, 3);
+  }
+
+  function measureWrappedLines(ctx, text, maxWidth, maxLines) {
+    var words = String(text || '').split(/\s+/).filter(Boolean);
+    if (!words.length) return [];
+    var line = '';
+    var lines = [];
+    for (var n = 0; n < words.length; n++) {
+      var testLine = line ? line + ' ' + words[n] : words[n];
+      if (ctx.measureText(testLine).width > maxWidth && line) {
+        lines.push(line);
+        line = words[n];
+      } else {
+        line = testLine;
+      }
+      if (lines.length === maxLines) break;
+    }
+    if (line && lines.length < maxLines) lines.push(line);
+    if (words.length && lines.length === maxLines && lines[lines.length - 1].length > 3) {
+      lines[lines.length - 1] = lines[lines.length - 1].replace(/[.,;:]?$/, '') + '…';
+    }
+    return lines;
+  }
+
+  function buildCompetitorCardTextBlocks(row, ctx, maxWidth, maxProfileLines) {
+    maxProfileLines = maxProfileLines || 3;
+    var blocks = [
+      {
+        kind: 'name',
+        text: val(row, ['Nombre']) || 'Competidor',
+        font: '800 50px Inter, Arial, sans-serif',
+        lineHeight: 56,
+        maxLines: 2,
+        color: '#ffffff'
+      },
+      {
+        kind: 'subtitle',
+        text: competitorCardSubtitle(row),
+        font: '700 24px Inter, Arial, sans-serif',
+        lineHeight: 30,
+        maxLines: 2,
+        color: '#f5d9a8'
+      }
+    ];
+    competitorProfileLines(row).slice(0, maxProfileLines).forEach(function (line) {
+      blocks.push({
+        kind: 'profile',
+        text: line,
+        font: '500 22px Inter, Arial, sans-serif',
+        lineHeight: 28,
+        maxLines: 2,
+        color: 'rgba(255,255,255,0.92)'
+      });
+    });
+    var gap = 12;
+    return blocks.map(function (block) {
+      ctx.font = block.font;
+      var lines = measureWrappedLines(ctx, block.text, maxWidth, block.maxLines);
+      return Object.assign({}, block, {
+        lines: lines,
+        height: lines.length * block.lineHeight
+      });
+    }).filter(function (block) {
+      return block.lines.length > 0;
+    });
+  }
+
+  function totalBlockStackHeight(blocks, gap) {
+    if (!blocks.length) return 0;
+    var total = 0;
+    blocks.forEach(function (block, idx) {
+      total += block.height;
+      if (idx < blocks.length - 1) total += gap;
+    });
+    return total;
+  }
+
+  function layoutCompetitorCardText(row, ctx, bounds) {
+    var gap = 12;
+    var padY = 24;
+    var maxWidth = bounds.width;
+    var maxHeight = bounds.maxHeight - padY * 2;
+    var blocks = buildCompetitorCardTextBlocks(row, ctx, maxWidth, 3);
+    var attempts = 0;
+    while (totalBlockStackHeight(blocks, gap) > maxHeight && attempts < 4) {
+      attempts += 1;
+      if (attempts === 1) {
+        blocks = buildCompetitorCardTextBlocks(row, ctx, maxWidth, 2);
+      } else if (attempts === 2) {
+        blocks.forEach(function (block) {
+          if (block.kind === 'name') {
+            block.font = '800 44px Inter, Arial, sans-serif';
+            block.lineHeight = 50;
+          } else if (block.kind === 'subtitle') {
+            block.font = '700 22px Inter, Arial, sans-serif';
+            block.lineHeight = 28;
+          } else {
+            block.font = '500 20px Inter, Arial, sans-serif';
+            block.lineHeight = 26;
+          }
+          ctx.font = block.font;
+          block.lines = measureWrappedLines(ctx, block.text, maxWidth, block.maxLines);
+          block.height = block.lines.length * block.lineHeight;
+        });
+      } else {
+        blocks = blocks.filter(function (block) {
+          return block.kind !== 'profile' || block === blocks[blocks.length - 1];
+        });
+        if (blocks.length > 2) blocks = blocks.slice(0, 2);
+      }
+    }
+    var stackH = totalBlockStackHeight(blocks, gap);
+    var y = bounds.top + padY + Math.max(0, (maxHeight - stackH) / 2);
+    blocks.forEach(function (block) {
+      block.x = bounds.left + bounds.width / 2;
+      block.y = y;
+      y += block.height + gap;
+    });
+    return {
+      blocks: blocks,
+      bottom: bounds.top + padY + stackH,
+      top: bounds.top
+    };
+  }
+
+  function drawCompetitorCardTextBlocks(ctx, layout) {
+    ctx.textAlign = 'center';
+    layout.blocks.forEach(function (block) {
+      ctx.fillStyle = block.color;
+      ctx.font = block.font;
+      block.lines.forEach(function (line, idx) {
+        ctx.fillText(line, block.x, block.y + idx * block.lineHeight + block.lineHeight * 0.82);
+      });
+    });
   }
 
   function sanitizeFilename(name) {
@@ -685,10 +750,6 @@
         return res.blob();
       })
       .catch(function () { return null; });
-  }
-
-  function normalizeCompetidorId(id) {
-    return String(id || '').trim();
   }
 
   function loadCompetitorPhotoForCanvas(row, inlinePhotoDataUrl) {
@@ -849,13 +910,19 @@
       var PAD = 48;
       var CONTENT_W = W - PAD * 2;
       var CX = W / 2;
+      var HEADER_END = 132;
+      var FOOTER_H = 64;
+      var FOOTER_GAP = 20;
+      var footerTop = H - FOOTER_H - FOOTER_GAP;
+      var INFO_MIN = 240;
+      var INFO_MAX = 400;
+      var PHOTO_MIN = 520;
+      var id = val(row, ['ID']);
 
       var canvas = document.createElement('canvas');
       canvas.width = W;
       canvas.height = H;
       var ctx = canvas.getContext('2d');
-      var name = val(row, ['Nombre']) || 'Competidor';
-      var id = val(row, ['ID']);
 
       var bg = ctx.createLinearGradient(0, 0, W, H);
       bg.addColorStop(0, '#2a1a12');
@@ -864,54 +931,73 @@
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
 
-      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+      ctx.fillStyle = 'rgba(255,255,255,0.04)';
       ctx.beginPath();
-      ctx.arc(W - 60, 100, 220, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(70, H - 80, 200, 0, Math.PI * 2);
+      ctx.arc(W - 60, 90, 180, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.textAlign = 'center';
       ctx.fillStyle = '#f6ead8';
-      ctx.font = '800 42px Inter, Arial, sans-serif';
-      ctx.fillText('RETO V60', CX, 72);
+      ctx.font = '800 40px Inter, Arial, sans-serif';
+      ctx.fillText('RETO V60', CX, 56);
 
-      ctx.font = '600 26px Inter, Arial, sans-serif';
+      ctx.font = '600 24px Inter, Arial, sans-serif';
       ctx.fillStyle = 'rgba(246,234,216,0.78)';
-      ctx.fillText('Edición Purist Marbella', CX, 108);
+      ctx.fillText('Edición Purist Marbella', CX, 88);
 
       ctx.fillStyle = '#e8a84c';
-      ctx.font = '700 22px Inter, Arial, sans-serif';
-      ctx.fillText(id || 'Competidor', CX, 138);
+      ctx.font = '700 20px Inter, Arial, sans-serif';
+      ctx.fillText(id || 'Competidor', CX, 116);
 
-      var photoY = 158;
-      var photoH = 920;
-      drawPortraitPhoto(ctx, img, PAD, photoY, CONTENT_W, photoH);
+      var infoHeight = INFO_MAX;
+      var photoHeight = footerTop - HEADER_END - infoHeight;
+      if (photoHeight < PHOTO_MIN) {
+        photoHeight = PHOTO_MIN;
+        infoHeight = footerTop - HEADER_END - photoHeight;
+      }
+      infoHeight = Math.max(INFO_MIN, Math.min(INFO_MAX, infoHeight));
 
-      var textY = photoY + photoH + 44;
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '800 62px Inter, Arial, sans-serif';
-      var afterName = wrapTextCentered(ctx, name, CX, textY, CONTENT_W, 66, 2);
+      var photoY = HEADER_END;
+      var infoY = photoY + photoHeight;
+      var infoBottom = footerTop;
 
-      ctx.fillStyle = '#f5d9a8';
-      ctx.font = '700 28px Inter, Arial, sans-serif';
-      ctx.fillText(competitorCardSubtitle(row), CX, afterName + 20);
+      drawPortraitPhoto(ctx, img, PAD, photoY, CONTENT_W, photoHeight);
 
-      var profileY = afterName + 64;
-      var profileLines = competitorProfileLines(row);
-      profileLines.forEach(function (line) {
-        ctx.fillStyle = 'rgba(255,255,255,0.9)';
-        ctx.font = '500 26px Inter, Arial, sans-serif';
-        profileY = wrapTextCentered(ctx, line, CX, profileY, CONTENT_W - 40, 34, 2) + 10;
+      var infoBg = ctx.createLinearGradient(0, infoY, 0, infoBottom);
+      infoBg.addColorStop(0, 'rgba(12,9,7,0.96)');
+      infoBg.addColorStop(1, 'rgba(22,16,12,0.98)');
+      ctx.fillStyle = infoBg;
+      ctx.fillRect(PAD, infoY, CONTENT_W, infoBottom - infoY);
+
+      ctx.strokeStyle = 'rgba(232,168,76,0.35)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(PAD + 24, infoY);
+      ctx.lineTo(PAD + CONTENT_W - 24, infoY);
+      ctx.stroke();
+
+      var textLayout = layoutCompetitorCardText(row, ctx, {
+        left: PAD,
+        top: infoY,
+        width: CONTENT_W,
+        maxHeight: infoBottom - infoY
       });
+      drawCompetitorCardTextBlocks(ctx, textLayout);
 
-      var footerY = H - 68;
-      ctx.fillStyle = 'rgba(0,0,0,0.32)';
-      roundedRect(ctx, PAD, footerY - 36, CONTENT_W, 56, 18);
+      if (textLayout.blocks.length) {
+        var lastBlock = textLayout.blocks[textLayout.blocks.length - 1];
+        var textBottom = lastBlock.y + lastBlock.height;
+        if (textBottom > infoBottom - 6) {
+          console.warn('Competitor PNG: texto cerca del límite', { textBottom: textBottom, infoBottom: infoBottom });
+        }
+      }
+
+      var footerY = H - FOOTER_GAP - 18;
+      ctx.fillStyle = 'rgba(0,0,0,0.38)';
+      roundedRect(ctx, PAD, footerTop, CONTENT_W, FOOTER_H, 16);
       ctx.fill();
       ctx.fillStyle = '#f6ead8';
-      ctx.font = '700 24px Inter, Arial, sans-serif';
+      ctx.font = '700 22px Inter, Arial, sans-serif';
       ctx.fillText('Café filtrado · Plaza Marbella · Purist', CX, footerY);
 
       return canvas;
@@ -939,12 +1025,12 @@
     }
   }
 
-  function downloadCompetitorCard(row, button, options) {
+  function downloadCompetitorCard(row, button) {
     if (button) {
       button.disabled = true;
       button.textContent = 'Generando…';
     }
-    createCompetitorCardCanvas(row, options).then(function (canvas) {
+    createCompetitorCardCanvas(row).then(function (canvas) {
       var name = sanitizeFilename(val(row, ['Nombre']));
       downloadCanvas(canvas, 'reto-v60-purist-marbella-' + name + '.png');
     }).catch(function (err) {
@@ -994,67 +1080,23 @@
   }
 
   function findCompetidorRowById(id) {
-    var targetId = normalizeCompetidorId(id);
-    if (!targetId || !lastDashboardData) return null;
+    if (!id || !lastDashboardData) return null;
     var rows = pickRows(lastDashboardData, 'allCompetencia');
     for (var i = 0; i < rows.length; i++) {
-      if (normalizeCompetidorId(rows[i]['ID']) === targetId) return rows[i];
+      if (rows[i]['ID'] === id) return rows[i];
     }
     return null;
   }
 
   function updateLocalCompetidor(updatedRow) {
-    if (!lastDashboardData || !updatedRow) return;
-    var updatedId = normalizeCompetidorId(updatedRow['ID']);
-    if (!updatedId) return;
+    if (!lastDashboardData || !updatedRow || !updatedRow['ID']) return;
     var rows = lastDashboardData.allCompetencia || [];
     for (var i = 0; i < rows.length; i++) {
-      if (normalizeCompetidorId(rows[i]['ID']) === updatedId) {
+      if (rows[i]['ID'] === updatedRow['ID']) {
         rows[i] = Object.assign({}, rows[i], updatedRow);
         break;
       }
     }
-  }
-
-  function getCompetidorRowFromEditorForm() {
-    var id = normalizeCompetidorId(document.getElementById('competidorEditId') && document.getElementById('competidorEditId').value);
-    if (!id) return null;
-    var base = findCompetidorRowById(id);
-    if (!base) return null;
-
-    return Object.assign({}, base, {
-      'ID': id,
-      'Nombre': ((document.getElementById('competidorEditNombre') || {}).value || '').trim(),
-      'Documento': ((document.getElementById('competidorEditDocumento') || {}).value || '').trim(),
-      'Edad': ((document.getElementById('competidorEditEdad') || {}).value || '').trim(),
-      'Correo': ((document.getElementById('competidorEditCorreo') || {}).value || '').trim().toLowerCase(),
-      'Celular': ((document.getElementById('competidorEditCelular') || {}).value || '').trim(),
-      'Ciudad': ((document.getElementById('competidorEditCiudad') || {}).value || '').trim(),
-      'Representa': ((document.getElementById('competidorEditRepresenta') || {}).value || '').trim(),
-      'Rol': ((document.getElementById('competidorEditRol') || {}).value || '').trim(),
-      'Experiencia café': ((document.getElementById('competidorEditExpCafe') || {}).value || '').trim(),
-      'Experiencia Switch': ((document.getElementById('competidorEditExpV60') || {}).value || '').trim(),
-      'Torneos previos': ((document.getElementById('competidorEditTorneos') || {}).value || '').trim(),
-      'Foto participante enlace Drive': ((document.getElementById('competidorEditFotoEnlace') || {}).value || '').trim(),
-      'Estado pago': ((document.getElementById('competidorEditEstadoPago') || {}).value || '').trim(),
-      'Cupo confirmado': document.getElementById('competidorEditCupoConfirmado') && document.getElementById('competidorEditCupoConfirmado').checked ? 'Sí' : 'No',
-      'Habilitado': document.getElementById('competidorEditHabilitado') && document.getElementById('competidorEditHabilitado').checked ? 'Sí' : 'No',
-      'Observaciones': ((document.getElementById('competidorEditObservaciones') || {}).value || '').trim(),
-      'Notas admin': ((document.getElementById('competidorEditNotas') || {}).value || '').trim()
-    });
-  }
-
-  function refreshCompetidorEditorIfOpen() {
-    if (!selectedCompetidorId) return;
-    var panel = document.getElementById('competidorEditorPanel');
-    if (!panel || panel.hidden) return;
-    var row = findCompetidorRowById(selectedCompetidorId);
-    if (!row) {
-      closeCompetidorEditor();
-      return;
-    }
-    fillCompetidorEditorForm(row);
-    updateCompetidorEditorPreview(row);
   }
 
   function renderCompetidorDashboard(rows) {
@@ -1074,8 +1116,7 @@
 
     root.innerHTML = dashboardCompetidorRows.map(function (row) {
       var id = val(row, ['ID']);
-      var selected = id && normalizeCompetidorId(id) === normalizeCompetidorId(selectedCompetidorId)
-        ? ' admin-competidor-hero--selected' : '';
+      var selected = id && id === selectedCompetidorId ? ' admin-competidor-hero--selected' : '';
       return '<button type="button" class="admin-competidor-hero' + selected + '" data-competidor-id="' + escapeHtml(id) + '">' +
         renderCompetidorHeroInner(row) +
         '<div class="admin-competidor-hero__actions">' +
@@ -1132,14 +1173,11 @@
 
   function openCompetidorEditor(row) {
     if (!row) return;
-    selectedCompetidorId = normalizeCompetidorId(row['ID']);
+    selectedCompetidorId = row['ID'] || '';
     renderCompetidorDashboard(pickRows(lastDashboardData || {}, 'allCompetencia'));
 
     var panel = document.getElementById('competidorEditorPanel');
     if (panel) panel.hidden = false;
-    if (global.AdminDisclosures && global.AdminDisclosures.openFold) {
-      global.AdminDisclosures.openFold('competidorEditorPanel');
-    }
 
     fillCompetidorEditorForm(row);
     updateCompetidorEditorPreview(row);
@@ -1168,58 +1206,38 @@
     var pngBtn = document.querySelector('.admin-competidor-png-editor');
     if (pngBtn) {
       pngBtn.addEventListener('click', function () {
-        var row = getCompetidorRowFromEditorForm();
-        if (!row) return;
-        var fileInput = document.getElementById('competidorEditFotoFile');
-        var file = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
-        if (file) {
-          readFileAsDataUrl(file).then(function (dataUrl) {
-            downloadCompetitorCard(row, pngBtn, { inlinePhotoDataUrl: dataUrl });
-          }).catch(function () {
-            downloadCompetitorCard(row, pngBtn);
-          });
-        } else {
-          downloadCompetitorCard(row, pngBtn);
-        }
+        var id = document.getElementById('competidorEditId').value.trim();
+        var row = findCompetidorRowById(id);
+        if (row) downloadCompetitorCard(row, pngBtn);
       });
     }
 
     var previewFields = [
       'competidorEditNombre', 'competidorEditRepresenta', 'competidorEditRol',
       'competidorEditExpCafe', 'competidorEditExpV60', 'competidorEditTorneos',
-      'competidorEditCiudad', 'competidorEditFotoEnlace', 'competidorEditEstadoPago',
-      'competidorEditCupoConfirmado', 'competidorEditHabilitado'
+      'competidorEditCiudad', 'competidorEditFotoEnlace'
     ];
     previewFields.forEach(function (fieldId) {
       var el = document.getElementById(fieldId);
       if (!el) return;
-      var eventName = el.type === 'checkbox' ? 'change' : 'input';
-      el.addEventListener(eventName, function () {
-        var draft = getCompetidorRowFromEditorForm();
-        if (draft) updateCompetidorEditorPreview(draft);
+      el.addEventListener('input', function () {
+        var id = document.getElementById('competidorEditId').value.trim();
+        if (!id) return;
+        var base = findCompetidorRowById(id);
+        if (!base) return;
+        var draft = Object.assign({}, base, {
+          'Nombre': document.getElementById('competidorEditNombre').value.trim(),
+          'Representa': document.getElementById('competidorEditRepresenta').value.trim(),
+          'Rol': document.getElementById('competidorEditRol').value.trim(),
+          'Experiencia café': document.getElementById('competidorEditExpCafe').value.trim(),
+          'Experiencia Switch': document.getElementById('competidorEditExpV60').value.trim(),
+          'Torneos previos': document.getElementById('competidorEditTorneos').value.trim(),
+          'Ciudad': document.getElementById('competidorEditCiudad').value.trim(),
+          'Foto participante enlace Drive': document.getElementById('competidorEditFotoEnlace').value.trim()
+        });
+        updateCompetidorEditorPreview(draft);
       });
     });
-
-    var fotoFileInput = document.getElementById('competidorEditFotoFile');
-    if (fotoFileInput) {
-      fotoFileInput.addEventListener('change', function () {
-        var draft = getCompetidorRowFromEditorForm();
-        if (!draft) return;
-        var file = fotoFileInput.files && fotoFileInput.files[0];
-        if (!file) {
-          updateCompetidorEditorPreview(draft);
-          return;
-        }
-        readFileAsDataUrl(file).then(function (dataUrl) {
-          updateCompetidorEditorPreview(draft);
-          var preview = document.getElementById('competidorEditorPreview');
-          if (!preview) return;
-          var wrap = preview.querySelector('.admin-competidor-hero__photo-wrap');
-          if (!wrap) return;
-          wrap.innerHTML = '<img class="admin-competidor-hero__photo" src="' + escapeHtml(dataUrl) + '" alt="Vista previa foto">';
-        });
-      });
-    }
 
     form.addEventListener('submit', function (event) {
       event.preventDefault();
@@ -1328,10 +1346,9 @@
       root.innerHTML = '<p class="admin-empty">Aún no hay competidores habilitados para generar imágenes.</p>';
       return;
     }
-    root.innerHTML = enabledRows.map(function (row) {
+    root.innerHTML = enabledRows.map(function (row, idx) {
       var photo = driveThumb(val(row, ['Foto participante enlace Drive']), 600);
       var name = val(row, ['Nombre']) || 'Competidor';
-      var id = val(row, ['ID']);
       var desc = competitorDescription(row) || 'Participante del reto de café filtrado.';
       return '<article class="admin-competitor-card">' +
         (photo
@@ -1341,18 +1358,17 @@
           '<h5>' + escapeHtml(name) + '</h5>' +
           '<p>' + escapeHtml(desc) + '</p>' +
           '<div class="admin-competitor-card__actions">' +
-            '<button type="button" class="admin-btn admin-btn--primary admin-competitor-png" data-competidor-id="' + escapeHtml(id) + '">PNG</button>' +
+            '<button type="button" class="admin-btn admin-btn--primary admin-competitor-png" data-competitor-idx="' + idx + '">PNG</button>' +
             (photo ? '<a class="admin-btn admin-btn--secondary" href="' + escapeHtml(val(row, ['Foto participante enlace Drive'])) + '" target="_blank" rel="noopener">Foto</a>' : '') +
           '</div>' +
         '</div>' +
       '</article>';
     }).join('');
 
-    root.querySelectorAll('.admin-competitor-png[data-competidor-id]').forEach(function (btn) {
+    root.querySelectorAll('.admin-competitor-png').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var id = btn.getAttribute('data-competidor-id');
-        var row = findCompetidorRowById(id);
-        if (row) downloadCompetitorCard(row, btn);
+        var idx = parseInt(btn.getAttribute('data-competitor-idx'), 10);
+        downloadCompetitorCard(enabledRows[idx], btn);
       });
     });
 
@@ -1427,7 +1443,6 @@
     }
 
     bindToggleStatusButtons();
-    refreshCompetidorEditorIfOpen();
   }
 
   function bindAdminTabs() {
@@ -2029,13 +2044,11 @@
   }
 
   function pickRows(data, key) {
-    if (Array.isArray(data[key])) return data[key];
-    if (key === 'allFeria' && Array.isArray(data.recentFeria)) return data.recentFeria;
-    if (key === 'allCompetencia' && Array.isArray(data.recentCompetencia)) return data.recentCompetencia;
-    if (key === 'allStands' && Array.isArray(data.recentStands)) return data.recentStands;
-    if (key === 'allPatrocinadoresCompetencia' && Array.isArray(data.allPatrocinadoresCompetencia)) {
-      return data.allPatrocinadoresCompetencia;
-    }
+    if (data[key]) return data[key];
+    if (key === 'allFeria' && data.recentFeria) return data.recentFeria;
+    if (key === 'allCompetencia' && data.recentCompetencia) return data.recentCompetencia;
+    if (key === 'allStands' && data.recentStands) return data.recentStands;
+    if (key === 'allPatrocinadoresCompetencia') return data.allPatrocinadoresCompetencia;
     return [];
   }
 
@@ -2292,9 +2305,6 @@
     syncMarcaPlanFromTab();
     showAdminSection(readHashSection());
     preMountAdminModules();
-    if (global.AdminDisclosures && global.AdminDisclosures.init) {
-      global.AdminDisclosures.init();
-    }
 
     if (!getWebAppUrl()) {
       showError('Configura js/sheets-config.js con la URL de Apps Script.');
