@@ -560,16 +560,22 @@
       .slice(0, 60) || 'competidor';
   }
 
-  function loadCanvasImage(url) {
+  function loadCanvasImage(url, options) {
+    options = options || {};
     return new Promise(function (resolve) {
       if (!url) {
         resolve(null);
         return;
       }
       var img = new Image();
-      var objectUrl = '';
+      var objectUrl = options.revokeObjectUrl || '';
+      var src = String(url);
+      var isInline = src.indexOf('data:') === 0 || src.indexOf('blob:') === 0;
+
       img.onload = function () {
-        if (objectUrl) setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 1000);
+        if (objectUrl) {
+          setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 2000);
+        }
         resolve(img);
       };
       img.onerror = function () {
@@ -577,30 +583,22 @@
         resolve(null);
       };
 
-      if (String(url).indexOf('data:') === 0) {
-        try {
-          objectUrl = dataUrlToObjectUrl(url);
-          img.src = objectUrl;
-        } catch (err) {
-          console.warn('No se pudo convertir dataUrl de foto:', err);
-          img.src = url;
-        }
-        return;
-      }
-
-      img.crossOrigin = 'anonymous';
-      img.src = url;
+      if (!isInline) img.crossOrigin = 'anonymous';
+      img.src = src;
     });
   }
 
-  function dataUrlToObjectUrl(dataUrl) {
-    var parts = String(dataUrl || '').match(/^data:([^;]+);base64,(.+)$/);
-    if (!parts) throw new Error('dataUrl inválido');
-    var contentType = parts[1] || 'image/jpeg';
-    var binary = atob(parts[2]);
-    var bytes = new Uint8Array(binary.length);
-    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return URL.createObjectURL(new Blob([bytes], { type: contentType }));
+  function fetchCompetitorPhotoBlob(fileId) {
+    var photoUrl = buildAdminUrl('competidor_foto', { id: fileId });
+    if (!photoUrl) return Promise.resolve(null);
+    return fetch(photoUrl, { method: 'GET', mode: 'cors', cache: 'no-store' })
+      .then(function (res) {
+        if (!res.ok) return null;
+        var type = (res.headers.get('content-type') || '').toLowerCase();
+        if (type.indexOf('image/') !== 0) return null;
+        return res.blob();
+      })
+      .catch(function () { return null; });
   }
 
   function loadCompetitorPhotoForCanvas(row) {
@@ -608,15 +606,22 @@
     var fileId = driveFileId(driveUrl);
     if (!fileId) return Promise.resolve(null);
 
-    var dataUrlEndpoint = buildAdminUrl('competidor_foto_data', { id: fileId });
-    if (!dataUrlEndpoint) return loadCanvasImage(driveThumb(driveUrl, 1600));
-
-    return fetchJson(dataUrlEndpoint).then(function (res) {
-      if (res && res.ok && res.dataUrl) {
-        return loadCanvasImage(res.dataUrl);
+    return fetchCompetitorPhotoBlob(fileId).then(function (blob) {
+      if (blob && blob.size > 0) {
+        var objectUrl = URL.createObjectURL(blob);
+        return loadCanvasImage(objectUrl, { revokeObjectUrl: objectUrl });
       }
-      console.warn('competidor_foto_data:', res && res.error ? res.error : 'sin dataUrl');
-      return loadCanvasImage(driveThumb(driveUrl, 1600));
+
+      var dataUrlEndpoint = buildAdminUrl('competidor_foto_data', { id: fileId });
+      if (!dataUrlEndpoint) return loadCanvasImage(driveThumb(driveUrl, 1600));
+
+      return fetchJson(dataUrlEndpoint).then(function (res) {
+        if (res && res.ok && res.dataUrl) {
+          return loadCanvasImage(res.dataUrl);
+        }
+        console.warn('competidor_foto_data:', res && res.error ? res.error : 'sin dataUrl');
+        return loadCanvasImage(driveThumb(driveUrl, 1600));
+      });
     });
   }
 

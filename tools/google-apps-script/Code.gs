@@ -113,6 +113,9 @@ function doGet(e) {
   if (params.action === 'admin_export') {
     return handleAdminExport_(params.idToken || '', params.dataset || '');
   }
+  if (params.action === 'competidor_foto') {
+    return getCompetidorFotoBinaryResponse_(params.id || params.fileId || params.url || '');
+  }
   if (params.action === 'competidor_foto_data') {
     return jsonResponse(getCompetidorFotoData_(params.id || params.fileId || params.url || ''));
   }
@@ -548,6 +551,47 @@ function extractDriveFileId_(raw) {
   return '';
 }
 
+function fetchDriveImageBytes_(fileId, maxWidth) {
+  var width = maxWidth || 1200;
+  try {
+    var thumbUrl = 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(fileId) + '&sz=w' + width;
+    var thumbResp = UrlFetchApp.fetch(thumbUrl, { muteHttpExceptions: true, followRedirects: true });
+    if (thumbResp.getResponseCode() === 200) {
+      var thumbBlob = thumbResp.getBlob();
+      var thumbType = thumbBlob.getContentType() || 'image/jpeg';
+      if (thumbType.indexOf('image/') === 0) {
+        return { bytes: thumbBlob.getBytes(), contentType: thumbType, source: 'thumbnail' };
+      }
+    }
+  } catch (thumbErr) {
+    Logger.log('fetchDriveImageBytes_ thumbnail: ' + thumbErr);
+  }
+
+  var file = DriveApp.getFileById(fileId);
+  var blob = file.getBlob();
+  var contentType = blob.getContentType() || 'image/jpeg';
+  if (contentType.indexOf('image/') !== 0) {
+    throw new Error('El archivo no es una imagen.');
+  }
+  return { bytes: blob.getBytes(), contentType: contentType, source: 'drive' };
+}
+
+function getCompetidorFotoBinaryResponse_(rawIdOrUrl) {
+  var fileId = extractDriveFileId_(rawIdOrUrl);
+  if (!fileId) {
+    return ContentService.createTextOutput('ID de foto inválido.')
+      .setMimeType(ContentService.MimeType.TEXT);
+  }
+
+  try {
+    var image = fetchDriveImageBytes_(fileId, 1200);
+    return ContentService.createBlobOutput(image.bytes).setMimeType(image.contentType);
+  } catch (err) {
+    return ContentService.createTextOutput('No se pudo leer la foto: ' + (err && err.message ? err.message : err))
+      .setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
 function getCompetidorFotoData_(rawIdOrUrl) {
   var fileId = extractDriveFileId_(rawIdOrUrl);
   if (!fileId) {
@@ -555,20 +599,13 @@ function getCompetidorFotoData_(rawIdOrUrl) {
   }
 
   try {
-    var file = DriveApp.getFileById(fileId);
-    var blob = file.getBlob();
-    var contentType = blob.getContentType() || 'image/jpeg';
-    if (contentType.indexOf('image/') !== 0) {
-      return { ok: false, error: 'El archivo no es una imagen.' };
-    }
-
-    var bytes = blob.getBytes();
-    var base64 = Utilities.base64Encode(bytes);
+    var image = fetchDriveImageBytes_(fileId, 1200);
     return {
       ok: true,
       fileId: fileId,
-      contentType: contentType,
-      dataUrl: 'data:' + contentType + ';base64,' + base64
+      contentType: image.contentType,
+      source: image.source || 'drive',
+      dataUrl: 'data:' + image.contentType + ';base64,' + Utilities.base64Encode(image.bytes)
     };
   } catch (err) {
     return {
