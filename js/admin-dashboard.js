@@ -1733,6 +1733,9 @@
     syncMarcaPlanFromTab();
     showAdminSection(readHashSection());
     preMountAdminModules();
+    if (global.AdminDisclosures && global.AdminDisclosures.init) {
+      global.AdminDisclosures.init();
+    }
 
     if (!getWebAppUrl()) {
       showError('Configura js/sheets-config.js con la URL de Apps Script.');
