@@ -18,7 +18,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Sincronizar rutas Firebase/site-links/sitemap
-        run: python3 tools/sync_routes.py --check
+        run: |
+          python3 tools/sync_routes.py
+          python3 tools/sync_routes.py --check
 
       - name: Validar secretos de CI
         env:
