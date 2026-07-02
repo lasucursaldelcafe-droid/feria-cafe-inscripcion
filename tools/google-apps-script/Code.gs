@@ -113,6 +113,9 @@ function doGet(e) {
   if (params.action === 'admin_export') {
     return handleAdminExport_(params.idToken || '', params.dataset || '');
   }
+  if (params.action === 'competidor_foto_data') {
+    return jsonResponse(getCompetidorFotoData_(params.id || params.fileId || params.url || ''));
+  }
   if (params.action === 'expositor_feed') {
     return jsonResponse(getExpositorFeed_());
   }
@@ -534,6 +537,45 @@ function getExpositorFeed_() {
     }
   }
   return { ok: true, items: items };
+}
+
+function extractDriveFileId_(raw) {
+  var value = String(raw || '').trim();
+  if (!value) return '';
+  var match = value.match(/\/file\/d\/([^/]+)/) || value.match(/[?&]id=([^&]+)/);
+  if (match && match[1]) return String(match[1]).trim();
+  if (/^[a-zA-Z0-9_-]{20,}$/.test(value)) return value;
+  return '';
+}
+
+function getCompetidorFotoData_(rawIdOrUrl) {
+  var fileId = extractDriveFileId_(rawIdOrUrl);
+  if (!fileId) {
+    return { ok: false, error: 'ID de foto inválido.' };
+  }
+
+  try {
+    var file = DriveApp.getFileById(fileId);
+    var blob = file.getBlob();
+    var contentType = blob.getContentType() || 'image/jpeg';
+    if (contentType.indexOf('image/') !== 0) {
+      return { ok: false, error: 'El archivo no es una imagen.' };
+    }
+
+    var bytes = blob.getBytes();
+    var base64 = Utilities.base64Encode(bytes);
+    return {
+      ok: true,
+      fileId: fileId,
+      contentType: contentType,
+      dataUrl: 'data:' + contentType + ';base64,' + base64
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      error: 'No se pudo leer la foto desde Drive: ' + (err && err.message ? err.message : err)
+    };
+  }
 }
 
 function getFeriaResumen_() {

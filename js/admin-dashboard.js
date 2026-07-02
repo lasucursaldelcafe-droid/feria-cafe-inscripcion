@@ -493,6 +493,14 @@
     return raw;
   }
 
+  function driveFileId(url) {
+    var raw = String(url || '').trim();
+    if (!raw) return '';
+    var match = raw.match(/\/file\/d\/([^/]+)/) || raw.match(/[?&]id=([^&]+)/);
+    if (match && match[1]) return match[1];
+    return /^[a-zA-Z0-9_-]{20,}$/.test(raw) ? raw : '';
+  }
+
   function val(row, keys) {
     for (var i = 0; i < keys.length; i++) {
       var value = row[keys[i]];
@@ -537,6 +545,23 @@
       img.onload = function () { resolve(img); };
       img.onerror = function () { resolve(null); };
       img.src = url;
+    });
+  }
+
+  function loadCompetitorPhotoForCanvas(row) {
+    var driveUrl = val(row, ['Foto participante enlace Drive']);
+    var fileId = driveFileId(driveUrl);
+    if (!fileId) return Promise.resolve(null);
+
+    var dataUrlEndpoint = buildAdminUrl('competidor_foto_data', { id: fileId });
+    if (!dataUrlEndpoint) return loadCanvasImage(driveThumb(driveUrl, 1600));
+
+    return fetchJson(dataUrlEndpoint).then(function (res) {
+      if (res && res.ok && res.dataUrl) {
+        return loadCanvasImage(res.dataUrl);
+      }
+      console.warn('competidor_foto_data:', res && res.error ? res.error : 'sin dataUrl');
+      return loadCanvasImage(driveThumb(driveUrl, 1600));
     });
   }
 
@@ -604,8 +629,7 @@
   }
 
   function createCompetitorCardCanvas(row) {
-    var photoUrl = driveThumb(val(row, ['Foto participante enlace Drive']), 1600);
-    return loadCanvasImage(photoUrl).then(function (img) {
+    return loadCompetitorPhotoForCanvas(row).then(function (img) {
       var canvas = document.createElement('canvas');
       canvas.width = 1080;
       canvas.height = 1350;
