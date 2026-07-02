@@ -643,6 +643,65 @@
     ctx.closePath();
   }
 
+  function drawPortraitPhoto(ctx, img, x, y, w, h) {
+    roundedRect(ctx, x, y, w, h, 28);
+    ctx.save();
+    ctx.clip();
+
+    var bg = ctx.createLinearGradient(x, y, x + w, y + h);
+    bg.addColorStop(0, '#3b291f');
+    bg.addColorStop(1, '#14100d');
+    ctx.fillStyle = bg;
+    ctx.fillRect(x, y, w, h);
+
+    if (!img) {
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      ctx.font = '700 40px Inter, Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Foto del competidor', x + w / 2, y + h / 2);
+      ctx.restore();
+      return;
+    }
+
+    var scale = Math.min(w / img.width, h / img.height);
+    var dw = img.width * scale;
+    var dh = img.height * scale;
+    var dx = x + (w - dw) / 2;
+    var dy = y + (h - dh) / 2;
+
+    if (img.height >= img.width) {
+      dy = y + Math.max(0, (h - dh) * 0.28);
+    }
+
+    ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, dw, dh);
+    ctx.restore();
+  }
+
+  function wrapTextCentered(ctx, text, centerX, y, maxWidth, lineHeight, maxLines) {
+    var words = String(text || '').split(/\s+/).filter(Boolean);
+    var line = '';
+    var lines = [];
+    for (var n = 0; n < words.length; n++) {
+      var testLine = line ? line + ' ' + words[n] : words[n];
+      if (ctx.measureText(testLine).width > maxWidth && line) {
+        lines.push(line);
+        line = words[n];
+      } else {
+        line = testLine;
+      }
+      if (lines.length === maxLines) break;
+    }
+    if (line && lines.length < maxLines) lines.push(line);
+    if (words.length && lines.length === maxLines && lines[lines.length - 1].length > 3) {
+      lines[lines.length - 1] = lines[lines.length - 1].replace(/[.,;:]?$/, '') + '…';
+    }
+    ctx.textAlign = 'center';
+    lines.forEach(function (l, idx) {
+      ctx.fillText(l, centerX, y + idx * lineHeight);
+    });
+    return y + lines.length * lineHeight;
+  }
+
   function drawCover(ctx, img, x, y, w, h) {
     roundedRect(ctx, x, y, w, h, 34);
     ctx.save();
@@ -694,73 +753,78 @@
 
   function createCompetitorCardCanvas(row) {
     return loadCompetitorPhotoForCanvas(row).then(function (img) {
+      var W = 1080;
+      var H = 1440;
+      var PAD = 48;
+      var CONTENT_W = W - PAD * 2;
+      var CX = W / 2;
+
       var canvas = document.createElement('canvas');
-      canvas.width = 1080;
-      canvas.height = 1350;
+      canvas.width = W;
+      canvas.height = H;
       var ctx = canvas.getContext('2d');
       var name = val(row, ['Nombre']) || 'Competidor';
       var id = val(row, ['ID']);
 
-      var bg = ctx.createLinearGradient(0, 0, 1080, 1350);
+      var bg = ctx.createLinearGradient(0, 0, W, H);
       bg.addColorStop(0, '#2a1a12');
-      bg.addColorStop(0.55, '#5d3a1a');
+      bg.addColorStop(0.5, '#4a2f18');
       bg.addColorStop(1, '#120d0a');
       ctx.fillStyle = bg;
-      ctx.fillRect(0, 0, 1080, 1350);
+      ctx.fillRect(0, 0, W, H);
 
-      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
       ctx.beginPath();
-      ctx.arc(950, 90, 280, 0, Math.PI * 2);
+      ctx.arc(W - 60, 100, 220, 0, Math.PI * 2);
       ctx.fill();
       ctx.beginPath();
-      ctx.arc(80, 1270, 260, 0, Math.PI * 2);
+      ctx.arc(70, H - 80, 200, 0, Math.PI * 2);
       ctx.fill();
 
+      ctx.textAlign = 'center';
       ctx.fillStyle = '#f6ead8';
-      ctx.font = '800 44px Inter, Arial, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('RETO V60', 72, 95);
+      ctx.font = '800 42px Inter, Arial, sans-serif';
+      ctx.fillText('RETO V60', CX, 72);
 
-      ctx.font = '600 28px Inter, Arial, sans-serif';
+      ctx.font = '600 26px Inter, Arial, sans-serif';
       ctx.fillStyle = 'rgba(246,234,216,0.78)';
-      ctx.fillText('Edición Purist Marbella', 72, 135);
+      ctx.fillText('Edición Purist Marbella', CX, 108);
 
-      ctx.textAlign = 'right';
       ctx.fillStyle = '#e8a84c';
-      ctx.font = '700 25px Inter, Arial, sans-serif';
-      ctx.fillText(id || 'Competidor', 1008, 95);
-      ctx.fillStyle = 'rgba(246,234,216,0.75)';
-      ctx.font = '600 22px Inter, Arial, sans-serif';
-      ctx.fillText('La Sucursal del Café', 1008, 130);
+      ctx.font = '700 22px Inter, Arial, sans-serif';
+      ctx.fillText(id || 'Competidor', CX, 138);
 
-      drawCover(ctx, img, 72, 185, 936, 650);
+      var photoY = 158;
+      var photoH = 920;
+      drawPortraitPhoto(ctx, img, PAD, photoY, CONTENT_W, photoH);
 
-      ctx.textAlign = 'left';
+      var textY = photoY + photoH + 44;
       ctx.fillStyle = '#ffffff';
-      ctx.font = '800 68px Inter, Arial, sans-serif';
-      var afterName = wrapText(ctx, name, 72, 930, 936, 72, 2);
+      ctx.font = '800 62px Inter, Arial, sans-serif';
+      var afterName = wrapTextCentered(ctx, name, CX, textY, CONTENT_W, 66, 2);
 
       ctx.fillStyle = '#f5d9a8';
-      ctx.font = '700 30px Inter, Arial, sans-serif';
-      ctx.fillText('Competidor oficial', 72, afterName + 18);
+      ctx.font = '700 28px Inter, Arial, sans-serif';
+      ctx.fillText('Competidor oficial', CX, afterName + 20);
 
-      ctx.fillStyle = 'rgba(255,255,255,0.88)';
-      ctx.font = '500 30px Inter, Arial, sans-serif';
-      ctx.fillText('Perfil del barista', 72, afterName + 72);
-      var profileY = afterName + 116;
-      competitorProfileLines(row).slice(0, 5).forEach(function (line) {
+      ctx.fillStyle = 'rgba(255,255,255,0.82)';
+      ctx.font = '600 24px Inter, Arial, sans-serif';
+      ctx.fillText('Perfil del barista', CX, afterName + 64);
+
+      var profileY = afterName + 98;
+      competitorProfileLines(row).slice(0, 4).forEach(function (line) {
         ctx.fillStyle = 'rgba(255,255,255,0.9)';
-        ctx.font = '500 28px Inter, Arial, sans-serif';
-        profileY = wrapText(ctx, '• ' + line, 72, profileY, 936, 36, 2) + 6;
+        ctx.font = '500 24px Inter, Arial, sans-serif';
+        profileY = wrapTextCentered(ctx, line, CX, profileY, CONTENT_W - 40, 32, 2) + 8;
       });
 
-      ctx.fillStyle = 'rgba(0,0,0,0.28)';
-      roundedRect(ctx, 72, 1218, 936, 72, 20);
+      var footerY = H - 68;
+      ctx.fillStyle = 'rgba(0,0,0,0.32)';
+      roundedRect(ctx, PAD, footerY - 36, CONTENT_W, 56, 18);
       ctx.fill();
       ctx.fillStyle = '#f6ead8';
-      ctx.font = '700 26px Inter, Arial, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('Café filtrado · Plaza Marbella · Purist', 540, 1264);
+      ctx.font = '700 24px Inter, Arial, sans-serif';
+      ctx.fillText('Café filtrado · Plaza Marbella · Purist', CX, footerY);
 
       return canvas;
     });
@@ -819,11 +883,9 @@
     var enabled = isHabilitadoValue(row['Habilitado']);
     var roleLine = (rol || 'Competidor/a') + (representa ? ' · ' + representa : '');
 
-    return '<div class="admin-competidor-hero__head">' +
-        '<div>' +
-          '<p class="admin-competidor-hero__kicker">Reto V60</p>' +
-          '<p class="admin-competidor-hero__edition">Edición Purist Marbella</p>' +
-        '</div>' +
+    return '<div class="admin-competidor-hero__head admin-competidor-hero__head--center">' +
+        '<p class="admin-competidor-hero__kicker">Reto V60</p>' +
+        '<p class="admin-competidor-hero__edition">Edición Purist Marbella · Instagram 3:4</p>' +
         '<p class="admin-competidor-hero__id">' + escapeHtml(id || '') + '</p>' +
       '</div>' +
       '<div class="admin-competidor-hero__photo-wrap">' +
