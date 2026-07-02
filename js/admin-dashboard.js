@@ -1003,6 +1003,9 @@
 
     var panel = document.getElementById('competidorEditorPanel');
     if (panel) panel.hidden = false;
+    if (global.AdminDisclosures && global.AdminDisclosures.openFold) {
+      global.AdminDisclosures.openFold('competidorEditorPanel');
+    }
 
     fillCompetidorEditorForm(row);
     updateCompetidorEditorPreview(row);
@@ -2130,6 +2133,9 @@
     syncMarcaPlanFromTab();
     showAdminSection(readHashSection());
     preMountAdminModules();
+    if (global.AdminDisclosures && global.AdminDisclosures.init) {
+      global.AdminDisclosures.init();
+    }
 
     if (!getWebAppUrl()) {
       showError('Configura js/sheets-config.js con la URL de Apps Script.');

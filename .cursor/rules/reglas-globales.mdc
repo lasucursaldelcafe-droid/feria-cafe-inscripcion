@@ -16,6 +16,8 @@ Antes de implementar, lee el skill en `.cursor/skills/`:
 | Firebase Hosting, CI, `firebase.json`, `site-links`, `event-config`, `verify_admin` | `feria-web-hosting` |
 | `Code.gs`, formularios, stands, expositor, `setup_admin`, `conectar_sheets` | `feria-apps-script-backend` |
 | Lazy load, cache, WebP, `brand.css`, `stands-map`, sponsors | `web-performance-static` |
+| Home minimal, bizcard, textos cortos, tabs/details en sitio público | `feria-ux-minimal` |
+| Panel `/admin`, tema claro, paneles plegables `admin-fold` | `feria-admin-ux` |
 
 ## Arquitectura y archivos clave
 
