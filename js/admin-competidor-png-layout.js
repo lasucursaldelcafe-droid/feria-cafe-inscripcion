@@ -134,12 +134,12 @@
   function loadLayout() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return getTemplate('portrait-classic');
+      if (!raw) return getTemplate('minimal-center');
       var parsed = JSON.parse(raw);
-      if (!parsed || !parsed.zones || !parsed.zones.length) return getTemplate('portrait-classic');
+      if (!parsed || !parsed.zones || !parsed.zones.length) return getTemplate('minimal-center');
       return parsed;
     } catch (e) {
-      return getTemplate('portrait-classic');
+      return getTemplate('minimal-center');
     }
   }
 
@@ -257,6 +257,29 @@
     });
   }
 
+  function isValidFotoDataResponse(res) {
+    return !!(res && res.ok && res.dataUrl && String(res.dataUrl).indexOf('base64,') > 0);
+  }
+
+  function fetchCompetitorPhotoBlobById(fileId) {
+    if (!deps.buildAdminUrl || !fileId) return Promise.resolve(null);
+    var photoUrl = deps.buildAdminUrl('competidor_foto', { id: fileId });
+    if (!photoUrl) return Promise.resolve(null);
+    return fetch(photoUrl, { method: 'GET', mode: 'cors', cache: 'no-store', redirect: 'follow' })
+      .then(function (res) {
+        if (!res.ok) return null;
+        var type = (res.headers.get('content-type') || '').toLowerCase();
+        if (type.indexOf('image/') !== 0) return null;
+        return res.blob();
+      })
+      .catch(function () { return null; })
+      .then(function (blob) {
+        if (!blob || !blob.size) return null;
+        var objectUrl = URL.createObjectURL(blob);
+        return loadCanvasImage(objectUrl, { revokeObjectUrl: objectUrl });
+      });
+  }
+
   function loadCompetitorPhoto(row) {
     if (deps.loadPhoto) return deps.loadPhoto(row);
 
@@ -270,14 +293,20 @@
 
     if (dataUrlEndpoint && deps.fetchJson) {
       return deps.fetchJson(dataUrlEndpoint).then(function (res) {
-        if (res && res.ok && res.dataUrl) {
+        if (isValidFotoDataResponse(res)) {
           return loadCanvasImage(res.dataUrl);
         }
-        return tryLoadPhotoUrls(drivePhotoCandidates(fileId, driveUrl), 0);
+        return fetchCompetitorPhotoBlobById(fileId).then(function (img) {
+          if (img) return img;
+          return tryLoadPhotoUrls(drivePhotoCandidates(fileId, driveUrl), 0);
+        });
       });
     }
 
-    return tryLoadPhotoUrls(drivePhotoCandidates(fileId, driveUrl), 0);
+    return fetchCompetitorPhotoBlobById(fileId).then(function (img) {
+      if (img) return img;
+      return tryLoadPhotoUrls(drivePhotoCandidates(fileId, driveUrl), 0);
+    });
   }
 
   function roundedRect(ctx, x, y, w, h, r) {
@@ -531,7 +560,8 @@
           '</label>' +
           '<button type="button" class="admin-btn admin-btn--secondary" id="pngLayoutReset">Restablecer plantilla</button>' +
           '<button type="button" class="admin-btn admin-btn--primary" id="pngLayoutSave">Guardar plantilla</button>' +
-          '<button type="button" class="admin-btn admin-btn--primary" id="pngLayoutSaveGenerate">Guardar y generar todos</button>' +
+          '<button type="button" class="admin-btn admin-btn--primary" id="pngLayoutSaveGenerate">Guardar y generar todas</button>' +
+          '<button type="button" class="admin-btn admin-btn--primary" id="pngLayoutMinimalZip">Minimal → ZIP todas</button>' +
           '<button type="button" class="admin-btn admin-btn--secondary" id="pngLayoutPreviewPng">Vista previa PNG</button>' +
         '</div>' +
         '<p class="admin-table-meta png-layout-editor__hint">Arrastra cada zona en el lienzo. Las <strong>líneas guía</strong> marcan márgenes seguros, centro y tercios. Esta plantilla se usa para <strong>todos</strong> los PNG.</p>' +
@@ -854,6 +884,33 @@
       saveLayoutAndMaybeGenerate(true);
     });
 
+    container.querySelector('#pngLayoutMinimalZip').addEventListener('click', function () {
+      applyTemplate('minimal-center');
+      saveLayoutAndMaybeGenerate(false);
+      if (options.onDownloadZip) {
+        var btn = container.querySelector('#pngLayoutMinimalZip');
+        if (btn) { btn.disabled = true; btn.textContent = 'Generando ZIP…'; }
+        var statusEl = container.querySelector('#pngLayoutStatus');
+        if (statusEl) {
+          statusEl.innerHTML = '<p>Plantilla minimal aplicada. Generando ZIP con fotos…</p>';
+          statusEl.hidden = false;
+        }
+        options.onDownloadZip().then(function (count) {
+          if (statusEl) {
+            statusEl.innerHTML = '<p><strong>Listo:</strong> ZIP con ' + count + ' PNG (plantilla minimal centrado).</p>';
+            statusEl.hidden = false;
+          }
+        }).catch(function (err) {
+          if (statusEl) {
+            statusEl.innerHTML = '<p class="admin-create-result--error">' + escapeHtml(err.message || 'Error al generar ZIP.') + '</p>';
+            statusEl.hidden = false;
+          }
+        }).finally(function () {
+          if (btn) { btn.disabled = false; btn.textContent = 'Minimal → ZIP todas'; }
+        });
+      }
+    });
+
     container.querySelector('#pngLayoutReset').addEventListener('click', function () {
       applyTemplate(templateSelect.value);
     });
@@ -879,7 +936,8 @@
     return {
       getLayout: function () { return layout; },
       setPreviewRow: function (row) { previewRow = row || sampleRow(); refreshPreviewCanvas(); },
-      refresh: refreshPreviewCanvas
+      refresh: refreshPreviewCanvas,
+      applyTemplate: applyTemplate
     };
   }
 
@@ -897,6 +955,7 @@
     init: init,
     loadLayout: loadLayout,
     saveLayout: saveLayout,
+    getTemplate: getTemplate,
     getTemplates: function () { return TEMPLATES.map(function (t) { return { id: t.id, name: t.name, description: t.description }; }); },
     renderCanvas: renderCanvas,
     mountEditor: mountEditor,

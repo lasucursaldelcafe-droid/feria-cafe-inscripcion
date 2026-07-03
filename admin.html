@@ -8,7 +8,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="googlebot" content="noindex, nofollow">
   <title>Panel de administración | La Sucursal del Café</title>
-  <link rel="stylesheet" href="css/admin.css?v=20260703png2">
+  <link rel="stylesheet" href="css/admin.css?v=20260703png3">
   <link rel="stylesheet" href="css/fidelizacion.css?v=20260625d">
 </head>
 <body class="admin-page admin-page--minimal">
@@ -84,6 +84,7 @@
             <button type="button" class="admin-btn admin-btn--secondary admin-goto-section" data-goto="competidores">Crear competidor</button>
             <button type="button" class="admin-btn admin-btn--primary admin-goto-section" data-goto="competidores" data-scroll-target="competidorDashboardPanel">Dashboard competidores</button>
             <button type="button" class="admin-btn admin-btn--primary admin-goto-section" data-goto="competidores" data-scroll-target="competidorPngLayoutPanel">Plantilla PNG competidores</button>
+            <button type="button" class="admin-btn admin-btn--primary admin-goto-section" data-goto="competidores" id="competidorMinimalZipBtnQuick">Minimal: ZIP todas</button>
             <button type="button" class="admin-btn admin-btn--primary admin-goto-section" data-goto="competidores" data-scroll-target="competidorCardsPanel">Imágenes PNG competidores</button>
             <button type="button" class="admin-btn admin-btn--secondary admin-goto-section" data-goto="stands">Vender stand / marca</button>
             <button type="button" class="admin-btn admin-btn--secondary admin-goto-section" data-goto="pasaportes">Crear pasaporte</button>
@@ -159,6 +160,7 @@
           <div class="admin-toolbar__actions">
             <button type="button" class="admin-btn admin-btn--primary admin-scroll-target" data-scroll-target="competidorDashboardPanel">Dashboard competidores</button>
             <button type="button" class="admin-btn admin-btn--primary admin-scroll-target" data-scroll-target="competidorPngLayoutPanel">Plantilla PNG</button>
+            <button type="button" class="admin-btn admin-btn--primary" id="competidorMinimalZipBtn">Minimal: descargar ZIP todas</button>
             <button type="button" class="admin-btn admin-btn--primary admin-scroll-target" data-scroll-target="competidorCardsPanel">Imágenes PNG</button>
             <button type="button" class="admin-btn admin-btn--secondary admin-download-competitor-cards">Descargar todas PNG</button>
             <button type="button" class="admin-btn admin-btn--secondary" data-export="competencia">CSV competidores</button>
@@ -666,9 +668,10 @@
   <script src="js/fidelizacion-sheets.js"></script>
   <script src="js/fidelizacion-db-shim.js"></script>
   <script src="js/fidelizacion-common.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/OoGMjHXu4qWZXhshQ9e3qX4HIGXerHf3i4F3NoRt8qlytK0348M02iNHhv8gqseO7wAJviL/Btg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="js/admin-disclosures.js?v=20260703ux"></script>
-  <script src="js/admin-competidor-png-layout.js?v=20260703png2"></script>
-  <script src="js/admin-dashboard.js?v=20260703png2"></script>
+  <script src="js/admin-competidor-png-layout.js?v=20260703png3"></script>
+  <script src="js/admin-dashboard.js?v=20260703png3"></script>
   <script src="js/admin-pasaportes.js?v=20260625g"></script>
   <script src="js/admin-operadores.js?v=20260625g"></script>
 </body>

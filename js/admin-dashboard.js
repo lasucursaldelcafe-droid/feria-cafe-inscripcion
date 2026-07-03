@@ -593,6 +593,29 @@
   }
 
 
+
+  function isValidFotoDataResponse(res) {
+    return !!(res && res.ok && res.dataUrl && String(res.dataUrl).indexOf('base64,') > 0);
+  }
+
+  function fetchCompetitorPhotoBlobById(fileId) {
+    var photoUrl = buildAdminUrl('competidor_foto', { id: fileId });
+    if (!photoUrl) return Promise.resolve(null);
+    return fetch(photoUrl, { method: 'GET', mode: 'cors', cache: 'no-store', redirect: 'follow' })
+      .then(function (res) {
+        if (!res.ok) return null;
+        var type = (res.headers.get('content-type') || '').toLowerCase();
+        if (type.indexOf('image/') !== 0) return null;
+        return res.blob();
+      })
+      .catch(function () { return null; })
+      .then(function (blob) {
+        if (!blob || !blob.size) return null;
+        var objectUrl = URL.createObjectURL(blob);
+        return loadCanvasImage(objectUrl, { revokeObjectUrl: objectUrl });
+      });
+  }
+
   function loadCompetitorPhotoForCanvas(row) {
     var driveUrl = val(row, ['Foto participante enlace Drive']);
     var fileId = driveFileId(driveUrl);
@@ -601,13 +624,19 @@
     var dataUrlEndpoint = buildAdminUrl('competidor_foto_data', { id: fileId });
     if (dataUrlEndpoint) {
       return fetchJson(dataUrlEndpoint).then(function (res) {
-        if (res && res.ok && res.dataUrl) {
+        if (isValidFotoDataResponse(res)) {
           return loadCanvasImage(res.dataUrl);
         }
-        return loadCompetitorPhotoDriveFallback(fileId, driveUrl);
+        return fetchCompetitorPhotoBlobById(fileId).then(function (img) {
+          if (img) return img;
+          return loadCompetitorPhotoDriveFallback(fileId, driveUrl);
+        });
       });
     }
-    return loadCompetitorPhotoDriveFallback(fileId, driveUrl);
+    return fetchCompetitorPhotoBlobById(fileId).then(function (img) {
+      if (img) return img;
+      return loadCompetitorPhotoDriveFallback(fileId, driveUrl);
+    });
   }
 
   function loadCompetitorPhotoDriveFallback(fileId, driveUrl) {
@@ -873,6 +902,17 @@
     }).catch(function () { /* sin foto */ });
   }
 
+  function downloadBlob(blob, filename) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+  }
+
   function downloadAllCompetitorPngsSequential() {
     var rowsNow = pickRows(lastDashboardData || {}, 'allCompetencia').filter(function (row) {
       return isHabilitadoValue(row['Habilitado']);
@@ -894,6 +934,68 @@
     });
   }
 
+  function downloadAllCompetitorPngsAsZip() {
+    if (typeof global.JSZip === 'undefined') {
+      return Promise.reject(new Error('JSZip no cargó. Recarga el admin (Ctrl+Shift+R).'));
+    }
+    var rowsNow = pickRows(lastDashboardData || {}, 'allCompetencia').filter(function (row) {
+      return isHabilitadoValue(row['Habilitado']);
+    });
+    if (!rowsNow.length) {
+      return Promise.reject(new Error('No hay competidores habilitados para generar PNG.'));
+    }
+    var zip = new global.JSZip();
+    var withPhoto = 0;
+    return rowsNow.reduce(function (chain, row) {
+      return chain.then(function () {
+        return createCompetitorCardCanvas(row).then(function (canvas) {
+          return new Promise(function (resolve, reject) {
+            canvas.toBlob(function (blob) {
+              if (!blob) {
+                reject(new Error('No se pudo generar PNG para ' + (val(row, ['Nombre']) || 'competidor')));
+                return;
+              }
+              if (val(row, ['Foto participante enlace Drive'])) withPhoto += 1;
+              var name = sanitizeFilename(val(row, ['Nombre']));
+              zip.file('reto-v60-minimal-' + name + '.png', blob);
+              resolve();
+            }, 'image/png', 0.95);
+          });
+        });
+      });
+    }, Promise.resolve()).then(function () {
+      return zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+    }).then(function (zipBlob) {
+      var stamp = new Date().toISOString().slice(0, 10);
+      downloadBlob(zipBlob, 'competidores-v60-minimal-' + stamp + '.zip');
+      return { count: rowsNow.length, withPhoto: withPhoto };
+    }).then(function (stats) {
+      return stats.count;
+    });
+  }
+
+  function applyMinimalTemplateAndDownloadZip(button) {
+    if (!global.AdminCompetidorPng) {
+      return Promise.reject(new Error('Editor PNG no disponible.'));
+    }
+    var layout = global.AdminCompetidorPng.getTemplate('minimal-center');
+    layout.templateId = 'minimal-center';
+    global.AdminCompetidorPng.saveLayout(layout);
+    if (pngLayoutEditorHandle && pngLayoutEditorHandle.applyTemplate) {
+      pngLayoutEditorHandle.applyTemplate('minimal-center');
+    }
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Generando ZIP…';
+    }
+    return downloadAllCompetitorPngsAsZip().finally(function () {
+      if (button) {
+        button.disabled = false;
+        button.textContent = 'Minimal: descargar ZIP todas';
+      }
+    });
+  }
+
   function mountCompetidorPngLayoutEditor() {
     var root = document.getElementById('competidorPngLayoutRoot');
     if (!root || !global.AdminCompetidorPng || root.getAttribute('data-mounted') === '1') return;
@@ -905,7 +1007,22 @@
     });
     pngLayoutEditorHandle = global.AdminCompetidorPng.mountEditor(root, {
       getPreviewRow: getCompetidorPreviewRow,
-      onGenerateAll: downloadAllCompetitorPngsSequential
+      onGenerateAll: downloadAllCompetitorPngsSequential,
+      onDownloadZip: downloadAllCompetitorPngsAsZip
+    });
+  }
+
+  function bindCompetidorMinimalZipButton() {
+    function onClick(btn) {
+      applyMinimalTemplateAndDownloadZip(btn).catch(function (err) {
+        alert(err.message || 'No se pudo generar el ZIP.');
+      });
+    }
+    ['competidorMinimalZipBtn', 'competidorMinimalZipBtnQuick'].forEach(function (id) {
+      var btn = document.getElementById(id);
+      if (!btn || btn.getAttribute('data-bound') === '1') return;
+      btn.setAttribute('data-bound', '1');
+      btn.addEventListener('click', function () { onClick(btn); });
     });
   }
 
@@ -2203,6 +2320,7 @@
     bindAdminCreateCompetidorForm();
     bindCompetidorEditorForm();
     mountCompetidorPngLayoutEditor();
+    bindCompetidorMinimalZipButton();
     bindAdminCreateVisitanteForm();
     bindAdminMarcaLogoPreview();
     restoreAdminTabFromStorage();
