@@ -22,6 +22,14 @@ window.EVENT_CONFIG = {
       ciudad: 'Cali'
     }
   },
+  tiemposRonda: {
+    preparacionMin: 5,
+    preparacionLabel: '5 min',
+    competenciaMin: 6,
+    competenciaLabel: '6 min',
+    catacionMin: 5,
+    catacionLabel: '5 min'
+  },
   evento1: {
     nombre: 'V60 Championship — Preliminar 1',
     preliminar: '1.ª de 2 preliminares',
