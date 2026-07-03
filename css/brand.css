@@ -5047,7 +5047,7 @@ textarea.has-value {
 .bizcard-layout {
   flex: 1;
   width: 100%;
-  max-width: 960px;
+  max-width: var(--content-max);
   margin: 0 auto;
   padding: 0.75rem 1rem 2rem;
   display: grid;
@@ -5060,6 +5060,7 @@ textarea.has-value {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.15rem;
     padding: 1rem 1.25rem 2.5rem;
+    align-items: stretch;
   }
 
   .bizcard--identity,
@@ -5254,5 +5255,195 @@ textarea.has-value {
 
   .bizcard-layout {
     padding-bottom: 1.5rem;
+  }
+}
+
+/* —— Distribución layout (20260703a) —— */
+
+.festival-wrap {
+  max-width: var(--content-max);
+  width: 100%;
+}
+
+.festival-section .festival-section-intro,
+.festival-section-intro {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+@media (min-width: 641px) {
+  .festival-nav {
+    flex-wrap: wrap;
+    align-items: center;
+    padding-bottom: 0.5rem;
+  }
+
+  .festival-nav__menu {
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    align-items: center;
+    row-gap: 0.25rem;
+  }
+
+  .festival-nav__menu a {
+    white-space: nowrap;
+    font-size: 0.82rem;
+  }
+}
+
+@media (min-width: 960px) {
+  .festival-nav__menu a {
+    font-size: 0.875rem;
+  }
+}
+
+.festival-sponsors--cards > .festival-sponsor-card {
+  display: flex;
+  min-width: 0;
+}
+
+.festival-sponsors--cards .festival-sponsor-card__link,
+.festival-sponsors--cards .festival-sponsor-card > div.festival-sponsor-card__link {
+  width: 100%;
+  height: 100%;
+}
+
+.festival-sponsors--competition,
+#patrocinadores-competencia .festival-sponsors--grid,
+.festival-sponsors-unified__panel[data-panel="competencia"] .festival-sponsors--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  justify-items: stretch;
+  max-width: 48rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 640px) {
+  .festival-sponsors--competition,
+  #patrocinadores-competencia .festival-sponsors--grid,
+  .festival-sponsors-unified__panel[data-panel="competencia"] .festival-sponsors--grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.festival-sponsors--strip {
+  justify-content: center;
+  align-items: stretch;
+  max-width: 52rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.festival-sponsors--strip > .festival-sponsor-card {
+  flex: 0 1 auto;
+  display: flex;
+  min-width: min(100%, 11.5rem);
+  max-width: 17.5rem;
+}
+
+.festival-sponsors--strip .festival-sponsor-card__link {
+  width: 100%;
+}
+
+.festival-sponsors-unified__panel .festival-sponsors--strip {
+  max-width: 100%;
+}
+
+.festival-sponsors-unified__panel .festival-sponsors--strip > .festival-sponsor-card {
+  max-width: 15rem;
+}
+
+.festival-sponsors--directory {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.festival-section .content-card--cta {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.festival-footer__nav {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+.festival-footer__nav .festival-footer__col-title {
+  width: 100%;
+  margin-bottom: 0.15rem;
+}
+
+.festival-footer__nav a {
+  display: inline-block;
+  padding: 0.12rem 0;
+  line-height: 1.4;
+}
+
+.page-form.page-festival .site-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-top: 0;
+}
+
+.page-form .content-card--wide {
+  width: 100%;
+  max-width: min(760px, 100%);
+}
+
+.stands-map-root {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.festival-section-premios {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-coffee-subtle);
+}
+
+.festival-section .festival-back-link {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 520px) and (max-width: 719px) {
+  .festival-home-nav {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.festival-partner-cta {
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .festival-footer__nav {
+    align-items: center;
+    text-align: center;
+  }
+
+  .festival-sponsors--competition,
+  #patrocinadores-competencia .festival-sponsors--grid,
+  .festival-sponsors-unified__panel[data-panel="competencia"] .festival-sponsors--grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .festival-sponsors--strip > .festival-sponsor-card,
+  .festival-sponsors-unified__panel .festival-sponsors--strip > .festival-sponsor-card {
+    min-width: min(100%, 100%);
+    max-width: 100%;
+  }
+
+  .bizcard__actions .btn-submit,
+  .bizcard__actions .btn-secondary {
+    width: 100%;
+    min-width: 0;
   }
 }
