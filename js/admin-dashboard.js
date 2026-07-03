@@ -888,18 +888,26 @@
     return null;
   }
 
+  function paintCompetidorEditorPngCanvas(row, layout) {
+    var canvasEl = document.getElementById('competidorEditorPngCanvas');
+    if (!canvasEl || !row || !global.AdminCompetidorPng) return;
+    var activeLayout = layout ||
+      (pngLayoutEditorHandle && pngLayoutEditorHandle.getLayout
+        ? pngLayoutEditorHandle.getLayout()
+        : null);
+    global.AdminCompetidorPng.renderCanvas(row, activeLayout).then(function (source) {
+      var ctx = canvasEl.getContext('2d');
+      ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+      ctx.drawImage(source, 0, 0, canvasEl.width, canvasEl.height);
+    }).catch(function () { /* sin foto */ });
+  }
+
   function updateCompetidorPngPreview(row) {
     if (!row || !global.AdminCompetidorPng) return;
     if (pngLayoutEditorHandle && pngLayoutEditorHandle.setPreviewRow) {
       pngLayoutEditorHandle.setPreviewRow(row);
     }
-    var canvasEl = document.getElementById('competidorEditorPngCanvas');
-    if (!canvasEl) return;
-    global.AdminCompetidorPng.renderCanvas(row).then(function (source) {
-      var ctx = canvasEl.getContext('2d');
-      ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-      ctx.drawImage(source, 0, 0, canvasEl.width, canvasEl.height);
-    }).catch(function () { /* sin foto */ });
+    paintCompetidorEditorPngCanvas(row);
   }
 
   function downloadBlob(blob, filename) {
@@ -1008,7 +1016,10 @@
     pngLayoutEditorHandle = global.AdminCompetidorPng.mountEditor(root, {
       getPreviewRow: getCompetidorPreviewRow,
       onGenerateAll: downloadAllCompetitorPngsSequential,
-      onDownloadZip: downloadAllCompetitorPngsAsZip
+      onDownloadZip: downloadAllCompetitorPngsAsZip,
+      onLayoutChange: function (layout, row) {
+        paintCompetidorEditorPngCanvas(row || getCompetidorPreviewRow(), layout);
+      }
     });
   }
 

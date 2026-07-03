@@ -16,6 +16,9 @@
     loadPhoto: null
   };
 
+  /** Cache de fotos por fileId para que al cambiar plantilla la preview no quede en blanco. */
+  var photoCache = Object.create(null);
+
   function clone(obj) {
     return JSON.parse(JSON.stringify(obj));
   }
@@ -280,32 +283,55 @@
       });
   }
 
-  function loadCompetitorPhoto(row) {
-    if (deps.loadPhoto) return deps.loadPhoto(row);
+  function cachePhoto(fileId, img) {
+    if (fileId && img && img.width > 0) photoCache[fileId] = img;
+    return img;
+  }
 
+  function loadCompetitorPhoto(row) {
     var driveUrl = val(row, ['Foto participante enlace Drive']);
     var fileId = driveFileId(driveUrl);
-    if (!fileId) return Promise.resolve(null);
+    if (fileId && photoCache[fileId]) {
+      return Promise.resolve(photoCache[fileId]);
+    }
 
-    var dataUrlEndpoint = deps.buildAdminUrl
-      ? deps.buildAdminUrl('competidor_foto_data', { id: fileId })
-      : '';
+    var loadPromise;
+    if (deps.loadPhoto) {
+      loadPromise = deps.loadPhoto(row);
+    } else if (!fileId) {
+      return Promise.resolve(null);
+    } else {
+      var dataUrlEndpoint = deps.buildAdminUrl
+        ? deps.buildAdminUrl('competidor_foto_data', { id: fileId })
+        : '';
 
-    if (dataUrlEndpoint && deps.fetchJson) {
-      return deps.fetchJson(dataUrlEndpoint).then(function (res) {
-        if (isValidFotoDataResponse(res)) {
-          return loadCanvasImage(res.dataUrl);
-        }
-        return fetchCompetitorPhotoBlobById(fileId).then(function (img) {
+      if (dataUrlEndpoint && deps.fetchJson) {
+        loadPromise = deps.fetchJson(dataUrlEndpoint).then(function (res) {
+          if (isValidFotoDataResponse(res)) {
+            return loadCanvasImage(res.dataUrl);
+          }
+          return fetchCompetitorPhotoBlobById(fileId).then(function (img) {
+            if (img) return img;
+            return tryLoadPhotoUrls(drivePhotoCandidates(fileId, driveUrl), 0);
+          });
+        }).catch(function () {
+          return fetchCompetitorPhotoBlobById(fileId).then(function (img) {
+            if (img) return img;
+            return tryLoadPhotoUrls(drivePhotoCandidates(fileId, driveUrl), 0);
+          });
+        });
+      } else {
+        loadPromise = fetchCompetitorPhotoBlobById(fileId).then(function (img) {
           if (img) return img;
           return tryLoadPhotoUrls(drivePhotoCandidates(fileId, driveUrl), 0);
         });
-      });
+      }
     }
 
-    return fetchCompetitorPhotoBlobById(fileId).then(function (img) {
-      if (img) return img;
-      return tryLoadPhotoUrls(drivePhotoCandidates(fileId, driveUrl), 0);
+    return loadPromise.then(function (img) {
+      return cachePhoto(fileId, img || null);
+    }).catch(function () {
+      return null;
     });
   }
 
@@ -460,69 +486,72 @@
     });
   }
 
+  function paintCard(ctx, row, layout, img) {
+    var accent = (layout.background && layout.background.accent) || '#e8a84c';
+    drawBackground(ctx, layout);
+
+    layout.zones.forEach(function (zone) {
+      if (zone.type === 'overlay') {
+        var ov = ctx.createLinearGradient(zone.x, zone.y, zone.x, zone.y + zone.h);
+        ov.addColorStop(0, 'rgba(0,0,0,0)');
+        ov.addColorStop(0.35, zone.color || 'rgba(0,0,0,0.35)');
+        ov.addColorStop(1, zone.color || 'rgba(0,0,0,0.72)');
+        ctx.fillStyle = ov;
+        ctx.fillRect(zone.x, zone.y, zone.w, zone.h);
+        return;
+      }
+      if (zone.type === 'photo') {
+        drawPhoto(ctx, img, zone, accent);
+        return;
+      }
+      if (zone.type === 'footer') {
+        var fg = ctx.createLinearGradient(zone.x, zone.y, zone.x, zone.y + zone.h);
+        fg.addColorStop(0, 'rgba(0,0,0,0.15)');
+        fg.addColorStop(1, 'rgba(0,0,0,0.45)');
+        ctx.fillStyle = fg;
+        roundedRect(ctx, zone.x, zone.y, zone.w, zone.h, zone.radius || 16);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(232,168,76,0.35)';
+        ctx.lineWidth = 1;
+        roundedRect(ctx, zone.x + 1, zone.y + 1, zone.w - 2, zone.h - 2, zone.radius || 15);
+        ctx.stroke();
+        withTextShadow(ctx, function () {
+          ctx.fillStyle = zone.color || '#f6ead8';
+          ctx.font = (zone.fontWeight || '700') + ' ' + (zone.fontSize || 24) + 'px Inter, Arial, sans-serif';
+          wrapText(ctx, zone.text || fieldText('footer', row, zone), Object.assign({}, zone, { y: zone.y + zone.h / 2 - 12, h: zone.h }));
+        });
+        return;
+      }
+      if (zone.type === 'profileLines') {
+        withTextShadow(ctx, function () {
+          ctx.fillStyle = zone.color || '#fff';
+          ctx.font = (zone.fontWeight || '500') + ' ' + (zone.fontSize || 24) + 'px Inter, Arial, sans-serif';
+          var lines = competitorProfileLines(row).slice(0, zone.maxLines || 4);
+          var block = Object.assign({}, zone);
+          lines.forEach(function (line, idx) {
+            wrapText(ctx, line, Object.assign({}, block, { y: zone.y + idx * (zone.lineHeight || 32), maxLines: 2 }));
+          });
+        });
+        return;
+      }
+      if (zone.type === 'text') {
+        withTextShadow(ctx, function () {
+          ctx.fillStyle = zone.color || '#fff';
+          ctx.font = (zone.fontWeight || '600') + ' ' + (zone.fontSize || 24) + 'px Inter, Arial, sans-serif';
+          wrapText(ctx, fieldText(zone.field, row, zone), zone);
+        });
+      }
+    });
+  }
+
   function renderCanvas(row, layout) {
     layout = layout || loadLayout();
-    var accent = (layout.background && layout.background.accent) || '#e8a84c';
+    row = row || sampleRow();
     return loadCompetitorPhoto(row).then(function (img) {
       var canvas = document.createElement('canvas');
       canvas.width = W;
       canvas.height = H;
-      var ctx = canvas.getContext('2d');
-      drawBackground(ctx, layout);
-
-      layout.zones.forEach(function (zone) {
-        if (zone.type === 'overlay') {
-          var ov = ctx.createLinearGradient(zone.x, zone.y, zone.x, zone.y + zone.h);
-          ov.addColorStop(0, 'rgba(0,0,0,0)');
-          ov.addColorStop(0.35, zone.color || 'rgba(0,0,0,0.35)');
-          ov.addColorStop(1, zone.color || 'rgba(0,0,0,0.72)');
-          ctx.fillStyle = ov;
-          ctx.fillRect(zone.x, zone.y, zone.w, zone.h);
-          return;
-        }
-        if (zone.type === 'photo') {
-          drawPhoto(ctx, img, zone, accent);
-          return;
-        }
-        if (zone.type === 'footer') {
-          var fg = ctx.createLinearGradient(zone.x, zone.y, zone.x, zone.y + zone.h);
-          fg.addColorStop(0, 'rgba(0,0,0,0.15)');
-          fg.addColorStop(1, 'rgba(0,0,0,0.45)');
-          ctx.fillStyle = fg;
-          roundedRect(ctx, zone.x, zone.y, zone.w, zone.h, zone.radius || 16);
-          ctx.fill();
-          ctx.strokeStyle = 'rgba(232,168,76,0.35)';
-          ctx.lineWidth = 1;
-          roundedRect(ctx, zone.x + 1, zone.y + 1, zone.w - 2, zone.h - 2, zone.radius || 15);
-          ctx.stroke();
-          withTextShadow(ctx, function () {
-            ctx.fillStyle = zone.color || '#f6ead8';
-            ctx.font = (zone.fontWeight || '700') + ' ' + (zone.fontSize || 24) + 'px Inter, Arial, sans-serif';
-            wrapText(ctx, zone.text || fieldText('footer', row, zone), Object.assign({}, zone, { y: zone.y + zone.h / 2 - 12, h: zone.h }));
-          });
-          return;
-        }
-        if (zone.type === 'profileLines') {
-          withTextShadow(ctx, function () {
-            ctx.fillStyle = zone.color || '#fff';
-            ctx.font = (zone.fontWeight || '500') + ' ' + (zone.fontSize || 24) + 'px Inter, Arial, sans-serif';
-            var lines = competitorProfileLines(row).slice(0, zone.maxLines || 4);
-            var block = Object.assign({}, zone);
-            lines.forEach(function (line, idx) {
-              wrapText(ctx, line, Object.assign({}, block, { y: zone.y + idx * (zone.lineHeight || 32), maxLines: 2 }));
-            });
-          });
-          return;
-        }
-        if (zone.type === 'text') {
-          withTextShadow(ctx, function () {
-            ctx.fillStyle = zone.color || '#fff';
-            ctx.font = (zone.fontWeight || '600') + ' ' + (zone.fontSize || 24) + 'px Inter, Arial, sans-serif';
-            wrapText(ctx, fieldText(zone.field, row, zone), zone);
-          });
-        }
-      });
-
+      paintCard(canvas.getContext('2d'), row, layout, img);
       return canvas;
     });
   }
@@ -568,8 +597,9 @@
         '<div id="pngLayoutStatus" class="admin-create-result" hidden role="status"></div>' +
         '<div class="png-layout-editor__body">' +
           '<div class="png-layout-editor__stage-wrap">' +
-            '<div class="png-layout-editor__stage" id="pngLayoutStage"></div>' +
-            '<canvas id="pngLayoutPreviewCanvas" class="png-layout-editor__preview-canvas" width="' + W + '" height="' + H + '" hidden></canvas>' +
+            '<div class="png-layout-editor__stage" id="pngLayoutStage">' +
+              '<canvas id="pngLayoutPreviewCanvas" class="png-layout-editor__preview-canvas" width="' + W + '" height="' + H + '" aria-label="Vista previa PNG final"></canvas>' +
+            '</div>' +
           '</div>' +
           '<div class="png-layout-editor__sidebar">' +
             '<h5 class="png-layout-editor__sidebar-title">Zonas</h5>' +
@@ -595,9 +625,11 @@
     });
 
     var stage = container.querySelector('#pngLayoutStage');
+    var previewCanvas = container.querySelector('#pngLayoutPreviewCanvas');
     var zoneList = container.querySelector('#pngLayoutZoneList');
     var zoneForm = container.querySelector('#pngLayoutZoneForm');
     var templateList = container.querySelector('#pngLayoutTemplateList');
+    var previewToken = 0;
 
     function marginsFor(zone) {
       return {
@@ -618,6 +650,12 @@
           applyTemplate(btn.getAttribute('data-template-id'));
         });
       });
+    }
+
+    function notifyLayoutChange() {
+      if (typeof options.onLayoutChange === 'function') {
+        options.onLayoutChange(layout, previewRow);
+      }
     }
 
     function applyTemplate(id) {
@@ -750,11 +788,34 @@
       return guides;
     }
 
+    function ensurePreviewCanvas() {
+      if (previewCanvas && previewCanvas.parentNode === stage) return previewCanvas;
+      previewCanvas = container.querySelector('#pngLayoutPreviewCanvas');
+      if (!previewCanvas) {
+        previewCanvas = document.createElement('canvas');
+        previewCanvas.id = 'pngLayoutPreviewCanvas';
+        previewCanvas.className = 'png-layout-editor__preview-canvas';
+        previewCanvas.width = W;
+        previewCanvas.height = H;
+        previewCanvas.setAttribute('aria-label', 'Vista previa PNG final');
+      }
+      if (previewCanvas.parentNode !== stage) {
+        stage.insertBefore(previewCanvas, stage.firstChild);
+      }
+      return previewCanvas;
+    }
+
     function renderStage() {
       var margin = layout.safeMargin || 48;
-      stage.innerHTML = '';
+      var canvas = ensurePreviewCanvas();
+      var keep = [canvas];
+      while (stage.firstChild) stage.removeChild(stage.firstChild);
+      keep.forEach(function (node) { stage.appendChild(node); });
+
       stage.style.width = Math.round(W * PREVIEW_SCALE) + 'px';
       stage.style.height = Math.round(H * PREVIEW_SCALE) + 'px';
+      stage.style.backgroundImage = 'none';
+      stage.style.backgroundColor = 'transparent';
 
       stage.appendChild(renderGuides(stage, margin));
 
@@ -798,24 +859,32 @@
         el.addEventListener('pointerup', function () {
           dragState = null;
           refreshPreviewCanvas();
+          notifyLayoutChange();
         });
       });
     }
 
     function refreshPreviewCanvas() {
-      var canvas = container.querySelector('#pngLayoutPreviewCanvas');
+      var canvas = ensurePreviewCanvas();
       if (!canvas) return;
       var row = options.getPreviewRow ? options.getPreviewRow() : previewRow;
-      previewRow = row || previewRow;
-      renderCanvas(previewRow, layout).then(function (source) {
-        var ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, W, H);
-        ctx.drawImage(source, 0, 0);
-        canvas.hidden = false;
-        var dataUrl = source.toDataURL('image/png');
-        stage.style.backgroundImage = 'url(' + dataUrl + ')';
-        stage.style.backgroundSize = '100% 100%';
-      }).catch(function () { /* sin foto */ });
+      previewRow = row || previewRow || sampleRow();
+      var token = ++previewToken;
+      var activeLayout = layout;
+
+      // Pintar layout al instante (sin foto) para que al elegir plantilla se vea el cambio.
+      var ctx = canvas.getContext('2d');
+      paintCard(ctx, previewRow, activeLayout, photoCache[driveFileId(val(previewRow, ['Foto participante enlace Drive']))] || null);
+
+      return loadCompetitorPhoto(previewRow).then(function (img) {
+        if (token !== previewToken) return null;
+        paintCard(ctx, previewRow, activeLayout, img);
+        return canvas;
+      }).catch(function () {
+        if (token !== previewToken) return null;
+        paintCard(ctx, previewRow, activeLayout, null);
+        return canvas;
+      });
     }
 
     function saveLayoutAndMaybeGenerate(generateAll) {
@@ -862,6 +931,7 @@
       renderZoneForm();
       renderStage();
       refreshPreviewCanvas();
+      notifyLayoutChange();
     }
 
     templateSelect.addEventListener('change', function () {
@@ -935,7 +1005,10 @@
 
     return {
       getLayout: function () { return layout; },
-      setPreviewRow: function (row) { previewRow = row || sampleRow(); refreshPreviewCanvas(); },
+      setPreviewRow: function (row) {
+        previewRow = row || sampleRow();
+        refreshPreviewCanvas();
+      },
       refresh: refreshPreviewCanvas,
       applyTemplate: applyTemplate
     };

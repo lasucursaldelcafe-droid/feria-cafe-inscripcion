@@ -379,10 +379,23 @@
   position: relative;
   margin: 0 auto;
   border-radius: 8px;
-  background-color: #1a100c;
+  background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+/* Misma imagen final que el PNG descargado (canvas 1080×1440 escalado). */
+.png-layout-editor__preview-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  border-radius: 8px;
 }
 
 .png-layout-editor__guides {
@@ -435,9 +448,9 @@
   position: absolute;
   z-index: 2;
   padding: 0;
-  border: 2px solid rgba(255, 255, 255, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.45);
   border-radius: 6px;
-  background: rgba(232, 168, 76, 0.18);
+  background: rgba(232, 168, 76, 0.08);
   color: #fff;
   font-size: 10px;
   font-weight: 700;
@@ -454,7 +467,7 @@
 
 .png-layout-zone--active {
   border-color: #e8a84c;
-  background: rgba(232, 168, 76, 0.32);
+  background: rgba(232, 168, 76, 0.14);
   box-shadow: 0 0 0 2px rgba(232, 168, 76, 0.25);
 }
 
