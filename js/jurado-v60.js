@@ -20,9 +20,16 @@
   var calificacionesMap = {};
   var guardando = false;
 
+  var WEB_APP_URL_CANONICAL =
+    'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec';
+
   function webAppUrl() {
     var cfg = window.SHEETS_CONFIG || {};
-    return (cfg.WEB_APP_URL || '').trim();
+    var url = (cfg.WEB_APP_URL || '').trim();
+    if (!url || url.indexOf('TU_ID_DE_DEPLOYMENT') !== -1) {
+      url = WEB_APP_URL_CANONICAL;
+    }
+    return url;
   }
 
   function getPinFromUrl() {
@@ -48,6 +55,12 @@
       .then(function (data) {
         if (!data || data.ok === false) {
           throw new Error((data && data.error) || 'Error del servidor.');
+        }
+        if (action === 'jurado_competidores' && !Array.isArray(data.competidores)) {
+          throw new Error('Apps Script desactualizado: falta jurado V60. El organizador debe redesplegar Code.gs.');
+        }
+        if (action === 'jurado_calificaciones' && !Array.isArray(data.calificaciones) && data.calificacion === undefined) {
+          throw new Error('Apps Script desactualizado: falta jurado V60. El organizador debe redesplegar Code.gs.');
         }
         return data;
       });
