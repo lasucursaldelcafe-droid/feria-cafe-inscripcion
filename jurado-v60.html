@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <title>Jurado sensorial V60 — La Sucursal del Café</title>
+  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260704jurado">
+</head>
+<body class="jurado-page">
+  <div class="jurado-shell">
+    <header class="jurado-header">
+      <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="120" height="48">
+      <h1>Jurado sensorial V60</h1>
+      <p>Calificación 1–5 · 7 criterios · 3 jueces</p>
+    </header>
+
+    <section id="pinSection" class="jurado-card" hidden>
+      <h2>Acceso restringido</h2>
+      <p>Esta página solo funciona con el enlace y PIN que te compartió el organizador.</p>
+      <p id="pinError" class="jurado-error" hidden></p>
+    </section>
+
+    <section id="mainSection" hidden>
+      <div class="jurado-card">
+        <div class="jurado-field">
+          <label for="competidorSelect">Competidor</label>
+          <select id="competidorSelect" required>
+            <option value="">— Selecciona competidor —</option>
+          </select>
+        </div>
+        <p id="competidorMeta" class="jurado-meta" hidden></p>
+      </div>
+
+      <div class="jurado-card">
+        <div class="jurado-card-head">
+          <h2>Formato de calificación</h2>
+          <p class="jurado-hint">Escala 1 (bajo) a 5 (excelente). Según reglamento: aroma, dulzor, acidez, sabor, balance, cuerpo y limpieza de taza.</p>
+        </div>
+        <div class="jurado-table-wrap">
+          <table class="jurado-table" id="scoresTable">
+            <thead>
+              <tr>
+                <th>Criterio</th>
+                <th>Juez 1</th>
+                <th>Juez 2</th>
+                <th>Juez 3</th>
+              </tr>
+            </thead>
+            <tbody id="scoresBody"></tbody>
+            <tfoot>
+              <tr class="jurado-subtotal-row">
+                <th>Subtotal juez</th>
+                <td id="subtotalJ1">—</td>
+                <td id="subtotalJ2">—</td>
+                <td id="subtotalJ3">—</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="jurado-totals">
+          <div class="jurado-total-box">
+            <span class="jurado-total-label">Suma total (3 jueces)</span>
+            <strong id="sumaTotal" class="jurado-total-value">—</strong>
+            <span class="jurado-total-hint">Máx. 105 pts (35 × 3)</span>
+          </div>
+          <div class="jurado-total-box jurado-total-box--accent">
+            <span class="jurado-total-label">Promedio final</span>
+            <strong id="promedioFinal" class="jurado-total-value">—</strong>
+            <span class="jurado-total-hint">Promedio de los 3 jueces (reglamento)</span>
+          </div>
+        </div>
+
+        <div class="jurado-field">
+          <label for="notasInput">Notas (opcional)</label>
+          <textarea id="notasInput" rows="2" placeholder="Observaciones del jurado…"></textarea>
+        </div>
+
+        <p id="saveError" class="jurado-error" hidden></p>
+        <p id="saveSuccess" class="jurado-success" hidden></p>
+        <button type="button" id="saveBtn" class="jurado-btn" disabled>Guardar calificación</button>
+      </div>
+
+      <div class="jurado-card">
+        <div class="jurado-card-head">
+          <h2>Clasificación actual</h2>
+          <p class="jurado-hint">Ordenada por promedio final (mayor a menor).</p>
+        </div>
+        <div class="jurado-table-wrap">
+          <table class="jurado-table jurado-table--ranking" id="rankingTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Competidor</th>
+                <th>Suma</th>
+                <th>Promedio</th>
+                <th>J1</th>
+                <th>J2</th>
+                <th>J3</th>
+              </tr>
+            </thead>
+            <tbody id="rankingBody">
+              <tr><td colspan="7" class="jurado-empty">Sin calificaciones aún</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <p id="loadingMsg" class="jurado-loading">Cargando panel de jurado…</p>
+  </div>
+
+  <script>
+    window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
+      WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec'
+    };
+  </script>
+  <script src="js/jurado-v60.js?v=20260704jurado2"></script>
+</body>
+</html>

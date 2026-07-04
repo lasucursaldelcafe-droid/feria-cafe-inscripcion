@@ -1,0 +1,241 @@
+/* Panel jurado sensorial V60 — acceso solo por URL */
+
+body.jurado-page {
+  margin: 0;
+  min-height: 100dvh;
+  background: linear-gradient(165deg, #1f1410 0%, #3d281c 45%, #5d3a1a 100%);
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #f8f4ef;
+}
+
+.jurado-shell {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+}
+
+.jurado-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.jurado-header img {
+  display: block;
+  margin: 0 auto 12px;
+  height: auto;
+}
+
+.jurado-header h1 {
+  margin: 0 0 6px;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.jurado-header p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.jurado-card {
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 18px 16px;
+  margin-bottom: 16px;
+}
+
+.jurado-card-head h2 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.jurado-hint {
+  margin: 0 0 14px;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.45;
+}
+
+.jurado-field {
+  margin-bottom: 14px;
+}
+
+.jurado-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.jurado-field select,
+.jurado-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.96);
+  color: #2a1a12;
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.jurado-meta {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.jurado-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 14px;
+}
+
+.jurado-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.jurado-table th,
+.jurado-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.jurado-table th:first-child,
+.jurado-table td:first-child {
+  text-align: left;
+  min-width: 140px;
+}
+
+.jurado-table thead th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.jurado-table select {
+  width: 100%;
+  min-width: 58px;
+  padding: 8px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: #fff;
+  color: #2a1a12;
+  font: inherit;
+  font-weight: 600;
+  text-align: center;
+}
+
+.jurado-subtotal-row th,
+.jurado-subtotal-row td {
+  border-bottom: none;
+  padding-top: 12px;
+  font-weight: 700;
+}
+
+.jurado-totals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 520px) {
+  .jurado-totals {
+    grid-template-columns: 1fr;
+  }
+}
+
+.jurado-total-box {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+
+.jurado-total-box--accent {
+  background: rgba(245, 217, 168, 0.15);
+  border: 1px solid rgba(245, 217, 168, 0.35);
+}
+
+.jurado-total-label {
+  display: block;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 4px;
+}
+
+.jurado-total-value {
+  display: block;
+  font-size: 1.8rem;
+  line-height: 1.1;
+  color: #f5d9a8;
+}
+
+.jurado-total-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.jurado-btn {
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #c9a227, #e8c547);
+  color: #2a1a12;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.jurado-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.jurado-error {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(180, 40, 40, 0.25);
+  border: 1px solid rgba(255, 120, 120, 0.4);
+  color: #ffc9c9;
+  font-size: 0.85rem;
+}
+
+.jurado-success {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(40, 120, 60, 0.25);
+  border: 1px solid rgba(120, 220, 140, 0.35);
+  color: #c8f5d0;
+  font-size: 0.85rem;
+}
+
+.jurado-loading {
+  text-align: center;
+  padding: 40px 16px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.jurado-empty {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.55);
+  font-style: italic;
+}
+
+.jurado-table--ranking td:nth-child(3),
+.jurado-table--ranking td:nth-child(4) {
+  font-weight: 700;
+  color: #f5d9a8;
+}

@@ -223,6 +223,16 @@
         "type": 301
       },
       {
+        "source": "/jurado-v60/",
+        "destination": "/jurado-v60",
+        "type": 301
+      },
+      {
+        "source": "/jurado-v60.html",
+        "destination": "/jurado-v60",
+        "type": 301
+      },
+      {
         "source": "/panel-fidelizacion/",
         "destination": "/panel-fidelizacion",
         "type": 301
@@ -313,6 +323,10 @@
       {
         "source": "/escanear-pasaporte",
         "destination": "/escanear-pasaporte.html"
+      },
+      {
+        "source": "/jurado-v60",
+        "destination": "/jurado-v60.html"
       },
       {
         "source": "/panel-fidelizacion",
@@ -462,6 +476,19 @@
       },
       {
         "source": "/escanear-pasaporte**",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-store, no-cache, must-revalidate, max-age=0"
+          }
+        ]
+      },
+      {
+        "source": "/jurado-v60**",
         "headers": [
           {
             "key": "X-Robots-Tag",
