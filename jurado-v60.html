@@ -8,110 +8,116 @@
   <title>Jurado sensorial V60 — La Sucursal del Café</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260704jurado">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260704jurado5">
 </head>
 <body class="jurado-page">
   <div class="jurado-shell">
     <header class="jurado-header">
       <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="120" height="48">
-      <h1>Jurado sensorial V60</h1>
-      <p>Calificación 1–5 · 7 criterios · 3 jueces</p>
+      <h1 id="headerTitle">Jurado sensorial V60</h1>
+      <p id="headerSubtitle">Calificación 1–5 · 7 criterios</p>
     </header>
 
     <section id="pinSection" class="jurado-card" hidden>
       <h2>Acceso restringido</h2>
-      <p>Esta página solo funciona con el enlace y PIN que te compartió el organizador.</p>
+      <p>Usa el enlace completo que te compartió el organizador.</p>
       <p id="pinError" class="jurado-error" hidden></p>
     </section>
 
-    <section id="mainSection" hidden>
+    <section id="roleSection" class="jurado-card" hidden>
+      <h2>¿Quién eres?</h2>
+      <p class="jurado-hint">Cada juez abre su enlace desde el celular. El organizador ve el panel general.</p>
+      <div class="jurado-role-grid" id="roleGrid"></div>
+    </section>
+
+    <!-- Vista juez (móvil) -->
+    <section id="judgeSection" hidden>
+      <div class="jurado-card jurado-toolbar-card">
+        <div class="jurado-toolbar">
+          <span class="jurado-badge" id="judgeBadge">Juez 1</span>
+          <button type="button" id="judgeLogoutBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Salir</button>
+        </div>
+      </div>
+
       <div class="jurado-card">
         <div class="jurado-field">
-          <label for="competidorSelect">Competidor</label>
-          <select id="competidorSelect" required>
+          <label for="judgeCompetidorSelect">Competidor a calificar</label>
+          <select id="judgeCompetidorSelect" required>
             <option value="">— Selecciona competidor —</option>
           </select>
         </div>
-        <p id="competidorMeta" class="jurado-meta" hidden></p>
+        <p id="judgeCompetidorMeta" class="jurado-meta" hidden></p>
       </div>
 
       <div class="jurado-card">
         <div class="jurado-card-head">
-          <h2>Formato de calificación</h2>
-          <p class="jurado-hint">Escala 1 (bajo) a 5 (excelente). Según reglamento: aroma, dulzor, acidez, sabor, balance, cuerpo y limpieza de taza.</p>
+          <h2>Tu calificación</h2>
+          <p class="jurado-hint">Escala 1 (bajo) a 5 (excelente). Solo llenas tu columna como juez.</p>
         </div>
-        <div class="jurado-table-wrap">
-          <table class="jurado-table" id="scoresTable">
-            <thead>
-              <tr>
-                <th>Criterio</th>
-                <th>Juez 1</th>
-                <th>Juez 2</th>
-                <th>Juez 3</th>
-              </tr>
-            </thead>
-            <tbody id="scoresBody"></tbody>
-            <tfoot>
-              <tr class="jurado-subtotal-row">
-                <th>Subtotal juez</th>
-                <td id="subtotalJ1">—</td>
-                <td id="subtotalJ2">—</td>
-                <td id="subtotalJ3">—</td>
-              </tr>
-            </tfoot>
-          </table>
+        <div id="judgeScoresList" class="jurado-judge-list"></div>
+        <div class="jurado-total-box jurado-total-box--accent" style="margin-top:14px">
+          <span class="jurado-total-label">Tu subtotal</span>
+          <strong id="judgeSubtotal" class="jurado-total-value">—</strong>
+          <span class="jurado-total-hint">Máx. 35 pts (7 criterios × 5)</span>
         </div>
+        <div class="jurado-field" style="margin-top:14px">
+          <label for="judgeNotasInput">Notas (opcional)</label>
+          <textarea id="judgeNotasInput" rows="2" placeholder="Observaciones de tu evaluación…"></textarea>
+        </div>
+        <p id="judgeSaveError" class="jurado-error" hidden></p>
+        <p id="judgeSaveSuccess" class="jurado-success" hidden></p>
+        <button type="button" id="judgeSaveBtn" class="jurado-btn" disabled>Guardar mi calificación</button>
+      </div>
+    </section>
 
-        <div class="jurado-totals">
-          <div class="jurado-total-box">
-            <span class="jurado-total-label">Suma total (3 jueces)</span>
-            <strong id="sumaTotal" class="jurado-total-value">—</strong>
-            <span class="jurado-total-hint">Máx. 105 pts (35 × 3)</span>
-          </div>
-          <div class="jurado-total-box jurado-total-box--accent">
-            <span class="jurado-total-label">Promedio final</span>
-            <strong id="promedioFinal" class="jurado-total-value">—</strong>
-            <span class="jurado-total-hint">Promedio de los 3 jueces (reglamento)</span>
-          </div>
+    <!-- Vista organizador -->
+    <section id="organizerSection" hidden>
+      <div class="jurado-card jurado-toolbar-card">
+        <div class="jurado-toolbar">
+          <span><strong>Panel general</strong> · actualización automática</span>
+          <button type="button" id="organizerRefreshBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Actualizar</button>
         </div>
-
-        <div class="jurado-field">
-          <label for="notasInput">Notas (opcional)</label>
-          <textarea id="notasInput" rows="2" placeholder="Observaciones del jurado…"></textarea>
-        </div>
-
-        <p id="saveError" class="jurado-error" hidden></p>
-        <p id="saveSuccess" class="jurado-success" hidden></p>
-        <button type="button" id="saveBtn" class="jurado-btn" disabled>Guardar calificación</button>
+        <p id="organizerUpdated" class="jurado-meta" style="margin-top:8px"></p>
       </div>
 
       <div class="jurado-card">
         <div class="jurado-card-head">
-          <h2>Clasificación actual</h2>
-          <p class="jurado-hint">Ordenada por promedio final (mayor a menor).</p>
+          <h2>Clasificación en vivo</h2>
+          <p class="jurado-hint">Promedio final cuando los 3 jueces calificaron. ✓ = juez listo.</p>
         </div>
         <div class="jurado-table-wrap">
-          <table class="jurado-table jurado-table--ranking" id="rankingTable">
+          <table class="jurado-table jurado-table--ranking" id="organizerRankingTable">
             <thead>
               <tr>
                 <th>#</th>
                 <th>Competidor</th>
+                <th>Jueces</th>
                 <th>Suma</th>
-                <th>Promedio</th>
-                <th>J1</th>
-                <th>J2</th>
-                <th>J3</th>
+                <th>Prom.</th>
               </tr>
             </thead>
-            <tbody id="rankingBody">
-              <tr><td colspan="7" class="jurado-empty">Sin calificaciones aún</td></tr>
+            <tbody id="organizerRankingBody">
+              <tr><td colspan="5" class="jurado-empty">Sin calificaciones aún</td></tr>
             </tbody>
           </table>
         </div>
       </div>
+
+      <div class="jurado-card">
+        <div class="jurado-card-head">
+          <h2>Detalle por competidor</h2>
+        </div>
+        <div class="jurado-field">
+          <label for="organizerCompetidorSelect">Ver detalle</label>
+          <select id="organizerCompetidorSelect">
+            <option value="">— Todos en tabla arriba —</option>
+          </select>
+        </div>
+        <div id="organizerDetail" class="jurado-detail" hidden></div>
+      </div>
     </section>
 
-    <p id="loadingMsg" class="jurado-loading">Cargando panel de jurado…</p>
+    <p id="loadingMsg" class="jurado-loading">Cargando…</p>
   </div>
 
   <script>
@@ -119,6 +125,6 @@
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260704jurado4"></script>
+  <script src="js/jurado-v60.js?v=20260704jurado5"></script>
 </body>
 </html>
