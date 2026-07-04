@@ -1,7 +1,7 @@
 /**
  * Panel jurado sensorial V60 — calificación 1–5, 7 criterios, 3 jueces.
  * Acceso solo por URL con ?pin= (sin enlace público en el sitio).
- * Competidores: Google Sheets (admin_dashboard). Calificaciones: Firestore.
+ * Competidores: admin_dashboard (Sheets). Calificaciones: Script Properties vía pasaporte_config.
  */
 (function () {
   'use strict';
@@ -17,7 +17,7 @@
   ];
 
   var JURADO_PIN_DEFAULT = 'v60sensorial';
-  var FIRESTORE_COLLECTION = 'jurado_v60_calificaciones';
+  var CONFIG_KEY = 'jurado_v60_calificaciones';
 
   var WEB_APP_URL_CANONICAL =
     'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec';
@@ -26,7 +26,6 @@
   var competidores = [];
   var calificacionesMap = {};
   var guardando = false;
-  var db = null;
 
   function webAppUrl() {
     var cfg = window.SHEETS_CONFIG || {};
@@ -82,19 +81,12 @@
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(body)
     }).then(function (res) { return res.json(); })
-      .catch(function () { return null; });
-  }
-
-  function initFirestore() {
-    var cfg = window.FIREBASE_FIDELIZACION_CONFIG || {};
-    if (!cfg.apiKey || !cfg.projectId) {
-      throw new Error('Firebase no configurado (js/firebase-fidelizacion-config.js).');
-    }
-    if (!firebase.apps.length) {
-      firebase.initializeApp(cfg);
-    }
-    db = firebase.firestore();
-    return db;
+      .then(function (data) {
+        if (!data || data.ok === false) {
+          throw new Error((data && data.error) || 'Error al guardar.');
+        }
+        return data;
+      });
   }
 
   function loadCompetidores() {
@@ -114,57 +106,40 @@
     });
   }
 
-  function buildCalificacionFromJudges(competidorId, nombre, judges, notas) {
-    var subtotales = [];
-    var judgesOut = {};
-    for (var j = 1; j <= 3; j++) {
-      var judge = readJudgeScores(j);
-      if (!judge.complete) {
-        throw new Error('Completa todas las calificaciones (1–5) de los 3 jueces.');
-      }
-      var sub = 0;
-      CRITERIA.forEach(function (crit) { sub += judge.scores[crit.key]; });
-      subtotales.push(sub);
-      judgesOut['j' + j] = { scores: judge.scores, subtotal: sub };
-    }
-    var sumaTotal = subtotales[0] + subtotales[1] + subtotales[2];
-    return {
-      competidorId: competidorId,
-      nombre: nombre,
-      judges: judgesOut,
-      sumaTotal: sumaTotal,
-      promedio: Math.round((sumaTotal / 3) * 100) / 100,
-      notas: String(notas || '').trim(),
-      actualizado: new Date().toISOString()
-    };
-  }
-
-  function loadCalificacionesFirestore() {
-    return db.collection(FIRESTORE_COLLECTION).get().then(function (snap) {
-      var list = [];
-      calificacionesMap = {};
-      snap.forEach(function (doc) {
-        var row = doc.data() || {};
-        row.competidorId = row.competidorId || doc.id;
-        calificacionesMap[row.competidorId] = row;
-        list.push(row);
-      });
+  function loadCalificacionesStore() {
+    return sheetsGet('pasaporte_config', { key: CONFIG_KEY }).then(function (res) {
+      var data = res.data || {};
+      var scores = data.scores && typeof data.scores === 'object' ? data.scores : {};
+      var list = Object.keys(scores).map(function (id) { return scores[id]; });
       list.sort(function (a, b) { return (b.promedio || 0) - (a.promedio || 0); });
+      calificacionesMap = {};
+      list.forEach(function (row) {
+        if (row && row.competidorId) calificacionesMap[row.competidorId] = row;
+      });
       return list;
     });
   }
 
-  function saveCalificacionFirestore(calificacion) {
-    return db.collection(FIRESTORE_COLLECTION)
-      .doc(calificacion.competidorId)
-      .set(calificacion, { merge: true })
-      .then(function () { return calificacion; });
+  function saveCalificacionStore(calificacion) {
+    return sheetsGet('pasaporte_config', { key: CONFIG_KEY }).then(function (res) {
+      var data = res.data || {};
+      if (!data.scores || typeof data.scores !== 'object') data.scores = {};
+      data.scores[calificacion.competidorId] = calificacion;
+      data.actualizado = new Date().toISOString();
+      return sheetsPost({
+        action: 'pasaporte_config_save',
+        key: CONFIG_KEY,
+        data: data
+      }).then(function () { return calificacion; });
+    });
   }
 
-  function syncSheetsOptional(calificacion) {
+  function trySyncSheetsJurado(calificacion) {
     var judgesPayload = {};
     for (var j = 1; j <= 3; j++) {
-      judgesPayload['j' + j] = calificacion.judges['j' + j].scores;
+      if (calificacion.judges && calificacion.judges['j' + j]) {
+        judgesPayload['j' + j] = calificacion.judges['j' + j].scores;
+      }
     }
     return sheetsPost({
       action: 'jurado_guardar',
@@ -172,7 +147,7 @@
       competidorId: calificacion.competidorId,
       judges: judgesPayload,
       notas: calificacion.notas
-    });
+    }).catch(function () { return null; });
   }
 
   function $(id) {
@@ -250,6 +225,31 @@
       }
     });
     return { scores: scores, complete: complete };
+  }
+
+  function buildCalificacion(competidorId, nombre, notas) {
+    var judgesOut = {};
+    var subtotales = [];
+    for (var j = 1; j <= 3; j++) {
+      var judge = readJudgeScores(j);
+      if (!judge.complete) {
+        throw new Error('Completa todas las calificaciones (1–5) de los 3 jueces.');
+      }
+      var sub = 0;
+      CRITERIA.forEach(function (crit) { sub += judge.scores[crit.key]; });
+      subtotales.push(sub);
+      judgesOut['j' + j] = { scores: judge.scores, subtotal: sub };
+    }
+    var sumaTotal = subtotales[0] + subtotales[1] + subtotales[2];
+    return {
+      competidorId: competidorId,
+      nombre: nombre,
+      judges: judgesOut,
+      sumaTotal: sumaTotal,
+      promedio: Math.round((sumaTotal / 3) * 100) / 100,
+      notas: String(notas || '').trim(),
+      actualizado: new Date().toISOString()
+    };
   }
 
   function recalcTotals() {
@@ -358,12 +358,7 @@
 
     var calificacion;
     try {
-      calificacion = buildCalificacionFromJudges(
-        competidorId,
-        found.nombre,
-        null,
-        $('notasInput').value.trim()
-      );
+      calificacion = buildCalificacion(competidorId, found.nombre, $('notasInput').value.trim());
     } catch (err) {
       $('saveError').textContent = err.message;
       $('saveError').hidden = false;
@@ -373,17 +368,17 @@
       return;
     }
 
-    saveCalificacionFirestore(calificacion)
+    saveCalificacionStore(calificacion)
       .then(function (saved) {
         calificacionesMap[saved.competidorId] = saved;
-        syncSheetsOptional(saved);
+        trySyncSheetsJurado(saved);
         $('saveSuccess').textContent =
           '✓ Guardado: ' + saved.nombre + ' — Suma ' + saved.sumaTotal + ' · Promedio ' + saved.promedio;
         $('saveSuccess').hidden = false;
-        return loadCalificacionesFirestore().then(renderRanking);
+        return loadCalificacionesStore().then(renderRanking);
       })
       .catch(function (err) {
-        $('saveError').textContent = err.message || 'No se pudo guardar en Firestore.';
+        $('saveError').textContent = err.message || 'No se pudo guardar.';
         $('saveError').hidden = false;
       })
       .finally(function () {
@@ -404,17 +399,15 @@
       return;
     }
 
-    try {
-      initFirestore();
-    } catch (err) {
-      showPinError(err.message || 'Firebase no disponible.');
-      return;
-    }
-
-    Promise.all([loadCompetidores(), loadCalificacionesFirestore()])
+    Promise.all([loadCompetidores(), loadCalificacionesStore()])
       .then(function (results) {
         competidores = results[0];
         var ranking = results[1];
+
+        if (!competidores.length) {
+          showPinError('No hay competidores habilitados en la hoja Competencia.');
+          return;
+        }
 
         var select = $('competidorSelect');
         competidores.forEach(function (c) {
