@@ -67,7 +67,7 @@ jobs:
           OAUTH_SCRIPT_TOKEN: ${{ secrets.OAUTH_SCRIPT_TOKEN }}
         run: |
           if [ -z "$OAUTH_SCRIPT_TOKEN" ]; then exit 0; fi
-          python3 tools/setup_admin.py --sin-firebase
+          python3 tools/setup_admin.py --sin-firebase --ci
 
       - name: Verificar pasaportes
         run: python3 tools/conectar_sheets.py --verificar

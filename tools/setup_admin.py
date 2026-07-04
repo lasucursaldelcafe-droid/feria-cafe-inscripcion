@@ -115,7 +115,18 @@ def get_oauth_credentials(*, ci: bool = False):
     OAUTH_TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
     creds = None
     if OAUTH_TOKEN_PATH.is_file():
-        creds = Credentials.from_authorized_user_file(str(OAUTH_TOKEN_PATH), SCRIPT_SCOPES)
+        raw = OAUTH_TOKEN_PATH.read_text(encoding="utf-8").strip()
+        if raw:
+            try:
+                creds = Credentials.from_authorized_user_file(str(OAUTH_TOKEN_PATH), SCRIPT_SCOPES)
+            except (ValueError, json.JSONDecodeError) as exc:
+                if ci:
+                    raise RuntimeError(
+                        f"Token OAuth inválido en {OAUTH_TOKEN_PATH}: {exc}. "
+                        "Regenera con py tools/setup_admin.py y actualiza el secreto OAUTH_SCRIPT_TOKEN."
+                    ) from exc
+                warn(f"Token OAuth corrupto ({exc}); se solicitará uno nuevo.")
+                creds = None
         if creds and creds.valid:
             sync_clasp_rc(creds)
             return creds

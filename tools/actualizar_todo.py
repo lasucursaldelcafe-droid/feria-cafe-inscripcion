@@ -73,7 +73,7 @@ def main() -> int:
 
         if args.apps_script:
             if has_valid_oauth_token():
-                code = run([sys.executable, "tools/setup_admin.py", "--sin-firebase"], allow_fail=True)
+                code = run([sys.executable, "tools/setup_admin.py", "--sin-firebase", "--ci"], allow_fail=True)
                 if code:
                     print("[AVISO] Deploy Apps Script falló; se continúa con Firebase Hosting.")
             else:

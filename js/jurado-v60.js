@@ -1,6 +1,7 @@
 /**
  * Panel jurado sensorial V60 — calificación 1–5, 7 criterios, 3 jueces.
  * Acceso solo por URL con ?pin= (sin enlace público en el sitio).
+ * Competidores: Google Sheets (admin_dashboard). Calificaciones: Firestore.
  */
 (function () {
   'use strict';
@@ -15,13 +16,17 @@
     { key: 'limpieza_taza', label: 'Limpieza de taza', desc: 'Ausencia de defectos u off-flavors' }
   ];
 
+  var JURADO_PIN_DEFAULT = 'v60sensorial';
+  var FIRESTORE_COLLECTION = 'jurado_v60_calificaciones';
+
+  var WEB_APP_URL_CANONICAL =
+    'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec';
+
   var pin = '';
   var competidores = [];
   var calificacionesMap = {};
   var guardando = false;
-
-  var WEB_APP_URL_CANONICAL =
-    'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec';
+  var db = null;
 
   function webAppUrl() {
     var cfg = window.SHEETS_CONFIG || {};
@@ -40,9 +45,18 @@
     }
   }
 
+  function assertPin(value) {
+    return String(value || '').trim() === JURADO_PIN_DEFAULT;
+  }
+
+  function isHabilitado(val) {
+    var v = String(val || '').trim().toLowerCase();
+    if (!v) return true;
+    return v === 'sí' || v === 'si' || v === 'yes' || v === 'true' || v === '1';
+  }
+
   function sheetsGet(action, params) {
     var url = webAppUrl();
-    if (!url) return Promise.reject(new Error('URL de Apps Script no configurada (js/sheets-config.js).'));
     var qs = 'action=' + encodeURIComponent(action);
     Object.keys(params || {}).forEach(function (key) {
       if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
@@ -54,13 +68,7 @@
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (!data || data.ok === false) {
-          throw new Error((data && data.error) || 'Error del servidor.');
-        }
-        if (action === 'jurado_competidores' && !Array.isArray(data.competidores)) {
-          throw new Error('Apps Script desactualizado: falta jurado V60. El organizador debe redesplegar Code.gs.');
-        }
-        if (action === 'jurado_calificaciones' && !Array.isArray(data.calificaciones) && data.calificacion === undefined) {
-          throw new Error('Apps Script desactualizado: falta jurado V60. El organizador debe redesplegar Code.gs.');
+          throw new Error((data && data.error) || 'Error del servidor Sheets.');
         }
         return data;
       });
@@ -68,19 +76,103 @@
 
   function sheetsPost(body) {
     var url = webAppUrl();
-    if (!url) return Promise.reject(new Error('URL de Apps Script no configurada.'));
     return fetch(url, {
       method: 'POST',
       mode: 'cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(body)
     }).then(function (res) { return res.json(); })
-      .then(function (data) {
-        if (!data || data.ok === false) {
-          throw new Error((data && data.error) || 'Error al guardar.');
-        }
-        return data;
+      .catch(function () { return null; });
+  }
+
+  function initFirestore() {
+    var cfg = window.FIREBASE_FIDELIZACION_CONFIG || {};
+    if (!cfg.apiKey || !cfg.projectId) {
+      throw new Error('Firebase no configurado (js/firebase-fidelizacion-config.js).');
+    }
+    if (!firebase.apps.length) {
+      firebase.initializeApp(cfg);
+    }
+    db = firebase.firestore();
+    return db;
+  }
+
+  function loadCompetidores() {
+    return sheetsGet('admin_dashboard', {}).then(function (data) {
+      return (data.allCompetencia || [])
+        .filter(function (row) { return isHabilitado(row.Habilitado); })
+        .map(function (row) {
+          return {
+            id: String(row.ID || '').trim(),
+            nombre: String(row.Nombre || '').trim(),
+            ciudad: String(row.Ciudad || '').trim(),
+            representa: String(row.Representa || '').trim()
+          };
+        })
+        .filter(function (c) { return c.id && c.nombre; })
+        .sort(function (a, b) { return a.nombre.localeCompare(b.nombre, 'es'); });
+    });
+  }
+
+  function buildCalificacionFromJudges(competidorId, nombre, judges, notas) {
+    var subtotales = [];
+    var judgesOut = {};
+    for (var j = 1; j <= 3; j++) {
+      var judge = readJudgeScores(j);
+      if (!judge.complete) {
+        throw new Error('Completa todas las calificaciones (1–5) de los 3 jueces.');
+      }
+      var sub = 0;
+      CRITERIA.forEach(function (crit) { sub += judge.scores[crit.key]; });
+      subtotales.push(sub);
+      judgesOut['j' + j] = { scores: judge.scores, subtotal: sub };
+    }
+    var sumaTotal = subtotales[0] + subtotales[1] + subtotales[2];
+    return {
+      competidorId: competidorId,
+      nombre: nombre,
+      judges: judgesOut,
+      sumaTotal: sumaTotal,
+      promedio: Math.round((sumaTotal / 3) * 100) / 100,
+      notas: String(notas || '').trim(),
+      actualizado: new Date().toISOString()
+    };
+  }
+
+  function loadCalificacionesFirestore() {
+    return db.collection(FIRESTORE_COLLECTION).get().then(function (snap) {
+      var list = [];
+      calificacionesMap = {};
+      snap.forEach(function (doc) {
+        var row = doc.data() || {};
+        row.competidorId = row.competidorId || doc.id;
+        calificacionesMap[row.competidorId] = row;
+        list.push(row);
       });
+      list.sort(function (a, b) { return (b.promedio || 0) - (a.promedio || 0); });
+      return list;
+    });
+  }
+
+  function saveCalificacionFirestore(calificacion) {
+    return db.collection(FIRESTORE_COLLECTION)
+      .doc(calificacion.competidorId)
+      .set(calificacion, { merge: true })
+      .then(function () { return calificacion; });
+  }
+
+  function syncSheetsOptional(calificacion) {
+    var judgesPayload = {};
+    for (var j = 1; j <= 3; j++) {
+      judgesPayload['j' + j] = calificacion.judges['j' + j].scores;
+    }
+    return sheetsPost({
+      action: 'jurado_guardar',
+      pin: pin,
+      competidorId: calificacion.competidorId,
+      judges: judgesPayload,
+      notas: calificacion.notas
+    });
   }
 
   function $(id) {
@@ -141,12 +233,7 @@
       tbody.appendChild(tr);
     });
 
-    if (existing && existing.notas) {
-      $('notasInput').value = existing.notas;
-    } else {
-      $('notasInput').value = '';
-    }
-
+    $('notasInput').value = existing && existing.notas ? existing.notas : '';
     recalcTotals();
   }
 
@@ -171,11 +258,9 @@
 
     for (var j = 1; j <= 3; j++) {
       var judge = readJudgeScores(j);
-      var sub = 0;
       if (judge.complete) {
-        CRITERIA.forEach(function (crit) {
-          sub += judge.scores[crit.key];
-        });
+        var sub = 0;
+        CRITERIA.forEach(function (crit) { sub += judge.scores[crit.key]; });
         $('subtotalJ' + j).textContent = String(sub);
         subtotales.push(sub);
       } else {
@@ -186,16 +271,14 @@
 
     if (allComplete && subtotales.length === 3) {
       var suma = subtotales[0] + subtotales[1] + subtotales[2];
-      var promedio = Math.round((suma / 3) * 100) / 100;
       $('sumaTotal').textContent = String(suma);
-      $('promedioFinal').textContent = String(promedio);
+      $('promedioFinal').textContent = String(Math.round((suma / 3) * 100) / 100);
     } else {
       $('sumaTotal').textContent = '—';
       $('promedioFinal').textContent = '—';
     }
 
-    var hasCompetidor = !!$('competidorSelect').value;
-    $('saveBtn').disabled = !hasCompetidor || !allComplete || guardando;
+    $('saveBtn').disabled = !$('competidorSelect').value || !allComplete || guardando;
   }
 
   function onScoreChange() {
@@ -240,16 +323,6 @@
       .replace(/"/g, '&quot;');
   }
 
-  function loadCalificaciones() {
-    return sheetsGet('jurado_calificaciones', { pin: pin }).then(function (data) {
-      calificacionesMap = {};
-      (data.calificaciones || []).forEach(function (row) {
-        if (row.competidorId) calificacionesMap[row.competidorId] = row;
-      });
-      renderRanking(data.calificaciones || []);
-    });
-  }
-
   function onCompetidorChange() {
     $('saveSuccess').hidden = true;
     $('saveError').hidden = true;
@@ -268,42 +341,49 @@
     if (found.representa) parts.push(found.representa);
     meta.textContent = parts.join(' · ');
     meta.hidden = !parts.length;
-
     renderScoresTable(calificacionesMap[id] || null);
-  }
-
-  function collectPayload() {
-    var judges = {};
-    for (var j = 1; j <= 3; j++) {
-      judges['j' + j] = readJudgeScores(j).scores;
-    }
-    return {
-      action: 'jurado_guardar',
-      pin: pin,
-      competidorId: $('competidorSelect').value,
-      judges: judges,
-      notas: $('notasInput').value.trim()
-    };
   }
 
   function onSave() {
     if (guardando) return;
+    var competidorId = $('competidorSelect').value;
+    var found = competidores.find(function (c) { return c.id === competidorId; });
+    if (!found) return;
+
     $('saveError').hidden = true;
     $('saveSuccess').hidden = true;
     guardando = true;
     $('saveBtn').disabled = true;
     $('saveBtn').textContent = 'Guardando…';
 
-    sheetsPost(collectPayload())
-      .then(function (res) {
-        calificacionesMap[res.competidorId] = res.calificacion;
+    var calificacion;
+    try {
+      calificacion = buildCalificacionFromJudges(
+        competidorId,
+        found.nombre,
+        null,
+        $('notasInput').value.trim()
+      );
+    } catch (err) {
+      $('saveError').textContent = err.message;
+      $('saveError').hidden = false;
+      guardando = false;
+      $('saveBtn').textContent = 'Guardar calificación';
+      recalcTotals();
+      return;
+    }
+
+    saveCalificacionFirestore(calificacion)
+      .then(function (saved) {
+        calificacionesMap[saved.competidorId] = saved;
+        syncSheetsOptional(saved);
         $('saveSuccess').textContent =
-          '✓ Guardado: ' + res.nombre + ' — Suma ' + res.sumaTotal + ' · Promedio ' + res.promedio;
+          '✓ Guardado: ' + saved.nombre + ' — Suma ' + saved.sumaTotal + ' · Promedio ' + saved.promedio;
         $('saveSuccess').hidden = false;
-        return loadCalificaciones();
+        return loadCalificacionesFirestore().then(renderRanking);
       })
       .catch(function (err) {
-        $('saveError').textContent = err.message || 'No se pudo guardar.';
+        $('saveError').textContent = err.message || 'No se pudo guardar en Firestore.';
         $('saveError').hidden = false;
       })
       .finally(function () {
@@ -319,25 +399,22 @@
       showPinError('Falta el PIN en la URL. Usa el enlace completo que te compartió el organizador (ej. ?pin=…).');
       return;
     }
-
-    if (!webAppUrl()) {
-      showPinError('Backend no configurado. Contacta al organizador.');
+    if (!assertPin(pin)) {
+      showPinError('PIN incorrecto. Verifica el enlace que te compartieron.');
       return;
     }
 
-    Promise.all([
-      sheetsGet('jurado_competidores', { pin: pin }),
-      sheetsGet('jurado_calificaciones', { pin: pin })
-    ])
-      .then(function (results) {
-        var compData = results[0];
-        var calData = results[1];
-        competidores = compData.competidores || [];
+    try {
+      initFirestore();
+    } catch (err) {
+      showPinError(err.message || 'Firebase no disponible.');
+      return;
+    }
 
-        calificacionesMap = {};
-        (calData.calificaciones || []).forEach(function (row) {
-          if (row.competidorId) calificacionesMap[row.competidorId] = row;
-        });
+    Promise.all([loadCompetidores(), loadCalificacionesFirestore()])
+      .then(function (results) {
+        competidores = results[0];
+        var ranking = results[1];
 
         var select = $('competidorSelect');
         competidores.forEach(function (c) {
@@ -348,23 +425,15 @@
         });
 
         renderScoresTable(null);
-        renderRanking(calData.calificaciones || []);
+        renderRanking(ranking);
 
         $('loadingMsg').hidden = true;
         $('mainSection').hidden = false;
-
         select.addEventListener('change', onCompetidorChange);
         $('saveBtn').addEventListener('click', onSave);
       })
       .catch(function (err) {
-        var msg = err.message || 'No se pudo cargar el panel.';
-        if (msg.indexOf('PIN') !== -1 || msg.indexOf('incorrecto') !== -1) {
-          showPinError('PIN incorrecto. Verifica el enlace que te compartieron.');
-        } else if (msg.indexOf('formType inválido') !== -1 || msg.indexOf('desactualizado') !== -1) {
-          showPinError('El backend aún no tiene jurado V60. El organizador debe redesplegar Apps Script.');
-        } else {
-          showPinError(msg);
-        }
+        showPinError(err.message || 'No se pudo cargar el panel de jurado.');
       });
   }
 

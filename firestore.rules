@@ -36,6 +36,12 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Panel jurado V60 (URL oculta + PIN en query; mismo modelo que fidelización)
+    match /jurado_v60_calificaciones/{competidorId} {
+      allow read, create, update: if true;
+      allow delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
