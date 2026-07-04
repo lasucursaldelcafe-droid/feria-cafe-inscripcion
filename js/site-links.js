@@ -28,6 +28,7 @@
     miTarjeta: 'pasaporte-cafetero.html',
     pasaporte: 'pasaporte-cafetero.html',
     escanearPasaporte: 'escanear-pasaporte.html',
+    juradoV60: 'jurado-v60.html',
     panelFidelizacion: 'dashboard-fidelizacion.html'
   };
 
@@ -54,6 +55,7 @@
     miTarjeta: '/pasaporte',
     pasaporte: '/pasaporte',
     escanearPasaporte: '/escanear-pasaporte',
+    juradoV60: '/jurado-v60',
     panelFidelizacion: '/panel-fidelizacion'
   };
 

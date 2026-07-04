@@ -87,6 +87,16 @@ var HEADERS_PASAPORTE_OPS = [
 var HEADERS_PASAPORTE_ESCANEOS = [
   'Fecha', 'ID escaneo', 'Operador ID', 'Cliente ID', 'Stand nombre', 'Puntos', 'Día'
 ];
+var SHEET_JURADO_V60 = 'Jurado V60';
+var JURADO_V60_PIN_DEFAULT = 'v60sensorial';
+var JURADO_V60_CRITERIA = ['Aroma', 'Dulzor', 'Acidez', 'Sabor', 'Balance', 'Cuerpo', 'Limpieza taza'];
+var HEADERS_JURADO_V60 = [
+  'Fecha actualización', 'Competidor ID', 'Nombre',
+  'J1 Aroma', 'J1 Dulzor', 'J1 Acidez', 'J1 Sabor', 'J1 Balance', 'J1 Cuerpo', 'J1 Limpieza taza', 'J1 Subtotal',
+  'J2 Aroma', 'J2 Dulzor', 'J2 Acidez', 'J2 Sabor', 'J2 Balance', 'J2 Cuerpo', 'J2 Limpieza taza', 'J2 Subtotal',
+  'J3 Aroma', 'J3 Dulzor', 'J3 Acidez', 'J3 Sabor', 'J3 Balance', 'J3 Cuerpo', 'J3 Limpieza taza', 'J3 Subtotal',
+  'Suma total', 'Promedio jueces', 'Notas'
+];
 var SITE_PUBLIC_BASE_URL = 'https://la-sucursal-del-cafe.web.app';
 var PASAPORTE_REGISTRO_PATH = '/registro-fidelizacion';
 var PASAPORTE_ESCANER_PATH = '/escanear-pasaporte';
@@ -151,14 +161,21 @@ function doGet(e) {
   if (params.action === 'pasaporte_config') {
     return jsonResponse(getPasaporteConfig_(params.key || 'niveles'));
   }
+  if (params.action === 'jurado_competidores') {
+    return jsonResponse(handleJuradoCompetidoresGet_(params.pin || ''));
+  }
+  if (params.action === 'jurado_calificaciones') {
+    return jsonResponse(handleJuradoCalificacionesGet_(params.pin || '', params.competidorId || ''));
+  }
   return jsonResponse({
     ok: true,
     message: 'API de inscripciones — La Sucursal del Café',
     forms: [
       'feria', 'competencia', 'stands', 'lista_espera', 'participantes_publico',
-      'patrocinadores_competencia_publico', 'admin', 'analytics', 'pasaportes'
+      'patrocinadores_competencia_publico', 'admin', 'analytics', 'pasaportes', 'jurado_v60'
     ],
-    pasaportesBackend: true
+    pasaportesBackend: true,
+    juradoV60Backend: true
   });
 }
 
@@ -233,6 +250,9 @@ function doPost(e) {
     }
     if (action === 'pasaporte_config_save') {
       return jsonResponse(savePasaporteConfig_(payload));
+    }
+    if (action === 'jurado_guardar') {
+      return jsonResponse(handleJuradoGuardar_(payload));
     }
     if (action === 'expositor_update_profile') {
       return jsonResponse(handleExpositorUpdateProfile_(payload));
@@ -313,9 +333,10 @@ function sincronizarEncabezados() {
   applyHeaders_(getOrCreateSheet_(SHEET_PASAPORTE_TX, HEADERS_PASAPORTE_TX), HEADERS_PASAPORTE_TX);
   applyHeaders_(getOrCreateSheet_(SHEET_PASAPORTE_OPS, HEADERS_PASAPORTE_OPS), HEADERS_PASAPORTE_OPS);
   applyHeaders_(getOrCreateSheet_(SHEET_PASAPORTE_ESCANEOS, HEADERS_PASAPORTE_ESCANEOS), HEADERS_PASAPORTE_ESCANEOS);
+  applyHeaders_(getOrCreateSheet_(SHEET_JURADO_V60, HEADERS_JURADO_V60), HEADERS_JURADO_V60);
   ensureDefaultPatrocinadoresCompetencia_();
   Logger.log(
-    'Encabezados sincronizados: Feria, Competencia, Stands, Lista de espera, Analytics, Novedades, Patrocinadores, Pasaportes.'
+    'Encabezados sincronizados: Feria, Competencia, Stands, Lista de espera, Analytics, Novedades, Patrocinadores, Pasaportes, Jurado V60.'
   );
 }
 
@@ -3200,4 +3221,240 @@ function savePasaporteConfig_(payload) {
   var k = 'PASAPORTE_CFG_' + key.toUpperCase();
   PropertiesService.getScriptProperties().setProperty(k, JSON.stringify(payload.data || {}));
   return { ok: true, key: key };
+}
+
+/** Configura PIN del panel jurado V60 (ejecutar en editor Apps Script). */
+function configurarJuradoV60Pin(pin) {
+  var value = String(pin || '').trim();
+  if (!value || value.length < 4) {
+    throw new Error('PIN inválido (mínimo 4 caracteres).');
+  }
+  PropertiesService.getScriptProperties().setProperty('JURADO_V60_PIN', value);
+  Logger.log('JURADO_V60_PIN actualizado.');
+}
+
+function getJuradoV60PinExpected_() {
+  return PropertiesService.getScriptProperties().getProperty('JURADO_V60_PIN') || JURADO_V60_PIN_DEFAULT;
+}
+
+function assertJuradoV60Pin_(pin) {
+  var expected = getJuradoV60PinExpected_();
+  if (String(pin || '').trim() !== expected) {
+    return { ok: false, error: 'PIN de jurado incorrecto.' };
+  }
+  return { ok: true };
+}
+
+function juradoCriteriaSlug_(label) {
+  return String(label || '')
+    .toLowerCase()
+    .replace(/á/g, 'a')
+    .replace(/é/g, 'e')
+    .replace(/í/g, 'i')
+    .replace(/ó/g, 'o')
+    .replace(/ú/g, 'u')
+    .replace(/ñ/g, 'n')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+function juradoCriteriaApiList_() {
+  return JURADO_V60_CRITERIA.map(function (label) {
+    return { label: label, key: juradoCriteriaSlug_(label) };
+  });
+}
+
+function parseJuradoScore_(value) {
+  var n = parseInt(value, 10);
+  if (isNaN(n) || n < 1 || n > 5) return null;
+  return n;
+}
+
+function sumJuradoJudgeScores_(scores) {
+  var total = 0;
+  for (var i = 0; i < JURADO_V60_CRITERIA.length; i++) {
+    var slug = juradoCriteriaSlug_(JURADO_V60_CRITERIA[i]);
+    var val = parseJuradoScore_(scores[slug]);
+    if (val === null) return null;
+    total += val;
+  }
+  return total;
+}
+
+function juradoRowObjectFromPayload_(competidorId, nombre, judges, notas) {
+  var row = {
+    'Fecha actualización': new Date().toISOString(),
+    'Competidor ID': competidorId,
+    'Nombre': nombre,
+    'Notas': String(notas || '').trim()
+  };
+  var sumaTotal = 0;
+  var subtotales = [];
+
+  for (var j = 1; j <= 3; j++) {
+    var judgeKey = 'j' + j;
+    var judgeScores = judges[judgeKey] || judges['J' + j] || {};
+    var subtotal = sumJuradoJudgeScores_(judgeScores);
+    if (subtotal === null) {
+      return { ok: false, error: 'Completa todas las calificaciones (1–5) de los 3 jueces.' };
+    }
+    subtotales.push(subtotal);
+    sumaTotal += subtotal;
+    for (var c = 0; c < JURADO_V60_CRITERIA.length; c++) {
+      var crit = JURADO_V60_CRITERIA[c];
+      var slug = juradoCriteriaSlug_(crit);
+      row['J' + j + ' ' + crit] = parseJuradoScore_(judgeScores[slug]);
+    }
+    row['J' + j + ' Subtotal'] = subtotal;
+  }
+
+  row['Suma total'] = sumaTotal;
+  row['Promedio jueces'] = Math.round((sumaTotal / 3) * 100) / 100;
+  return { ok: true, row: row, sumaTotal: sumaTotal, promedio: row['Promedio jueces'], subtotales: subtotales };
+}
+
+function juradoRowToApi_(rowObj) {
+  var judges = {};
+  for (var j = 1; j <= 3; j++) {
+    var scores = {};
+    for (var c = 0; c < JURADO_V60_CRITERIA.length; c++) {
+      var crit = JURADO_V60_CRITERIA[c];
+      scores[juradoCriteriaSlug_(crit)] = rowObj['J' + j + ' ' + crit];
+    }
+    judges['j' + j] = {
+      scores: scores,
+      subtotal: rowObj['J' + j + ' Subtotal']
+    };
+  }
+  return {
+    competidorId: rowObj['Competidor ID'],
+    nombre: rowObj['Nombre'],
+    judges: judges,
+    sumaTotal: rowObj['Suma total'],
+    promedio: rowObj['Promedio jueces'],
+    notas: rowObj['Notas'] || '',
+    actualizado: rowObj['Fecha actualización'] || ''
+  };
+}
+
+function findJuradoRowIndex_(sheet, competidorId) {
+  var idCol = HEADERS_JURADO_V60.indexOf('Competidor ID') + 1;
+  if (idCol <= 0) return -1;
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return -1;
+  var ids = sheet.getRange(2, idCol, lastRow, idCol).getValues();
+  for (var i = 0; i < ids.length; i++) {
+    if (String(ids[i][0] || '').trim() === competidorId) return i + 2;
+  }
+  return -1;
+}
+
+function listJuradoCompetidores_() {
+  var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
+  var lastRow = sheet.getLastRow();
+  var competidores = [];
+  if (lastRow >= 2) {
+    var values = sheet.getRange(2, 1, lastRow, HEADERS_COMPETENCIA.length).getValues();
+    for (var i = 0; i < values.length; i++) {
+      var row = rowObjectFromValues_(HEADERS_COMPETENCIA, values[i]);
+      if (!isHabilitado_(row['Habilitado'])) continue;
+      var id = String(row['ID'] || '').trim();
+      var nombre = String(row['Nombre'] || '').trim();
+      if (!id || !nombre) continue;
+      competidores.push({
+        id: id,
+        nombre: nombre,
+        ciudad: String(row['Ciudad'] || '').trim(),
+        representa: String(row['Representa'] || '').trim()
+      });
+    }
+  }
+  competidores.sort(function (a, b) {
+    return a.nombre.localeCompare(b.nombre, 'es');
+  });
+  return competidores;
+}
+
+function readAllJuradoCalificaciones_() {
+  var sheet = getOrCreateSheet_(SHEET_JURADO_V60, HEADERS_JURADO_V60);
+  return readAllSheetRows_(SHEET_JURADO_V60, HEADERS_JURADO_V60, false).map(juradoRowToApi_);
+}
+
+function handleJuradoCompetidoresGet_(pin) {
+  var access = assertJuradoV60Pin_(pin);
+  if (!access.ok) return access;
+  return {
+    ok: true,
+    criterios: juradoCriteriaApiList_(),
+    escala: { min: 1, max: 5 },
+    jueces: 3,
+    competidores: listJuradoCompetidores_()
+  };
+}
+
+function handleJuradoCalificacionesGet_(pin, competidorId) {
+  var access = assertJuradoV60Pin_(pin);
+  if (!access.ok) return access;
+  var all = readAllJuradoCalificaciones_();
+  if (competidorId) {
+    var one = null;
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].competidorId === competidorId) {
+        one = all[i];
+        break;
+      }
+    }
+    return { ok: true, calificacion: one, calificaciones: one ? [one] : [] };
+  }
+  all.sort(function (a, b) {
+    return (b.promedio || 0) - (a.promedio || 0);
+  });
+  return { ok: true, calificaciones: all };
+}
+
+function handleJuradoGuardar_(payload) {
+  var access = assertJuradoV60Pin_(payload.pin || '');
+  if (!access.ok) return access;
+
+  var competidorId = String(payload.competidorId || '').trim();
+  if (!competidorId) return { ok: false, error: 'Competidor requerido.' };
+
+  var competidores = listJuradoCompetidores_();
+  var nombre = '';
+  for (var i = 0; i < competidores.length; i++) {
+    if (competidores[i].id === competidorId) {
+      nombre = competidores[i].nombre;
+      break;
+    }
+  }
+  if (!nombre) return { ok: false, error: 'Competidor no encontrado o no habilitado.' };
+
+  var built = juradoRowObjectFromPayload_(
+    competidorId,
+    nombre,
+    payload.judges || payload.jueces || {},
+    payload.notas || ''
+  );
+  if (!built.ok) return built;
+
+  var sheet = getOrCreateSheet_(SHEET_JURADO_V60, HEADERS_JURADO_V60);
+  var rowValues = HEADERS_JURADO_V60.map(function (header) {
+    return built.row[header] !== undefined ? built.row[header] : '';
+  });
+  var rowIndex = findJuradoRowIndex_(sheet, competidorId);
+  if (rowIndex > 0) {
+    sheet.getRange(rowIndex, 1, rowIndex, HEADERS_JURADO_V60.length).setValues([rowValues]);
+  } else {
+    sheet.appendRow(rowValues);
+  }
+
+  return {
+    ok: true,
+    competidorId: competidorId,
+    nombre: nombre,
+    sumaTotal: built.sumaTotal,
+    promedio: built.promedio,
+    subtotales: built.subtotales,
+    calificacion: juradoRowToApi_(built.row)
+  };
 }

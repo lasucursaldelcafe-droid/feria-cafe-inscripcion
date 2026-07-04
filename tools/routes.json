@@ -145,6 +145,12 @@
       "sitemap": false
     },
     {
+      "key": "juradoV60",
+      "local": "jurado-v60.html",
+      "hosted": "/jurado-v60",
+      "sitemap": false
+    },
+    {
       "key": "panelFidelizacion",
       "local": "dashboard-fidelizacion.html",
       "hosted": "/panel-fidelizacion",
