@@ -109,7 +109,7 @@ def main() -> int:
             + [
                 "deploy",
                 "--only",
-                "hosting",
+                "hosting,firestore:rules",
                 "--project",
                 args.project,
                 "--non-interactive",
@@ -118,7 +118,7 @@ def main() -> int:
             env=env,
         )
 
-        ok("Despliegue de Firebase Hosting completado.")
+        ok("Despliegue de Firebase Hosting y reglas Firestore completado.")
         info(f"Sitio: https://{args.project}.web.app")
         return 0
 
