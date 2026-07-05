@@ -106,6 +106,16 @@
     }
     el.hidden = false;
     el.innerHTML = sponsors.map(renderCard).join('');
+    el.querySelectorAll('img.festival-sponsor-card__avatar').forEach(function (img) {
+      img.addEventListener('error', function onAvatarError() {
+        img.removeEventListener('error', onAvatarError);
+        var span = document.createElement('span');
+        span.className = 'festival-sponsor-card__avatar festival-sponsor-card__avatar--placeholder';
+        span.setAttribute('aria-hidden', 'true');
+        span.textContent = initials(img.getAttribute('alt') || '');
+        img.replaceWith(span);
+      });
+    });
   }
 
   function setSectionVisible() {
