@@ -63,6 +63,7 @@
   var activeDashTab = 'vista';
   var autoAdvancing = false;
   var autoAdvanceCooldownUntil = 0;
+  var pendingPanelImageDataUrl = null;
   var PAGE_MODE = (document.body && document.body.getAttribute('data-jurado-page')) || 'all';
 
   function storageKey(base) {
@@ -422,14 +423,18 @@
         reglamentoUrl: (ev.links && ev.links.reglas) || ''
       },
       scoring: {
+        disciplina: 'filtrado',
         modo: 'duelos',
         scaleMin: 1,
         scaleMax: 5,
         jueces: 3,
         avancePorRonda: 0,
         autoAvance: true,
+        competidoresEsperados: 16,
+        mostrarFotos: true,
         criteria: DEFAULT_CRITERIA.map(function (c) { return Object.assign({}, c); })
       },
+      panelImageDataUrl: '',
       actualizado: ''
     };
   }
@@ -507,13 +512,22 @@
     var jueces = parseInt(s.jueces, 10);
     if (isNaN(jueces) || jueces < 1 || jueces > 5) jueces = 3;
     var modo = s.modo === 'puntaje_general' ? 'puntaje_general' : 'duelos';
+    var disciplinas = ['filtrado', 'catacion', 'arte_latte', 'tostion', 'aeropress', 'personalizado'];
+    var disciplina = disciplinas.indexOf(s.disciplina) >= 0 ? s.disciplina : (base.disciplina || 'filtrado');
+    var competidoresEsperados = parseInt(s.competidoresEsperados, 10);
+    if (isNaN(competidoresEsperados) || competidoresEsperados < 2) {
+      competidoresEsperados = base.competidoresEsperados || 16;
+    }
     return {
+      disciplina: disciplina,
       modo: modo,
       scaleMin: scaleMin,
       scaleMax: scaleMax,
       jueces: jueces,
       avancePorRonda: Math.max(0, parseInt(s.avancePorRonda, 10) || 0),
       autoAvance: s.autoAvance !== false,
+      competidoresEsperados: competidoresEsperados,
+      mostrarFotos: s.mostrarFotos !== false,
       criteria: normalizeCriteriaList(s.criteria || base.criteria)
     };
   }
@@ -542,6 +556,148 @@
   function getScoringMode() {
     return (platformConfig && platformConfig.scoring && platformConfig.scoring.modo === 'puntaje_general')
       ? 'puntaje_general' : 'duelos';
+  }
+
+  function getDisciplina() {
+    return (platformConfig && platformConfig.scoring && platformConfig.scoring.disciplina) || 'filtrado';
+  }
+
+  function getCompetidoresEsperados() {
+    var n = platformConfig && platformConfig.scoring && platformConfig.scoring.competidoresEsperados;
+    return Math.max(2, parseInt(n, 10) || 16);
+  }
+
+  function shouldShowCompetitorPhotos() {
+    return !(platformConfig && platformConfig.scoring && platformConfig.scoring.mostrarFotos === false);
+  }
+
+  function driveThumbUrl(url, size) {
+    if (!url) return '';
+    var s = String(url).trim();
+    var m = s.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w' + (size || 200);
+    if (/^https?:\/\//i.test(s)) return s;
+    return '';
+  }
+
+  function disciplinaLabel(id) {
+    if (window.TournamentPresets && window.TournamentPresets.get) {
+      return window.TournamentPresets.get(id || getDisciplina()).label;
+    }
+    return id || 'Torneo';
+  }
+
+  function renderScoringModoHint() {
+    var hint = $('cfgScoringModoHint');
+    if (!hint || !window.TournamentPresets) return;
+    var modo = $('cfgScoringModo') ? $('cfgScoringModo').value : getScoringMode();
+    var modes = window.TournamentPresets.classificationModes();
+    var found = modes.find(function (m) { return m.id === modo; });
+    hint.textContent = found ? (found.desc + ' · ' + found.entities) : '';
+  }
+
+  function renderTournamentRecommendations(disciplina) {
+    var box = $('cfgTournamentRecommendations');
+    if (!box || !window.TournamentPresets) return;
+    box.innerHTML = window.TournamentPresets.summaryHtml(disciplina || getDisciplina());
+  }
+
+  function applyDisciplinePresetToForm(disciplina) {
+    if (!window.TournamentPresets || disciplina === 'personalizado') {
+      renderTournamentRecommendations(disciplina);
+      renderScoringModoHint();
+      updateConfigPreview();
+      return;
+    }
+    var current = readPlatformConfigForm();
+    var scoring = window.TournamentPresets.applyToScoring(disciplina, current.scoring);
+    var el;
+    el = $('cfgScoringModo'); if (el) el.value = scoring.modo;
+    el = $('cfgScaleMin'); if (el) el.value = scoring.scaleMin;
+    el = $('cfgScaleMax'); if (el) el.value = scoring.scaleMax;
+    el = $('cfgJueces'); if (el) el.value = scoring.jueces;
+    el = $('cfgAvanceRonda'); if (el) el.value = scoring.avancePorRonda || 0;
+    el = $('cfgCompetidoresEsperados'); if (el) el.value = scoring.competidoresEsperados;
+    el = $('cfgRegCupo'); if (el && scoring.competidoresEsperados) el.value = scoring.competidoresEsperados;
+    var autoEl = $('cfgAutoAvance');
+    if (autoEl) autoEl.checked = scoring.autoAvance !== false;
+    renderCriteriaEditor(scoring.criteria);
+    renderTournamentRecommendations(disciplina);
+    renderScoringModoHint();
+    updateConfigPreview();
+  }
+
+  function compressPanelImageFile(file) {
+    return new Promise(function (resolve, reject) {
+      if (!file || !file.type || file.type.indexOf('image/') !== 0) {
+        reject(new Error('Selecciona una imagen válida.'));
+        return;
+      }
+      if (file.size > 1024 * 1024) {
+        reject(new Error('La imagen debe pesar menos de 1 MB.'));
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function () {
+        var img = new Image();
+        img.onload = function () {
+          var maxW = 1200;
+          var w = img.width;
+          var h = img.height;
+          if (w > maxW) {
+            h = Math.round(h * (maxW / w));
+            w = maxW;
+          }
+          var canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.onerror = function () { reject(new Error('No se pudo leer la imagen.')); };
+        img.src = reader.result;
+      };
+      reader.onerror = function () { reject(new Error('No se pudo cargar el archivo.')); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderPanelImagePreview(dataUrl) {
+    var preview = $('cfgPanelImagePreview');
+    var clearBtn = $('cfgPanelImageClearBtn');
+    if (!preview) return;
+    if (dataUrl) {
+      preview.innerHTML = '<img src="' + escapeHtml(dataUrl) + '" alt="Vista previa panel">';
+      preview.hidden = false;
+      if (clearBtn) clearBtn.hidden = false;
+    } else {
+      preview.innerHTML = '';
+      preview.hidden = true;
+      if (clearBtn) clearBtn.hidden = true;
+    }
+  }
+
+  function renderFifaPanelBrand() {
+    var box = $('fifaPanelBrand');
+    if (!box) return;
+    var dataUrl = platformConfig && platformConfig.panelImageDataUrl;
+    if (dataUrl) {
+      box.innerHTML = '<img src="' + escapeHtml(dataUrl) + '" alt="Panel de calificación" class="jurado-panel-brand__img">';
+      box.hidden = false;
+    } else {
+      box.innerHTML = '';
+      box.hidden = true;
+    }
+  }
+
+  function competitorPhotoHtml(competidor, size) {
+    if (!shouldShowCompetitorPhotos() || !competidor) return '';
+    var url = driveThumbUrl(competidor.fotoUrl, size || 120);
+    if (!url) {
+      return '<span class="jurado-fifa-photo jurado-fifa-photo--empty" aria-hidden="true"></span>';
+    }
+    return '<img class="jurado-fifa-photo" src="' + escapeHtml(url) + '" alt="" loading="lazy" referrerpolicy="no-referrer" width="40" height="40">';
   }
 
   function scoringModeLabel() {
@@ -734,7 +890,7 @@
   }
 
   function fifaColspan() {
-    return getJudgeCount() + 5;
+    return getJudgeCount() + 5 + (shouldShowCompetitorPhotos() ? 1 : 0);
   }
 
   function rankingColspan() {
@@ -744,8 +900,9 @@
   function renderFifaTableHead() {
     var row = document.querySelector('#fifaStandingsTable thead tr');
     if (!row) return;
-    var html = '<th class="jurado-fifa-pos">#</th>' +
-      '<th class="jurado-fifa-team">Competidor</th>' +
+    var html = '<th class="jurado-fifa-pos">#</th>';
+    if (shouldShowCompetitorPhotos()) html += '<th class="jurado-fifa-photo-col">Foto</th>';
+    html += '<th class="jurado-fifa-team">Competidor</th>' +
       '<th>Cat.</th>';
     for (var j = 1; j <= getJudgeCount(); j++) html += '<th>J' + j + '</th>';
     html += '<th class="jurado-fifa-pts">Pts</th><th>Estado</th>';
@@ -890,6 +1047,7 @@
         reglamentoUrl: String(reg.reglamentoUrl || base.registration.reglamentoUrl).trim()
       },
       scoring: normalizeScoringConfig(raw.scoring, base.scoring),
+      panelImageDataUrl: String(raw.panelImageDataUrl || '').trim(),
       actualizado: raw.actualizado || ''
     };
   }
@@ -977,6 +1135,7 @@
     updateDashboardScoringChip();
     updateJudgeUiHints();
     updateRoleSectionHint();
+    renderFifaPanelBrand();
   }
 
   function webAppUrl() {
@@ -1063,7 +1222,8 @@
             id: String(row.ID || '').trim(),
             nombre: String(row.Nombre || '').trim(),
             ciudad: String(row.Ciudad || '').trim(),
-            representa: String(row.Representa || '').trim()
+            representa: String(row.Representa || '').trim(),
+            fotoUrl: String(row['Foto participante enlace Drive'] || row.FotoParticipante || '').trim()
           };
         })
         .filter(function (c) { return c.id && c.nombre; })
@@ -1419,7 +1579,9 @@
     var modoHtml = '<p class="jurado-meta">Modo: <strong>' + modoLabel + '</strong> · ' + scoringSubtitle() + '</p>';
 
     box.innerHTML =
-      '<p><strong>' + n + '</strong> inscrito(s) habilitado(s)</p>' +
+      '<p><strong>' + n + '</strong> inscrito(s) habilitado(s)' +
+      (getCompetidoresEsperados() ? ' · objetivo <strong>' + getCompetidoresEsperados() + '</strong>' : '') + '</p>' +
+      '<p class="jurado-meta">Disciplina: <strong>' + escapeHtml(disciplinaLabel(getDisciplina())) + '</strong></p>' +
       modoHtml +
       '<p class="jurado-hint">Formato sugerido para este cupo:</p>' +
       '<div class="jurado-plan-chips">' + planHtml + '</div>' +
@@ -1951,11 +2113,26 @@
     var meta = $('judgeCompetidorMeta');
     if (!found) {
       meta.hidden = true;
+      meta.textContent = '';
       renderJudgeForm(null);
       return;
     }
-    meta.textContent = competidorMeta(found);
-    meta.hidden = !meta.textContent;
+    var metaParts = competidorMeta(found);
+    if (shouldShowCompetitorPhotos()) {
+      var photoUrl = driveThumbUrl(found.fotoUrl, 160);
+      if (photoUrl) {
+        meta.innerHTML = '<span class="judge-competitor-meta">' +
+          '<img class="judge-competitor-photo" src="' + escapeHtml(photoUrl) + '" alt="" loading="lazy" referrerpolicy="no-referrer" width="56" height="56">' +
+          '<span>' + escapeHtml(metaParts || found.nombre) + '</span></span>';
+        meta.hidden = false;
+      } else {
+        meta.textContent = metaParts || found.nombre;
+        meta.hidden = !meta.textContent;
+      }
+    } else {
+      meta.textContent = metaParts;
+      meta.hidden = !meta.textContent;
+    }
     loadCalificacionesStore().then(function () {
       renderJudgeForm(calificacionesMap[id] || null);
     }).catch(function () {
@@ -2082,6 +2259,7 @@
     renderFifaTableHead();
     renderRankingTableHead();
     updateScoringHints();
+    renderFifaPanelBrand();
     renderOrganizerStats();
     renderFifaStandings();
     renderOrganizerLinksPanel();
@@ -2311,6 +2489,7 @@
     }
 
     var need = getJudgeCount();
+    var showPhotos = shouldShowCompetitorPhotos();
     tbody.innerHTML = rows.map(function (row, idx) {
       var pos = idx + 1;
       var total = puntajeTotal(row);
@@ -2321,8 +2500,13 @@
       var estadoCls = estado === 'listo' ? 'jurado-fifa-estado--ok' : estado === 'parcial' ? 'jurado-fifa-estado--partial' : '';
       var cat = countJudgesDone(row);
       var judgeCells = formatJudgeScores(row).map(function (v) { return '<td>' + v + '</td>'; }).join('');
+      var comp = competidores.find(function (c) { return c.id === row.competidorId; });
+      var photoCell = showPhotos
+        ? '<td class="jurado-fifa-photo-col">' + competitorPhotoHtml(comp, 120) + '</td>'
+        : '';
       return '<tr class="jurado-fifa-row' + (pos <= 3 ? ' jurado-fifa-row--top' : '') + '">' +
         '<td class="jurado-fifa-pos ' + fifaPosClass(pos) + '">' + pos + '</td>' +
+        photoCell +
         '<td class="jurado-fifa-team"><span class="jurado-fifa-name">' + escapeHtml(row.nombre) + '</span></td>' +
         '<td>' + cat + '/' + need + '</td>' +
         judgeCells +
@@ -2690,12 +2874,15 @@
       return el ? el.value : '';
     }
     var scoring = {
+      disciplina: val('cfgDisciplina') || 'filtrado',
       modo: val('cfgScoringModo') === 'puntaje_general' ? 'puntaje_general' : 'duelos',
       scaleMin: val('cfgScaleMin'),
       scaleMax: val('cfgScaleMax'),
       jueces: val('cfgJueces'),
       avancePorRonda: val('cfgAvanceRonda'),
       autoAvance: $('cfgAutoAvance') ? $('cfgAutoAvance').checked : true,
+      competidoresEsperados: val('cfgCompetidoresEsperados'),
+      mostrarFotos: $('cfgMostrarFotos') ? $('cfgMostrarFotos').checked : true,
       criteria: readCriteriaFromEditor()
     };
     return normalizePlatformConfig({
@@ -2707,6 +2894,9 @@
       primaryColor: val('cfgPrimaryColor'),
       pinOrganizador: val('cfgPinOrganizador'),
       pinJuez: val('cfgPinJuez'),
+      panelImageDataUrl: pendingPanelImageDataUrl != null
+        ? pendingPanelImageDataUrl
+        : ((platformConfig && platformConfig.panelImageDataUrl) || ''),
       registration: {
         title: val('cfgRegTitle'),
         fee: val('cfgRegFee'),
@@ -2737,6 +2927,8 @@
       cfgPinOrganizador: cfg.pinOrganizador || '',
       cfgPinJuez: cfg.pinJuez || '',
       cfgScoringModo: sc.modo || 'duelos',
+      cfgDisciplina: sc.disciplina || 'filtrado',
+      cfgCompetidoresEsperados: sc.competidoresEsperados || 16,
       cfgScaleMin: sc.scaleMin != null ? sc.scaleMin : 1,
       cfgScaleMax: sc.scaleMax != null ? sc.scaleMax : 5,
       cfgJueces: sc.jueces || 3,
@@ -2757,8 +2949,14 @@
     });
     var autoEl = $('cfgAutoAvance');
     if (autoEl) autoEl.checked = sc.autoAvance !== false;
+    var fotosEl = $('cfgMostrarFotos');
+    if (fotosEl) fotosEl.checked = sc.mostrarFotos !== false;
+    pendingPanelImageDataUrl = cfg.panelImageDataUrl || '';
+    renderPanelImagePreview(cfg.panelImageDataUrl || '');
     renderCriteriaEditor(sc.criteria);
     renderFormFieldsEditor(cfg.formFields);
+    renderTournamentRecommendations(sc.disciplina || 'filtrado');
+    renderScoringModoHint();
     updateConfigPreview(cfg);
   }
 
@@ -2816,6 +3014,11 @@
     if (sub) sub.textContent = cfg.eventSubtitle || summary;
     var scoringLine = $('configPreviewScoring');
     if (scoringLine) scoringLine.textContent = summary;
+    var disciplineLine = $('configPreviewDiscipline');
+    if (disciplineLine) {
+      disciplineLine.textContent = disciplinaLabel(sc.disciplina || 'filtrado') +
+        ' · ' + (sc.competidoresEsperados || 16) + ' competidores objetivo';
+    }
     renderInscripcionPreviewMock(cfg);
   }
 
@@ -2866,6 +3069,61 @@
       inp.addEventListener('input', function () { updateConfigPreview(); });
       inp.addEventListener('change', function () { updateConfigPreview(); });
     });
+
+    var disciplinaSel = $('cfgDisciplina');
+    if (disciplinaSel && !disciplinaSel.dataset.bound) {
+      disciplinaSel.dataset.bound = '1';
+      disciplinaSel.addEventListener('change', function () {
+        applyDisciplinePresetToForm(disciplinaSel.value);
+      });
+    }
+    var modoSel = $('cfgScoringModo');
+    if (modoSel && !modoSel.dataset.bound) {
+      modoSel.dataset.bound = '1';
+      modoSel.addEventListener('change', renderScoringModoHint);
+    }
+    var panelFile = $('cfgPanelImageFile');
+    if (panelFile && !panelFile.dataset.bound) {
+      panelFile.dataset.bound = '1';
+      panelFile.addEventListener('change', function () {
+        var file = panelFile.files && panelFile.files[0];
+        if (!file) return;
+        $('platformConfigError').hidden = true;
+        compressPanelImageFile(file).then(function (dataUrl) {
+          pendingPanelImageDataUrl = dataUrl;
+          renderPanelImagePreview(dataUrl);
+          updateConfigPreview();
+        }).catch(function (err) {
+          var errEl = $('platformConfigError');
+          if (errEl) {
+            errEl.textContent = err.message || 'No se pudo cargar la imagen.';
+            errEl.hidden = false;
+          }
+          panelFile.value = '';
+        });
+      });
+    }
+    var panelClear = $('cfgPanelImageClearBtn');
+    if (panelClear && !panelClear.dataset.bound) {
+      panelClear.dataset.bound = '1';
+      panelClear.addEventListener('click', function () {
+        pendingPanelImageDataUrl = '';
+        var panelFileInput = $('cfgPanelImageFile');
+        if (panelFileInput) panelFileInput.value = '';
+        renderPanelImagePreview('');
+        updateConfigPreview();
+      });
+    }
+
+    var compInput = $('cfgCompetidoresEsperados');
+    if (compInput && !compInput.dataset.bound) {
+      compInput.dataset.bound = '1';
+      compInput.addEventListener('change', function () {
+        var cupoEl = $('cfgRegCupo');
+        if (cupoEl && compInput.value) cupoEl.value = compInput.value;
+        updateConfigPreview();
+      });
+    }
 
     $('platformConfigSaveBtn').addEventListener('click', function () {
       var cfg = readPlatformConfigForm();

@@ -2865,3 +2865,127 @@ body.jurado-page--resultados .jurado-shell {
 .jurado-card--tenant-welcome {
   display: none;
 }
+
+/* ——— Disciplinas y panel de calificación ——— */
+.jurado-tournament-recommendations {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(201, 162, 39, 0.08);
+  border: 1px solid rgba(201, 162, 39, 0.22);
+}
+
+.jurado-preset-summary__entity {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+}
+
+.jurado-preset-tips {
+  margin: 10px 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--jurado-text-muted);
+}
+
+.jurado-preset-tips li + li {
+  margin-top: 6px;
+}
+
+.jurado-field-hint {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--jurado-text-muted);
+}
+
+.jurado-panel-image-preview {
+  margin-top: 10px;
+  border-radius: 10px;
+  overflow: hidden;
+  max-height: 160px;
+}
+
+.jurado-panel-image-preview img {
+  display: block;
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+}
+
+.jurado-panel-brand {
+  margin-bottom: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  max-height: 120px;
+}
+
+.jurado-panel-brand__img {
+  display: block;
+  width: 100%;
+  max-height: 120px;
+  object-fit: cover;
+}
+
+.jurado-config-preview-discipline {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: var(--jurado-text-muted);
+}
+
+.jurado-fifa-photo-col {
+  width: 48px;
+  text-align: center;
+}
+
+.jurado-fifa-photo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(201, 162, 39, 0.35);
+  vertical-align: middle;
+}
+
+.jurado-fifa-photo--empty {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.judge-competitor-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.judge-competitor-photo {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--jurado-accent);
+  flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+  .jurado-fifa-photo-col {
+    width: 40px;
+  }
+
+  .jurado-fifa-photo,
+  .jurado-fifa-photo--empty {
+    width: 32px;
+    height: 32px;
+  }
+
+  .judge-competitor-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

@@ -9,7 +9,7 @@
   <title>Configuración — Jurado sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado28">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado32">
 </head>
 <body class="jurado-page jurado-page--setup" data-jurado-page="config">
   <div class="jurado-shell">
@@ -369,20 +369,79 @@
             </div>
             </section>
 
+            <section class="jurado-config-block" aria-labelledby="cfgBlockDisciplina">
+              <div class="jurado-config-block__head">
+                <span class="jurado-config-block__icon" aria-hidden="true">🏆</span>
+                <div>
+                  <h3 id="cfgBlockDisciplina">Disciplina del torneo</h3>
+                  <p class="jurado-hint">Plantillas basadas en campeonatos mundiales (WCE, SCA, WAC). El sistema ajusta criterios y recomendaciones automáticamente.</p>
+                </div>
+              </div>
+              <div class="jurado-config-grid">
+                <div class="jurado-field jurado-field--full">
+                  <label for="cfgDisciplina">Tipo de competencia</label>
+                  <select id="cfgDisciplina">
+                    <option value="filtrado">Filtrado / Brewers (WBrC)</option>
+                    <option value="catacion">Catación / Cup Tasters (WCTC)</option>
+                    <option value="arte_latte">Arte latte (WLAC)</option>
+                    <option value="tostion">Tostión (WCRC)</option>
+                    <option value="aeropress">Aeropress (WAC)</option>
+                    <option value="personalizado">Personalizado</option>
+                  </select>
+                </div>
+                <div class="jurado-field">
+                  <label for="cfgCompetidoresEsperados">Competidores esperados</label>
+                  <input type="number" id="cfgCompetidoresEsperados" min="2" max="128" value="16" placeholder="16">
+                  <p class="jurado-field-hint">Define el cupo objetivo; el cuadro se adapta al número de inscritos habilitados.</p>
+                </div>
+                <div class="jurado-field">
+                  <label for="cfgRegCupo">Cupo inscripción</label>
+                  <input type="number" id="cfgRegCupo" min="1" max="999" placeholder="36">
+                </div>
+              </div>
+              <div id="cfgTournamentRecommendations" class="jurado-tournament-recommendations" aria-live="polite"></div>
+            </section>
+
+            <section class="jurado-config-block" aria-labelledby="cfgBlockPanel">
+              <div class="jurado-config-block__head">
+                <span class="jurado-config-block__icon" aria-hidden="true">🖼️</span>
+                <div>
+                  <h3 id="cfgBlockPanel">Panel de calificación</h3>
+                  <p class="jurado-hint">Imagen de fondo o marca para la clasificación en vivo y fotos de competidores.</p>
+                </div>
+              </div>
+              <div class="jurado-config-grid">
+                <div class="jurado-field jurado-field--full">
+                  <label for="cfgPanelImageFile">Imagen del panel (opcional)</label>
+                  <input type="file" id="cfgPanelImageFile" accept="image/jpeg,image/png,image/webp">
+                  <p class="jurado-field-hint">JPG, PNG o WebP · máx. 1 MB · se muestra en clasificación en vivo.</p>
+                  <div id="cfgPanelImagePreview" class="jurado-panel-image-preview" hidden></div>
+                  <button type="button" id="cfgPanelImageClearBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small" hidden>Quitar imagen</button>
+                </div>
+                <div class="jurado-field jurado-field--full jurado-field--checkbox">
+                  <label class="jurado-checkbox-label">
+                    <input type="checkbox" id="cfgMostrarFotos" checked>
+                    Mostrar foto del competidor en el panel de calificación
+                  </label>
+                </div>
+              </div>
+            </section>
+
             <section class="jurado-config-block" aria-labelledby="cfgBlockScoring">
               <div class="jurado-config-block__head">
                 <span class="jurado-config-block__icon" aria-hidden="true">⚖️</span>
                 <div>
-                  <h3 id="cfgBlockScoring">Tipo de torneo y jurado</h3>
-                  <p class="jurado-hint">Modo de clasificación, escala y criterios sensoriales.</p>
+                  <h3 id="cfgBlockScoring">Modo de clasificación y jurado</h3>
+                  <p class="jurado-hint">Cómo avanzan los competidores y cómo puntúa el jurado.</p>
                 </div>
               </div>
-              <div class="jurado-field">
+              <div class="jurado-field jurado-field--full">
                 <label for="cfgScoringModo">Modo de clasificación</label>
                 <select id="cfgScoringModo">
-                  <option value="duelos">Duelos 1v1 (mayor puntaje)</option>
-                  <option value="puntaje_general">Puntaje general (ranking)</option>
+                  <option value="duelos">Duelos 1v1 — eliminatoria (WBrC, WAC, WLAC)</option>
+                  <option value="puntaje_general">Puntaje general — ranking (WCTC, WCRC, grupos)</option>
                 </select>
+                <p class="jurado-field-hint" id="cfgScoringModoHint"></p>
               </div>
               <div class="jurado-field">
                 <label for="cfgJueces">Número de jueces</label>
@@ -439,10 +498,6 @@
                 <input type="text" id="cfgRegFee" maxlength="40" placeholder="$90.000 COP">
               </div>
               <div class="jurado-field">
-                <label for="cfgRegCupo">Cupo</label>
-                <input type="number" id="cfgRegCupo" min="1" max="999" placeholder="36">
-              </div>
-              <div class="jurado-field">
                 <label for="cfgRegFecha">Fecha evento</label>
                 <input type="text" id="cfgRegFecha" maxlength="80" placeholder="29 ago 2026">
               </div>
@@ -491,6 +546,7 @@
                   <strong id="configPreviewName">Mi torneo</strong>
                   <span id="configPreviewSub">Subtítulo del evento</span>
                   <span id="configPreviewScoring" class="jurado-config-preview-scoring"></span>
+                  <span id="configPreviewDiscipline" class="jurado-config-preview-discipline"></span>
                 </div>
               </div>
               <div class="jurado-inscripcion-mock" id="inscripcionPreviewMock" aria-hidden="true">
@@ -554,12 +610,13 @@
     <p id="loadingMsg" class="jurado-loading">Cargando…</p>
   </div>
 
-  <script src="js/event-config.js?v=20260705jurado25"></script>
+  <script src="js/tournament-presets.js?v=20260705jurado32"></script>
+  <script src="js/event-config.js?v=20260705jurado29"></script>
   <script>
     window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxEVH5x6x8xj5vBFlwbkQjkEtpVNnfBoaeOwRDSk9FbF9K9_vuQFfwNBR9Kghtn2i6u/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado28"></script>
+  <script src="js/jurado-v60.js?v=20260705jurado32"></script>
 </body>
 </html>

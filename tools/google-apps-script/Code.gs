@@ -4059,16 +4059,20 @@ function defaultJuradoPlatformForTenant_(instance) {
     eventId: instance.slug,
     tenantSlug: instance.slug,
     scoring: {
+      disciplina: 'filtrado',
       modo: 'duelos',
       scaleMin: 1,
       scaleMax: 5,
       jueces: 3,
       avancePorRonda: 0,
       autoAvance: true,
+      competidoresEsperados: 16,
+      mostrarFotos: true,
       criteria: juradoCriteriaApiList_().map(function (c) {
         return { key: c.key, label: c.label, desc: '' };
       })
     },
+    panelImageDataUrl: '',
     actualizado: now
   };
 }

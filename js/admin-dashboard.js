@@ -2333,11 +2333,13 @@
   function juradoScoringSummary(platformCfg) {
     var sc = platformCfg && platformCfg.scoring;
     if (!sc) return 'Duelos 1v1 · 3 jueces · escala 1–5';
+    var disciplina = sc.disciplina ? String(sc.disciplina).replace(/_/g, ' ') : 'filtrado';
     var modo = sc.modo === 'puntaje_general' ? 'Puntaje general' : 'Duelos 1v1';
     var jueces = sc.jueces || 3;
     var scale = (sc.scaleMin != null ? sc.scaleMin : 1) + '–' + (sc.scaleMax != null ? sc.scaleMax : 5);
     var crit = Array.isArray(sc.criteria) ? sc.criteria.length : 7;
-    return modo + ' · ' + jueces + ' juez' + (jueces === 1 ? '' : 'es') + ' · escala ' + scale + ' · ' + crit + ' criterios';
+    return disciplina + ' · ' + modo + ' · ' + jueces + ' juez' + (jueces === 1 ? '' : 'es') +
+      ' · escala ' + scale + ' · ' + crit + ' criterios';
   }
 
   function renderAdminJuradoLinks(platformCfg) {
