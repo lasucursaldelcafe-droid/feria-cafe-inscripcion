@@ -26,7 +26,7 @@ window.EVENT_CONFIG = {
       'Dos días en Cali para probar, aprender y conectar. Entrada sin costo; registro opcional con premios.',
     mensajeEvento:
       'Productores, tostadores y baristas en un solo lugar para descubrir lo nuestro.',
-    exploreIntro: 'Elige por dónde empezar — puedes entrar sin registrarte.',
+    exploreIntro: '',
     explore: [
       {
         id: 'evento',
