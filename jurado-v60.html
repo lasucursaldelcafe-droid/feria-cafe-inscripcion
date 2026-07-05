@@ -8,7 +8,7 @@
   <title>Jurado sensorial — Torneo en vivo</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado19">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado20">
 </head>
 <body class="jurado-page">
   <div class="jurado-shell">
@@ -94,6 +94,7 @@
 
       <nav class="jurado-dash-nav" id="dashboardNav" aria-label="Secciones del panel">
         <button type="button" class="jurado-dash-tab jurado-dash-tab--active" data-dash-tab="vista">Vista general</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="recorrido">Recorrido</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="torneo">Torneo</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="puntajes">Puntajes</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="control">Control</button>
@@ -104,6 +105,14 @@
       <!-- Tab: Vista general -->
       <div class="jurado-dash-pane jurado-dash-pane--active" data-dash-pane="vista">
         <div class="jurado-stats-row" id="organizerStatsRow"></div>
+
+        <div class="jurado-card jurado-card--journey-mini" id="journeySummaryCard">
+          <div class="jurado-card-head">
+            <h2>Progreso del torneo</h2>
+            <button type="button" class="jurado-btn jurado-btn--secondary jurado-btn--small" id="gotoRecorridoBtn">Ver recorrido completo</button>
+          </div>
+          <div id="journeySummaryMini" class="jurado-journey-mini"></div>
+        </div>
 
         <div class="jurado-card jurado-card--fifa">
           <div class="jurado-card-head jurado-card-head--fifa">
@@ -138,6 +147,19 @@
           </div>
           <div id="organizerLinksList" class="jurado-links-list"></div>
           <p id="organizerLinksCopied" class="jurado-success" hidden></p>
+        </div>
+      </div>
+
+      <!-- Tab: Recorrido del torneo -->
+      <div class="jurado-dash-pane" data-dash-pane="recorrido" hidden>
+        <div class="jurado-card jurado-card--journey">
+          <div class="jurado-card-head">
+            <h2>Recorrido del torneo</h2>
+            <p class="jurado-hint">Grupos, historial de cada ronda y avance automático cuando todos los puntajes están listos.</p>
+          </div>
+          <div id="tournamentJourneyPanel" class="jurado-journey-panel">
+            <p class="jurado-hint">Cargando recorrido…</p>
+          </div>
         </div>
       </div>
 
@@ -361,6 +383,12 @@
                 <label for="cfgAvanceRonda">Avance por ronda (0 = automático)</label>
                 <input type="number" id="cfgAvanceRonda" min="0" max="99" value="0" placeholder="Ej. 8 para octavos fijos">
               </div>
+              <div class="jurado-field jurado-field--full jurado-field--checkbox">
+                <label class="jurado-checkbox-label">
+                  <input type="checkbox" id="cfgAutoAvance" checked>
+                  Avance automático al completar puntajes de la ronda
+                </label>
+              </div>
             </div>
             <div id="criteriaEditorList" class="jurado-criteria-editor"></div>
             <button type="button" id="addCriterionBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">+ Añadir criterio</button>
@@ -431,12 +459,12 @@
     <p id="loadingMsg" class="jurado-loading">Cargando…</p>
   </div>
 
-  <script src="js/event-config.js?v=20260705jurado19"></script>
+  <script src="js/event-config.js?v=20260705jurado20"></script>
   <script>
     window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado19"></script>
+  <script src="js/jurado-v60.js?v=20260705jurado20"></script>
 </body>
 </html>

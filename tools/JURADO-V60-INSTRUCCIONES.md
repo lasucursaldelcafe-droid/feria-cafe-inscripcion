@@ -23,7 +23,7 @@ Ve el dashboard completo: clasificación en vivo, torneo por duelos, puntajes, c
 
 ### Jueces (1 a 5)
 
-Cada juez abre **su enlace** desde el celular, elige competidor activo y califica **solo su columna**. Los criterios, la escala y la cantidad de jueces se configuran en **Marca → Calificación y criterios**.
+Cada juez abre **su enlace** desde el celular, elige competidor activo y califica **solo su columna**. Los criterios, la escala y la cantidad de jueces se configuran en **Marca y reglas → Calificación y criterios**.
 
 - Subtotal por juez = suma de todos los criterios (máx. `criterios × escala máxima`)
 - Total competidor = suma de todos los jueces
@@ -35,12 +35,20 @@ Cada juez abre **su enlace** desde el celular, elige competidor activo y calific
 ### 1. Vista general
 
 - **Tarjetas de resumen:** activos, calificados, eliminados, fase actual.
+- **Progreso del torneo:** resumen de la ronda actual y enlace al recorrido completo.
 - **Clasificación en vivo (estilo torneo):** tabla por puntaje total, con posición, estado de cada juez y puntos. Se actualiza cada 3 segundos.
 - **Enlaces del jurado:** copiar o abrir enlace de organizador y de cada juez.
 
-### 2. Torneo
+### 2. Recorrido
 
-Depende del **modo de clasificación** configurado en Marca:
+- **Barra de progreso** de la ronda actual (cuántos ya calificaron).
+- **Grupos del torneo** con estado (en juego / cerrado) y puntajes.
+- **Historial de rondas:** sorteo, cierres de grupo, duelos y rankings con quién pasó y quién quedó fuera.
+- **Avance automático:** cuando todos los activos tienen puntaje completo, el sistema avanza solo (configurable en Marca y reglas).
+
+### 3. Torneo
+
+Depende del **modo de clasificación** configurado en Marca y reglas:
 
 | Modo | Comportamiento |
 |------|----------------|
@@ -50,7 +58,7 @@ Depende del **modo de clasificación** configurado en Marca:
 - En duelos: empate o falta de puntajes → **Declarar ganador**
 - Tras cerrar ronda: **Avanzar ganadores** o **Clasificar por puntaje** (modo ranking) en **Control**
 
-### 3. Puntajes
+### 4. Puntajes
 
 - Tabla dinámica con una columna por juez (J1…JN) y total por competidor activo.
 - **Edición manual** de puntajes (correcciones del organizador).
@@ -119,6 +127,7 @@ Personaliza el torneo para vender la plataforma a otros eventos:
 | **Escala mín/máx** | Valores permitidos por criterio (ej. 1–5, 0–10) |
 | **Número de jueces** | De 1 a 5 (genera enlaces J1…JN) |
 | **Avance por ronda** | Cuántos clasifican (0 = automático según fase) |
+| **Avance automático** | Al completar puntajes de todos los activos, pasa a la siguiente ronda sin pulsar botón |
 | **Criterios sensoriales** | Nombre y descripción; puedes añadir o quitar filas |
 | Datos de inscripción | Para la plantilla exportada: tarifa, cupo, fecha, lugar, correo, WhatsApp, reglamento |
 
@@ -137,7 +146,7 @@ El HTML incluye tu logo, colores y campos básicos (nombre, documento, correo, c
 
 ## Criterios de calificación (configurables)
 
-Por defecto el torneo V60 usa 7 criterios sensoriales (aroma, dulzor, acidez, sabor, balance, cuerpo, limpieza de taza) con escala **1–5** y **3 jueces**. Todo es editable en **Marca → Calificación y criterios**:
+Por defecto el torneo V60 usa 7 criterios sensoriales (aroma, dulzor, acidez, sabor, balance, cuerpo, limpieza de taza) con escala **1–5** y **3 jueces**. Todo es editable en **Marca y reglas → Calificación y criterios**:
 
 | Parámetro | Descripción |
 |-----------|-------------|
@@ -160,7 +169,7 @@ Por defecto el torneo V60 usa 7 criterios sensoriales (aroma, dulzor, acidez, sa
 | Clave `pasaporte_config` | Contenido |
 |--------------------------|-----------|
 | `jurado_v60_calificaciones` | Puntajes por competidor y juez |
-| `jurado_v60_bracket` | Fase, ronda, activos, eliminados, sorteo, grupos, plan de fases |
+| `jurado_v60_bracket` | Fase, ronda, activos, eliminados, sorteo, grupos, plan de fases, **historial** |
 | `jurado_v60_platform` | Marca, colores, PINs, **scoring** (modo, escala, jueces, criterios), datos de inscripción |
 
 Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado** = sí).
@@ -173,7 +182,7 @@ Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado
 2. **Móvil para jueces, tablet/PC para organizador** — la UI de juez está optimizada para celular.
 3. **Actualización automática** — el organizador refresca cada 3 s; usa **Actualizar** si necesitas forzar.
 4. **Antes de una nueva ronda** — confirma ganadores en **Torneo**, luego **Avanzar ganadores** en **Control**.
-5. **Otros eventos** — configura **Marca**, exporta HTML/JSON y usa PINs propios; no hace falta tocar código.
+5. **Otros eventos** — configura **Marca y reglas**, exporta HTML/JSON y usa PINs propios; no hace falta tocar código.
 
 ---
 
@@ -185,8 +194,8 @@ Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado
 | No aparecen competidores | Revisa hoja Competencia y columna Habilitado |
 | Duelo sin ganador | Espera a que todos los jueces califiquen o usa **Declarar ganador** / edición manual |
 | Modo ranking no avanza | Verifica que todos tengan nota completa; usa **Clasificar por puntaje** en Control |
-| Cambié PIN o jueces y el enlace viejo no funciona | Copia enlaces nuevos desde **Vista general** tras guardar en **Marca** |
-| Página con datos viejos | Forzar recarga (Ctrl+Shift+R); versión actual en URL: `jurado19` |
+| Cambié PIN o jueces y el enlace viejo no funciona | Copia enlaces nuevos desde **Vista general** tras guardar en **Marca y reglas** |
+| Página con datos viejos | Forzar recarga (Ctrl+Shift+R); versión actual en URL: `jurado20` |
 
 ---
 
@@ -202,4 +211,4 @@ Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado
 
 ---
 
-*Última actualización: julio 2026 · cache `jurado19`*
+*Última actualización: julio 2026 · cache `jurado20`*
