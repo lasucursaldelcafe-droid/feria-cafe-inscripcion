@@ -14,8 +14,19 @@ Panel interno unificado para **administrar** inscripciones, stands, sitio web y 
 | Sitio web | Directorio `/marcas` y patrocinadores competencia |
 | Pasaportes | Crear pasaporte + clientes recientes |
 | Operadores de confianza | Usuarios PIN para escáner en stands |
+| Competidores (V60) | Listado + **enlaces del jurado sensorial** |
 
-## URL del panel
+## Jurado sensorial V60 (interno)
+
+Panel en vivo para calificación del torneo. No enlazado desde el sitio público.
+
+| Rol | URL |
+|-----|-----|
+| Organizador | https://la-sucursal-del-cafe.web.app/jurado-v60?pin=v60organizador |
+| Juez 1–3 | `…/jurado-v60?pin=v60sensorial&juez=1` (2, 3) |
+
+**Guía completa:** [`tools/JURADO-V60-INSTRUCCIONES.md`](JURADO-V60-INSTRUCCIONES.md) — dashboard, torneo por duelos, marca white-label y exportación del kit de inscripción.
+
 
 | Entorno | URL |
 | ------- | --- |

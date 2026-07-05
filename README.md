@@ -18,6 +18,7 @@ Sitio del festival de café especial: páginas informativas + formularios de ins
 | QR inscripción | https://la-sucursal-del-cafe.web.app/qr |
 | Alias festival | https://la-sucursal-del-cafe.web.app/festival |
 | Panel admin (interno) | https://la-sucursal-del-cafe.web.app/admin |
+| Jurado V60 (interno) | https://la-sucursal-del-cafe.web.app/jurado-v60?pin=v60organizador |
 
 ### Contacto y redes
 
