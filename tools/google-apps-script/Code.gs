@@ -27,6 +27,7 @@ var DRIVE_FOLDER_NAME = 'V60 Championship — Comprobantes';
 var DRIVE_FOTOS_FOLDER_NAME = 'V60 Championship — Fotos participantes';
 var DRIVE_LOGOS_STANDS_FOLDER_NAME = 'Feria — Logos expositores';
 var DRIVE_GALERIA_EXPOSITORES_FOLDER = 'Feria — Galería expositores';
+var DRIVE_JUDGES_FOLDER_NAME = 'Jurado — Fotos jueces';
 // Correo(s) del equipo para alertas de nueva inscripcion (separar con coma si son varios).
 var ORGANIZER_EMAIL = 'lasucursaldelcafe@gmail.com';
 var WHATSAPP_GRUPO_COMPETENCIA = 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9';
@@ -285,6 +286,9 @@ function doPost(e) {
     }
     if (action === 'jurado_guardar') {
       return jsonResponse(handleJuradoGuardar_(payload));
+    }
+    if (action === 'jurado_juez_profile_save') {
+      return jsonResponse(handleJuradoJuezProfileSave_(payload));
     }
     if (action === 'expositor_update_profile') {
       return jsonResponse(handleExpositorUpdateProfile_(payload));
@@ -3808,6 +3812,98 @@ function assertJuradoTenantOrganizerPin_(slug, pin) {
     return { ok: false, error: 'PIN de organizador incorrecto.' };
   }
   return { ok: true };
+}
+
+function assertJuradoTenantJudgePin_(slug, pin) {
+  var pinNorm = String(pin || '').trim().toLowerCase();
+  if (!pinNorm) return { ok: false, error: 'PIN de juez requerido.' };
+  slug = String(slug || '').trim();
+  var expected = '';
+  if (slug) {
+    var platform = getJuradoTenantPlatform_(slug);
+    if (platform && platform.pinJuez) {
+      expected = String(platform.pinJuez).trim().toLowerCase();
+    }
+  } else {
+    var cfg = getPasaporteConfig_('jurado_v60_platform');
+    if (cfg.data && cfg.data.pinJuez) {
+      expected = String(cfg.data.pinJuez).trim().toLowerCase();
+    }
+  }
+  if (expected && pinNorm === expected) return { ok: true };
+  return assertJuradoV60Pin_(pin);
+}
+
+function handleJuradoJuezProfileSave_(payload) {
+  var slug = String(payload.evt || payload.tenantSlug || '').trim();
+  var access = assertJuradoTenantJudgePin_(slug, payload.pin || '');
+  if (!access.ok) return access;
+
+  var judgeNum = parseInt(payload.judgeNum, 10);
+  if (isNaN(judgeNum) || judgeNum < 1 || judgeNum > 5) {
+    return { ok: false, error: 'Número de juez inválido.' };
+  }
+
+  var nombre = String(payload.nombre || '').trim();
+  if (!nombre || nombre.length < 2) {
+    return { ok: false, error: 'Ingresa tu nombre completo.' };
+  }
+
+  var foto = payload.foto || {};
+  var dataUrl = String(foto.base64 || foto.dataUrl || '').trim();
+  if (!dataUrl) {
+    return { ok: false, error: 'Sube una foto tuya.' };
+  }
+
+  var fotoUrl = saveFileToDriveFolder_(
+    (slug || 'main') + '-juez-' + judgeNum,
+    String(foto.nombreArchivo || 'foto.jpg'),
+    String(foto.tipoArchivo || 'image/jpeg'),
+    dataUrl,
+    DRIVE_JUDGES_FOLDER_NAME,
+    'foto'
+  );
+  if (!fotoUrl) {
+    return { ok: false, error: 'No se pudo guardar la foto en Drive.' };
+  }
+
+  var cfgKey = juradoTenantKey_('jurado_v60_platform', slug);
+  var cfg = getPasaporteConfig_(cfgKey);
+  var platform = cfg.data && typeof cfg.data === 'object' ? cfg.data : {};
+  if (!platform.eventName && slug) {
+    var instList = listJuradoInstances_().instances || [];
+    var inst = null;
+    for (var i = 0; i < instList.length; i++) {
+      if (instList[i].slug === slug) {
+        inst = instList[i];
+        break;
+      }
+    }
+    if (inst) platform = defaultJuradoPlatformForTenant_(inst);
+  }
+  if (!platform.judgeProfiles || typeof platform.judgeProfiles !== 'object') {
+    platform.judgeProfiles = {};
+  }
+  platform.judgeProfiles[String(judgeNum)] = {
+    num: judgeNum,
+    nombre: nombre,
+    fotoUrl: fotoUrl,
+    updatedAt: new Date().toISOString()
+  };
+  platform.actualizado = new Date().toISOString();
+
+  PropertiesService.getScriptProperties().setProperty(
+    'PASAPORTE_CFG_' + String(cfgKey).toUpperCase(),
+    JSON.stringify(platform)
+  );
+
+  return {
+    ok: true,
+    judgeNum: judgeNum,
+    nombre: nombre,
+    fotoUrl: fotoUrl,
+    profile: platform.judgeProfiles[String(judgeNum)]
+  };
 }
 
 function normalizeCompetenciaFormFields_(raw) {

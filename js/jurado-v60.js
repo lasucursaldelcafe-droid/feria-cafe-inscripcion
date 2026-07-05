@@ -37,6 +37,7 @@
   var PLATFORM_KEY = 'jurado_v60_platform';
   var tenantSlug = '';
   var SESSION_KEY = 'lsc_jurado_v60_session';
+  var JUDGE_PROFILE_LS = 'lsc_jurado_juez_profile';
   var REFRESH_MS = 3000;
 
   var WEB_APP_URL_CANONICAL =
@@ -1291,7 +1292,72 @@
       },
       scoring: normalizeScoringConfig(raw.scoring, base.scoring),
       panelImageDataUrl: String(raw.panelImageDataUrl || '').trim(),
+      judgeProfiles: normalizeJudgeProfiles(raw.judgeProfiles),
       actualizado: raw.actualizado || ''
+    };
+  }
+
+  function normalizeJudgeProfiles(raw) {
+    var out = {};
+    if (!raw || typeof raw !== 'object') return out;
+    Object.keys(raw).forEach(function (key) {
+      var p = raw[key];
+      if (!p || typeof p !== 'object') return;
+      var num = parseInt(p.num != null ? p.num : key, 10);
+      if (isNaN(num) || num < 1) return;
+      out[String(num)] = {
+        num: num,
+        nombre: String(p.nombre || '').trim(),
+        fotoUrl: String(p.fotoUrl || '').trim(),
+        updatedAt: String(p.updatedAt || '').trim()
+      };
+    });
+    return out;
+  }
+
+  function judgeProfileStorageKey(num) {
+    return JUDGE_PROFILE_LS + '__' + (tenantSlug || 'main') + '__' + num;
+  }
+
+  function readJudgeProfileLocal(num) {
+    try {
+      var raw = localStorage.getItem(judgeProfileStorageKey(num));
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeJudgeProfileLocal(num, profile) {
+    try {
+      localStorage.setItem(judgeProfileStorageKey(num), JSON.stringify(profile || {}));
+    } catch (e) { /* ignore quota */ }
+  }
+
+  function getJudgeProfile(num) {
+    var key = String(num);
+    var fromCfg = platformConfig && platformConfig.judgeProfiles
+      ? platformConfig.judgeProfiles[key]
+      : null;
+    if (fromCfg && fromCfg.fotoUrl) return fromCfg;
+    var local = readJudgeProfileLocal(num);
+    if (local && local.fotoUrl) return local;
+    return fromCfg || local || null;
+  }
+
+  function hasJudgeProfile(num) {
+    var p = getJudgeProfile(num);
+    return !!(p && p.fotoUrl);
+  }
+
+  function mergeJudgeProfileIntoConfig(num, profile) {
+    if (!platformConfig) platformConfig = defaultPlatformConfig();
+    if (!platformConfig.judgeProfiles) platformConfig.judgeProfiles = {};
+    platformConfig.judgeProfiles[String(num)] = {
+      num: num,
+      nombre: String(profile.nombre || '').trim(),
+      fotoUrl: String(profile.fotoUrl || '').trim(),
+      updatedAt: profile.updatedAt || new Date().toISOString()
     };
   }
 
@@ -2179,6 +2245,7 @@
   function hideAll() {
     $('pinSection').hidden = true;
     $('roleSection').hidden = true;
+    if ($('judgeOnboardingSection')) $('judgeOnboardingSection').hidden = true;
     $('judgeSection').hidden = true;
     $('organizerSection').hidden = true;
     if ($('hubSection')) $('hubSection').hidden = true;
@@ -2460,14 +2527,245 @@
     judgeNum = num;
     mode = 'judge';
     writeSession({ mode: 'judge', judgeNum: num, pin: pin });
-    showJudgeUI();
+    maybeShowJudgeUI();
+  }
+
+  function ensureJudgeOnboardingSection() {
+    if ($('judgeOnboardingSection')) return;
+    var judgeSection = $('judgeSection');
+    if (!judgeSection || !judgeSection.parentNode) return;
+    var section = document.createElement('section');
+    section.id = 'judgeOnboardingSection';
+    section.hidden = true;
+    section.innerHTML =
+      '<div class="jurado-card jurado-card--judge-onboarding">' +
+      '<div class="jurado-card-head">' +
+      '<h2>Tu perfil de juez</h2>' +
+      '<p class="jurado-hint">La primera vez que entras debes subir una foto tuya. Así el organizador te identifica en el panel.</p>' +
+      '</div>' +
+      '<div class="jurado-field">' +
+      '<label for="judgeProfileNombre">Tu nombre</label>' +
+      '<input type="text" id="judgeProfileNombre" required autocomplete="name" placeholder="Nombre completo">' +
+      '</div>' +
+      '<div class="jurado-field">' +
+      '<label for="judgeProfilePhotoFile">Tu foto</label>' +
+      '<input type="file" id="judgeProfilePhotoFile" accept="image/*" capture="user">' +
+      '<p class="jurado-field-hint">Selfie o retrato claro · máx. 2 MB</p>' +
+      '<div id="judgeProfilePhotoPreview" class="judge-profile-photo-preview" hidden></div>' +
+      '</div>' +
+      '<p id="judgeProfileError" class="jurado-error" hidden></p>' +
+      '<button type="button" id="judgeProfileSaveBtn" class="jurado-btn">Continuar al panel de calificación</button>' +
+      '</div>';
+    judgeSection.parentNode.insertBefore(section, judgeSection);
+  }
+
+  var judgeProfilePhotoDataUrl = '';
+
+  function compressJudgePhotoFile(file) {
+    return new Promise(function (resolve, reject) {
+      if (!file || !file.type || file.type.indexOf('image/') !== 0) {
+        reject(new Error('Selecciona una imagen válida.'));
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        reject(new Error('La imagen debe pesar menos de 2 MB.'));
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function () {
+        var img = new Image();
+        img.onload = function () {
+          var maxW = 1024;
+          var w = img.width;
+          var h = img.height;
+          if (w > maxW) {
+            h = Math.round(h * (maxW / w));
+            w = maxW;
+          }
+          var canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve({
+            dataUrl: canvas.toDataURL('image/jpeg', 0.85),
+            nombreArchivo: file.name || 'juez-foto.jpg',
+            tipoArchivo: 'image/jpeg'
+          });
+        };
+        img.onerror = function () { reject(new Error('No se pudo leer la imagen.')); };
+        img.src = reader.result;
+      };
+      reader.onerror = function () { reject(new Error('No se pudo cargar el archivo.')); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderJudgeProfilePreview(dataUrl) {
+    var preview = $('judgeProfilePhotoPreview');
+    if (!preview) return;
+    if (dataUrl) {
+      preview.innerHTML = '<img src="' + escapeHtml(dataUrl) + '" alt="Vista previa de tu foto" class="judge-profile-photo-preview__img">';
+      preview.hidden = false;
+    } else {
+      preview.innerHTML = '';
+      preview.hidden = true;
+    }
+  }
+
+  function bindJudgeOnboardingOnce() {
+    var fileInput = $('judgeProfilePhotoFile');
+    var saveBtn = $('judgeProfileSaveBtn');
+    if (!fileInput || !saveBtn || saveBtn.dataset.bound) return;
+    saveBtn.dataset.bound = '1';
+
+    fileInput.addEventListener('change', function () {
+      var file = fileInput.files && fileInput.files[0];
+      if (!file) {
+        judgeProfilePhotoDataUrl = '';
+        renderJudgeProfilePreview('');
+        return;
+      }
+      compressJudgePhotoFile(file).then(function (payload) {
+        judgeProfilePhotoDataUrl = payload.dataUrl;
+        renderJudgeProfilePreview(payload.dataUrl);
+        var err = $('judgeProfileError');
+        if (err) err.hidden = true;
+      }).catch(function (err) {
+        judgeProfilePhotoDataUrl = '';
+        renderJudgeProfilePreview('');
+        var errEl = $('judgeProfileError');
+        if (errEl) {
+          errEl.textContent = err.message || 'No se pudo procesar la imagen.';
+          errEl.hidden = false;
+        }
+      });
+    });
+
+    saveBtn.addEventListener('click', onJudgeProfileSave);
+  }
+
+  function saveJudgeProfileRemote(nombre, fotoPayload) {
+    return sheetsPost({
+      action: 'jurado_juez_profile_save',
+      evt: tenantSlug || undefined,
+      tenantSlug: tenantSlug || undefined,
+      pin: pin,
+      judgeNum: judgeNum,
+      nombre: nombre,
+      foto: {
+        base64: fotoPayload.dataUrl,
+        nombreArchivo: fotoPayload.nombreArchivo,
+        tipoArchivo: fotoPayload.tipoArchivo
+      }
+    });
+  }
+
+  function onJudgeProfileSave() {
+    var nombre = ($('judgeProfileNombre') && $('judgeProfileNombre').value || '').trim();
+    var errEl = $('judgeProfileError');
+    var saveBtn = $('judgeProfileSaveBtn');
+    if (!nombre || nombre.length < 2) {
+      if (errEl) {
+        errEl.textContent = 'Ingresa tu nombre completo.';
+        errEl.hidden = false;
+      }
+      return;
+    }
+    if (!judgeProfilePhotoDataUrl) {
+      if (errEl) {
+        errEl.textContent = 'Sube una foto tuya para continuar.';
+        errEl.hidden = false;
+      }
+      return;
+    }
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Guardando…';
+    }
+    if (errEl) errEl.hidden = true;
+
+    var fotoPayload = {
+      dataUrl: judgeProfilePhotoDataUrl,
+      nombreArchivo: 'juez-' + judgeNum + '.jpg',
+      tipoArchivo: 'image/jpeg'
+    };
+
+    saveJudgeProfileRemote(nombre, fotoPayload).then(function (res) {
+      var profile = {
+        num: judgeNum,
+        nombre: res.nombre || nombre,
+        fotoUrl: res.fotoUrl || '',
+        updatedAt: new Date().toISOString()
+      };
+      mergeJudgeProfileIntoConfig(judgeNum, profile);
+      writeJudgeProfileLocal(judgeNum, profile);
+      showJudgeUI();
+    }).catch(function (err) {
+      if (errEl) {
+        errEl.textContent = err.message || 'No se pudo guardar tu perfil.';
+        errEl.hidden = false;
+      }
+    }).finally(function () {
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Continuar al panel de calificación';
+      }
+    });
+  }
+
+  function showJudgeOnboarding() {
+    ensureJudgeOnboardingSection();
+    bindJudgeOnboardingOnce();
+    hideAll();
+    document.body.classList.remove('jurado-page--organizer');
+    applyPlatformBranding();
+    var badge = $('judgeBadge');
+    if (badge) badge.textContent = 'Juez ' + judgeNum;
+    var existing = getJudgeProfile(judgeNum);
+    var nombreInput = $('judgeProfileNombre');
+    if (nombreInput && existing && existing.nombre) nombreInput.value = existing.nombre;
+    judgeProfilePhotoDataUrl = '';
+    renderJudgeProfilePreview('');
+    var fileInput = $('judgeProfilePhotoFile');
+    if (fileInput) fileInput.value = '';
+    var errEl = $('judgeProfileError');
+    if (errEl) errEl.hidden = true;
+    $('judgeOnboardingSection').hidden = false;
+    if ($('headerSubtitle')) {
+      $('headerSubtitle').textContent = 'Completa tu perfil para empezar a calificar';
+    }
+  }
+
+  function maybeShowJudgeUI() {
+    if (hasJudgeProfile(judgeNum)) {
+      showJudgeUI();
+    } else {
+      showJudgeOnboarding();
+    }
+  }
+
+  function renderJudgeBadge() {
+    var badge = $('judgeBadge');
+    if (!badge) return;
+    var profile = getJudgeProfile(judgeNum);
+    var photoUrl = profile && profile.fotoUrl ? driveThumbUrl(profile.fotoUrl, 80) : '';
+    if (photoUrl) {
+      badge.innerHTML =
+        '<img class="judge-badge-photo" src="' + escapeHtml(photoUrl) + '" alt="" width="32" height="32" loading="lazy" referrerpolicy="no-referrer">' +
+        '<span>Juez ' + judgeNum + (profile.nombre ? ' · ' + escapeHtml(profile.nombre) : '') + '</span>';
+      badge.classList.add('jurado-badge--with-photo');
+    } else {
+      badge.textContent = 'Juez ' + judgeNum;
+      badge.classList.remove('jurado-badge--with-photo');
+    }
   }
 
   function showJudgeUI() {
     hideAll();
     document.body.classList.remove('jurado-page--organizer');
     applyPlatformBranding();
-    $('judgeBadge').textContent = 'Juez ' + judgeNum;
+    renderJudgeBadge();
 
     fillCompetidorSelect($('judgeCompetidorSelect'), true, competidoresActivos());
     renderJudgeForm(null);
@@ -3792,10 +4090,29 @@
     list.innerHTML = roles.map(function (role) {
       var vis = getLinkVisual(role.key);
       var step = role.step > 0 ? '<span class="jurado-link-step">Paso ' + role.step + '</span>' : '';
+      var iconHtml = '<div class="jurado-link-item__icon" aria-hidden="true">' + vis.icon + '</div>';
+      var jMatch = String(role.key).match(/^juez(\d+)$/);
+      if (jMatch) {
+        var jp = getJudgeProfile(parseInt(jMatch[1], 10));
+        if (jp && jp.fotoUrl) {
+          var thumb = driveThumbUrl(jp.fotoUrl, 96);
+          if (thumb) {
+            iconHtml = '<div class="jurado-link-item__icon jurado-link-item__icon--photo">' +
+              '<img src="' + escapeHtml(thumb) + '" alt="" width="40" height="40" loading="lazy" referrerpolicy="no-referrer"></div>';
+          }
+        }
+      }
+      var judgeName = '';
+      if (jMatch) {
+        var profile = getJudgeProfile(parseInt(jMatch[1], 10));
+        if (profile && profile.nombre) {
+          judgeName = ' · ' + escapeHtml(profile.nombre);
+        }
+      }
       return '<div class="jurado-link-item jurado-link-item--' + vis.tone + '">' +
-        '<div class="jurado-link-item__icon" aria-hidden="true">' + vis.icon + '</div>' +
+        iconHtml +
         '<div class="jurado-link-meta">' + step +
-        '<strong>' + escapeHtml(role.label) + '</strong>' +
+        '<strong>' + escapeHtml(role.label) + judgeName + '</strong>' +
         '<span class="jurado-hub-tag jurado-hub-tag--inline">' + escapeHtml(role.tag) + '</span>' +
         '<span>' + escapeHtml(role.desc) + '</span>' +
         '</div>' +
@@ -5045,7 +5362,7 @@
               showOrganizerUI();
             } else if (mode === 'judge' && judgeNum) {
               applyPlatformBranding();
-              showJudgeUI();
+              maybeShowJudgeUI();
             } else {
               applyPlatformBranding();
               showRolePicker();
