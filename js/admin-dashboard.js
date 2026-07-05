@@ -2131,6 +2131,8 @@
 
     renderAdminTabPanels(data);
 
+    renderAdminTorneoActivo();
+
     var updated = document.getElementById('dashboardUpdated');
     if (updated && data.generatedAt) {
       updated.textContent = 'Actualizado: ' + new Date(data.generatedAt).toLocaleString('es-CO');
@@ -2322,6 +2324,72 @@
     }
   }
 
+  function getTorneoActivoConfig() {
+    var cfg = global.EVENT_CONFIG || {};
+    if (typeof cfg.getEventoActivo === 'function') return cfg.getEventoActivo();
+    return cfg.evento2 || cfg.evento1 || {};
+  }
+
+  function renderAdminTorneoActivo() {
+    var ev = getTorneoActivoConfig();
+    var cfg = global.EVENT_CONFIG || {};
+    var circuito = cfg.circuito || {};
+    var site = String(cfg.siteUrl || global.location.origin).replace(/\/$/, '');
+    var nombre = ev.nombre || 'V60 Championship';
+    var preliminar = ev.preliminar || '';
+    var fecha = ev.fecha || '—';
+    var hora = ev.horaInicio || '';
+    var sede = ev.sede || '—';
+    var ciudad = ev.ciudad || 'Cali';
+    var estado = ev.estado || 'activa';
+    var mapsQ = ev.mapsQuery || (sede + ' ' + ciudad);
+    var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(mapsQ);
+    var inscUrl = site + '/competencia';
+    var pinOrg = (cfg.juradoV60 && cfg.juradoV60.pinOrganizador) || 'v60organizador';
+    var cfgPath = (global.SiteLinks && global.SiteLinks.HOSTED && global.SiteLinks.HOSTED.juradoConfig) || '/jurado/config';
+    var juradoCfgUrl = site + cfgPath + '?pin=' + encodeURIComponent(pinOrg);
+    var principal = circuito.principal || {};
+    var badgeLabel = preliminar || nombre;
+    var estadoLabel = estado === 'realizada' ? 'Realizada' : (estado === 'activa' ? 'Inscripción abierta' : estado);
+
+    var html =
+      '<div class="admin-torneo-activo__grid">' +
+      '<div class="admin-torneo-activo__main">' +
+      '<p class="admin-torneo-activo__name"><strong>' + escapeHtml(nombre) + '</strong></p>' +
+      (preliminar ? '<p class="admin-table-meta">' + escapeHtml(preliminar) + ' · <span class="admin-badge admin-badge--on">' + escapeHtml(estadoLabel) + '</span></p>' : '') +
+      '<ul class="admin-torneo-activo__facts">' +
+      '<li><span>Fecha</span><strong>' + escapeHtml(fecha) + (hora ? ' · ' + escapeHtml(hora) : '') + '</strong></li>' +
+      '<li><span>Sede</span><strong><a href="' + escapeHtml(mapsUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(sede) + ', ' + escapeHtml(ciudad) + '</a></strong></li>' +
+      (principal.fecha ? '<li><span>Final principal</span><strong>' + escapeHtml(principal.fecha) + ' · ' + escapeHtml(principal.sede || '') + ', ' + escapeHtml(principal.ciudad || 'Cali') + '</strong></li>' : '') +
+      '</ul>' +
+      '<p class="admin-table-meta admin-torneo-activo__jurado-note">El jurado sensorial (número de jueces, PINs, criterios y modo de torneo) se configura <strong>para esta competencia</strong> en el panel de configuración — no es un ajuste global del sitio.</p>' +
+      '</div>' +
+      '<div class="admin-torneo-activo__actions">' +
+      '<a class="admin-btn admin-btn--primary" href="' + escapeHtml(inscUrl) + '" target="_blank" rel="noopener noreferrer">Inscripción pública</a>' +
+      '<a class="admin-btn admin-btn--primary" href="' + escapeHtml(juradoCfgUrl) + '" target="_blank" rel="noopener noreferrer">Configurar jurado</a>' +
+      '<button type="button" class="admin-btn admin-btn--secondary admin-goto-section" data-goto="competidores" data-scroll-target="adminJuradoLinksCard">Ver enlaces jurado</button>' +
+      '</div></div>';
+
+    ['adminTorneoActivoRoot', 'adminTorneoActivoRootComp'].forEach(function (id) {
+      var root = document.getElementById(id);
+      if (root) root.innerHTML = html;
+    });
+    ['adminTorneoActivoBadge', 'adminTorneoActivoBadgeComp'].forEach(function (id) {
+      var badge = document.getElementById(id);
+      if (badge) badge.textContent = badgeLabel;
+    });
+    var title = document.getElementById('adminCompetidoresTitle');
+    if (title) title.textContent = 'Competidores — ' + nombre;
+    var meta = document.getElementById('adminCompetidoresMeta');
+    if (meta) {
+      meta.textContent = preliminar
+        ? preliminar + ' · ' + fecha + ' · ' + sede + ', ' + ciudad + ' — jurado configurable por competencia'
+        : 'Alta manual y gestión de inscripciones';
+    }
+    var cfgQuick = document.getElementById('adminJuradoConfigQuickLink');
+    if (cfgQuick) cfgQuick.href = juradoCfgUrl;
+  }
+
   function fetchJuradoPlatformConfig() {
     var requestUrl = buildAdminUrl('pasaporte_config', { key: 'jurado_v60_platform' });
     if (!requestUrl) return Promise.resolve(null);
@@ -2364,12 +2432,11 @@
 
     if (meta) {
       meta.textContent = juradoScoringSummary(platformCfg) +
-        '. Paneles separados: config, torneo, resultados (nombre + cédula) y jurados.';
+        ' — configuración de esta competencia. Los jueces y criterios no se comparten entre torneos. Paneles: config, inscripción, torneo en vivo, resultados y un enlace por juez.';
     }
 
     var roles = [
-      { key: 'hub', label: 'Índice jurado' },
-      { key: 'config', label: '1. Configuración' },
+      { key: 'config', label: '1. Configuración (jurado por competencia)' },
       { key: 'inscripcion', label: '2. Inscripción' },
       { key: 'organizador', label: '3. Torneo en vivo' },
       { key: 'resultados', label: '4. Resultados competidor' }
@@ -2438,7 +2505,7 @@
         })
         : {};
       var linkBlocks = [
-        { label: '1. Configuración (envía esto al cliente)', url: cfgUrl },
+        { label: '1. Configuración (jurado de este torneo)', url: cfgUrl },
         { label: '2. Inscripción en línea', url: inscUrl },
         { label: '3. Torneo en vivo', url: urls.organizador || '' },
         { label: '4. Resultados competidor', url: urls.resultados || '' }
@@ -2456,7 +2523,7 @@
         '<span class="admin-table-meta">' + escapeHtml(inst.eventName) + ' · ' + escapeHtml(inst.slug) + '</span>' +
         '</div>' +
         linkBlocks +
-        (judgeLinks.length ? '<p class="admin-jurado-client-config"><span class="admin-table-meta">5. Jurados (día del evento):</span><br>' + judgeLinks.join(' · ') + '</p>' : '') +
+        (judgeLinks.length ? '<p class="admin-jurado-client-config"><span class="admin-table-meta">5. Jurados (configurados en este torneo · día del evento):</span><br>' + judgeLinks.join(' · ') + '</p>' : '') +
         '<div class="admin-jurado-link-actions">' +
         '<button type="button" class="admin-btn admin-btn--secondary admin-btn--small" data-admin-copy-link="' + escapeHtml(cfgUrl) + '">Copiar config</button>' +
         (inscUrl ? '<button type="button" class="admin-btn admin-btn--secondary admin-btn--small" data-admin-copy-link="' + escapeHtml(inscUrl) + '">Copiar inscripción</button>' : '') +
@@ -2543,6 +2610,7 @@
     bindAdminMarcaLogoPreview();
     bindAdminJuradoLinkCopy();
     bindJuradoClientsForm();
+    renderAdminTorneoActivo();
     fetchJuradoPlatformConfig().then(renderAdminJuradoLinks).catch(function () {
       renderAdminJuradoLinks(null);
     });

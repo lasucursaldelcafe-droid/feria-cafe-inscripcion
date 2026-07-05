@@ -8,7 +8,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="googlebot" content="noindex, nofollow">
   <title>Panel de administración | La Sucursal del Café</title>
-  <link rel="stylesheet" href="css/admin.css?v=20260703png4">
+  <link rel="stylesheet" href="css/admin.css?v=20260705jurado20">
   <link rel="stylesheet" href="css/fidelizacion.css?v=20260625d">
 </head>
 <body class="admin-page admin-page--minimal">
@@ -78,6 +78,16 @@
           </div>
         </div>
 
+        <div class="admin-card admin-card--torneo-activo" id="adminTorneoActivoCard" data-admin-fold-open="true">
+          <div class="admin-card__head">
+            <h4 class="admin-card__title">Competencia activa — V60 Championship</h4>
+            <span class="admin-badge admin-badge--on" id="adminTorneoActivoBadge">Preliminar 2</span>
+          </div>
+          <div id="adminTorneoActivoRoot" class="admin-torneo-activo">
+            <p class="admin-table-meta">Cargando datos del torneo…</p>
+          </div>
+        </div>
+
         <div class="admin-card" data-admin-fold-open="true">
           <h4 class="admin-card__title">Accesos rápidos</h4>
           <div class="admin-quick-links">
@@ -91,7 +101,8 @@
             <button type="button" class="admin-btn admin-btn--secondary admin-goto-section" data-goto="operadores">Operador de escaneo</button>
             <button type="button" class="admin-btn admin-btn--secondary admin-goto-section" data-goto="analiticas">Ver analíticas</button>
             <a class="admin-btn admin-btn--secondary" data-link="panelFidelizacion" href="dashboard-fidelizacion.html" target="_blank" rel="noopener">Panel fidelización completo</a>
-            <a class="admin-btn admin-btn--primary" id="adminJuradoOrganizadorLink" href="/jurado-v60?pin=v60organizador" target="_blank" rel="noopener noreferrer">Jurado V60 — organizador</a>
+            <a class="admin-btn admin-btn--primary" id="adminJuradoConfigQuickLink" href="/jurado/config?pin=v60organizador" target="_blank" rel="noopener noreferrer">Config jurado (esta competencia)</a>
+            <a class="admin-btn admin-btn--secondary" id="adminJuradoOrganizadorLink" href="/jurado/organizador?pin=v60organizador" target="_blank" rel="noopener noreferrer">Torneo en vivo</a>
           </div>
         </div>
       </section>
@@ -155,8 +166,8 @@
       <section id="section-competidores" class="admin-section-panel" data-admin-section-panel="competidores" hidden>
         <div class="admin-toolbar">
           <div>
-            <h2 class="admin-toolbar__title">Competidores V60 Championship</h2>
-            <p class="admin-toolbar__meta">Alta manual y gestión de inscripciones</p>
+            <h2 class="admin-toolbar__title" id="adminCompetidoresTitle">Competidores V60 Championship</h2>
+            <p class="admin-toolbar__meta" id="adminCompetidoresMeta">Alta manual y gestión de inscripciones</p>
           </div>
           <div class="admin-toolbar__actions">
             <button type="button" class="admin-btn admin-btn--primary admin-scroll-target" data-scroll-target="competidorDashboardPanel">Dashboard competidores</button>
@@ -221,15 +232,24 @@
           <div id="adminCreateCompResult" class="admin-create-result" hidden role="status"></div>
         </div>
 
+        <div class="admin-card admin-card--torneo-activo admin-card--torneo-activo-compact" id="adminTorneoActivoCardCompetidores" data-admin-fold-open="true">
+          <div class="admin-card__head">
+            <h4 class="admin-card__title">Preliminar 2 — edición activa</h4>
+            <span class="admin-badge admin-badge--on" id="adminTorneoActivoBadgeComp">Preliminar 2</span>
+          </div>
+          <div id="adminTorneoActivoRootComp" class="admin-torneo-activo"></div>
+        </div>
+
         <div class="admin-card" id="adminJuradoLinksCard" data-admin-fold-open="true">
-          <h4 class="admin-card__title">Enlaces jurado sensorial V60</h4>
+          <h4 class="admin-card__title">Jurado sensorial — esta competencia</h4>
+          <p class="admin-table-meta admin-table-meta--emphasis">Los jueces, PINs, criterios y modo de torneo se configuran <strong>por competencia</strong> en el panel de configuración (no es global del sitio). Cada preliminar, la final o un torneo white-label tiene su propia configuración.</p>
           <p class="admin-table-meta" id="adminJuradoLinksMeta">Cargando configuración del jurado…</p>
           <div id="adminJuradoLinksRoot" class="admin-jurado-links"></div>
         </div>
 
         <div class="admin-card" id="adminJuradoClientsCard" data-admin-fold-open="true">
           <h4 class="admin-card__title">Clientes plataforma jurado (white-label)</h4>
-          <p class="admin-table-meta">Crea un apartado por cliente. El cliente configura el torneo y el sistema genera automáticamente los enlaces (config, inscripción, torneo, jueces, resultados).</p>
+          <p class="admin-table-meta">Crea un apartado por cliente. Cada torneo configura su propio jurado en <code>/jurado/config</code>; el sistema genera automáticamente los enlaces (config, inscripción, torneo, jueces, resultados).</p>
           <form id="adminJuradoClientForm" class="admin-form admin-form--inline" onsubmit="return false">
             <div class="admin-form-grid">
               <label class="admin-field">
@@ -706,7 +726,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/OoGMjHXu4qWZXhshQ9e3qX4HIGXerHf3i4F3NoRt8qlytK0348M02iNHhv8gqseO7wAJviL/Btg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="js/admin-disclosures.js?v=20260703ux"></script>
   <script src="js/admin-competidor-png-layout.js?v=20260703png4"></script>
-  <script src="js/admin-dashboard.js?v=20260705jurado14"></script>
+  <script src="js/admin-dashboard.js?v=20260705jurado20"></script>
   <script src="js/admin-pasaportes.js?v=20260625g"></script>
   <script src="js/admin-operadores.js?v=20260625g"></script>
 </body>

@@ -156,10 +156,18 @@
     var meta = $('setupWizardMeta');
     if (meta) {
       if (tenantSlug) {
-        meta.textContent = 'ID del torneo: ' + tenantSlug;
+        meta.textContent = 'Torneo: ' + tenantSlug + ' — jurado y criterios propios de esta competencia';
         meta.hidden = false;
       } else {
-        meta.hidden = true;
+        var evAct = (window.EVENT_CONFIG && window.EVENT_CONFIG.getEventoActivo)
+          ? window.EVENT_CONFIG.getEventoActivo()
+          : null;
+        if (evAct && evAct.nombre) {
+          meta.textContent = evAct.nombre + ' — jurado configurable por competencia';
+          meta.hidden = false;
+        } else {
+          meta.hidden = true;
+        }
       }
     }
     renderSetupStepper();
@@ -168,7 +176,7 @@
   function getEventLinkRoles() {
     var urls = getJuradoShareUrls();
     var roles = [
-      { step: 1, key: 'config', label: 'Configuración del torneo', desc: 'Marca, reglas, criterios, jueces y formulario.', tag: 'Organizador', url: urls.config },
+      { step: 1, key: 'config', label: 'Configuración del torneo', desc: 'Marca, reglas, criterios, número de jueces y PINs de esta competencia.', tag: 'Organizador', url: urls.config },
       { step: 2, key: 'inscripcion', label: 'Inscripción en línea', desc: tenantSlug ? 'Formulario público de este torneo.' : 'Formulario de registro de competidores.', tag: 'Público', url: urls.inscripcion || urls.competencia },
       { step: 3, key: 'organizador', label: 'Torneo en vivo', desc: 'Vista general, rondas, puntajes y control del día.', tag: 'Organizador', url: urls.organizador },
       { step: 4, key: 'resultados', label: 'Resultados por competidor', desc: 'Portal público: nombre + documento.', tag: 'Competidor', url: urls.resultados }
@@ -246,7 +254,7 @@
       '<div class="jurado-card jurado-card--links">' +
       '<div class="jurado-card-head">' +
       '<h2>' + (PAGE_MODE === 'config' ? '3. Enlaces del evento' : 'Enlaces del evento') + '</h2>' +
-      '<p class="jurado-hint">Tras guardar la configuración, copia y comparte cada enlace con quien corresponda. Se regeneran solos si cambias PINs o número de jueces.</p>' +
+      '<p class="jurado-hint">Tras guardar la configuración de <strong>esta competencia</strong>, copia y comparte cada enlace. Se regeneran solos si cambias PINs o número de jueces.</p>' +
       '</div>' +
       '<ol class="jurado-setup-steps">' +
       '<li><strong>Configura</strong> marca, reglas, criterios y formulario.</li>' +
@@ -364,7 +372,7 @@
           nav.parentNode.insertBefore(welcome, nav);
         }
         welcome.innerHTML = '<h2>Configura tu torneo</h2>' +
-          '<p class="jurado-hint">Personaliza marca, reglas, criterios, campos del formulario y PINs. Comparte el enlace de la pestaña <strong>Inscripciones</strong> con los competidores.</p>' +
+          '<p class="jurado-hint">Personaliza marca, reglas, criterios, campos del formulario y PINs de <strong>este torneo</strong>. Los jueces no se comparten con otras competencias. Comparte el enlace de la pestaña <strong>Inscripciones</strong> con los competidores.</p>' +
           '<p class="jurado-meta">ID del torneo: <code>' + escapeHtml(tenantSlug) + '</code></p>';
         welcome.hidden = false;
       }
