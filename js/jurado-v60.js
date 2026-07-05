@@ -21,7 +21,7 @@
   var PIN_ORGANIZADOR = 'v60organizador';
   var CONFIG_KEY = 'jurado_v60_calificaciones';
   var SESSION_KEY = 'lsc_jurado_v60_session';
-  var REFRESH_MS = 5000;
+  var REFRESH_MS = 3000;
 
   var WEB_APP_URL_CANONICAL =
     'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec';
@@ -513,9 +513,64 @@
   }
 
   function renderOrganizerViews(list) {
-    renderOrganizerFinalSummary(list);
+    renderOrganizerLeaderStrip(list);
     renderOrganizerRanking(list);
     renderOrganizerDetail($('organizerCompetidorSelect').value);
+  }
+
+  function buildUnifiedOrganizerRows() {
+    return competidores.map(function (c) {
+      var cal = calificacionesMap[c.id] || null;
+      return {
+        competidorId: c.id,
+        nombre: c.nombre,
+        judges: cal && cal.judges ? cal.judges : {},
+        sumaTotal: cal ? cal.sumaTotal : null,
+        promedio: cal ? cal.promedio : null
+      };
+    });
+  }
+
+  function countJudgesDone(row) {
+    var n = 0;
+    for (var j = 1; j <= 3; j++) {
+      if (judgeDone(row.judges, j)) n++;
+    }
+    return n;
+  }
+
+  function sortUnifiedRows(rows) {
+    return rows.slice().sort(function (a, b) {
+      var ca = countJudgesDone(a);
+      var cb = countJudgesDone(b);
+      if (ca > 0 && cb === 0) return -1;
+      if (cb > 0 && ca === 0) return 1;
+      var pa = a.promedio != null ? a.promedio : -1;
+      var pb = b.promedio != null ? b.promedio : -1;
+      if (pb !== pa) return pb - pa;
+      if (cb !== ca) return cb - ca;
+      return (a.nombre || '').localeCompare(b.nombre || '', 'es');
+    });
+  }
+
+  function renderOrganizerLeaderStrip(list) {
+    var strip = $('organizerLeaderStrip');
+    if (!strip) return;
+    var completos = list.filter(function (r) { return r.promedio != null; });
+    if (!completos.length) {
+      strip.hidden = true;
+      strip.innerHTML = '';
+      return;
+    }
+    var sorted = sortOrganizerRows(completos);
+    var leader = sorted[0];
+    var s = formatJudgeScores(leader);
+    strip.innerHTML =
+      '<span class="jurado-leader-label">🏆 Líder</span> ' +
+      '<strong>' + escapeHtml(leader.nombre) + '</strong> · ' +
+      '<span class="jurado-leader-scores">J1 <b>' + s.j1 + '</b> · J2 <b>' + s.j2 + '</b> · J3 <b>' + s.j3 + '</b></span> · ' +
+      '<span class="jurado-leader-prom">Prom. <strong>' + leader.promedio.toFixed(2) + '</strong></span>';
+    strip.hidden = false;
   }
   function sortOrganizerRows(list) {
     return list.slice().sort(function (a, b) {
@@ -547,99 +602,53 @@
     return judgeDone(row.judges, 1) || judgeDone(row.judges, 2) || judgeDone(row.judges, 3);
   }
 
-  function renderOrganizerFinalSummary(list) {
-    var box = $('organizerFinalSummary');
-    if (!box) return;
-
-    var withScores = list.filter(hasAnyJudgeScore);
-    var completos = list.filter(function (r) { return r.promedio != null; });
-    var enProgreso = withScores.filter(function (r) { return r.promedio == null; });
-    var sortedCompletos = sortOrganizerRows(completos);
-    var sortedProgreso = enProgreso.slice().sort(function (a, b) {
-      return (a.nombre || '').localeCompare(b.nombre || '', 'es');
-    });
-
-    var html = '';
-
-    if (sortedProgreso.length) {
-      html += '<div class="jurado-live-block"><h3 class="jurado-live-title">En vivo · esperando los 3 jueces</h3><div class="jurado-live-list">';
-      html += sortedProgreso.map(function (row) {
-        var s = formatJudgeScores(row);
-        return '<article class="jurado-live-item">' +
-          '<div class="jurado-live-name">' + escapeHtml(row.nombre || row.competidorId) + '</div>' +
-          '<div class="jurado-live-scores">' +
-          '<span class="' + (s.j1 !== '—' ? 'jurado-score-done' : 'jurado-score-pending') + '">J1: ' + s.j1 + '</span> · ' +
-          '<span class="' + (s.j2 !== '—' ? 'jurado-score-done' : 'jurado-score-pending') + '">J2: ' + s.j2 + '</span> · ' +
-          '<span class="' + (s.j3 !== '—' ? 'jurado-score-done' : 'jurado-score-pending') + '">J3: ' + s.j3 + '</span>' +
-          '</div></article>';
-      }).join('');
-      html += '</div></div>';
-    }
-
-    if (!sortedCompletos.length) {
-      html += sortedProgreso.length
-        ? '<p class="jurado-hint">El resultado final aparecerá aquí cuando los 3 jueces califiquen a un competidor.</p>'
-        : '<p class="jurado-hint">Aún no hay calificaciones. Aparecerán en cuanto los jueces guarden.</p>';
-      box.innerHTML = html;
-      return;
-    }
-
-    var leader = sortedCompletos[0];
-    var ls = formatJudgeScores(leader);
-
-    var podium = sortedCompletos.slice(0, 3).map(function (row, idx) {
-      var medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉';
-      var s = formatJudgeScores(row);
-      return '<article class="jurado-final-podium-item">' +
-        '<div class="jurado-final-podium-rank">' + medal + ' #' + (idx + 1) + '</div>' +
-        '<div class="jurado-final-podium-name">' + escapeHtml(row.nombre || row.competidorId) + '</div>' +
-        '<div class="jurado-final-podium-scores">J1: ' + s.j1 + ' · J2: ' + s.j2 + ' · J3: ' + s.j3 + '</div>' +
-        '<div class="jurado-final-podium-result">' +
-        '<span class="jurado-final-podium-prom">' + row.promedio.toFixed(2) + '</span>' +
-        '<span class="jurado-final-podium-label">promedio final</span>' +
-        '<span class="jurado-final-podium-suma">Suma ' + row.sumaTotal + ' / 105</span>' +
-        '</div></article>';
-    }).join('');
-
-    html += '<div class="jurado-live-block jurado-live-block--final"><h3 class="jurado-live-title">Resultado final</h3>' +
-      '<p class="jurado-final-leader">Líder: <strong>' + escapeHtml(leader.nombre) + '</strong> — ' +
-      '<strong>' + leader.promedio.toFixed(2) + '</strong> pts (J1 ' + ls.j1 + ', J2 ' + ls.j2 + ', J3 ' + ls.j3 + ')</p>' +
-      '<div class="jurado-final-podium">' + podium + '</div></div>';
-
-    box.innerHTML = html;
-  }
-
   function renderOrganizerRanking(list) {
     var tbody = $('organizerRankingBody');
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    var withAny = list.filter(hasAnyJudgeScore);
-    var ranked = sortOrganizerRows(withAny);
+    var rows = sortUnifiedRows(buildUnifiedOrganizerRows());
+    var rankNum = 0;
 
-    if (!ranked.length) {
-      tbody.innerHTML = '<tr><td colspan="7" class="jurado-empty">Esperando calificaciones de los jueces…</td></tr>';
-      return;
-    }
-
-    ranked.forEach(function (row, idx) {
+    rows.forEach(function (row) {
+      var hasScore = hasAnyJudgeScore(row);
+      if (hasScore) rankNum++;
       var suma = row.sumaTotal != null ? row.sumaTotal : '—';
       var prom = row.promedio != null ? row.promedio.toFixed(2) : '—';
       var promCls = row.promedio != null ? 'jurado-prom-final' : 'jurado-score-pending';
+      var rowCls = 'jurado-score-row';
+      if (row.promedio != null) rowCls += ' jurado-score-row--complete';
+      else if (hasScore) rowCls += ' jurado-score-row--partial';
+
       var tr = document.createElement('tr');
+      tr.className = rowCls;
+      tr.dataset.competidor = row.competidorId;
       tr.innerHTML =
-        '<td>' + (idx + 1) + '</td>' +
-        '<td style="text-align:left">' + escapeHtml(row.nombre) + '</td>' +
-        '<td class="jurado-td-score">' + notaJuezDisplay(row, 1) + '</td>' +
-        '<td class="jurado-td-score">' + notaJuezDisplay(row, 2) + '</td>' +
-        '<td class="jurado-td-score">' + notaJuezDisplay(row, 3) + '</td>' +
-        '<td><strong>' + suma + '</strong></td>' +
-        '<td class="' + promCls + '"><strong>' + prom + '</strong></td>';
+        '<td>' + (hasScore ? rankNum : '—') + '</td>' +
+        '<td class="jurado-td-name">' + escapeHtml(row.nombre) + '</td>' +
+        '<td class="jurado-td-score jurado-td-judge">' + notaJuezDisplay(row, 1) + '</td>' +
+        '<td class="jurado-td-score jurado-td-judge">' + notaJuezDisplay(row, 2) + '</td>' +
+        '<td class="jurado-td-score jurado-td-judge">' + notaJuezDisplay(row, 3) + '</td>' +
+        '<td class="jurado-td-total"><strong>' + suma + '</strong></td>' +
+        '<td class="jurado-td-total ' + promCls + '"><strong>' + prom + '</strong></td>';
+
+      tr.addEventListener('click', function () {
+        var sel = $('organizerCompetidorSelect');
+        if (sel) {
+          sel.value = row.competidorId;
+          renderOrganizerDetail(row.competidorId);
+        }
+        tbody.querySelectorAll('tr.jurado-score-row--selected').forEach(function (r) {
+          r.classList.remove('jurado-score-row--selected');
+        });
+        tr.classList.add('jurado-score-row--selected');
+      });
+
       tbody.appendChild(tr);
     });
 
     var updated = $('organizerUpdated');
-    if (updated) updated.textContent = 'Última actualización: ' + new Date().toLocaleTimeString('es-CO');
+    if (updated) updated.textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-CO') + ' · cada 3 s';
   }
 
   function judgeSubtotalDisplay(cal, j) {
@@ -697,10 +706,10 @@
     var j3 = judgeSubtotalDisplay(cal, 3);
 
     var html = '<h3 class="jurado-detail-title">' + escapeHtml(cal.nombre || nombre) + '</h3>';
-    html += '<div class="jurado-judges-summary-bar">';
-    html += '<div class="jurado-js-item"><span>Juez 1</span><strong>' + j1 + '</strong></div>';
-    html += '<div class="jurado-js-item"><span>Juez 2</span><strong>' + j2 + '</strong></div>';
-    html += '<div class="jurado-js-item"><span>Juez 3</span><strong>' + j3 + '</strong></div>';
+    html += '<div class="jurado-scores-together">';
+    html += '<div class="jurado-scores-together-item' + (j1 !== '—' ? ' jurado-scores-together-item--done' : '') + '"><span>Juez 1</span><strong>' + j1 + '</strong></div>';
+    html += '<div class="jurado-scores-together-item' + (j2 !== '—' ? ' jurado-scores-together-item--done' : '') + '"><span>Juez 2</span><strong>' + j2 + '</strong></div>';
+    html += '<div class="jurado-scores-together-item' + (j3 !== '—' ? ' jurado-scores-together-item--done' : '') + '"><span>Juez 3</span><strong>' + j3 + '</strong></div>';
     html += '</div>';
 
     html += '<div class="jurado-table-wrap"><table class="jurado-table"><thead><tr><th>Criterio</th><th>J1</th><th>J2</th><th>J3</th></tr></thead><tbody>';
