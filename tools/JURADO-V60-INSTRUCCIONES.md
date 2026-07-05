@@ -64,7 +64,7 @@ Depende del **modo de clasificación** configurado en Marca y reglas:
 - **Edición manual** de puntajes (correcciones del organizador).
 - **Detalle** por competidor: desglose por criterio y notas.
 
-### 4. Control
+### 5. Control
 
 #### Sorteo automático (inicio del torneo)
 
@@ -111,7 +111,7 @@ Depende del **modo de clasificación** configurado en Marca y reglas:
 
 #### Flujo manual (sin sorteo)
 
-### 5. Marca y reglas (white-label)
+### 6. Marca y reglas (white-label)
 
 Personaliza el torneo para vender la plataforma a otros eventos:
 
@@ -133,7 +133,7 @@ Personaliza el torneo para vender la plataforma a otros eventos:
 
 Pulsa **Guardar configuración**. Se almacena en el servidor (`jurado_v60_platform`) y se aplica al instante en tablas, formularios de juez y enlaces.
 
-### 6. Exportar
+### 7. Exportar
 
 | Botón | Contenido |
 |-------|-----------|
