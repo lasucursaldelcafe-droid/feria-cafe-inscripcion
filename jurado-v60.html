@@ -5,17 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-  <title>Jurado sensorial V60 — La Sucursal del Café</title>
-  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado15">
+  <title>Jurado sensorial — Torneo en vivo</title>
+  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado16">
 </head>
 <body class="jurado-page">
   <div class="jurado-shell">
-    <header class="jurado-header">
-      <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="120" height="48">
-      <h1 id="headerTitle">Jurado sensorial V60</h1>
-      <p id="headerSubtitle">Calificación 1–5 · 7 criterios</p>
+    <header class="jurado-header" id="juradoHeader">
+      <div class="jurado-header-brand">
+        <img id="headerLogo" src="assets/logo-la-sucursal-del-cafe.png" alt="Evento" width="120" height="48">
+        <div class="jurado-header-text">
+          <p class="jurado-header-kicker" id="headerKicker">Torneo sensorial</p>
+          <h1 id="headerTitle">Jurado en vivo</h1>
+          <p id="headerSubtitle">Calificación 1–5 · 7 criterios</p>
+        </div>
+      </div>
+      <div class="jurado-live-pill" id="livePill" hidden>
+        <span class="jurado-live-dot"></span> En vivo
+      </div>
     </header>
 
     <section id="pinSection" class="jurado-card" hidden>
@@ -70,150 +78,312 @@
       </div>
     </section>
 
-    <!-- Vista organizador -->
+    <!-- Vista organizador — dashboard configurable -->
     <section id="organizerSection" hidden>
-      <div class="jurado-card jurado-toolbar-card">
+      <div class="jurado-card jurado-toolbar-card jurado-dashboard-toolbar">
         <div class="jurado-toolbar">
-          <span><strong>Panel general</strong> · actualización automática</span>
+          <div>
+            <strong id="dashboardEventName">Panel del torneo</strong>
+            <p id="organizerUpdated" class="jurado-meta" style="margin:4px 0 0"></p>
+          </div>
           <button type="button" id="organizerRefreshBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Actualizar</button>
         </div>
-        <p id="organizerUpdated" class="jurado-meta" style="margin-top:8px"></p>
         <p id="organizerLoadError" class="jurado-error" hidden style="margin-top:8px"></p>
       </div>
 
-      <div class="jurado-card jurado-card--links" id="organizerLinksCard">
-        <div class="jurado-card-head">
-          <h2>Enlaces del jurado</h2>
-          <p class="jurado-hint">Comparte cada enlace solo con quien corresponda. Usa <strong>Copiar</strong> o abre en nueva pestaña.</p>
+      <nav class="jurado-dash-nav" id="dashboardNav" aria-label="Secciones del panel">
+        <button type="button" class="jurado-dash-tab jurado-dash-tab--active" data-dash-tab="vista">Vista general</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="torneo">Torneo</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="puntajes">Puntajes</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="control">Control</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="config">Marca</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="export">Exportar</button>
+      </nav>
+
+      <!-- Tab: Vista general -->
+      <div class="jurado-dash-pane jurado-dash-pane--active" data-dash-pane="vista">
+        <div class="jurado-stats-row" id="organizerStatsRow"></div>
+
+        <div class="jurado-card jurado-card--fifa">
+          <div class="jurado-card-head jurado-card-head--fifa">
+            <h2>Clasificación en vivo</h2>
+            <p class="jurado-hint">Tabla por puntaje total · estilo torneo · se actualiza cada 3 s</p>
+          </div>
+          <div class="jurado-fifa-wrap">
+            <table class="jurado-fifa-table" id="fifaStandingsTable">
+              <thead>
+                <tr>
+                  <th class="jurado-fifa-pos">#</th>
+                  <th class="jurado-fifa-team">Competidor</th>
+                  <th>Cat.</th>
+                  <th>J1</th>
+                  <th>J2</th>
+                  <th>J3</th>
+                  <th class="jurado-fifa-pts">Pts</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="fifaStandingsBody">
+                <tr><td colspan="8" class="jurado-empty">Cargando…</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div id="organizerLinksList" class="jurado-links-list"></div>
-        <p id="organizerLinksCopied" class="jurado-success" hidden></p>
+
+        <div class="jurado-card jurado-card--links" id="organizerLinksCard">
+          <div class="jurado-card-head">
+            <h2>Enlaces del jurado</h2>
+            <p class="jurado-hint">Comparte cada enlace solo con quien corresponda.</p>
+          </div>
+          <div id="organizerLinksList" class="jurado-links-list"></div>
+          <p id="organizerLinksCopied" class="jurado-success" hidden></p>
+        </div>
       </div>
 
-      <div class="jurado-card jurado-card--admin">
-        <div class="jurado-card-head">
-          <h2>Control de ronda</h2>
-          <p class="jurado-hint">Configura la fase actual, elimina participantes y reinicia puntajes para una nueva catación.</p>
+      <!-- Tab: Torneo -->
+      <div class="jurado-dash-pane" data-dash-pane="torneo" hidden>
+        <div class="jurado-card jurado-card--bracket">
+          <div class="jurado-card-head">
+            <h2>Clasificación por rondas</h2>
+            <p class="jurado-hint">Duelos de 2 competidores · pasa quien tenga mayor <strong>puntaje total</strong> (J1 + J2 + J3).</p>
+          </div>
+          <div id="organizerChampionStrip" class="jurado-leader-strip" hidden></div>
+          <div id="organizerRoundsNav" class="jurado-rounds-nav"></div>
+          <div id="organizerRoundSummary" class="jurado-round-summary" hidden></div>
+          <div id="organizerBracket" class="jurado-bracket"></div>
         </div>
-        <div class="jurado-admin-grid">
-          <div class="jurado-field">
-            <label for="bracketFaseSelect">Fase</label>
-            <select id="bracketFaseSelect">
-              <option value="clasificatoria">Clasificatoria</option>
-              <option value="semifinal" selected>Semifinal</option>
-              <option value="final">Final</option>
-            </select>
+      </div>
+
+      <!-- Tab: Puntajes -->
+      <div class="jurado-dash-pane" data-dash-pane="puntajes" hidden>
+        <div class="jurado-card jurado-card--scores">
+          <div class="jurado-card-head">
+            <h2>Puntajes por competidor</h2>
+            <p class="jurado-hint">J1, J2 y J3 · puntaje total cuando los 3 jueces calificaron.</p>
+          </div>
+          <div class="jurado-table-wrap">
+            <table class="jurado-table jurado-table--ranking jurado-table--unified" id="organizerRankingTable">
+              <thead>
+                <tr>
+                  <th>Competidor</th>
+                  <th colspan="3" class="jurado-th-group">Jueces</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+                <tr class="jurado-subhead">
+                  <th></th>
+                  <th class="jurado-th-judge">J1</th>
+                  <th class="jurado-th-judge">J2</th>
+                  <th class="jurado-th-judge">J3</th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="organizerRankingBody">
+                <tr><td colspan="7" class="jurado-empty">Cargando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="jurado-card jurado-card--manual" id="organizerManualCard" hidden>
+          <div class="jurado-card-head">
+            <h2>Edición manual de puntajes</h2>
+            <p class="jurado-hint">Corrige o ingresa las notas de J1, J2 y J3 (escala 1–5 por criterio).</p>
+          </div>
+          <p id="organizerManualTarget" class="jurado-phase-label"></p>
+          <div id="organizerManualForm" class="jurado-manual-form"></div>
+          <p id="organizerManualError" class="jurado-error" hidden></p>
+          <p id="organizerManualSuccess" class="jurado-success" hidden></p>
+          <button type="button" id="organizerManualSaveBtn" class="jurado-btn jurado-btn--small" disabled>Guardar puntajes manuales</button>
+        </div>
+
+        <div class="jurado-card">
+          <div class="jurado-card-head">
+            <h2>Detalle por competidor</h2>
+            <p class="jurado-hint">Selecciona un competidor para ver el desglose completo.</p>
           </div>
           <div class="jurado-field">
-            <label for="bracketRondaSelect">Ronda en fase</label>
-            <select id="bracketRondaSelect">
-              <option value="1" selected>1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
+            <label for="organizerCompetidorSelect">Competidor</label>
+            <select id="organizerCompetidorSelect" required>
+              <option value="">— Selecciona competidor —</option>
             </select>
           </div>
-          <div class="jurado-field jurado-field--btn">
-            <label>&nbsp;</label>
-            <button type="button" id="bracketApplyBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Aplicar fase</button>
+          <div id="organizerDetail" class="jurado-detail" hidden></div>
+        </div>
+      </div>
+
+      <!-- Tab: Control -->
+      <div class="jurado-dash-pane" data-dash-pane="control" hidden>
+        <div class="jurado-card jurado-card--admin">
+          <div class="jurado-card-head">
+            <h2>Control de ronda</h2>
+            <p class="jurado-hint">Configura la fase actual, elimina participantes y reinicia puntajes.</p>
+          </div>
+          <div class="jurado-admin-grid">
+            <div class="jurado-field">
+              <label for="bracketFaseSelect">Fase</label>
+              <select id="bracketFaseSelect">
+                <option value="clasificatoria">Clasificatoria</option>
+                <option value="semifinal" selected>Semifinal</option>
+                <option value="final">Final</option>
+              </select>
+            </div>
+            <div class="jurado-field">
+              <label for="bracketRondaSelect">Ronda en fase</label>
+              <select id="bracketRondaSelect">
+                <option value="1" selected>1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+            <div class="jurado-field jurado-field--btn">
+              <label>&nbsp;</label>
+              <button type="button" id="bracketApplyBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Aplicar fase</button>
+            </div>
+          </div>
+          <p id="bracketPhaseLabel" class="jurado-phase-label"></p>
+          <div class="jurado-admin-actions">
+            <button type="button" id="resetActivosScoresBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Reiniciar puntajes de activos</button>
+            <button type="button" id="resetAllScoresBtn" class="jurado-btn jurado-btn--danger jurado-btn--small">Reiniciar TODOS los puntajes</button>
+            <button type="button" id="advanceWinnersBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Avanzar ganadores + limpiar puntajes</button>
+          </div>
+          <p id="organizerAdminMsg" class="jurado-success" hidden></p>
+          <p id="organizerAdminError" class="jurado-error" hidden></p>
+          <h3 class="jurado-admin-subtitle">Participantes activos en esta ronda</h3>
+          <div id="bracketActivosList" class="jurado-activos-list"></div>
+          <div id="bracketEliminadosWrap" hidden>
+            <h3 class="jurado-admin-subtitle">Eliminados</h3>
+            <div id="bracketEliminadosList" class="jurado-activos-list"></div>
           </div>
         </div>
-        <p id="bracketPhaseLabel" class="jurado-phase-label"></p>
-        <div class="jurado-admin-actions">
-          <button type="button" id="resetActivosScoresBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Reiniciar puntajes de activos</button>
-          <button type="button" id="resetAllScoresBtn" class="jurado-btn jurado-btn--danger jurado-btn--small">Reiniciar TODOS los puntajes</button>
-          <button type="button" id="advanceWinnersBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Avanzar ganadores + limpiar puntajes</button>
-        </div>
-        <p id="organizerAdminMsg" class="jurado-success" hidden></p>
-        <p id="organizerAdminError" class="jurado-error" hidden></p>
-        <h3 class="jurado-admin-subtitle">Participantes activos en esta ronda</h3>
-        <div id="bracketActivosList" class="jurado-activos-list"></div>
-        <div id="bracketEliminadosWrap" hidden>
-          <h3 class="jurado-admin-subtitle">Eliminados</h3>
-          <div id="bracketEliminadosList" class="jurado-activos-list"></div>
+      </div>
+
+      <!-- Tab: Marca / Config -->
+      <div class="jurado-dash-pane" data-dash-pane="config" hidden>
+        <div class="jurado-card jurado-card--config">
+          <div class="jurado-card-head">
+            <h2>Personaliza tu torneo</h2>
+            <p class="jurado-hint">Nombre, logo y colores para vender la plataforma a otros eventos. Los cambios se guardan en el servidor.</p>
+          </div>
+          <form id="platformConfigForm" class="jurado-config-form" onsubmit="return false">
+            <div class="jurado-config-preview" id="configPreview">
+              <img id="configPreviewLogo" src="assets/logo-la-sucursal-del-cafe.png" alt="" width="80">
+              <div>
+                <strong id="configPreviewName">Mi torneo</strong>
+                <span id="configPreviewSub">Subtítulo del evento</span>
+              </div>
+            </div>
+            <div class="jurado-config-grid">
+              <div class="jurado-field">
+                <label for="cfgEventName">Nombre del torneo</label>
+                <input type="text" id="cfgEventName" maxlength="120" placeholder="V60 Championship 2026">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgEventSubtitle">Subtítulo</label>
+                <input type="text" id="cfgEventSubtitle" maxlength="160" placeholder="Calificación sensorial en vivo">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgOrganizerName">Organizador / marca</label>
+                <input type="text" id="cfgOrganizerName" maxlength="120" placeholder="Tu empresa o festival">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgLogoUrl">URL del logo</label>
+                <input type="url" id="cfgLogoUrl" maxlength="500" placeholder="https://…/logo.png">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgAccentColor">Color acento</label>
+                <input type="color" id="cfgAccentColor" value="#c9a227">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgPrimaryColor">Color fondo</label>
+                <input type="color" id="cfgPrimaryColor" value="#3d281c">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgPinOrganizador">PIN organizador</label>
+                <input type="text" id="cfgPinOrganizador" maxlength="40" placeholder="v60organizador">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgPinJuez">PIN jueces</label>
+                <input type="text" id="cfgPinJuez" maxlength="40" placeholder="v60sensorial">
+              </div>
+            </div>
+            <h3 class="jurado-admin-subtitle">Datos de inscripción (para exportar)</h3>
+            <div class="jurado-config-grid">
+              <div class="jurado-field">
+                <label for="cfgRegTitle">Título inscripción</label>
+                <input type="text" id="cfgRegTitle" maxlength="120" placeholder="Inscripción competencia">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgRegFee">Tarifa</label>
+                <input type="text" id="cfgRegFee" maxlength="40" placeholder="$90.000 COP">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgRegCupo">Cupo</label>
+                <input type="number" id="cfgRegCupo" min="1" max="999" placeholder="36">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgRegFecha">Fecha evento</label>
+                <input type="text" id="cfgRegFecha" maxlength="80" placeholder="29 ago 2026">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgRegHora">Hora</label>
+                <input type="text" id="cfgRegHora" maxlength="40" placeholder="5:30 p. m.">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgRegLugar">Lugar</label>
+                <input type="text" id="cfgRegLugar" maxlength="120" placeholder="Palmetto Plaza, Cali">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgRegEmail">Correo contacto</label>
+                <input type="email" id="cfgRegEmail" maxlength="120" placeholder="evento@ejemplo.com">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgRegWhatsapp">WhatsApp</label>
+                <input type="text" id="cfgRegWhatsapp" maxlength="30" placeholder="+57 300…">
+              </div>
+              <div class="jurado-field jurado-field--full">
+                <label for="cfgRegReglamento">URL reglamento</label>
+                <input type="url" id="cfgRegReglamento" maxlength="500" placeholder="https://…/reglamento">
+              </div>
+            </div>
+            <p id="platformConfigError" class="jurado-error" hidden></p>
+            <p id="platformConfigSuccess" class="jurado-success" hidden></p>
+            <button type="button" id="platformConfigSaveBtn" class="jurado-btn">Guardar configuración</button>
+          </form>
         </div>
       </div>
 
-      <div class="jurado-card jurado-card--bracket">
-        <div class="jurado-card-head">
-          <h2>Clasificación por rondas</h2>
-          <p class="jurado-hint">Duelos de 2 competidores · pasa quien tenga mayor <strong>puntaje total</strong> (J1 + J2 + J3).</p>
+      <!-- Tab: Exportar -->
+      <div class="jurado-dash-pane" data-dash-pane="export" hidden>
+        <div class="jurado-card jurado-card--export">
+          <div class="jurado-card-head">
+            <h2>Kit del evento</h2>
+            <p class="jurado-hint">Descarga la configuración y una plantilla de inscripción con tu marca, lista para adaptar o publicar.</p>
+          </div>
+          <div class="jurado-export-actions">
+            <button type="button" id="exportJsonBtn" class="jurado-btn jurado-btn--secondary">Descargar config JSON</button>
+            <button type="button" id="exportHtmlBtn" class="jurado-btn">Descargar formulario HTML</button>
+          </div>
+          <p id="exportMsg" class="jurado-success" hidden></p>
+          <div class="jurado-export-preview" id="exportPreview"></div>
         </div>
-        <div id="organizerChampionStrip" class="jurado-leader-strip" hidden></div>
-        <div id="organizerRoundsNav" class="jurado-rounds-nav"></div>
-        <div id="organizerRoundSummary" class="jurado-round-summary" hidden></div>
-        <div id="organizerBracket" class="jurado-bracket"></div>
-      </div>
-
-      <div class="jurado-card jurado-card--scores">
-        <div class="jurado-card-head">
-          <h2>Puntajes por competidor</h2>
-          <p class="jurado-hint">J1, J2 y J3 · puntaje total cuando los 3 jueces calificaron.</p>
-        </div>
-        <div class="jurado-table-wrap">
-          <table class="jurado-table jurado-table--ranking jurado-table--unified" id="organizerRankingTable">
-            <thead>
-              <tr>
-                <th>Competidor</th>
-                <th colspan="3" class="jurado-th-group">Jueces</th>
-                <th>Total</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-              <tr class="jurado-subhead">
-                <th></th>
-                <th class="jurado-th-judge">J1</th>
-                <th class="jurado-th-judge">J2</th>
-                <th class="jurado-th-judge">J3</th>
-                <th></th>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="organizerRankingBody">
-              <tr><td colspan="7" class="jurado-empty">Cargando…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="jurado-card jurado-card--manual" id="organizerManualCard" hidden>
-        <div class="jurado-card-head">
-          <h2>Edición manual de puntajes</h2>
-          <p class="jurado-hint">Corrige o ingresa las notas de J1, J2 y J3 (escala 1–5 por criterio). Los cambios se guardan en el servidor.</p>
-        </div>
-        <p id="organizerManualTarget" class="jurado-phase-label"></p>
-        <div id="organizerManualForm" class="jurado-manual-form"></div>
-        <p id="organizerManualError" class="jurado-error" hidden></p>
-        <p id="organizerManualSuccess" class="jurado-success" hidden></p>
-        <button type="button" id="organizerManualSaveBtn" class="jurado-btn jurado-btn--small" disabled>Guardar puntajes manuales</button>
-      </div>
-
-      <div class="jurado-card">
-        <div class="jurado-card-head">
-          <h2>Detalle por competidor</h2>
-          <p class="jurado-hint">Selecciona un competidor para ver el desglose, editar puntajes o reiniciar.</p>
-        </div>
-        <div class="jurado-field">
-          <label for="organizerCompetidorSelect">Competidor</label>
-          <select id="organizerCompetidorSelect" required>
-            <option value="">— Selecciona competidor —</option>
-          </select>
-        </div>
-        <div id="organizerDetail" class="jurado-detail" hidden></div>
       </div>
     </section>
 
     <p id="loadingMsg" class="jurado-loading">Cargando…</p>
   </div>
 
-  <script src="js/event-config.js?v=20260705jurado15"></script>
+  <script src="js/event-config.js?v=20260705jurado16"></script>
   <script>
     window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado15"></script>
+  <script src="js/jurado-v60.js?v=20260705jurado16"></script>
 </body>
 </html>

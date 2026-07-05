@@ -1,9 +1,17 @@
-/* Panel jurado sensorial V60 — acceso solo por URL */
+/* Panel jurado sensorial V60 — plataforma white-label */
+
+:root {
+  --jurado-accent: #c9a227;
+  --jurado-primary: #3d281c;
+  --jurado-accent-soft: rgba(201, 162, 39, 0.18);
+  --jurado-glass: rgba(0, 0, 0, 0.32);
+  --jurado-border: rgba(255, 255, 255, 0.1);
+}
 
 body.jurado-page {
   margin: 0;
   min-height: 100dvh;
-  background: linear-gradient(165deg, #1f1410 0%, #3d281c 45%, #5d3a1a 100%);
+  background: linear-gradient(165deg, #1f1410 0%, var(--jurado-primary) 45%, #5d3a1a 100%);
   font-family: 'Inter', system-ui, sans-serif;
   color: #f8f4ef;
 }
@@ -15,12 +23,67 @@ body.jurado-page {
 }
 
 body.jurado-page--organizer .jurado-shell {
-  max-width: 980px;
+  max-width: 1040px;
 }
 
 .jurado-header {
   text-align: center;
   margin-bottom: 20px;
+  position: relative;
+}
+
+.jurado-header-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+body.jurado-page--organizer .jurado-header-brand {
+  flex-direction: row;
+  text-align: left;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.jurado-header-text {
+  flex: 1;
+  min-width: 200px;
+}
+
+.jurado-header-kicker {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--jurado-accent);
+  font-weight: 600;
+}
+
+.jurado-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(220, 50, 50, 0.2);
+  border: 1px solid rgba(255, 100, 100, 0.4);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.jurado-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff4444;
+  animation: jurado-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes jurado-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
 }
 
 .jurado-header img {
@@ -33,6 +96,7 @@ body.jurado-page--organizer .jurado-shell {
   margin: 0 0 6px;
   font-size: 1.35rem;
   font-weight: 700;
+  font-family: 'Playfair Display', Georgia, serif;
 }
 
 .jurado-header p {
@@ -73,7 +137,15 @@ body.jurado-page--organizer .jurado-shell {
 }
 
 .jurado-field select,
-.jurado-field textarea {
+.jurado-field textarea,
+.jurado-field input[type="text"],
+.jurado-field input[type="url"],
+.jurado-field input[type="email"],
+.jurado-field input[type="number"],
+.jurado-config-form input[type="text"],
+.jurado-config-form input[type="url"],
+.jurado-config-form input[type="email"],
+.jurado-config-form input[type="number"] {
   width: 100%;
   box-sizing: border-box;
   padding: 11px 12px;
@@ -193,7 +265,7 @@ body.jurado-page--organizer .jurado-shell {
   padding: 14px 16px;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, #c9a227, #e8c547);
+  background: linear-gradient(135deg, var(--jurado-accent), #e8c547);
   color: #2a1a12;
   font: inherit;
   font-size: 1rem;
@@ -1298,4 +1370,270 @@ body.jurado-page--organizer .jurado-shell {
     padding: 14px;
     font-size: 1.2rem;
   }
+}
+
+/* ——— Dashboard tabs ——— */
+
+.jurado-dash-nav {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 2px 14px;
+  margin-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.jurado-dash-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.jurado-dash-tab {
+  flex: 0 0 auto;
+  padding: 9px 14px;
+  border: 1px solid var(--jurado-border);
+  border-radius: 10px;
+  background: var(--jurado-glass);
+  color: rgba(255, 255, 255, 0.75);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.jurado-dash-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.jurado-dash-tab--active {
+  background: var(--jurado-accent-soft);
+  border-color: var(--jurado-accent);
+  color: #fff;
+}
+
+.jurado-dash-pane[hidden] {
+  display: none !important;
+}
+
+.jurado-dashboard-toolbar {
+  margin-bottom: 0;
+}
+
+/* ——— Stats row ——— */
+
+.jurado-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 640px) {
+  .jurado-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.jurado-stat-card {
+  background: var(--jurado-glass);
+  border: 1px solid var(--jurado-border);
+  border-radius: 14px;
+  padding: 14px 12px;
+  text-align: center;
+}
+
+.jurado-stat-card--phase {
+  grid-column: span 1;
+}
+
+.jurado-stat-value {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--jurado-accent);
+  line-height: 1.1;
+}
+
+.jurado-stat-value--text {
+  font-size: 0.95rem;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.jurado-stat-label {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ——— FIFA standings ——— */
+
+.jurado-card-head--fifa h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.jurado-fifa-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.jurado-fifa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 520px;
+}
+
+.jurado-fifa-table thead {
+  background: linear-gradient(180deg, #1a472a 0%, #0d2818 100%);
+}
+
+.jurado-fifa-table th {
+  padding: 11px 10px;
+  text-align: center;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.85);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.jurado-fifa-table td {
+  padding: 12px 10px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.jurado-fifa-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.jurado-fifa-row--top {
+  background: rgba(201, 162, 39, 0.06);
+}
+
+.jurado-fifa-pos {
+  font-weight: 800;
+  width: 36px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.jurado-fifa-pos--gold { color: #ffd700; }
+.jurado-fifa-pos--silver { color: #c0c0c0; }
+.jurado-fifa-pos--bronze { color: #cd7f32; }
+
+.jurado-fifa-team {
+  text-align: left !important;
+  min-width: 140px;
+}
+
+.jurado-fifa-name {
+  font-weight: 600;
+}
+
+.jurado-fifa-pts strong {
+  font-size: 1.05rem;
+  color: var(--jurado-accent);
+}
+
+.jurado-fifa-estado--ok {
+  color: #7dcea0;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.jurado-fifa-estado--partial {
+  color: #f5d9a8;
+  font-size: 0.78rem;
+}
+
+/* ——— Config / white-label ——— */
+
+.jurado-config-preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  margin-bottom: 18px;
+  border-radius: 14px;
+  background: var(--jurado-accent-soft);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.jurado-config-preview img {
+  border-radius: 10px;
+  background: #fff;
+  padding: 4px;
+}
+
+.jurado-config-preview strong {
+  display: block;
+  font-size: 1.05rem;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.jurado-config-preview span {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.jurado-config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 14px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 560px) {
+  .jurado-config-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.jurado-field--full {
+  grid-column: 1 / -1;
+}
+
+.jurado-field input[type="color"] {
+  width: 100%;
+  height: 42px;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.96);
+  cursor: pointer;
+}
+
+/* ——— Export ——— */
+
+.jurado-export-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 480px) {
+  .jurado-export-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+.jurado-export-card {
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.jurado-export-card p {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
 }

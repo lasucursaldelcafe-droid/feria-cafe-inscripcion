@@ -21,6 +21,7 @@
   var PIN_ORGANIZADOR = 'v60organizador';
   var CONFIG_KEY = 'jurado_v60_calificaciones';
   var BRACKET_KEY = 'jurado_v60_bracket';
+  var PLATFORM_KEY = 'jurado_v60_platform';
   var SESSION_KEY = 'lsc_jurado_v60_session';
   var REFRESH_MS = 3000;
 
@@ -41,6 +42,130 @@
   var selectedRoundNum = 0;
   var manualEditCompetidorId = '';
   var manualEditDirty = false;
+  var platformConfig = null;
+  var dashboardTabsBound = false;
+  var platformConfigBound = false;
+  var activeDashTab = 'vista';
+
+  function defaultPlatformConfig() {
+    var ev = window.EVENT_CONFIG || {};
+    var j = ev.juradoV60 || {};
+    var torneo = ev.torneo || {};
+    return {
+      eventName: 'Jurado sensorial V60',
+      eventSubtitle: 'Calificación 1–5 · 7 criterios',
+      organizerName: ev.organizerName || 'La Sucursal del Café',
+      logoUrl: 'assets/logo-la-sucursal-del-cafe.png',
+      accentColor: '#c9a227',
+      primaryColor: '#3d281c',
+      pinOrganizador: j.pinOrganizador || PIN_ORGANIZADOR,
+      pinJuez: j.pinJuez || PIN_JUEZ,
+      registration: {
+        title: 'Inscripción competencia',
+        fee: torneo.precio || '$90.000 COP',
+        cupo: torneo.cupo || 36,
+        fecha: torneo.fecha || 'Por confirmar',
+        hora: torneo.hora || '5:30 p. m.',
+        lugar: torneo.lugar || 'Por confirmar',
+        contactEmail: (ev.alerts && ev.alerts.email) || '',
+        whatsapp: (ev.contact && ev.contact.whatsapp) || '',
+        reglamentoUrl: (ev.links && ev.links.reglas) || ''
+      },
+      actualizado: ''
+    };
+  }
+
+  function normalizePlatformConfig(raw) {
+    var base = defaultPlatformConfig();
+    if (!raw || typeof raw !== 'object') return base;
+    var reg = raw.registration && typeof raw.registration === 'object' ? raw.registration : {};
+    return {
+      eventName: String(raw.eventName || base.eventName).trim() || base.eventName,
+      eventSubtitle: String(raw.eventSubtitle || base.eventSubtitle).trim() || base.eventSubtitle,
+      organizerName: String(raw.organizerName || base.organizerName).trim() || base.organizerName,
+      logoUrl: String(raw.logoUrl || base.logoUrl).trim() || base.logoUrl,
+      accentColor: String(raw.accentColor || base.accentColor).trim() || base.accentColor,
+      primaryColor: String(raw.primaryColor || base.primaryColor).trim() || base.primaryColor,
+      pinOrganizador: String(raw.pinOrganizador || base.pinOrganizador).trim().toLowerCase() || base.pinOrganizador,
+      pinJuez: String(raw.pinJuez || base.pinJuez).trim().toLowerCase() || base.pinJuez,
+      registration: {
+        title: String(reg.title || base.registration.title).trim() || base.registration.title,
+        fee: String(reg.fee || base.registration.fee).trim() || base.registration.fee,
+        cupo: parseInt(reg.cupo, 10) || base.registration.cupo,
+        fecha: String(reg.fecha || base.registration.fecha).trim() || base.registration.fecha,
+        hora: String(reg.hora || base.registration.hora).trim() || base.registration.hora,
+        lugar: String(reg.lugar || base.registration.lugar).trim() || base.registration.lugar,
+        contactEmail: String(reg.contactEmail || base.registration.contactEmail).trim(),
+        whatsapp: String(reg.whatsapp || base.registration.whatsapp).trim(),
+        reglamentoUrl: String(reg.reglamentoUrl || base.registration.reglamentoUrl).trim()
+      },
+      actualizado: raw.actualizado || ''
+    };
+  }
+
+  function loadPlatformConfig() {
+    return sheetsGet('pasaporte_config', { key: PLATFORM_KEY }).then(function (res) {
+      platformConfig = normalizePlatformConfig(res.data);
+      applyPlatformBranding();
+      return platformConfig;
+    }).catch(function () {
+      platformConfig = defaultPlatformConfig();
+      applyPlatformBranding();
+      return platformConfig;
+    });
+  }
+
+  function savePlatformConfig(cfg) {
+    cfg.actualizado = new Date().toISOString();
+    return sheetsPost({
+      action: 'pasaporte_config_save',
+      key: PLATFORM_KEY,
+      data: cfg
+    }).then(function () {
+      platformConfig = normalizePlatformConfig(cfg);
+      applyPlatformBranding();
+      return platformConfig;
+    });
+  }
+
+  function pinOrganizadorEffective() {
+    return (platformConfig && platformConfig.pinOrganizador) || PIN_ORGANIZADOR;
+  }
+
+  function pinJuezEffective() {
+    return (platformConfig && platformConfig.pinJuez) || PIN_JUEZ;
+  }
+
+  function applyPlatformBranding() {
+    var cfg = platformConfig || defaultPlatformConfig();
+    var root = document.documentElement;
+    root.style.setProperty('--jurado-accent', cfg.accentColor || '#c9a227');
+    root.style.setProperty('--jurado-primary', cfg.primaryColor || '#3d281c');
+
+    var logo = $('headerLogo');
+    if (logo && cfg.logoUrl) {
+      logo.src = cfg.logoUrl;
+      logo.alt = cfg.organizerName || cfg.eventName;
+    }
+    var fav = $('faviconLink');
+    if (fav && cfg.logoUrl) fav.href = cfg.logoUrl;
+
+    if (mode === 'organizer') {
+      $('headerTitle').textContent = cfg.eventName;
+      $('headerSubtitle').textContent = cfg.eventSubtitle;
+      var dashName = $('dashboardEventName');
+      if (dashName) dashName.textContent = cfg.eventName;
+      var kicker = $('headerKicker');
+      if (kicker) kicker.textContent = cfg.organizerName;
+      var live = $('livePill');
+      if (live) live.hidden = false;
+    } else if (mode !== 'judge') {
+      $('headerTitle').textContent = cfg.eventName;
+      $('headerSubtitle').textContent = cfg.eventSubtitle;
+    }
+
+    document.title = cfg.eventName + ' — Jurado en vivo';
+  }
 
   function webAppUrl() {
     var cfg = window.SHEETS_CONFIG || {};
@@ -481,7 +606,7 @@
     var grid = $('roleGrid');
     grid.innerHTML = '';
 
-    if (pin === PIN_ORGANIZADOR) {
+    if (pin === pinOrganizadorEffective()) {
       var orgBtn = document.createElement('button');
       orgBtn.type = 'button';
       orgBtn.className = 'jurado-role-btn jurado-role-btn--org';
@@ -490,7 +615,7 @@
       grid.appendChild(orgBtn);
     }
 
-    if (pin === PIN_JUEZ) {
+    if (pin === pinJuezEffective()) {
       [1, 2, 3].forEach(function (n) {
         var btn = document.createElement('button');
         btn.type = 'button';
@@ -682,6 +807,7 @@
   function showJudgeUI() {
     hideAll();
     document.body.classList.remove('jurado-page--organizer');
+    applyPlatformBranding();
     $('headerTitle').textContent = 'Juez ' + judgeNum;
     $('headerSubtitle').textContent = 'Califica 7 criterios · escala 1–5';
     $('judgeBadge').textContent = 'Juez ' + judgeNum;
@@ -694,7 +820,7 @@
     $('judgeSaveBtn').addEventListener('click', onJudgeSave);
     $('judgeLogoutBtn').addEventListener('click', function () {
       clearSession();
-      if (pin === PIN_JUEZ) showRolePicker();
+      if (pin === pinJuezEffective()) showRolePicker();
       else showPinError('Sesión cerrada.');
     });
   }
@@ -716,10 +842,14 @@
   }
 
   function renderOrganizerViews(list) {
+    renderOrganizerStats();
+    renderFifaStandings();
     renderOrganizerLinksPanel();
     renderOrganizerAdminPanel();
     renderOrganizerBracket();
     renderOrganizerScoresTable();
+    renderPlatformConfigForm();
+    renderExportPreview();
     var detailId = $('organizerCompetidorSelect') ? $('organizerCompetidorSelect').value : '';
     if (!(manualEditDirty && detailId && detailId === manualEditCompetidorId)) {
       renderOrganizerDetail(detailId);
@@ -728,16 +858,315 @@
     else hideOrganizerManualEdit();
   }
 
-  function getJuradoShareUrls() {
-    if (window.EVENT_CONFIG && window.EVENT_CONFIG.juradoV60 && window.EVENT_CONFIG.juradoV60.links) {
-      return window.EVENT_CONFIG.juradoV60.links;
+  function switchDashTab(tabId) {
+    activeDashTab = tabId;
+    document.querySelectorAll('.jurado-dash-tab').forEach(function (btn) {
+      var on = btn.getAttribute('data-dash-tab') === tabId;
+      btn.classList.toggle('jurado-dash-tab--active', on);
+    });
+    document.querySelectorAll('.jurado-dash-pane').forEach(function (pane) {
+      var match = pane.getAttribute('data-dash-pane') === tabId;
+      pane.hidden = !match;
+      pane.classList.toggle('jurado-dash-pane--active', match);
+    });
+  }
+
+  function bindDashboardTabs() {
+    if (dashboardTabsBound) return;
+    dashboardTabsBound = true;
+    document.querySelectorAll('.jurado-dash-tab').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        switchDashTab(btn.getAttribute('data-dash-tab') || 'vista');
+      });
+    });
+  }
+
+  function renderOrganizerStats() {
+    var box = $('organizerStatsRow');
+    if (!box) return;
+    var activos = getActiveCompetitorIds().length;
+    var elim = (bracketState && bracketState.eliminados) ? bracketState.eliminados.length : 0;
+    var listos = competidores.filter(function (c) {
+      if (getActiveCompetitorIds().indexOf(c.id) < 0) return false;
+      var row = getRowById(c.id);
+      return puntajeEstado(row) === 'listo';
+    }).length;
+    var phase = currentPhaseTitle();
+    box.innerHTML =
+      '<div class="jurado-stat-card"><span class="jurado-stat-value">' + activos + '</span><span class="jurado-stat-label">Activos</span></div>' +
+      '<div class="jurado-stat-card"><span class="jurado-stat-value">' + listos + '</span><span class="jurado-stat-label">Calificados</span></div>' +
+      '<div class="jurado-stat-card"><span class="jurado-stat-value">' + elim + '</span><span class="jurado-stat-label">Eliminados</span></div>' +
+      '<div class="jurado-stat-card jurado-stat-card--phase"><span class="jurado-stat-value jurado-stat-value--text">' + escapeHtml(phase) + '</span><span class="jurado-stat-label">Fase actual</span></div>';
+  }
+
+  function fifaPosClass(pos) {
+    if (pos === 1) return 'jurado-fifa-pos--gold';
+    if (pos === 2) return 'jurado-fifa-pos--silver';
+    if (pos === 3) return 'jurado-fifa-pos--bronze';
+    return '';
+  }
+
+  function renderFifaStandings() {
+    var tbody = $('fifaStandingsBody');
+    if (!tbody) return;
+
+    var rows = buildUnifiedOrganizerRows().filter(function (row) {
+      return getActiveCompetitorIds().indexOf(row.competidorId) >= 0;
+    }).slice().sort(function (a, b) {
+      var ta = puntajeTotal(a) != null ? puntajeTotal(a) : partialScore(a);
+      var tb = puntajeTotal(b) != null ? puntajeTotal(b) : partialScore(b);
+      if (tb !== ta) return tb - ta;
+      return (a.nombre || '').localeCompare(b.nombre || '', 'es');
+    });
+
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="jurado-empty">Sin participantes activos en esta ronda.</td></tr>';
+      return;
     }
+
+    tbody.innerHTML = rows.map(function (row, idx) {
+      var pos = idx + 1;
+      var total = puntajeTotal(row);
+      var partial = partialScore(row);
+      var pts = total != null ? total : (partial > 0 ? partial + '*' : '—');
+      var estado = puntajeEstado(row);
+      var estadoLabel = estado === 'listo' ? '✓ Listo' : estado === 'parcial' ? 'En curso' : 'Pendiente';
+      var estadoCls = estado === 'listo' ? 'jurado-fifa-estado--ok' : estado === 'parcial' ? 'jurado-fifa-estado--partial' : '';
+      var cat = countJudgesDone(row);
+      var s = formatJudgeScores(row);
+      return '<tr class="jurado-fifa-row' + (pos <= 3 ? ' jurado-fifa-row--top' : '') + '">' +
+        '<td class="jurado-fifa-pos ' + fifaPosClass(pos) + '">' + pos + '</td>' +
+        '<td class="jurado-fifa-team"><span class="jurado-fifa-name">' + escapeHtml(row.nombre) + '</span></td>' +
+        '<td>' + cat + '/3</td>' +
+        '<td>' + s.j1 + '</td><td>' + s.j2 + '</td><td>' + s.j3 + '</td>' +
+        '<td class="jurado-fifa-pts"><strong>' + pts + '</strong></td>' +
+        '<td class="' + estadoCls + '">' + estadoLabel + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  function partialScore(row) {
+    var sum = 0;
+    var any = false;
+    for (var j = 1; j <= 3; j++) {
+      var v = judgeScoreValue(row, j);
+      if (v != null) { sum += v; any = true; }
+    }
+    return any ? sum : -1;
+  }
+
+  function readPlatformConfigForm() {
+    function val(id) {
+      var el = $(id);
+      return el ? el.value : '';
+    }
+    return normalizePlatformConfig({
+      eventName: val('cfgEventName'),
+      eventSubtitle: val('cfgEventSubtitle'),
+      organizerName: val('cfgOrganizerName'),
+      logoUrl: val('cfgLogoUrl'),
+      accentColor: val('cfgAccentColor'),
+      primaryColor: val('cfgPrimaryColor'),
+      pinOrganizador: val('cfgPinOrganizador'),
+      pinJuez: val('cfgPinJuez'),
+      registration: {
+        title: val('cfgRegTitle'),
+        fee: val('cfgRegFee'),
+        cupo: val('cfgRegCupo'),
+        fecha: val('cfgRegFecha'),
+        hora: val('cfgRegHora'),
+        lugar: val('cfgRegLugar'),
+        contactEmail: val('cfgRegEmail'),
+        whatsapp: val('cfgRegWhatsapp'),
+        reglamentoUrl: val('cfgRegReglamento')
+      }
+    });
+  }
+
+  function fillPlatformConfigForm(cfg) {
+    cfg = cfg || platformConfig || defaultPlatformConfig();
+    var reg = cfg.registration || {};
+    var fields = {
+      cfgEventName: cfg.eventName || '',
+      cfgEventSubtitle: cfg.eventSubtitle || '',
+      cfgOrganizerName: cfg.organizerName || '',
+      cfgLogoUrl: cfg.logoUrl || '',
+      cfgAccentColor: cfg.accentColor || '#c9a227',
+      cfgPrimaryColor: cfg.primaryColor || '#3d281c',
+      cfgPinOrganizador: cfg.pinOrganizador || '',
+      cfgPinJuez: cfg.pinJuez || '',
+      cfgRegTitle: reg.title || '',
+      cfgRegFee: reg.fee || '',
+      cfgRegCupo: reg.cupo || '',
+      cfgRegFecha: reg.fecha || '',
+      cfgRegHora: reg.hora || '',
+      cfgRegLugar: reg.lugar || '',
+      cfgRegEmail: reg.contactEmail || '',
+      cfgRegWhatsapp: reg.whatsapp || '',
+      cfgRegReglamento: reg.reglamentoUrl || ''
+    };
+    Object.keys(fields).forEach(function (id) {
+      var el = $(id);
+      if (el) el.value = fields[id];
+    });
+    updateConfigPreview(cfg);
+  }
+
+  function updateConfigPreview(cfg) {
+    cfg = cfg || readPlatformConfigForm();
+    var img = $('configPreviewLogo');
+    if (img) img.src = cfg.logoUrl || 'assets/logo-la-sucursal-del-cafe.png';
+    var name = $('configPreviewName');
+    if (name) name.textContent = cfg.eventName || 'Mi torneo';
+    var sub = $('configPreviewSub');
+    if (sub) sub.textContent = cfg.eventSubtitle || '';
+  }
+
+  function renderPlatformConfigForm() {
+    fillPlatformConfigForm(platformConfig);
+  }
+
+  function bindPlatformConfigForm() {
+    if (platformConfigBound) return;
+    var saveBtn = $('platformConfigSaveBtn');
+    var exportJson = $('exportJsonBtn');
+    var exportHtml = $('exportHtmlBtn');
+    if (!saveBtn || !exportJson || !exportHtml) return;
+    platformConfigBound = true;
+
+    var inputs = document.querySelectorAll('#platformConfigForm input');
+    inputs.forEach(function (inp) {
+      inp.addEventListener('input', function () { updateConfigPreview(); });
+    });
+
+    $('platformConfigSaveBtn').addEventListener('click', function () {
+      var cfg = readPlatformConfigForm();
+      $('platformConfigError').hidden = true;
+      $('platformConfigSuccess').hidden = true;
+      $('platformConfigSaveBtn').disabled = true;
+      $('platformConfigSaveBtn').textContent = 'Guardando…';
+      savePlatformConfig(cfg).then(function () {
+        $('platformConfigSuccess').textContent = '✓ Configuración guardada. Los enlaces usan los PIN configurados.';
+        $('platformConfigSuccess').hidden = false;
+        renderOrganizerLinksPanel();
+        applyPlatformBranding();
+      }).catch(function (err) {
+        $('platformConfigError').textContent = err.message || 'No se pudo guardar.';
+        $('platformConfigError').hidden = false;
+      }).finally(function () {
+        $('platformConfigSaveBtn').disabled = false;
+        $('platformConfigSaveBtn').textContent = 'Guardar configuración';
+      });
+    });
+
+    $('exportJsonBtn').addEventListener('click', downloadPlatformJson);
+    $('exportHtmlBtn').addEventListener('click', downloadRegistrationHtml);
+  }
+
+  function slugifyFilename(str) {
+    return String(str || 'evento').toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'evento';
+  }
+
+  function downloadBlob(filename, content, mime) {
+    var blob = new Blob([content], { type: mime || 'application/octet-stream' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function downloadPlatformJson() {
+    var cfg = platformConfig || defaultPlatformConfig();
+    var kit = {
+      platform: 'jurado-v60',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      config: cfg,
+      criteria: CRITERIA,
+      links: getJuradoShareUrls()
+    };
+    var name = slugifyFilename(cfg.eventName) + '-kit.json';
+    downloadBlob(name, JSON.stringify(kit, null, 2), 'application/json');
+    var msg = $('exportMsg');
+    if (msg) { msg.textContent = '✓ Descargado: ' + name; msg.hidden = false; }
+  }
+
+  function buildRegistrationHtml(cfg) {
+    cfg = cfg || platformConfig || defaultPlatformConfig();
+    var reg = cfg.registration || {};
+    var accent = cfg.accentColor || '#c9a227';
+    var primary = cfg.primaryColor || '#3d281c';
+    return '<!DOCTYPE html>\n<html lang="es">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>' +
+      escapeHtml(reg.title || cfg.eventName) + '</title>\n' +
+      '<style>\n:root{--accent:' + accent + ';--primary:' + primary + '}\n' +
+      'body{margin:0;font-family:Inter,system-ui,sans-serif;background:linear-gradient(165deg,' + primary + ',#1a1008);color:#f8f4ef;min-height:100dvh}\n' +
+      '.wrap{max-width:640px;margin:0 auto;padding:24px 16px 48px}\n' +
+      '.hero{text-align:center;margin-bottom:24px}\n.hero img{max-height:64px;margin-bottom:12px}\n.hero h1{margin:0 0 8px;font-size:1.5rem}\n' +
+      '.card{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:20px;margin-bottom:16px}\n' +
+      '.field{margin-bottom:14px}label{display:block;font-size:.85rem;font-weight:600;margin-bottom:6px}\n' +
+      'input,textarea,select{width:100%;box-sizing:border-box;padding:11px 12px;border-radius:10px;border:1px solid rgba(0,0,0,.15);font:inherit}\n' +
+      '.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:520px){.row{grid-template-columns:1fr}}\n' +
+      '.btn{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--accent),#e8c547);color:#1a1008;font:inherit;font-weight:700;cursor:pointer}\n' +
+      '.meta{font-size:.85rem;opacity:.8;margin:0 0 12px}.badge{display:inline-block;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.1);font-size:.8rem;margin:4px 4px 0 0}\n' +
+      '</style>\n</head>\n<body>\n<div class="wrap">\n<div class="hero">\n' +
+      (cfg.logoUrl ? '<img src="' + escapeHtml(cfg.logoUrl) + '" alt="' + escapeHtml(cfg.organizerName) + '">\n' : '') +
+      '<p class="meta">' + escapeHtml(cfg.organizerName) + '</p>\n<h1>' + escapeHtml(reg.title || cfg.eventName) + '</h1>\n' +
+      '<p class="meta">' + escapeHtml(cfg.eventSubtitle) + '</p>\n' +
+      '<span class="badge">📅 ' + escapeHtml(reg.fecha) + '</span>\n' +
+      '<span class="badge">🕠 ' + escapeHtml(reg.hora) + '</span>\n' +
+      '<span class="badge">📍 ' + escapeHtml(reg.lugar) + '</span>\n' +
+      '<span class="badge">' + escapeHtml(reg.fee) + '</span>\n' +
+      '<span class="badge">Cupo: ' + escapeHtml(String(reg.cupo)) + '</span>\n</div>\n' +
+      '<form class="card" id="inscripcionForm" onsubmit="return false">\n<h2 style="margin:0 0 16px;font-size:1.1rem">Datos del competidor</h2>\n' +
+      '<div class="field"><label>Nombre completo *</label><input name="nombre" required minlength="2" placeholder="Nombre y apellido"></div>\n' +
+      '<div class="row"><div class="field"><label>Documento *</label><input name="documento" required></div>\n' +
+      '<div class="field"><label>Celular *</label><input name="celular" type="tel" required></div></div>\n' +
+      '<div class="field"><label>Correo *</label><input name="correo" type="email" required></div>\n' +
+      '<div class="row"><div class="field"><label>Ciudad</label><input name="ciudad"></div>\n' +
+      '<div class="field"><label>Representa (marca/finca)</label><input name="representa"></div></div>\n' +
+      '<div class="field"><label>Notas / alergias</label><textarea name="notas" rows="2"></textarea></div>\n' +
+      '<p class="meta">Al enviar aceptas el reglamento del torneo.' +
+      (reg.reglamentoUrl ? ' <a href="' + escapeHtml(reg.reglamentoUrl) + '" style="color:var(--accent)">Ver reglamento</a>.' : '') + '</p>\n' +
+      '<button type="submit" class="btn">Enviar inscripción</button>\n</form>\n' +
+      '<p class="meta" style="text-align:center;margin-top:20px">Contacto: ' + escapeHtml(reg.contactEmail || '') +
+      (reg.whatsapp ? ' · WhatsApp ' + escapeHtml(reg.whatsapp) : '') + '</p>\n' +
+      '<p class="meta" style="text-align:center;font-size:.75rem">Plantilla generada por Jurado V60 · ' + new Date().toISOString().slice(0, 10) + '</p>\n</div>\n</body>\n</html>';
+  }
+
+  function downloadRegistrationHtml() {
+    var cfg = platformConfig || defaultPlatformConfig();
+    var html = buildRegistrationHtml(cfg);
+    var name = slugifyFilename(cfg.eventName) + '-inscripcion.html';
+    downloadBlob(name, html, 'text/html;charset=utf-8');
+    var msg = $('exportMsg');
+    if (msg) { msg.textContent = '✓ Descargado: ' + name; msg.hidden = false; }
+  }
+
+  function renderExportPreview() {
+    var box = $('exportPreview');
+    if (!box) return;
+    var cfg = platformConfig || defaultPlatformConfig();
+    var reg = cfg.registration || {};
+    box.innerHTML =
+      '<div class="jurado-export-card">' +
+      '<strong>' + escapeHtml(cfg.eventName) + '</strong>' +
+      '<p>' + escapeHtml(cfg.organizerName) + ' · ' + escapeHtml(reg.fecha) + ' · ' + escapeHtml(reg.lugar) + '</p>' +
+      '<p class="jurado-hint">El HTML incluye formulario de inscripción con tu logo, colores y datos. Conéctalo a tu backend o Google Apps Script.</p>' +
+      '</div>';
+  }
+
+  function getJuradoShareUrls() {
     var base = String(window.location.origin || 'https://la-sucursal-del-cafe.web.app').replace(/\/$/, '');
+    var path = (window.EVENT_CONFIG && window.EVENT_CONFIG.juradoV60 && window.EVENT_CONFIG.juradoV60.path) || '/jurado-v60';
+    var pinOrg = pinOrganizadorEffective();
+    var pinJ = pinJuezEffective();
     return {
-      organizador: base + '/jurado-v60?pin=' + PIN_ORGANIZADOR,
-      juez1: base + '/jurado-v60?pin=' + PIN_JUEZ + '&juez=1',
-      juez2: base + '/jurado-v60?pin=' + PIN_JUEZ + '&juez=2',
-      juez3: base + '/jurado-v60?pin=' + PIN_JUEZ + '&juez=3'
+      organizador: base + path + '?pin=' + encodeURIComponent(pinOrg),
+      juez1: base + path + '?pin=' + encodeURIComponent(pinJ) + '&juez=1',
+      juez2: base + path + '?pin=' + encodeURIComponent(pinJ) + '&juez=2',
+      juez3: base + path + '?pin=' + encodeURIComponent(pinJ) + '&juez=3'
     };
   }
 
@@ -1698,8 +2127,7 @@
   function showOrganizerUI() {
     hideAll();
     document.body.classList.add('jurado-page--organizer');
-    $('headerTitle').textContent = 'Panel jurado V60';
-    $('headerSubtitle').textContent = 'Paneles por ronda · edición manual de puntajes';
+    applyPlatformBranding();
 
     $('organizerSection').hidden = false;
     clearOrganizerError();
@@ -1708,6 +2136,9 @@
 
     bindOrganizerAdminActions();
     bindOrganizerManualEdit();
+    bindDashboardTabs();
+    bindPlatformConfigForm();
+    switchDashTab(activeDashTab);
 
     try {
       renderOrganizerViews(calificacionesList());
@@ -1749,65 +2180,74 @@
 
   function resolvePin(value) {
     var p = String(value || '').trim().toLowerCase();
-    if (p === PIN_ORGANIZADOR) return PIN_ORGANIZADOR;
-    if (p === PIN_JUEZ) return PIN_JUEZ;
+    var org = pinOrganizadorEffective();
+    var juez = pinJuezEffective();
+    if (p === PIN_ORGANIZADOR || p === org) return org;
+    if (p === PIN_JUEZ || p === juez) return juez;
     return '';
   }
 
   function init() {
     var params = getParams();
-    pin = resolvePin(params.get('pin') || '');
+    var rawPin = String(params.get('pin') || '').trim().toLowerCase();
 
-    if (!pin) {
-      showPinError('Falta el PIN en la URL. Pide el enlace al organizador.');
-      return;
-    }
+    $('loadingMsg').hidden = false;
 
-    var sess = readSession();
-    if (sess && sess.pin === pin && sess.mode === 'organizer' && pin === PIN_ORGANIZADOR) {
-      mode = 'organizer';
-    } else if (sess && sess.pin === pin && sess.mode === 'judge' && pin === PIN_JUEZ) {
-      mode = 'judge';
-      judgeNum = sess.judgeNum;
-    }
+    loadPlatformConfig().then(function () {
+      pin = resolvePin(rawPin);
 
-    var juezParam = parseInt(params.get('juez') || '', 10);
-    if (!mode && pin === PIN_JUEZ && juezParam >= 1 && juezParam <= 3) {
-      judgeNum = juezParam;
-      mode = 'judge';
-      writeSession({ mode: 'judge', judgeNum: juezParam, pin: pin });
-    }
-    if (!mode && pin === PIN_ORGANIZADOR) {
-      mode = 'organizer';
-      writeSession({ mode: 'organizer', pin: pin });
-    }
+      if (!pin) {
+        showPinError('Falta el PIN en la URL o no es válido. Pide el enlace al organizador.');
+        return;
+      }
 
-    Promise.all([loadCompetidores(), loadCalificacionesStore()])
-      .then(function (results) {
-        competidores = results[0];
-        if (!competidores.length) {
-          showPinError('No hay competidores habilitados.');
-          return;
-        }
-        return loadBracketStore().then(function () {
-          if (!bracketState.activos.length) {
-            bracketState.activos = competidores.map(function (c) { return c.id; });
+      var sess = readSession();
+      if (sess && sess.pin === pin && sess.mode === 'organizer' && pin === pinOrganizadorEffective()) {
+        mode = 'organizer';
+      } else if (sess && sess.pin === pin && sess.mode === 'judge' && pin === pinJuezEffective()) {
+        mode = 'judge';
+        judgeNum = sess.judgeNum;
+      }
+
+      var juezParam = parseInt(params.get('juez') || '', 10);
+      if (!mode && pin === pinJuezEffective() && juezParam >= 1 && juezParam <= 3) {
+        judgeNum = juezParam;
+        mode = 'judge';
+        writeSession({ mode: 'judge', judgeNum: juezParam, pin: pin });
+      }
+      if (!mode && pin === pinOrganizadorEffective()) {
+        mode = 'organizer';
+        writeSession({ mode: 'organizer', pin: pin });
+      }
+
+      return Promise.all([loadCompetidores(), loadCalificacionesStore()])
+        .then(function (results) {
+          competidores = results[0];
+          if (!competidores.length) {
+            showPinError('No hay competidores habilitados.');
+            return;
           }
+          return loadBracketStore().then(function () {
+            if (!bracketState.activos.length) {
+              bracketState.activos = competidores.map(function (c) { return c.id; });
+            }
 
-          $('loadingMsg').hidden = true;
+            $('loadingMsg').hidden = true;
 
-          if (mode === 'organizer') {
-            showOrganizerUI();
-          } else if (mode === 'judge' && judgeNum) {
-            showJudgeUI();
-          } else {
-            showRolePicker();
-          }
+            if (mode === 'organizer') {
+              showOrganizerUI();
+            } else if (mode === 'judge' && judgeNum) {
+              applyPlatformBranding();
+              showJudgeUI();
+            } else {
+              applyPlatformBranding();
+              showRolePicker();
+            }
+          });
         });
-      })
-      .catch(function (err) {
-        showPinError(err.message || 'No se pudo cargar el panel.');
-      });
+    }).catch(function (err) {
+      showPinError(err.message || 'No se pudo cargar el panel.');
+    });
   }
 
   if (document.readyState === 'loading') {
