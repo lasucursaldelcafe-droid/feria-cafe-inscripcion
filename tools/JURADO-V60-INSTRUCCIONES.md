@@ -241,4 +241,4 @@ Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado
 
 ---
 
-*Última actualización: julio 2026 · cache `jurado20`*
+*Última actualización: julio 2026 · cache `jurado22`*
