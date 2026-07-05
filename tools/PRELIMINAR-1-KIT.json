@@ -1,0 +1,5891 @@
+{
+  "platform": "jurado-v60",
+  "source": "preliminar-1-results",
+  "syncedAt": "2026-07-05T22:45:00.000Z",
+  "event": {
+    "id": "preliminar-1",
+    "nombre": "V60 Championship — Preliminar 1",
+    "fecha": "4 de julio de 2026 · Plaza Marbella, Curis",
+    "disciplina": "filtrado",
+    "jueces": 3,
+    "scaleMin": 1,
+    "scaleMax": 6
+  },
+  "criteria": [
+    {
+      "key": "aroma",
+      "label": "Aroma"
+    },
+    {
+      "key": "sabor",
+      "label": "Sabor"
+    },
+    {
+      "key": "acidez",
+      "label": "Acidez"
+    },
+    {
+      "key": "dulzor",
+      "label": "Dulzor"
+    },
+    {
+      "key": "cuerpo",
+      "label": "Cuerpo"
+    },
+    {
+      "key": "balance",
+      "label": "Balance"
+    },
+    {
+      "key": "limpieza_taza",
+      "label": "Limpieza de taza"
+    },
+    {
+      "key": "impresion_general",
+      "label": "Impresión general"
+    }
+  ],
+  "inscritos": [
+    {
+      "key": "andrenia",
+      "id": "SC-MR6QU500",
+      "nombre": "Andreina",
+      "planilla": "Andrenia",
+      "ciudad": "Cali",
+      "representa": "Tierradentro",
+      "habilitado": "Sí",
+      "fotoUrl": "https://drive.google.com/file/d/1eBFiW59v84dNu8Bn0Ya_5vVavEGMFofN/view?usp=drivesdk",
+      "correo": "apernia2412@gmail.com",
+      "documento": "1026308764"
+    },
+    {
+      "key": "angela",
+      "id": "SC-MR14S1PV",
+      "nombre": "Angela sibaja",
+      "planilla": "Angela",
+      "ciudad": "Cali",
+      "representa": "El cafe de Astoria",
+      "habilitado": "Sí",
+      "fotoUrl": "https://drive.google.com/file/d/1s2v2QVXKpR0edyMN88skvllC-Hw3hvHH/view?usp=drivesdk",
+      "correo": "angesibaja777@gmail.com",
+      "documento": "1143838869"
+    },
+    {
+      "key": "brayan",
+      "id": "SC-MR1B4PZS",
+      "nombre": "Brayan Moreno G",
+      "planilla": "Brayan",
+      "ciudad": "Cali",
+      "representa": "Médium Café",
+      "habilitado": "Sí",
+      "fotoUrl": "https://drive.google.com/file/d/1xAaWDVWrZD0UwdpZ1KXp3jgEWQQ1IDJO/view?usp=drivesdk",
+      "correo": "bmgpersonal99@gmail.com",
+      "documento": "1234198183"
+    },
+    {
+      "key": "jessi",
+      "id": "SC-MR2CEGBE",
+      "nombre": "Jessica combita",
+      "planilla": "Jessi",
+      "ciudad": "Cali",
+      "representa": "MAS CAFÉ",
+      "habilitado": "Sí",
+      "fotoUrl": "https://drive.google.com/file/d/1F4HFFpdf2z3PlfWSRVs7NSxvHb9ekAsv/view?usp=drivesdk",
+      "correo": "jesikaparra9@gmail.com",
+      "documento": "1018509921"
+    },
+    {
+      "key": "joe",
+      "id": "SC-MQSNH3RD",
+      "nombre": "Joe",
+      "planilla": "Joe",
+      "ciudad": "Cali",
+      "representa": "Espressoyourself",
+      "habilitado": "",
+      "fotoUrl": "https://drive.google.com/file/d/1BFrQIyP6YK2hvYv588Fie0mAJ2iz_L98/view?usp=drivesdk",
+      "correo": "joehernandezpena@hotmail.com",
+      "documento": "1006172292"
+    },
+    {
+      "key": "useche",
+      "id": "SC-MR488BBE",
+      "nombre": "José Alejandro Useche",
+      "planilla": "Useche",
+      "ciudad": "Cali",
+      "representa": "Purist café",
+      "habilitado": "Sí",
+      "fotoUrl": "https://drive.google.com/file/d/1Wohlim0taSLCBFsLR1W8rcD-n1XhTFfB/view?usp=drivesdk",
+      "correo": "josealejandro.usechemahecha@gmail.com",
+      "documento": "1006072215"
+    },
+    {
+      "key": "savedra",
+      "id": "SC-MR2NRDPE",
+      "nombre": "Juan David Saavedra cardona",
+      "planilla": "Savedra",
+      "ciudad": "Cali",
+      "representa": "Independiente",
+      "habilitado": "Sí",
+      "fotoUrl": "https://drive.google.com/file/d/1jET4LD5HZ92cjFeemK4PQyKv6ltLc6Ht/view?usp=drivesdk",
+      "correo": "judasaca34@gmail.com",
+      "documento": "1107847761"
+    },
+    {
+      "key": "manjares",
+      "id": "SC-MR442V2P",
+      "nombre": "Juan Miguel Manjarres",
+      "planilla": "Manjares",
+      "ciudad": "Palmira",
+      "representa": "Barista independiente",
+      "habilitado": "Sí",
+      "fotoUrl": "https://drive.google.com/file/d/14jwUR6qJV79EL0a_dD9jJu2oOn-htsCT/view?usp=drivesdk",
+      "correo": "juanmimanjarresilva@gmail.com",
+      "documento": "1021396326"
+    },
+    {
+      "key": "vera",
+      "id": "SC-MR2KMUPR",
+      "nombre": "Juan sebastian vera",
+      "planilla": "Vera",
+      "ciudad": "Cali",
+      "representa": "Barista independiente",
+      "habilitado": "Sí",
+      "fotoUrl": "https://drive.google.com/file/d/173jY-rAN4sh7_EpIchcFlDTFznh8mO1g/view?usp=drivesdk",
+      "correo": "thesmilesmilingjj88@gmail.com",
+      "documento": "1006008177"
+    },
+    {
+      "key": "linda",
+      "id": "SC-MR172ZIT",
+      "nombre": "Linda Hernandez",
+      "planilla": "Linda",
+      "ciudad": "Cali",
+      "representa": "Mas cafe",
+      "habilitado": "Sí",
+      "fotoUrl": "https://drive.google.com/file/d/1ArkCQeEZRqPOZjkFE2asOy9BdzidaoJP/view?usp=drivesdk",
+      "correo": "lindahernandez200025@gmail.com",
+      "documento": "1005974653"
+    },
+    {
+      "key": "colorado",
+      "id": "SC-MQQQCABR",
+      "nombre": "Santiago Colorado",
+      "planilla": "Colorado",
+      "ciudad": "Cali",
+      "representa": "Delta Coffee",
+      "habilitado": "",
+      "fotoUrl": "https://drive.google.com/file/d/1cDE3D6gPjgpbKDOg8a-DTVtxy9gmBX9x/view?usp=drivesdk",
+      "correo": "santiagocoloradotrujillo@gmail.com",
+      "documento": "1006170225"
+    },
+    {
+      "key": "polo",
+      "id": "SC-MR5J8QUJ",
+      "nombre": "Ximena polo",
+      "planilla": "Polo",
+      "ciudad": "Cali",
+      "representa": "Black coffee",
+      "habilitado": "Sí",
+      "fotoUrl": "https://drive.google.com/file/d/1VJsPhFiGTfDc6aXqYlIlDk1GhtweDjGM/view?usp=drivesdk",
+      "correo": "ximena.polo@gmail.com",
+      "documento": "31320969"
+    }
+  ],
+  "crosswalk": {
+    "Andrenia": "andrenia",
+    "Angela": "angela",
+    "Jessi": "jessi",
+    "Brayan": "brayan",
+    "Joe": "joe",
+    "Useche": "useche",
+    "Savedra": "savedra",
+    "Manjares": "manjares",
+    "Vera": "vera",
+    "Linda": "linda",
+    "Colorado": "colorado",
+    "Polo": "polo"
+  },
+  "rawRows": [
+    {
+      "participante": "Andrenia",
+      "entrada": 1,
+      "j1": 29,
+      "j2": 24,
+      "j3": 27,
+      "total": 80,
+      "id": "SC-MR6QU500-e1",
+      "competidorId": "SC-MR6QU500",
+      "inscritoKey": "andrenia",
+      "nombreInscrito": "Andreina",
+      "ciudad": "Cali",
+      "representa": "Tierradentro",
+      "fotoUrl": "https://drive.google.com/file/d/1eBFiW59v84dNu8Bn0Ya_5vVavEGMFofN/view?usp=drivesdk",
+      "inscrito": {
+        "key": "andrenia",
+        "id": "SC-MR6QU500",
+        "nombre": "Andreina",
+        "planilla": "Andrenia",
+        "ciudad": "Cali",
+        "representa": "Tierradentro",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1eBFiW59v84dNu8Bn0Ya_5vVavEGMFofN/view?usp=drivesdk",
+        "correo": "apernia2412@gmail.com",
+        "documento": "1026308764"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 4,
+            "acidez": 3,
+            "dulzor": 4,
+            "cuerpo": 4,
+            "balance": 4,
+            "limpieza_taza": 3,
+            "impresion_general": 4
+          },
+          "subtotal": 29,
+          "actualizado": "2026-07-05T22:47:34.258Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.258Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 4,
+            "acidez": 3,
+            "dulzor": 4,
+            "cuerpo": 4,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 27,
+          "actualizado": "2026-07-05T22:47:34.258Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 4,
+          "j2": 3,
+          "j3": 4,
+          "suma": 11
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 4,
+          "j2": 3,
+          "j3": 4,
+          "suma": 11
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 4,
+          "j2": 3,
+          "j3": 4,
+          "suma": 11
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        }
+      ],
+      "sumaVerificada": 80
+    },
+    {
+      "participante": "Andrenia",
+      "entrada": 2,
+      "j1": 18,
+      "j2": 18,
+      "j3": 22,
+      "total": 58,
+      "id": "SC-MR6QU500-e2",
+      "competidorId": "SC-MR6QU500",
+      "inscritoKey": "andrenia",
+      "nombreInscrito": "Andreina",
+      "ciudad": "Cali",
+      "representa": "Tierradentro",
+      "fotoUrl": "https://drive.google.com/file/d/1eBFiW59v84dNu8Bn0Ya_5vVavEGMFofN/view?usp=drivesdk",
+      "inscrito": {
+        "key": "andrenia",
+        "id": "SC-MR6QU500",
+        "nombre": "Andreina",
+        "planilla": "Andrenia",
+        "ciudad": "Cali",
+        "representa": "Tierradentro",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1eBFiW59v84dNu8Bn0Ya_5vVavEGMFofN/view?usp=drivesdk",
+        "correo": "apernia2412@gmail.com",
+        "documento": "1026308764"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 2,
+            "acidez": 2,
+            "dulzor": 2,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 2,
+            "impresion_general": 3
+          },
+          "subtotal": 18,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 2,
+            "acidez": 2,
+            "dulzor": 2,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 2,
+            "impresion_general": 3
+          },
+          "subtotal": 18,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 3,
+            "acidez": 2,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 22,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 58
+    },
+    {
+      "participante": "Angela",
+      "entrada": 1,
+      "j1": 26,
+      "j2": 22,
+      "j3": 24,
+      "total": 72,
+      "id": "SC-MR14S1PV-e1",
+      "competidorId": "SC-MR14S1PV",
+      "inscritoKey": "angela",
+      "nombreInscrito": "Angela sibaja",
+      "ciudad": "Cali",
+      "representa": "El cafe de Astoria",
+      "fotoUrl": "https://drive.google.com/file/d/1s2v2QVXKpR0edyMN88skvllC-Hw3hvHH/view?usp=drivesdk",
+      "inscrito": {
+        "key": "angela",
+        "id": "SC-MR14S1PV",
+        "nombre": "Angela sibaja",
+        "planilla": "Angela",
+        "ciudad": "Cali",
+        "representa": "El cafe de Astoria",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1s2v2QVXKpR0edyMN88skvllC-Hw3hvHH/view?usp=drivesdk",
+        "correo": "angesibaja777@gmail.com",
+        "documento": "1143838869"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 4,
+            "cuerpo": 4,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 26,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 22,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 2,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 2,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 72
+    },
+    {
+      "participante": "Jessi",
+      "entrada": 1,
+      "j1": 18,
+      "j2": 24,
+      "j3": 23,
+      "total": 65,
+      "id": "SC-MR2CEGBE-e1",
+      "competidorId": "SC-MR2CEGBE",
+      "inscritoKey": "jessi",
+      "nombreInscrito": "Jessica combita",
+      "ciudad": "Cali",
+      "representa": "MAS CAFÉ",
+      "fotoUrl": "https://drive.google.com/file/d/1F4HFFpdf2z3PlfWSRVs7NSxvHb9ekAsv/view?usp=drivesdk",
+      "inscrito": {
+        "key": "jessi",
+        "id": "SC-MR2CEGBE",
+        "nombre": "Jessica combita",
+        "planilla": "Jessi",
+        "ciudad": "Cali",
+        "representa": "MAS CAFÉ",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1F4HFFpdf2z3PlfWSRVs7NSxvHb9ekAsv/view?usp=drivesdk",
+        "correo": "jesikaparra9@gmail.com",
+        "documento": "1018509921"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 2,
+            "acidez": 2,
+            "dulzor": 2,
+            "cuerpo": 2,
+            "balance": 3,
+            "limpieza_taza": 2,
+            "impresion_general": 3
+          },
+          "subtotal": 18,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 2,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 23,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 2,
+          "j2": 3,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 2,
+          "j2": 3,
+          "j3": 2,
+          "suma": 7
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 2,
+          "j2": 3,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 2,
+          "j2": 3,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 2,
+          "j2": 3,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 2,
+          "j2": 3,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 65
+    },
+    {
+      "participante": "Jessi",
+      "entrada": 2,
+      "j1": 26,
+      "j2": 24,
+      "j3": 29,
+      "total": 79,
+      "id": "SC-MR2CEGBE-e2",
+      "competidorId": "SC-MR2CEGBE",
+      "inscritoKey": "jessi",
+      "nombreInscrito": "Jessica combita",
+      "ciudad": "Cali",
+      "representa": "MAS CAFÉ",
+      "fotoUrl": "https://drive.google.com/file/d/1F4HFFpdf2z3PlfWSRVs7NSxvHb9ekAsv/view?usp=drivesdk",
+      "inscrito": {
+        "key": "jessi",
+        "id": "SC-MR2CEGBE",
+        "nombre": "Jessica combita",
+        "planilla": "Jessi",
+        "ciudad": "Cali",
+        "representa": "MAS CAFÉ",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1F4HFFpdf2z3PlfWSRVs7NSxvHb9ekAsv/view?usp=drivesdk",
+        "correo": "jesikaparra9@gmail.com",
+        "documento": "1018509921"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 4,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 26,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 4,
+            "balance": 4,
+            "limpieza_taza": 4,
+            "impresion_general": 4
+          },
+          "subtotal": 29,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 4,
+          "j2": 3,
+          "j3": 4,
+          "suma": 11
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 3,
+          "j2": 3,
+          "j3": 4,
+          "suma": 10
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 4,
+          "j2": 3,
+          "j3": 4,
+          "suma": 11
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 4,
+          "suma": 10
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 4,
+          "suma": 10
+        }
+      ],
+      "sumaVerificada": 79
+    },
+    {
+      "participante": "Jessi",
+      "entrada": 3,
+      "j1": 22,
+      "j2": 27,
+      "j3": 19,
+      "total": 68,
+      "id": "SC-MR2CEGBE-e3",
+      "competidorId": "SC-MR2CEGBE",
+      "inscritoKey": "jessi",
+      "nombreInscrito": "Jessica combita",
+      "ciudad": "Cali",
+      "representa": "MAS CAFÉ",
+      "fotoUrl": "https://drive.google.com/file/d/1F4HFFpdf2z3PlfWSRVs7NSxvHb9ekAsv/view?usp=drivesdk",
+      "inscrito": {
+        "key": "jessi",
+        "id": "SC-MR2CEGBE",
+        "nombre": "Jessica combita",
+        "planilla": "Jessi",
+        "ciudad": "Cali",
+        "representa": "MAS CAFÉ",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1F4HFFpdf2z3PlfWSRVs7NSxvHb9ekAsv/view?usp=drivesdk",
+        "correo": "jesikaparra9@gmail.com",
+        "documento": "1018509921"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 2,
+            "acidez": 2,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 22,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 4,
+            "limpieza_taza": 4,
+            "impresion_general": 3
+          },
+          "subtotal": 27,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 2,
+            "acidez": 2,
+            "dulzor": 2,
+            "cuerpo": 2,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 2
+          },
+          "subtotal": 19,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 4,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 2,
+          "j2": 3,
+          "j3": 2,
+          "suma": 7
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 2,
+          "j2": 3,
+          "j3": 2,
+          "suma": 7
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 4,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 4,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        }
+      ],
+      "sumaVerificada": 68
+    },
+    {
+      "participante": "Brayan",
+      "entrada": 1,
+      "j1": 18,
+      "j2": 19,
+      "j3": 21,
+      "total": 58,
+      "id": "SC-MR1B4PZS-e1",
+      "competidorId": "SC-MR1B4PZS",
+      "inscritoKey": "brayan",
+      "nombreInscrito": "Brayan Moreno G",
+      "ciudad": "Cali",
+      "representa": "Médium Café",
+      "fotoUrl": "https://drive.google.com/file/d/1xAaWDVWrZD0UwdpZ1KXp3jgEWQQ1IDJO/view?usp=drivesdk",
+      "inscrito": {
+        "key": "brayan",
+        "id": "SC-MR1B4PZS",
+        "nombre": "Brayan Moreno G",
+        "planilla": "Brayan",
+        "ciudad": "Cali",
+        "representa": "Médium Café",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1xAaWDVWrZD0UwdpZ1KXp3jgEWQQ1IDJO/view?usp=drivesdk",
+        "correo": "bmgpersonal99@gmail.com",
+        "documento": "1234198183"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 2,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 2,
+            "balance": 2,
+            "limpieza_taza": 2,
+            "impresion_general": 2
+          },
+          "subtotal": 18,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 2,
+            "balance": 2,
+            "limpieza_taza": 2,
+            "impresion_general": 2
+          },
+          "subtotal": 19,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 2,
+            "balance": 3,
+            "limpieza_taza": 2,
+            "impresion_general": 3
+          },
+          "subtotal": 21,
+          "actualizado": "2026-07-05T22:47:34.259Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 2,
+          "j2": 3,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        }
+      ],
+      "sumaVerificada": 58
+    },
+    {
+      "participante": "Joe",
+      "entrada": 1,
+      "j1": 28,
+      "j2": 21,
+      "j3": 19,
+      "total": 68,
+      "id": "SC-MQSNH3RD-e1",
+      "competidorId": "SC-MQSNH3RD",
+      "inscritoKey": "joe",
+      "nombreInscrito": "Joe",
+      "ciudad": "Cali",
+      "representa": "Espressoyourself",
+      "fotoUrl": "https://drive.google.com/file/d/1BFrQIyP6YK2hvYv588Fie0mAJ2iz_L98/view?usp=drivesdk",
+      "inscrito": {
+        "key": "joe",
+        "id": "SC-MQSNH3RD",
+        "nombre": "Joe",
+        "planilla": "Joe",
+        "ciudad": "Cali",
+        "representa": "Espressoyourself",
+        "habilitado": "",
+        "fotoUrl": "https://drive.google.com/file/d/1BFrQIyP6YK2hvYv588Fie0mAJ2iz_L98/view?usp=drivesdk",
+        "correo": "joehernandezpena@hotmail.com",
+        "documento": "1006172292"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 4,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 4,
+            "balance": 3,
+            "limpieza_taza": 4,
+            "impresion_general": 4
+          },
+          "subtotal": 28,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 2,
+            "dulzor": 2,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 21,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 3,
+            "acidez": 2,
+            "dulzor": 2,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 2
+          },
+          "subtotal": 19,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 2,
+          "j3": 2,
+          "suma": 7
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 2,
+          "j3": 2,
+          "suma": 7
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 2,
+          "j3": 2,
+          "suma": 7
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 4,
+          "j2": 3,
+          "j3": 2,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 68
+    },
+    {
+      "participante": "Useche",
+      "entrada": 1,
+      "j1": 31,
+      "j2": 25,
+      "j3": 24,
+      "total": 80,
+      "id": "SC-MR488BBE-e1",
+      "competidorId": "SC-MR488BBE",
+      "inscritoKey": "useche",
+      "nombreInscrito": "José Alejandro Useche",
+      "ciudad": "Cali",
+      "representa": "Purist café",
+      "fotoUrl": "https://drive.google.com/file/d/1Wohlim0taSLCBFsLR1W8rcD-n1XhTFfB/view?usp=drivesdk",
+      "inscrito": {
+        "key": "useche",
+        "id": "SC-MR488BBE",
+        "nombre": "José Alejandro Useche",
+        "planilla": "Useche",
+        "ciudad": "Cali",
+        "representa": "Purist café",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1Wohlim0taSLCBFsLR1W8rcD-n1XhTFfB/view?usp=drivesdk",
+        "correo": "josealejandro.usechemahecha@gmail.com",
+        "documento": "1006072215"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 4,
+            "acidez": 4,
+            "dulzor": 4,
+            "cuerpo": 4,
+            "balance": 4,
+            "limpieza_taza": 4,
+            "impresion_general": 4
+          },
+          "subtotal": 31,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 4,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 25,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 4,
+          "j2": 4,
+          "j3": 3,
+          "suma": 11
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        }
+      ],
+      "sumaVerificada": 80
+    },
+    {
+      "participante": "Useche",
+      "entrada": 2,
+      "j1": 30,
+      "j2": 27,
+      "j3": 25,
+      "total": 82,
+      "id": "SC-MR488BBE-e2",
+      "competidorId": "SC-MR488BBE",
+      "inscritoKey": "useche",
+      "nombreInscrito": "José Alejandro Useche",
+      "ciudad": "Cali",
+      "representa": "Purist café",
+      "fotoUrl": "https://drive.google.com/file/d/1Wohlim0taSLCBFsLR1W8rcD-n1XhTFfB/view?usp=drivesdk",
+      "inscrito": {
+        "key": "useche",
+        "id": "SC-MR488BBE",
+        "nombre": "José Alejandro Useche",
+        "planilla": "Useche",
+        "ciudad": "Cali",
+        "representa": "Purist café",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1Wohlim0taSLCBFsLR1W8rcD-n1XhTFfB/view?usp=drivesdk",
+        "correo": "josealejandro.usechemahecha@gmail.com",
+        "documento": "1006072215"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 4,
+            "acidez": 4,
+            "dulzor": 4,
+            "cuerpo": 4,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 4
+          },
+          "subtotal": 30,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 4,
+            "acidez": 4,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 27,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 25,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 4,
+          "j2": 4,
+          "j3": 4,
+          "suma": 12
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 4,
+          "j2": 4,
+          "j3": 3,
+          "suma": 11
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 4,
+          "j2": 4,
+          "j3": 3,
+          "suma": 11
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        }
+      ],
+      "sumaVerificada": 82
+    },
+    {
+      "participante": "Useche",
+      "entrada": 3,
+      "j1": 27,
+      "j2": 26,
+      "j3": 26,
+      "total": 79,
+      "id": "SC-MR488BBE-e3",
+      "competidorId": "SC-MR488BBE",
+      "inscritoKey": "useche",
+      "nombreInscrito": "José Alejandro Useche",
+      "ciudad": "Cali",
+      "representa": "Purist café",
+      "fotoUrl": "https://drive.google.com/file/d/1Wohlim0taSLCBFsLR1W8rcD-n1XhTFfB/view?usp=drivesdk",
+      "inscrito": {
+        "key": "useche",
+        "id": "SC-MR488BBE",
+        "nombre": "José Alejandro Useche",
+        "planilla": "Useche",
+        "ciudad": "Cali",
+        "representa": "Purist café",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1Wohlim0taSLCBFsLR1W8rcD-n1XhTFfB/view?usp=drivesdk",
+        "correo": "josealejandro.usechemahecha@gmail.com",
+        "documento": "1006072215"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 3,
+            "acidez": 4,
+            "dulzor": 3,
+            "cuerpo": 4,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 27,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 3,
+            "acidez": 4,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 26,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 3,
+            "acidez": 4,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 26,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 4,
+          "j2": 4,
+          "j3": 4,
+          "suma": 12
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 4,
+          "j2": 4,
+          "j3": 4,
+          "suma": 12
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 79
+    },
+    {
+      "participante": "Savedra",
+      "entrada": 1,
+      "j1": 23,
+      "j2": 23,
+      "j3": 23,
+      "total": 69,
+      "id": "SC-MR2NRDPE-e1",
+      "competidorId": "SC-MR2NRDPE",
+      "inscritoKey": "savedra",
+      "nombreInscrito": "Juan David Saavedra cardona",
+      "ciudad": "Cali",
+      "representa": "Independiente",
+      "fotoUrl": "https://drive.google.com/file/d/1jET4LD5HZ92cjFeemK4PQyKv6ltLc6Ht/view?usp=drivesdk",
+      "inscrito": {
+        "key": "savedra",
+        "id": "SC-MR2NRDPE",
+        "nombre": "Juan David Saavedra cardona",
+        "planilla": "Savedra",
+        "ciudad": "Cali",
+        "representa": "Independiente",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1jET4LD5HZ92cjFeemK4PQyKv6ltLc6Ht/view?usp=drivesdk",
+        "correo": "judasaca34@gmail.com",
+        "documento": "1107847761"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 2,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 23,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 2,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 23,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 2,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 23,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 69
+    },
+    {
+      "participante": "Savedra",
+      "entrada": 2,
+      "j1": 24,
+      "j2": 24,
+      "j3": 22,
+      "total": 70,
+      "id": "SC-MR2NRDPE-e2",
+      "competidorId": "SC-MR2NRDPE",
+      "inscritoKey": "savedra",
+      "nombreInscrito": "Juan David Saavedra cardona",
+      "ciudad": "Cali",
+      "representa": "Independiente",
+      "fotoUrl": "https://drive.google.com/file/d/1jET4LD5HZ92cjFeemK4PQyKv6ltLc6Ht/view?usp=drivesdk",
+      "inscrito": {
+        "key": "savedra",
+        "id": "SC-MR2NRDPE",
+        "nombre": "Juan David Saavedra cardona",
+        "planilla": "Savedra",
+        "ciudad": "Cali",
+        "representa": "Independiente",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1jET4LD5HZ92cjFeemK4PQyKv6ltLc6Ht/view?usp=drivesdk",
+        "correo": "judasaca34@gmail.com",
+        "documento": "1107847761"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 2,
+            "acidez": 2,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 22,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 70
+    },
+    {
+      "participante": "Manjares",
+      "entrada": 1,
+      "j1": 19,
+      "j2": 21,
+      "j3": 24,
+      "total": 64,
+      "id": "SC-MR442V2P-e1",
+      "competidorId": "SC-MR442V2P",
+      "inscritoKey": "manjares",
+      "nombreInscrito": "Juan Miguel Manjarres",
+      "ciudad": "Palmira",
+      "representa": "Barista independiente",
+      "fotoUrl": "https://drive.google.com/file/d/14jwUR6qJV79EL0a_dD9jJu2oOn-htsCT/view?usp=drivesdk",
+      "inscrito": {
+        "key": "manjares",
+        "id": "SC-MR442V2P",
+        "nombre": "Juan Miguel Manjarres",
+        "planilla": "Manjares",
+        "ciudad": "Palmira",
+        "representa": "Barista independiente",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/14jwUR6qJV79EL0a_dD9jJu2oOn-htsCT/view?usp=drivesdk",
+        "correo": "juanmimanjarresilva@gmail.com",
+        "documento": "1021396326"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 3,
+            "acidez": 2,
+            "dulzor": 3,
+            "cuerpo": 2,
+            "balance": 3,
+            "limpieza_taza": 2,
+            "impresion_general": 2
+          },
+          "subtotal": 19,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 2,
+            "balance": 3,
+            "limpieza_taza": 2,
+            "impresion_general": 2
+          },
+          "subtotal": 21,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 2,
+          "j2": 3,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 2,
+          "j2": 3,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        }
+      ],
+      "sumaVerificada": 64
+    },
+    {
+      "participante": "Vera",
+      "entrada": 1,
+      "j1": 19,
+      "j2": 20,
+      "j3": 21,
+      "total": 60,
+      "id": "SC-MR2KMUPR-e1",
+      "competidorId": "SC-MR2KMUPR",
+      "inscritoKey": "vera",
+      "nombreInscrito": "Juan sebastian vera",
+      "ciudad": "Cali",
+      "representa": "Barista independiente",
+      "fotoUrl": "https://drive.google.com/file/d/173jY-rAN4sh7_EpIchcFlDTFznh8mO1g/view?usp=drivesdk",
+      "inscrito": {
+        "key": "vera",
+        "id": "SC-MR2KMUPR",
+        "nombre": "Juan sebastian vera",
+        "planilla": "Vera",
+        "ciudad": "Cali",
+        "representa": "Barista independiente",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/173jY-rAN4sh7_EpIchcFlDTFznh8mO1g/view?usp=drivesdk",
+        "correo": "thesmilesmilingjj88@gmail.com",
+        "documento": "1006008177"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 2,
+            "acidez": 2,
+            "dulzor": 2,
+            "cuerpo": 2,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 19,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 2,
+            "acidez": 2,
+            "dulzor": 2,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 20,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 2,
+            "acidez": 3,
+            "dulzor": 2,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 21,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 2,
+          "j2": 3,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 60
+    },
+    {
+      "participante": "Linda",
+      "entrada": 1,
+      "j1": 27,
+      "j2": 24,
+      "j3": 22,
+      "total": 73,
+      "id": "SC-MR172ZIT-e1",
+      "competidorId": "SC-MR172ZIT",
+      "inscritoKey": "linda",
+      "nombreInscrito": "Linda Hernandez",
+      "ciudad": "Cali",
+      "representa": "Mas cafe",
+      "fotoUrl": "https://drive.google.com/file/d/1ArkCQeEZRqPOZjkFE2asOy9BdzidaoJP/view?usp=drivesdk",
+      "inscrito": {
+        "key": "linda",
+        "id": "SC-MR172ZIT",
+        "nombre": "Linda Hernandez",
+        "planilla": "Linda",
+        "ciudad": "Cali",
+        "representa": "Mas cafe",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1ArkCQeEZRqPOZjkFE2asOy9BdzidaoJP/view?usp=drivesdk",
+        "correo": "lindahernandez200025@gmail.com",
+        "documento": "1005974653"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 4,
+            "dulzor": 3,
+            "cuerpo": 4,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 4
+          },
+          "subtotal": 27,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 2,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 22,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        }
+      ],
+      "sumaVerificada": 73
+    },
+    {
+      "participante": "Linda",
+      "entrada": 2,
+      "j1": 26,
+      "j2": 23,
+      "j3": 21,
+      "total": 70,
+      "id": "SC-MR172ZIT-e2",
+      "competidorId": "SC-MR172ZIT",
+      "inscritoKey": "linda",
+      "nombreInscrito": "Linda Hernandez",
+      "ciudad": "Cali",
+      "representa": "Mas cafe",
+      "fotoUrl": "https://drive.google.com/file/d/1ArkCQeEZRqPOZjkFE2asOy9BdzidaoJP/view?usp=drivesdk",
+      "inscrito": {
+        "key": "linda",
+        "id": "SC-MR172ZIT",
+        "nombre": "Linda Hernandez",
+        "planilla": "Linda",
+        "ciudad": "Cali",
+        "representa": "Mas cafe",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1ArkCQeEZRqPOZjkFE2asOy9BdzidaoJP/view?usp=drivesdk",
+        "correo": "lindahernandez200025@gmail.com",
+        "documento": "1005974653"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 4
+          },
+          "subtotal": 26,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 2,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 23,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 2,
+            "acidez": 2,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 21,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 2,
+          "j3": 2,
+          "suma": 7
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        }
+      ],
+      "sumaVerificada": 70
+    },
+    {
+      "participante": "Colorado",
+      "entrada": 1,
+      "j1": 27,
+      "j2": 23,
+      "j3": 26,
+      "total": 76,
+      "id": "SC-MQQQCABR-e1",
+      "competidorId": "SC-MQQQCABR",
+      "inscritoKey": "colorado",
+      "nombreInscrito": "Santiago Colorado",
+      "ciudad": "Cali",
+      "representa": "Delta Coffee",
+      "fotoUrl": "https://drive.google.com/file/d/1cDE3D6gPjgpbKDOg8a-DTVtxy9gmBX9x/view?usp=drivesdk",
+      "inscrito": {
+        "key": "colorado",
+        "id": "SC-MQQQCABR",
+        "nombre": "Santiago Colorado",
+        "planilla": "Colorado",
+        "ciudad": "Cali",
+        "representa": "Delta Coffee",
+        "habilitado": "",
+        "fotoUrl": "https://drive.google.com/file/d/1cDE3D6gPjgpbKDOg8a-DTVtxy9gmBX9x/view?usp=drivesdk",
+        "correo": "santiagocoloradotrujillo@gmail.com",
+        "documento": "1006170225"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 4,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 4,
+            "limpieza_taza": 3,
+            "impresion_general": 4
+          },
+          "subtotal": 27,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 2,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 23,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 4,
+            "limpieza_taza": 3,
+            "impresion_general": 4
+          },
+          "subtotal": 26,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 3,
+          "j2": 2,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 4,
+          "j2": 3,
+          "j3": 4,
+          "suma": 11
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 4,
+          "j2": 3,
+          "j3": 4,
+          "suma": 11
+        }
+      ],
+      "sumaVerificada": 76
+    },
+    {
+      "participante": "Colorado",
+      "entrada": 2,
+      "j1": 27,
+      "j2": 26,
+      "j3": 26,
+      "total": 79,
+      "id": "SC-MQQQCABR-e2",
+      "competidorId": "SC-MQQQCABR",
+      "inscritoKey": "colorado",
+      "nombreInscrito": "Santiago Colorado",
+      "ciudad": "Cali",
+      "representa": "Delta Coffee",
+      "fotoUrl": "https://drive.google.com/file/d/1cDE3D6gPjgpbKDOg8a-DTVtxy9gmBX9x/view?usp=drivesdk",
+      "inscrito": {
+        "key": "colorado",
+        "id": "SC-MQQQCABR",
+        "nombre": "Santiago Colorado",
+        "planilla": "Colorado",
+        "ciudad": "Cali",
+        "representa": "Delta Coffee",
+        "habilitado": "",
+        "fotoUrl": "https://drive.google.com/file/d/1cDE3D6gPjgpbKDOg8a-DTVtxy9gmBX9x/view?usp=drivesdk",
+        "correo": "santiagocoloradotrujillo@gmail.com",
+        "documento": "1006170225"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 4,
+            "acidez": 4,
+            "dulzor": 4,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 27,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 4,
+            "acidez": 4,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 26,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 4,
+            "acidez": 4,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 26,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 4,
+          "j2": 4,
+          "j3": 4,
+          "suma": 12
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 4,
+          "j2": 4,
+          "j3": 4,
+          "suma": 12
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 79
+    },
+    {
+      "participante": "Colorado",
+      "entrada": 3,
+      "j1": 28,
+      "j2": 29,
+      "j3": 25,
+      "total": 82,
+      "id": "SC-MQQQCABR-e3",
+      "competidorId": "SC-MQQQCABR",
+      "inscritoKey": "colorado",
+      "nombreInscrito": "Santiago Colorado",
+      "ciudad": "Cali",
+      "representa": "Delta Coffee",
+      "fotoUrl": "https://drive.google.com/file/d/1cDE3D6gPjgpbKDOg8a-DTVtxy9gmBX9x/view?usp=drivesdk",
+      "inscrito": {
+        "key": "colorado",
+        "id": "SC-MQQQCABR",
+        "nombre": "Santiago Colorado",
+        "planilla": "Colorado",
+        "ciudad": "Cali",
+        "representa": "Delta Coffee",
+        "habilitado": "",
+        "fotoUrl": "https://drive.google.com/file/d/1cDE3D6gPjgpbKDOg8a-DTVtxy9gmBX9x/view?usp=drivesdk",
+        "correo": "santiagocoloradotrujillo@gmail.com",
+        "documento": "1006170225"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 4,
+            "acidez": 4,
+            "dulzor": 4,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 4,
+            "impresion_general": 3
+          },
+          "subtotal": 28,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 4,
+            "acidez": 4,
+            "dulzor": 4,
+            "cuerpo": 4,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 29,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 25,
+          "actualizado": "2026-07-05T22:47:34.260Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 4,
+          "j3": 4,
+          "suma": 11
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 4,
+          "j2": 4,
+          "j3": 3,
+          "suma": 11
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 4,
+          "j2": 4,
+          "j3": 3,
+          "suma": 11
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 4,
+          "j2": 4,
+          "j3": 3,
+          "suma": 11
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 3,
+          "j2": 4,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 82
+    },
+    {
+      "participante": "Polo",
+      "entrada": 1,
+      "j1": 24,
+      "j2": 26,
+      "j3": 21,
+      "total": 71,
+      "id": "SC-MR5J8QUJ-e1",
+      "competidorId": "SC-MR5J8QUJ",
+      "inscritoKey": "polo",
+      "nombreInscrito": "Ximena polo",
+      "ciudad": "Cali",
+      "representa": "Black coffee",
+      "fotoUrl": "https://drive.google.com/file/d/1VJsPhFiGTfDc6aXqYlIlDk1GhtweDjGM/view?usp=drivesdk",
+      "inscrito": {
+        "key": "polo",
+        "id": "SC-MR5J8QUJ",
+        "nombre": "Ximena polo",
+        "planilla": "Polo",
+        "ciudad": "Cali",
+        "representa": "Black coffee",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1VJsPhFiGTfDc6aXqYlIlDk1GhtweDjGM/view?usp=drivesdk",
+        "correo": "ximena.polo@gmail.com",
+        "documento": "31320969"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 4,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 4,
+            "impresion_general": 3
+          },
+          "subtotal": 26,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 2,
+            "dulzor": 2,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 21,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 4,
+          "j3": 2,
+          "suma": 9
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 4,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 71
+    }
+  ],
+  "ranking": [
+    {
+      "participante": "Colorado",
+      "entrada": 3,
+      "j1": 28,
+      "j2": 29,
+      "j3": 25,
+      "total": 82,
+      "id": "SC-MQQQCABR-e3",
+      "competidorId": "SC-MQQQCABR",
+      "inscritoKey": "colorado",
+      "nombreInscrito": "Santiago Colorado",
+      "ciudad": "Cali",
+      "representa": "Delta Coffee",
+      "fotoUrl": "https://drive.google.com/file/d/1cDE3D6gPjgpbKDOg8a-DTVtxy9gmBX9x/view?usp=drivesdk",
+      "inscrito": {
+        "key": "colorado",
+        "id": "SC-MQQQCABR",
+        "nombre": "Santiago Colorado",
+        "planilla": "Colorado",
+        "ciudad": "Cali",
+        "representa": "Delta Coffee",
+        "habilitado": "",
+        "fotoUrl": "https://drive.google.com/file/d/1cDE3D6gPjgpbKDOg8a-DTVtxy9gmBX9x/view?usp=drivesdk",
+        "correo": "santiagocoloradotrujillo@gmail.com",
+        "documento": "1006170225"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 4,
+            "acidez": 4,
+            "dulzor": 4,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 4,
+            "impresion_general": 3
+          },
+          "subtotal": 28,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 4,
+            "acidez": 4,
+            "dulzor": 4,
+            "cuerpo": 4,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 29,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 25,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 4,
+          "j3": 4,
+          "suma": 11
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 4,
+          "j2": 4,
+          "j3": 3,
+          "suma": 11
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 4,
+          "j2": 4,
+          "j3": 3,
+          "suma": 11
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 4,
+          "j2": 4,
+          "j3": 3,
+          "suma": 11
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 3,
+          "j2": 4,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 82,
+      "posicion": 1
+    },
+    {
+      "participante": "Useche",
+      "entrada": 2,
+      "j1": 30,
+      "j2": 27,
+      "j3": 25,
+      "total": 82,
+      "id": "SC-MR488BBE-e2",
+      "competidorId": "SC-MR488BBE",
+      "inscritoKey": "useche",
+      "nombreInscrito": "José Alejandro Useche",
+      "ciudad": "Cali",
+      "representa": "Purist café",
+      "fotoUrl": "https://drive.google.com/file/d/1Wohlim0taSLCBFsLR1W8rcD-n1XhTFfB/view?usp=drivesdk",
+      "inscrito": {
+        "key": "useche",
+        "id": "SC-MR488BBE",
+        "nombre": "José Alejandro Useche",
+        "planilla": "Useche",
+        "ciudad": "Cali",
+        "representa": "Purist café",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1Wohlim0taSLCBFsLR1W8rcD-n1XhTFfB/view?usp=drivesdk",
+        "correo": "josealejandro.usechemahecha@gmail.com",
+        "documento": "1006072215"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 4,
+            "acidez": 4,
+            "dulzor": 4,
+            "cuerpo": 4,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 4
+          },
+          "subtotal": 30,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 4,
+            "acidez": 4,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 27,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 25,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 4,
+          "j2": 4,
+          "j3": 4,
+          "suma": 12
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 4,
+          "j2": 4,
+          "j3": 3,
+          "suma": 11
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 4,
+          "j2": 4,
+          "j3": 3,
+          "suma": 11
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        }
+      ],
+      "sumaVerificada": 82,
+      "posicion": 2
+    },
+    {
+      "participante": "Andrenia",
+      "entrada": 1,
+      "j1": 29,
+      "j2": 24,
+      "j3": 27,
+      "total": 80,
+      "id": "SC-MR6QU500-e1",
+      "competidorId": "SC-MR6QU500",
+      "inscritoKey": "andrenia",
+      "nombreInscrito": "Andreina",
+      "ciudad": "Cali",
+      "representa": "Tierradentro",
+      "fotoUrl": "https://drive.google.com/file/d/1eBFiW59v84dNu8Bn0Ya_5vVavEGMFofN/view?usp=drivesdk",
+      "inscrito": {
+        "key": "andrenia",
+        "id": "SC-MR6QU500",
+        "nombre": "Andreina",
+        "planilla": "Andrenia",
+        "ciudad": "Cali",
+        "representa": "Tierradentro",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1eBFiW59v84dNu8Bn0Ya_5vVavEGMFofN/view?usp=drivesdk",
+        "correo": "apernia2412@gmail.com",
+        "documento": "1026308764"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 4,
+            "acidez": 3,
+            "dulzor": 4,
+            "cuerpo": 4,
+            "balance": 4,
+            "limpieza_taza": 3,
+            "impresion_general": 4
+          },
+          "subtotal": 29,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 4,
+            "acidez": 3,
+            "dulzor": 4,
+            "cuerpo": 4,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 27,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 4,
+          "j2": 3,
+          "j3": 4,
+          "suma": 11
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 4,
+          "j2": 3,
+          "j3": 4,
+          "suma": 11
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 4,
+          "j2": 3,
+          "j3": 4,
+          "suma": 11
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        }
+      ],
+      "sumaVerificada": 80,
+      "posicion": 3
+    },
+    {
+      "participante": "Jessi",
+      "entrada": 2,
+      "j1": 26,
+      "j2": 24,
+      "j3": 29,
+      "total": 79,
+      "id": "SC-MR2CEGBE-e2",
+      "competidorId": "SC-MR2CEGBE",
+      "inscritoKey": "jessi",
+      "nombreInscrito": "Jessica combita",
+      "ciudad": "Cali",
+      "representa": "MAS CAFÉ",
+      "fotoUrl": "https://drive.google.com/file/d/1F4HFFpdf2z3PlfWSRVs7NSxvHb9ekAsv/view?usp=drivesdk",
+      "inscrito": {
+        "key": "jessi",
+        "id": "SC-MR2CEGBE",
+        "nombre": "Jessica combita",
+        "planilla": "Jessi",
+        "ciudad": "Cali",
+        "representa": "MAS CAFÉ",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1F4HFFpdf2z3PlfWSRVs7NSxvHb9ekAsv/view?usp=drivesdk",
+        "correo": "jesikaparra9@gmail.com",
+        "documento": "1018509921"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 4,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 26,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 4,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 4,
+            "balance": 4,
+            "limpieza_taza": 4,
+            "impresion_general": 4
+          },
+          "subtotal": 29,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 4,
+          "j2": 3,
+          "j3": 4,
+          "suma": 11
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 3,
+          "j2": 3,
+          "j3": 4,
+          "suma": 10
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 4,
+          "j2": 3,
+          "j3": 4,
+          "suma": 11
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 4,
+          "suma": 10
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 4,
+          "suma": 10
+        }
+      ],
+      "sumaVerificada": 79,
+      "posicion": 4
+    },
+    {
+      "participante": "Linda",
+      "entrada": 1,
+      "j1": 27,
+      "j2": 24,
+      "j3": 22,
+      "total": 73,
+      "id": "SC-MR172ZIT-e1",
+      "competidorId": "SC-MR172ZIT",
+      "inscritoKey": "linda",
+      "nombreInscrito": "Linda Hernandez",
+      "ciudad": "Cali",
+      "representa": "Mas cafe",
+      "fotoUrl": "https://drive.google.com/file/d/1ArkCQeEZRqPOZjkFE2asOy9BdzidaoJP/view?usp=drivesdk",
+      "inscrito": {
+        "key": "linda",
+        "id": "SC-MR172ZIT",
+        "nombre": "Linda Hernandez",
+        "planilla": "Linda",
+        "ciudad": "Cali",
+        "representa": "Mas cafe",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1ArkCQeEZRqPOZjkFE2asOy9BdzidaoJP/view?usp=drivesdk",
+        "correo": "lindahernandez200025@gmail.com",
+        "documento": "1005974653"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 4,
+            "dulzor": 3,
+            "cuerpo": 4,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 4
+          },
+          "subtotal": 27,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 2,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 22,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        }
+      ],
+      "sumaVerificada": 73,
+      "posicion": 5
+    },
+    {
+      "participante": "Angela",
+      "entrada": 1,
+      "j1": 26,
+      "j2": 22,
+      "j3": 24,
+      "total": 72,
+      "id": "SC-MR14S1PV-e1",
+      "competidorId": "SC-MR14S1PV",
+      "inscritoKey": "angela",
+      "nombreInscrito": "Angela sibaja",
+      "ciudad": "Cali",
+      "representa": "El cafe de Astoria",
+      "fotoUrl": "https://drive.google.com/file/d/1s2v2QVXKpR0edyMN88skvllC-Hw3hvHH/view?usp=drivesdk",
+      "inscrito": {
+        "key": "angela",
+        "id": "SC-MR14S1PV",
+        "nombre": "Angela sibaja",
+        "planilla": "Angela",
+        "ciudad": "Cali",
+        "representa": "El cafe de Astoria",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1s2v2QVXKpR0edyMN88skvllC-Hw3hvHH/view?usp=drivesdk",
+        "correo": "angesibaja777@gmail.com",
+        "documento": "1143838869"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 4,
+            "cuerpo": 4,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 26,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 22,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 2,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 2,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 72,
+      "posicion": 6
+    },
+    {
+      "participante": "Polo",
+      "entrada": 1,
+      "j1": 24,
+      "j2": 26,
+      "j3": 21,
+      "total": 71,
+      "id": "SC-MR5J8QUJ-e1",
+      "competidorId": "SC-MR5J8QUJ",
+      "inscritoKey": "polo",
+      "nombreInscrito": "Ximena polo",
+      "ciudad": "Cali",
+      "representa": "Black coffee",
+      "fotoUrl": "https://drive.google.com/file/d/1VJsPhFiGTfDc6aXqYlIlDk1GhtweDjGM/view?usp=drivesdk",
+      "inscrito": {
+        "key": "polo",
+        "id": "SC-MR5J8QUJ",
+        "nombre": "Ximena polo",
+        "planilla": "Polo",
+        "ciudad": "Cali",
+        "representa": "Black coffee",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1VJsPhFiGTfDc6aXqYlIlDk1GhtweDjGM/view?usp=drivesdk",
+        "correo": "ximena.polo@gmail.com",
+        "documento": "31320969"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.262Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 4,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 4,
+            "impresion_general": 3
+          },
+          "subtotal": 26,
+          "actualizado": "2026-07-05T22:47:34.262Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 2,
+            "dulzor": 2,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 21,
+          "actualizado": "2026-07-05T22:47:34.262Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 4,
+          "j3": 2,
+          "suma": 9
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 4,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 71,
+      "posicion": 7
+    },
+    {
+      "participante": "Savedra",
+      "entrada": 2,
+      "j1": 24,
+      "j2": 24,
+      "j3": 22,
+      "total": 70,
+      "id": "SC-MR2NRDPE-e2",
+      "competidorId": "SC-MR2NRDPE",
+      "inscritoKey": "savedra",
+      "nombreInscrito": "Juan David Saavedra cardona",
+      "ciudad": "Cali",
+      "representa": "Independiente",
+      "fotoUrl": "https://drive.google.com/file/d/1jET4LD5HZ92cjFeemK4PQyKv6ltLc6Ht/view?usp=drivesdk",
+      "inscrito": {
+        "key": "savedra",
+        "id": "SC-MR2NRDPE",
+        "nombre": "Juan David Saavedra cardona",
+        "planilla": "Savedra",
+        "ciudad": "Cali",
+        "representa": "Independiente",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1jET4LD5HZ92cjFeemK4PQyKv6ltLc6Ht/view?usp=drivesdk",
+        "correo": "judasaca34@gmail.com",
+        "documento": "1107847761"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 2,
+            "acidez": 2,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 22,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 70,
+      "posicion": 8
+    },
+    {
+      "participante": "Joe",
+      "entrada": 1,
+      "j1": 28,
+      "j2": 21,
+      "j3": 19,
+      "total": 68,
+      "id": "SC-MQSNH3RD-e1",
+      "competidorId": "SC-MQSNH3RD",
+      "inscritoKey": "joe",
+      "nombreInscrito": "Joe",
+      "ciudad": "Cali",
+      "representa": "Espressoyourself",
+      "fotoUrl": "https://drive.google.com/file/d/1BFrQIyP6YK2hvYv588Fie0mAJ2iz_L98/view?usp=drivesdk",
+      "inscrito": {
+        "key": "joe",
+        "id": "SC-MQSNH3RD",
+        "nombre": "Joe",
+        "planilla": "Joe",
+        "ciudad": "Cali",
+        "representa": "Espressoyourself",
+        "habilitado": "",
+        "fotoUrl": "https://drive.google.com/file/d/1BFrQIyP6YK2hvYv588Fie0mAJ2iz_L98/view?usp=drivesdk",
+        "correo": "joehernandezpena@hotmail.com",
+        "documento": "1006172292"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 4,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 4,
+            "balance": 3,
+            "limpieza_taza": 4,
+            "impresion_general": 4
+          },
+          "subtotal": 28,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 2,
+            "dulzor": 2,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 21,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 3,
+            "acidez": 2,
+            "dulzor": 2,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 2
+          },
+          "subtotal": 19,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 2,
+          "suma": 8
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 2,
+          "j3": 2,
+          "suma": 7
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 2,
+          "j3": 2,
+          "suma": 7
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 2,
+          "j3": 2,
+          "suma": 7
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 4,
+          "j2": 3,
+          "j3": 3,
+          "suma": 10
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 4,
+          "j2": 3,
+          "j3": 2,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 68,
+      "posicion": 9
+    },
+    {
+      "participante": "Manjares",
+      "entrada": 1,
+      "j1": 19,
+      "j2": 21,
+      "j3": 24,
+      "total": 64,
+      "id": "SC-MR442V2P-e1",
+      "competidorId": "SC-MR442V2P",
+      "inscritoKey": "manjares",
+      "nombreInscrito": "Juan Miguel Manjarres",
+      "ciudad": "Palmira",
+      "representa": "Barista independiente",
+      "fotoUrl": "https://drive.google.com/file/d/14jwUR6qJV79EL0a_dD9jJu2oOn-htsCT/view?usp=drivesdk",
+      "inscrito": {
+        "key": "manjares",
+        "id": "SC-MR442V2P",
+        "nombre": "Juan Miguel Manjarres",
+        "planilla": "Manjares",
+        "ciudad": "Palmira",
+        "representa": "Barista independiente",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/14jwUR6qJV79EL0a_dD9jJu2oOn-htsCT/view?usp=drivesdk",
+        "correo": "juanmimanjarresilva@gmail.com",
+        "documento": "1021396326"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 3,
+            "acidez": 2,
+            "dulzor": 3,
+            "cuerpo": 2,
+            "balance": 3,
+            "limpieza_taza": 2,
+            "impresion_general": 2
+          },
+          "subtotal": 19,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 2,
+            "balance": 3,
+            "limpieza_taza": 2,
+            "impresion_general": 2
+          },
+          "subtotal": 21,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 3,
+            "balance": 3,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 24,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 2,
+          "j2": 3,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 2,
+          "j2": 3,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        }
+      ],
+      "sumaVerificada": 64,
+      "posicion": 10
+    },
+    {
+      "participante": "Vera",
+      "entrada": 1,
+      "j1": 19,
+      "j2": 20,
+      "j3": 21,
+      "total": 60,
+      "id": "SC-MR2KMUPR-e1",
+      "competidorId": "SC-MR2KMUPR",
+      "inscritoKey": "vera",
+      "nombreInscrito": "Juan sebastian vera",
+      "ciudad": "Cali",
+      "representa": "Barista independiente",
+      "fotoUrl": "https://drive.google.com/file/d/173jY-rAN4sh7_EpIchcFlDTFznh8mO1g/view?usp=drivesdk",
+      "inscrito": {
+        "key": "vera",
+        "id": "SC-MR2KMUPR",
+        "nombre": "Juan sebastian vera",
+        "planilla": "Vera",
+        "ciudad": "Cali",
+        "representa": "Barista independiente",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/173jY-rAN4sh7_EpIchcFlDTFznh8mO1g/view?usp=drivesdk",
+        "correo": "thesmilesmilingjj88@gmail.com",
+        "documento": "1006008177"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 2,
+            "acidez": 2,
+            "dulzor": 2,
+            "cuerpo": 2,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 19,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 2,
+            "acidez": 2,
+            "dulzor": 2,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 20,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 3,
+            "sabor": 2,
+            "acidez": 3,
+            "dulzor": 2,
+            "cuerpo": 3,
+            "balance": 2,
+            "limpieza_taza": 3,
+            "impresion_general": 3
+          },
+          "subtotal": 21,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 2,
+          "j2": 3,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        }
+      ],
+      "sumaVerificada": 60,
+      "posicion": 11
+    },
+    {
+      "participante": "Brayan",
+      "entrada": 1,
+      "j1": 18,
+      "j2": 19,
+      "j3": 21,
+      "total": 58,
+      "id": "SC-MR1B4PZS-e1",
+      "competidorId": "SC-MR1B4PZS",
+      "inscritoKey": "brayan",
+      "nombreInscrito": "Brayan Moreno G",
+      "ciudad": "Cali",
+      "representa": "Médium Café",
+      "fotoUrl": "https://drive.google.com/file/d/1xAaWDVWrZD0UwdpZ1KXp3jgEWQQ1IDJO/view?usp=drivesdk",
+      "inscrito": {
+        "key": "brayan",
+        "id": "SC-MR1B4PZS",
+        "nombre": "Brayan Moreno G",
+        "planilla": "Brayan",
+        "ciudad": "Cali",
+        "representa": "Médium Café",
+        "habilitado": "Sí",
+        "fotoUrl": "https://drive.google.com/file/d/1xAaWDVWrZD0UwdpZ1KXp3jgEWQQ1IDJO/view?usp=drivesdk",
+        "correo": "bmgpersonal99@gmail.com",
+        "documento": "1234198183"
+      },
+      "judges": {
+        "j1": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 2,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 2,
+            "balance": 2,
+            "limpieza_taza": 2,
+            "impresion_general": 2
+          },
+          "subtotal": 18,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j2": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 2,
+            "balance": 2,
+            "limpieza_taza": 2,
+            "impresion_general": 2
+          },
+          "subtotal": 19,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        },
+        "j3": {
+          "scores": {
+            "aroma": 2,
+            "sabor": 3,
+            "acidez": 3,
+            "dulzor": 3,
+            "cuerpo": 2,
+            "balance": 3,
+            "limpieza_taza": 2,
+            "impresion_general": 3
+          },
+          "subtotal": 21,
+          "actualizado": "2026-07-05T22:47:34.261Z",
+          "imported": true
+        }
+      },
+      "breakdown": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "j1": 2,
+          "j2": 3,
+          "j3": 3,
+          "suma": 8
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "j1": 3,
+          "j2": 3,
+          "j3": 3,
+          "suma": 9
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "j1": 2,
+          "j2": 2,
+          "j3": 2,
+          "suma": 6
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "j1": 2,
+          "j2": 2,
+          "j3": 3,
+          "suma": 7
+        }
+      ],
+      "sumaVerificada": 58,
+      "posicion": 12
+    }
+  ],
+  "calificaciones": {
+    "scores": {
+      "SC-MQQQCABR": {
+        "competidorId": "SC-MQQQCABR",
+        "nombre": "Santiago Colorado",
+        "judges": {
+          "j1": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 4,
+              "acidez": 4,
+              "dulzor": 4,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 4,
+              "impresion_general": 3
+            },
+            "subtotal": 28,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j2": {
+            "scores": {
+              "aroma": 4,
+              "sabor": 4,
+              "acidez": 4,
+              "dulzor": 4,
+              "cuerpo": 4,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 29,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j3": {
+            "scores": {
+              "aroma": 4,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 25,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          }
+        },
+        "notasPorJuez": {
+          "j1": "",
+          "j2": "",
+          "j3": ""
+        },
+        "sumaTotal": 82,
+        "promedio": 27.3,
+        "actualizado": "2026-07-05T22:47:34.262Z",
+        "meta": {
+          "evento": "V60 Championship — Preliminar 1",
+          "entradaUsada": 3,
+          "preliminar": 1,
+          "planilla": "Colorado",
+          "inscritoId": "SC-MQQQCABR",
+          "ciudad": "Cali",
+          "representa": "Delta Coffee"
+        }
+      },
+      "SC-MR488BBE": {
+        "competidorId": "SC-MR488BBE",
+        "nombre": "José Alejandro Useche",
+        "judges": {
+          "j1": {
+            "scores": {
+              "aroma": 4,
+              "sabor": 4,
+              "acidez": 4,
+              "dulzor": 4,
+              "cuerpo": 4,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 4
+            },
+            "subtotal": 30,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j2": {
+            "scores": {
+              "aroma": 4,
+              "sabor": 4,
+              "acidez": 4,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 27,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j3": {
+            "scores": {
+              "aroma": 4,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 25,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          }
+        },
+        "notasPorJuez": {
+          "j1": "",
+          "j2": "",
+          "j3": ""
+        },
+        "sumaTotal": 82,
+        "promedio": 27.3,
+        "actualizado": "2026-07-05T22:47:34.262Z",
+        "meta": {
+          "evento": "V60 Championship — Preliminar 1",
+          "entradaUsada": 2,
+          "preliminar": 1,
+          "planilla": "Useche",
+          "inscritoId": "SC-MR488BBE",
+          "ciudad": "Cali",
+          "representa": "Purist café"
+        }
+      },
+      "SC-MR6QU500": {
+        "competidorId": "SC-MR6QU500",
+        "nombre": "Andreina",
+        "judges": {
+          "j1": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 4,
+              "acidez": 3,
+              "dulzor": 4,
+              "cuerpo": 4,
+              "balance": 4,
+              "limpieza_taza": 3,
+              "impresion_general": 4
+            },
+            "subtotal": 29,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j2": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 24,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j3": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 4,
+              "acidez": 3,
+              "dulzor": 4,
+              "cuerpo": 4,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 27,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          }
+        },
+        "notasPorJuez": {
+          "j1": "",
+          "j2": "",
+          "j3": ""
+        },
+        "sumaTotal": 80,
+        "promedio": 26.7,
+        "actualizado": "2026-07-05T22:47:34.262Z",
+        "meta": {
+          "evento": "V60 Championship — Preliminar 1",
+          "entradaUsada": 1,
+          "preliminar": 1,
+          "planilla": "Andrenia",
+          "inscritoId": "SC-MR6QU500",
+          "ciudad": "Cali",
+          "representa": "Tierradentro"
+        }
+      },
+      "SC-MR2CEGBE": {
+        "competidorId": "SC-MR2CEGBE",
+        "nombre": "Jessica combita",
+        "judges": {
+          "j1": {
+            "scores": {
+              "aroma": 4,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 4,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 26,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j2": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 24,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j3": {
+            "scores": {
+              "aroma": 4,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 4,
+              "balance": 4,
+              "limpieza_taza": 4,
+              "impresion_general": 4
+            },
+            "subtotal": 29,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          }
+        },
+        "notasPorJuez": {
+          "j1": "",
+          "j2": "",
+          "j3": ""
+        },
+        "sumaTotal": 79,
+        "promedio": 26.3,
+        "actualizado": "2026-07-05T22:47:34.262Z",
+        "meta": {
+          "evento": "V60 Championship — Preliminar 1",
+          "entradaUsada": 2,
+          "preliminar": 1,
+          "planilla": "Jessi",
+          "inscritoId": "SC-MR2CEGBE",
+          "ciudad": "Cali",
+          "representa": "MAS CAFÉ"
+        }
+      },
+      "SC-MR172ZIT": {
+        "competidorId": "SC-MR172ZIT",
+        "nombre": "Linda Hernandez",
+        "judges": {
+          "j1": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 3,
+              "acidez": 4,
+              "dulzor": 3,
+              "cuerpo": 4,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 4
+            },
+            "subtotal": 27,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j2": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 24,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j3": {
+            "scores": {
+              "aroma": 2,
+              "sabor": 2,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 22,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          }
+        },
+        "notasPorJuez": {
+          "j1": "",
+          "j2": "",
+          "j3": ""
+        },
+        "sumaTotal": 73,
+        "promedio": 24.3,
+        "actualizado": "2026-07-05T22:47:34.262Z",
+        "meta": {
+          "evento": "V60 Championship — Preliminar 1",
+          "entradaUsada": 1,
+          "preliminar": 1,
+          "planilla": "Linda",
+          "inscritoId": "SC-MR172ZIT",
+          "ciudad": "Cali",
+          "representa": "Mas cafe"
+        }
+      },
+      "SC-MR14S1PV": {
+        "competidorId": "SC-MR14S1PV",
+        "nombre": "Angela sibaja",
+        "judges": {
+          "j1": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 4,
+              "cuerpo": 4,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 26,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j2": {
+            "scores": {
+              "aroma": 2,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 2,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 22,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j3": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 24,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          }
+        },
+        "notasPorJuez": {
+          "j1": "",
+          "j2": "",
+          "j3": ""
+        },
+        "sumaTotal": 72,
+        "promedio": 24,
+        "actualizado": "2026-07-05T22:47:34.262Z",
+        "meta": {
+          "evento": "V60 Championship — Preliminar 1",
+          "entradaUsada": 1,
+          "preliminar": 1,
+          "planilla": "Angela",
+          "inscritoId": "SC-MR14S1PV",
+          "ciudad": "Cali",
+          "representa": "El cafe de Astoria"
+        }
+      },
+      "SC-MR5J8QUJ": {
+        "competidorId": "SC-MR5J8QUJ",
+        "nombre": "Ximena polo",
+        "judges": {
+          "j1": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 24,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j2": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 3,
+              "acidez": 4,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 4,
+              "impresion_general": 3
+            },
+            "subtotal": 26,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j3": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 3,
+              "acidez": 2,
+              "dulzor": 2,
+              "cuerpo": 3,
+              "balance": 2,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 21,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          }
+        },
+        "notasPorJuez": {
+          "j1": "",
+          "j2": "",
+          "j3": ""
+        },
+        "sumaTotal": 71,
+        "promedio": 23.7,
+        "actualizado": "2026-07-05T22:47:34.262Z",
+        "meta": {
+          "evento": "V60 Championship — Preliminar 1",
+          "entradaUsada": 1,
+          "preliminar": 1,
+          "planilla": "Polo",
+          "inscritoId": "SC-MR5J8QUJ",
+          "ciudad": "Cali",
+          "representa": "Black coffee"
+        }
+      },
+      "SC-MR2NRDPE": {
+        "competidorId": "SC-MR2NRDPE",
+        "nombre": "Juan David Saavedra cardona",
+        "judges": {
+          "j1": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 24,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j2": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 24,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j3": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 2,
+              "acidez": 2,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 22,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          }
+        },
+        "notasPorJuez": {
+          "j1": "",
+          "j2": "",
+          "j3": ""
+        },
+        "sumaTotal": 70,
+        "promedio": 23.3,
+        "actualizado": "2026-07-05T22:47:34.262Z",
+        "meta": {
+          "evento": "V60 Championship — Preliminar 1",
+          "entradaUsada": 2,
+          "preliminar": 1,
+          "planilla": "Savedra",
+          "inscritoId": "SC-MR2NRDPE",
+          "ciudad": "Cali",
+          "representa": "Independiente"
+        }
+      },
+      "SC-MQSNH3RD": {
+        "competidorId": "SC-MQSNH3RD",
+        "nombre": "Joe",
+        "judges": {
+          "j1": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 4,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 4,
+              "balance": 3,
+              "limpieza_taza": 4,
+              "impresion_general": 4
+            },
+            "subtotal": 28,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j2": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 3,
+              "acidez": 2,
+              "dulzor": 2,
+              "cuerpo": 3,
+              "balance": 2,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 21,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j3": {
+            "scores": {
+              "aroma": 2,
+              "sabor": 3,
+              "acidez": 2,
+              "dulzor": 2,
+              "cuerpo": 3,
+              "balance": 2,
+              "limpieza_taza": 3,
+              "impresion_general": 2
+            },
+            "subtotal": 19,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          }
+        },
+        "notasPorJuez": {
+          "j1": "",
+          "j2": "",
+          "j3": ""
+        },
+        "sumaTotal": 68,
+        "promedio": 22.7,
+        "actualizado": "2026-07-05T22:47:34.262Z",
+        "meta": {
+          "evento": "V60 Championship — Preliminar 1",
+          "entradaUsada": 1,
+          "preliminar": 1,
+          "planilla": "Joe",
+          "inscritoId": "SC-MQSNH3RD",
+          "ciudad": "Cali",
+          "representa": "Espressoyourself"
+        }
+      },
+      "SC-MR442V2P": {
+        "competidorId": "SC-MR442V2P",
+        "nombre": "Juan Miguel Manjarres",
+        "judges": {
+          "j1": {
+            "scores": {
+              "aroma": 2,
+              "sabor": 3,
+              "acidez": 2,
+              "dulzor": 3,
+              "cuerpo": 2,
+              "balance": 3,
+              "limpieza_taza": 2,
+              "impresion_general": 2
+            },
+            "subtotal": 19,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j2": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 2,
+              "balance": 3,
+              "limpieza_taza": 2,
+              "impresion_general": 2
+            },
+            "subtotal": 21,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j3": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 3,
+              "balance": 3,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 24,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          }
+        },
+        "notasPorJuez": {
+          "j1": "",
+          "j2": "",
+          "j3": ""
+        },
+        "sumaTotal": 64,
+        "promedio": 21.3,
+        "actualizado": "2026-07-05T22:47:34.262Z",
+        "meta": {
+          "evento": "V60 Championship — Preliminar 1",
+          "entradaUsada": 1,
+          "preliminar": 1,
+          "planilla": "Manjares",
+          "inscritoId": "SC-MR442V2P",
+          "ciudad": "Palmira",
+          "representa": "Barista independiente"
+        }
+      },
+      "SC-MR2KMUPR": {
+        "competidorId": "SC-MR2KMUPR",
+        "nombre": "Juan sebastian vera",
+        "judges": {
+          "j1": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 2,
+              "acidez": 2,
+              "dulzor": 2,
+              "cuerpo": 2,
+              "balance": 2,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 19,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j2": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 2,
+              "acidez": 2,
+              "dulzor": 2,
+              "cuerpo": 3,
+              "balance": 2,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 20,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j3": {
+            "scores": {
+              "aroma": 3,
+              "sabor": 2,
+              "acidez": 3,
+              "dulzor": 2,
+              "cuerpo": 3,
+              "balance": 2,
+              "limpieza_taza": 3,
+              "impresion_general": 3
+            },
+            "subtotal": 21,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          }
+        },
+        "notasPorJuez": {
+          "j1": "",
+          "j2": "",
+          "j3": ""
+        },
+        "sumaTotal": 60,
+        "promedio": 20,
+        "actualizado": "2026-07-05T22:47:34.262Z",
+        "meta": {
+          "evento": "V60 Championship — Preliminar 1",
+          "entradaUsada": 1,
+          "preliminar": 1,
+          "planilla": "Vera",
+          "inscritoId": "SC-MR2KMUPR",
+          "ciudad": "Cali",
+          "representa": "Barista independiente"
+        }
+      },
+      "SC-MR1B4PZS": {
+        "competidorId": "SC-MR1B4PZS",
+        "nombre": "Brayan Moreno G",
+        "judges": {
+          "j1": {
+            "scores": {
+              "aroma": 2,
+              "sabor": 2,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 2,
+              "balance": 2,
+              "limpieza_taza": 2,
+              "impresion_general": 2
+            },
+            "subtotal": 18,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j2": {
+            "scores": {
+              "aroma": 2,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 2,
+              "balance": 2,
+              "limpieza_taza": 2,
+              "impresion_general": 2
+            },
+            "subtotal": 19,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          },
+          "j3": {
+            "scores": {
+              "aroma": 2,
+              "sabor": 3,
+              "acidez": 3,
+              "dulzor": 3,
+              "cuerpo": 2,
+              "balance": 3,
+              "limpieza_taza": 2,
+              "impresion_general": 3
+            },
+            "subtotal": 21,
+            "actualizado": "2026-07-05T22:47:34.262Z",
+            "imported": true
+          }
+        },
+        "notasPorJuez": {
+          "j1": "",
+          "j2": "",
+          "j3": ""
+        },
+        "sumaTotal": 58,
+        "promedio": 19.3,
+        "actualizado": "2026-07-05T22:47:34.262Z",
+        "meta": {
+          "evento": "V60 Championship — Preliminar 1",
+          "entradaUsada": 1,
+          "preliminar": 1,
+          "planilla": "Brayan",
+          "inscritoId": "SC-MR1B4PZS",
+          "ciudad": "Cali",
+          "representa": "Médium Café"
+        }
+      }
+    },
+    "actualizado": "2026-07-05T22:47:34.262Z"
+  },
+  "competidores": [
+    {
+      "id": "SC-MQQQCABR",
+      "nombre": "Santiago Colorado",
+      "ciudad": "Cali",
+      "representa": "Delta Coffee",
+      "fotoUrl": "https://drive.google.com/file/d/1cDE3D6gPjgpbKDOg8a-DTVtxy9gmBX9x/view?usp=drivesdk",
+      "posicion": 1,
+      "total": 82,
+      "planilla": "Colorado",
+      "entradaUsada": 3
+    },
+    {
+      "id": "SC-MR488BBE",
+      "nombre": "José Alejandro Useche",
+      "ciudad": "Cali",
+      "representa": "Purist café",
+      "fotoUrl": "https://drive.google.com/file/d/1Wohlim0taSLCBFsLR1W8rcD-n1XhTFfB/view?usp=drivesdk",
+      "posicion": 2,
+      "total": 82,
+      "planilla": "Useche",
+      "entradaUsada": 2
+    },
+    {
+      "id": "SC-MR6QU500",
+      "nombre": "Andreina",
+      "ciudad": "Cali",
+      "representa": "Tierradentro",
+      "fotoUrl": "https://drive.google.com/file/d/1eBFiW59v84dNu8Bn0Ya_5vVavEGMFofN/view?usp=drivesdk",
+      "posicion": 3,
+      "total": 80,
+      "planilla": "Andrenia",
+      "entradaUsada": 1
+    },
+    {
+      "id": "SC-MR2CEGBE",
+      "nombre": "Jessica combita",
+      "ciudad": "Cali",
+      "representa": "MAS CAFÉ",
+      "fotoUrl": "https://drive.google.com/file/d/1F4HFFpdf2z3PlfWSRVs7NSxvHb9ekAsv/view?usp=drivesdk",
+      "posicion": 4,
+      "total": 79,
+      "planilla": "Jessi",
+      "entradaUsada": 2
+    },
+    {
+      "id": "SC-MR172ZIT",
+      "nombre": "Linda Hernandez",
+      "ciudad": "Cali",
+      "representa": "Mas cafe",
+      "fotoUrl": "https://drive.google.com/file/d/1ArkCQeEZRqPOZjkFE2asOy9BdzidaoJP/view?usp=drivesdk",
+      "posicion": 5,
+      "total": 73,
+      "planilla": "Linda",
+      "entradaUsada": 1
+    },
+    {
+      "id": "SC-MR14S1PV",
+      "nombre": "Angela sibaja",
+      "ciudad": "Cali",
+      "representa": "El cafe de Astoria",
+      "fotoUrl": "https://drive.google.com/file/d/1s2v2QVXKpR0edyMN88skvllC-Hw3hvHH/view?usp=drivesdk",
+      "posicion": 6,
+      "total": 72,
+      "planilla": "Angela",
+      "entradaUsada": 1
+    },
+    {
+      "id": "SC-MR5J8QUJ",
+      "nombre": "Ximena polo",
+      "ciudad": "Cali",
+      "representa": "Black coffee",
+      "fotoUrl": "https://drive.google.com/file/d/1VJsPhFiGTfDc6aXqYlIlDk1GhtweDjGM/view?usp=drivesdk",
+      "posicion": 7,
+      "total": 71,
+      "planilla": "Polo",
+      "entradaUsada": 1
+    },
+    {
+      "id": "SC-MR2NRDPE",
+      "nombre": "Juan David Saavedra cardona",
+      "ciudad": "Cali",
+      "representa": "Independiente",
+      "fotoUrl": "https://drive.google.com/file/d/1jET4LD5HZ92cjFeemK4PQyKv6ltLc6Ht/view?usp=drivesdk",
+      "posicion": 8,
+      "total": 70,
+      "planilla": "Savedra",
+      "entradaUsada": 2
+    },
+    {
+      "id": "SC-MQSNH3RD",
+      "nombre": "Joe",
+      "ciudad": "Cali",
+      "representa": "Espressoyourself",
+      "fotoUrl": "https://drive.google.com/file/d/1BFrQIyP6YK2hvYv588Fie0mAJ2iz_L98/view?usp=drivesdk",
+      "posicion": 9,
+      "total": 68,
+      "planilla": "Joe",
+      "entradaUsada": 1
+    },
+    {
+      "id": "SC-MR442V2P",
+      "nombre": "Juan Miguel Manjarres",
+      "ciudad": "Palmira",
+      "representa": "Barista independiente",
+      "fotoUrl": "https://drive.google.com/file/d/14jwUR6qJV79EL0a_dD9jJu2oOn-htsCT/view?usp=drivesdk",
+      "posicion": 10,
+      "total": 64,
+      "planilla": "Manjares",
+      "entradaUsada": 1
+    },
+    {
+      "id": "SC-MR2KMUPR",
+      "nombre": "Juan sebastian vera",
+      "ciudad": "Cali",
+      "representa": "Barista independiente",
+      "fotoUrl": "https://drive.google.com/file/d/173jY-rAN4sh7_EpIchcFlDTFznh8mO1g/view?usp=drivesdk",
+      "posicion": 11,
+      "total": 60,
+      "planilla": "Vera",
+      "entradaUsada": 1
+    },
+    {
+      "id": "SC-MR1B4PZS",
+      "nombre": "Brayan Moreno G",
+      "ciudad": "Cali",
+      "representa": "Médium Café",
+      "fotoUrl": "https://drive.google.com/file/d/1xAaWDVWrZD0UwdpZ1KXp3jgEWQQ1IDJO/view?usp=drivesdk",
+      "posicion": 12,
+      "total": 58,
+      "planilla": "Brayan",
+      "entradaUsada": 1
+    }
+  ],
+  "platformConfig": {
+    "eventName": "V60 Championship — Preliminar 1",
+    "eventId": "V60 Championship — Preliminar 1",
+    "eventSubtitle": "Café filtrado V60 · 3 jueces · 8 parámetros SCA",
+    "scoring": {
+      "disciplina": "filtrado",
+      "modo": "puntaje_general",
+      "scaleMin": 1,
+      "scaleMax": 6,
+      "jueces": 3,
+      "avancePorRonda": 8,
+      "autoAvance": true,
+      "competidoresEsperados": 12,
+      "mostrarFotos": true,
+      "criteria": [
+        {
+          "key": "aroma",
+          "label": "Aroma",
+          "desc": "Parámetro sensorial SCA / WBrC"
+        },
+        {
+          "key": "sabor",
+          "label": "Sabor",
+          "desc": "Parámetro sensorial SCA / WBrC"
+        },
+        {
+          "key": "acidez",
+          "label": "Acidez",
+          "desc": "Parámetro sensorial SCA / WBrC"
+        },
+        {
+          "key": "dulzor",
+          "label": "Dulzor",
+          "desc": "Parámetro sensorial SCA / WBrC"
+        },
+        {
+          "key": "cuerpo",
+          "label": "Cuerpo",
+          "desc": "Parámetro sensorial SCA / WBrC"
+        },
+        {
+          "key": "balance",
+          "label": "Balance",
+          "desc": "Parámetro sensorial SCA / WBrC"
+        },
+        {
+          "key": "limpieza_taza",
+          "label": "Limpieza de taza",
+          "desc": "Parámetro sensorial SCA / WBrC"
+        },
+        {
+          "key": "impresion_general",
+          "label": "Impresión general",
+          "desc": "Parámetro sensorial SCA / WBrC"
+        }
+      ]
+    }
+  },
+  "exportedAt": "2026-07-05T22:47:34.264Z"
+}

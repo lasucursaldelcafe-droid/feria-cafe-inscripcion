@@ -1196,8 +1196,8 @@
   function competenciaEventKey(val) {
     var s = String(val || '').trim();
     if (!s) return '';
-    if (/preliminar\s*2/i.test(s) || /2\.ª/i.test(s)) return 'V60 Championship — Preliminar 2';
-    if (/preliminar\s*1/i.test(s) || /1\.ª/i.test(s)) return 'V60 Championship — Preliminar 1';
+    if (/preliminar\s*2/i.test(s) || /evento\s*2/i.test(s) || /2\.ª/i.test(s)) return 'V60 Championship — Preliminar 2';
+    if (/preliminar\s*1/i.test(s) || /evento\s*1/i.test(s) || /1\.ª/i.test(s)) return 'V60 Championship — Preliminar 1';
     if (s === 'V60 Championship') return 'V60 Championship — Preliminar 1';
     return s;
   }
@@ -3314,11 +3314,15 @@
       .replace(/^-|-$/g, '');
   }
 
-  function findCompetidorIdForPreliminar(nombre) {
-    var slug = slugifyCompetidorName(nombre);
+  function findCompetidorIdForPreliminar(nombreOrId) {
+    if (window.Preliminar1Results && window.Preliminar1Results.resolveInscritoId) {
+      var fromKit = window.Preliminar1Results.resolveInscritoId(nombreOrId);
+      if (fromKit) return fromKit;
+    }
+    var slug = slugifyCompetidorName(nombreOrId);
     for (var i = 0; i < competidores.length; i++) {
       var c = competidores[i];
-      if (slugifyCompetidorName(c.nombre) === slug) return c.id;
+      if (c.id === nombreOrId || slugifyCompetidorName(c.nombre) === slug) return c.id;
       if (String(c.id || '').toLowerCase() === slug) return c.id;
     }
     return slug;
@@ -3339,10 +3343,16 @@
     }
     var ranking = kit.ranking || [];
     var rawCount = (kit.rawRows || []).length;
+    var inscritosCount = (kit.inscritos || []).length;
     var rows = ranking.map(function (row) {
+      var label = row.nombreInscrito || row.participante;
+      var sub = row.participante !== label
+        ? '<span class="jurado-preliminar-planilla">' + escapeHtml(row.participante) + '</span>'
+        : '';
       return '<tr>' +
         '<td class="jurado-preliminar-rank">' + row.posicion + '</td>' +
-        '<td><strong>' + escapeHtml(row.participante) + '</strong></td>' +
+        '<td><code class="jurado-preliminar-id">' + escapeHtml(row.competidorId) + '</code></td>' +
+        '<td><strong>' + escapeHtml(label) + '</strong>' + sub + '</td>' +
         '<td class="jurado-preliminar-num">T' + row.entrada + '</td>' +
         '<td class="jurado-preliminar-num">' + row.j1 + '</td>' +
         '<td class="jurado-preliminar-num">' + row.j2 + '</td>' +
@@ -3353,17 +3363,17 @@
     box.innerHTML =
       '<div class="jurado-preliminar-card">' +
       '<div class="jurado-preliminar-head">' +
-      '<h3>Preliminar 1 — datos de referencia</h3>' +
-      '<p class="jurado-hint">' + escapeHtml(kit.event.nombre) + ' · ' + rawCount + ' tandas · ' +
-      ranking.length + ' competidores (mejor tanda) · 3 jueces · 8 parámetros SCA</p>' +
+      '<h3>Preliminar 1 — cruzado con inscritos</h3>' +
+      '<p class="jurado-hint">' + escapeHtml(kit.event.nombre) + ' · ' + inscritosCount + ' inscritos · ' +
+      rawCount + ' tandas · ' + ranking.length + ' en ranking (mejor tanda) · IDs <code>SC-*</code></p>' +
       '</div>' +
       '<div class="jurado-preliminar-table-wrap">' +
       '<table class="jurado-preliminar-table">' +
       '<thead><tr>' +
-      '<th>#</th><th>Competidor</th><th>Tanda</th><th>J1</th><th>J2</th><th>J3</th><th>Total</th>' +
+      '<th>#</th><th>ID</th><th>Competidor</th><th>Tanda</th><th>J1</th><th>J2</th><th>J3</th><th>Total</th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table>' +
       '</div>' +
-      '<p class="jurado-hint jurado-preliminar-foot">Descarga el JSON completo (21 tandas + desglose por parámetro) o cárgalo en la consola para poblar calificaciones.</p>' +
+      '<p class="jurado-hint jurado-preliminar-foot">Importar carga calificaciones con ID real de inscripción (Sheets). Nombres de planilla entre paréntesis cuando difieren.</p>' +
       '</div>';
   }
 
@@ -3396,12 +3406,12 @@
     var unmatched = [];
     Object.keys(sourceScores).forEach(function (srcId) {
       var row = sourceScores[srcId];
-      var targetId = findCompetidorIdForPreliminar(row.nombre);
+      var targetId = row.competidorId || findCompetidorIdForPreliminar(row.nombre);
       var matched = false;
       for (var i = 0; i < competidores.length; i++) {
         if (competidores[i].id === targetId) { matched = true; break; }
       }
-      if (!matched && competidores.length) unmatched.push(row.nombre);
+      if (!matched && competidores.length) unmatched.push((row.nombre || targetId) + ' (' + targetId + ')');
       mapped.push({
         competidorId: targetId,
         nombre: row.nombre,

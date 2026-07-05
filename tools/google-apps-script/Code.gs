@@ -423,8 +423,8 @@ function normalizeCompetenciaEvento_(evento) {
 function extractCompetenciaPreliminarKey_(evento) {
   var s = normalizeCompetenciaEvento_(evento);
   if (!s) return '';
-  if (/preliminar\s*2/i.test(s) || /2\.ª/i.test(s)) return 'V60 Championship — Preliminar 2';
-  if (/preliminar\s*1/i.test(s) || /1\.ª/i.test(s)) return 'V60 Championship — Preliminar 1';
+  if (/preliminar\s*2/i.test(s) || /evento\s*2/i.test(s) || /2\.ª/i.test(s)) return 'V60 Championship — Preliminar 2';
+  if (/preliminar\s*1/i.test(s) || /evento\s*1/i.test(s) || /1\.ª/i.test(s)) return 'V60 Championship — Preliminar 1';
   if (s === 'V60 Championship') return 'V60 Championship — Preliminar 1';
   return s;
 }

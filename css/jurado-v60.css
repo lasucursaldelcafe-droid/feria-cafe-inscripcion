@@ -1886,6 +1886,18 @@ body.jurado-page--organizer .jurado-header-brand {
   color: var(--jurado-accent, #e8c547);
 }
 
+.jurado-preliminar-planilla {
+  display: block;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 400;
+}
+
+.jurado-preliminar-id {
+  font-size: 0.7rem;
+  opacity: 0.85;
+}
+
 .jurado-preliminar-foot {
   margin: 0;
 }
