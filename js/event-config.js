@@ -344,7 +344,8 @@ window.EVENT_CONFIG = {
       organizador: '/jurado/organizador',
       config: '/jurado/config',
       juez: '/jurado/juez',
-      resultados: '/jurado/resultados'
+      resultados: '/jurado/resultados',
+      historial: '/jurado/historial'
     },
     pinOrganizador: 'v60organizador',
     pinJuez: 'v60sensorial',
@@ -383,6 +384,7 @@ window.EVENT_CONFIG.getEventoActivo = function getEventoActivo() {
   var pathCfg = paths.config || '/jurado/config';
   var pathJuez = paths.juez || '/jurado/juez';
   var pathRes = paths.resultados || '/jurado/resultados';
+  var pathHist = paths.historial || '/jurado/historial';
   var jueces = Math.max(1, Math.min(5, parseInt(j.jueces, 10) || 3));
 
   function q(pin) {
@@ -394,6 +396,7 @@ window.EVENT_CONFIG.getEventoActivo = function getEventoActivo() {
     config: site + pathCfg + q(j.pinOrganizador),
     organizador: site + pathOrg + q(j.pinOrganizador),
     resultados: site + pathRes,
+    historial: site + pathHist,
     competencia: site + '/competencia'
   };
   j.roles = [

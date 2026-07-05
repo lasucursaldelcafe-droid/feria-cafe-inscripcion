@@ -90,9 +90,9 @@
 
   function getAllowedDashTabs() {
     var map = {
-      config: ['config', 'inscripciones', 'enlaces', 'export'],
-      organizador: ['vista', 'enlaces', 'recorrido', 'torneo', 'puntajes', 'control'],
-      all: ['vista', 'enlaces', 'recorrido', 'torneo', 'puntajes', 'control', 'config', 'inscripciones', 'export']
+      config: ['config', 'inscripciones', 'enlaces', 'historial', 'export'],
+      organizador: ['vista', 'enlaces', 'recorrido', 'torneo', 'puntajes', 'control', 'historial'],
+      all: ['vista', 'enlaces', 'recorrido', 'torneo', 'puntajes', 'control', 'config', 'inscripciones', 'historial', 'export']
     };
     return map[PAGE_MODE] || map.all;
   }
@@ -112,6 +112,7 @@
     if (roleKey === 'inscripcion') return { icon: '📝', tone: 'public' };
     if (roleKey === 'organizador') return { icon: '🏆', tone: 'live' };
     if (roleKey === 'resultados') return { icon: '📊', tone: 'results' };
+    if (roleKey === 'historial') return { icon: '📚', tone: 'history' };
     if (String(roleKey).indexOf('juez') === 0) return { icon: '👨‍⚖️', tone: 'judge' };
     return { icon: '🔗', tone: 'config' };
   }
@@ -172,7 +173,8 @@
       { step: 1, key: 'config', label: 'Configuración del torneo', desc: 'Marca, reglas, criterios, jueces y formulario.', tag: 'Organizador', url: urls.config },
       { step: 2, key: 'inscripcion', label: 'Inscripción en línea', desc: tenantSlug ? 'Formulario público de este torneo.' : 'Formulario de registro de competidores.', tag: 'Público', url: urls.inscripcion || urls.competencia },
       { step: 3, key: 'organizador', label: 'Torneo en vivo', desc: 'Vista general, rondas, puntajes y control del día.', tag: 'Organizador', url: urls.organizador },
-      { step: 4, key: 'resultados', label: 'Resultados por competidor', desc: 'Portal público: nombre + documento.', tag: 'Competidor', url: urls.resultados }
+      { step: 4, key: 'resultados', label: 'Resultados por competidor', desc: 'Portal público: nombre + documento.', tag: 'Competidor', url: urls.resultados },
+      { step: 5, key: 'historial', label: 'Historial de competencias', desc: 'Ediciones anteriores, rankings archivados y kits JSON.', tag: 'Archivo', url: urls.historial }
     ];
     for (var j = 1; j <= getJudgeCount(); j++) {
       roles.push({
@@ -215,7 +217,8 @@
       config: paths.config || '/jurado/config',
       organizador: paths.organizador || '/jurado/organizador',
       juez: paths.juez || '/jurado/juez',
-      resultados: paths.resultados || '/jurado/resultados'
+      resultados: paths.resultados || '/jurado/resultados',
+      historial: paths.historial || '/jurado/historial'
     };
     var path = pathMap[pageKey] || pathMap.hub;
     if (path.indexOf('http') === 0) return path + (extraQuery || '');
@@ -227,7 +230,8 @@
       config: 'jurado-config.html',
       organizador: 'jurado-organizador.html',
       juez: 'jurado-juez.html',
-      resultados: 'jurado-resultados.html'
+      resultados: 'jurado-resultados.html',
+      historial: 'jurado-historial.html'
     };
     if (isLocal && localFiles[pageKey]) {
       return appendTenantToUrl(localFiles[pageKey] + (extraQuery || ''));
@@ -285,6 +289,7 @@
     if (PAGE_MODE !== 'organizador') return;
     ensureDashTab('enlaces', 'Enlaces', 'vista');
     ensureEnlacesPane();
+    ensureHistorialPane();
   }
 
   function applyConfigDashboardNav() {
@@ -315,11 +320,13 @@
       if (idx === 0 && PAGE_MODE === 'config') btn.classList.add('jurado-dash-tab--active');
     });
     ensureEnlacesPane();
+    ensureHistorialPane();
   }
 
   function applyPageModeUI() {
     if (PAGE_MODE === 'hub') return;
     ensureEnlacesPane();
+    ensureHistorialPane();
     if (PAGE_MODE === 'config') applyConfigDashboardNav();
     if (PAGE_MODE === 'organizador') applyOrganizerDashboardNav();
     var allowed = getAllowedDashTabs();
@@ -342,6 +349,7 @@
       var cfgUrl = juradoPageUrl('config', '?pin=' + encodeURIComponent(pinOrganizadorEffective()));
       existing.innerHTML = 'Paneles: <a href="' + escapeHtml(cfgUrl) + '">Configuración</a> · ' +
         '<a href="' + escapeHtml(juradoPageUrl('resultados')) + '">Resultados competidores</a> · ' +
+        '<a href="' + escapeHtml(juradoPageUrl('historial')) + '">Historial</a> · ' +
         '<a href="' + escapeHtml(juradoPageUrl('hub')) + '">Consola principal</a>';
     }
     if (nav && PAGE_MODE === 'config') {
@@ -355,6 +363,7 @@
       var orgUrl = juradoPageUrl('organizador', '?pin=' + encodeURIComponent(pinOrganizadorEffective()));
       existingCfg.innerHTML = 'Paneles: <a href="' + escapeHtml(orgUrl) + '">Torneo en vivo</a> · ' +
         '<a href="' + escapeHtml(juradoPageUrl('resultados')) + '">Resultados competidores</a> · ' +
+        '<a href="' + escapeHtml(juradoPageUrl('historial')) + '">Historial</a> · ' +
         '<a href="' + escapeHtml(juradoPageUrl('hub')) + '">Consola principal</a>';
       if (tenantSlug) {
         var welcome = $('tenantSetupBanner');
@@ -380,14 +389,95 @@
     hub.hidden = false;
     applyPlatformBranding();
     renderHubLinks();
+    renderHubHistorialPreview();
+  }
+
+  function renderHubHistorialPreview() {
+    var box = $('hubHistorialPreview');
+    if (!box || !window.CompetitionHistory) return;
+    var editions = window.CompetitionHistory.getEditions();
+    var historialUrl = juradoPageUrl('historial');
+    box.innerHTML =
+      '<div class="jurado-card-head">' +
+      '<h2>Historial de competencias</h2>' +
+      '<p class="jurado-hint">Consulta ediciones realizadas, podios y resultados archivados del circuito.</p>' +
+      '</div>' +
+      window.CompetitionHistory.renderEditionsList(editions.slice(0, 2), {
+        detailBaseUrl: historialUrl + '?',
+        showActions: true
+      }) +
+      '<p style="margin-top:14px"><a class="jurado-btn jurado-btn--secondary" href="' + escapeHtml(historialUrl) + '">Ver historial completo</a></p>';
+    bindHistoryDownloadButtons(box);
+  }
+
+  function bindHistoryDownloadButtons(root) {
+    if (!root || !window.CompetitionHistory) return;
+    root.querySelectorAll('[data-history-download]').forEach(function (btn) {
+      if (btn.dataset.bound) return;
+      btn.dataset.bound = '1';
+      btn.addEventListener('click', function () {
+        window.CompetitionHistory.downloadEditionKit(btn.getAttribute('data-history-download'));
+      });
+    });
+  }
+
+  function ensureHistorialPane() {
+    if ($('historialPaneRoot')) return;
+    var organizer = $('organizerSection');
+    if (!organizer) return;
+    var pane = document.createElement('div');
+    pane.className = 'jurado-dash-pane';
+    pane.setAttribute('data-dash-pane', 'historial');
+    pane.hidden = true;
+    pane.innerHTML =
+      '<div class="jurado-card jurado-card--history">' +
+      '<div class="jurado-card-head jurado-card-head--toolbar">' +
+      '<div>' +
+      '<h2>Historial de competencias</h2>' +
+      '<p class="jurado-hint">Archivo del circuito V60: preliminares, final y kits de resultados.</p>' +
+      '</div>' +
+      '<a class="jurado-btn jurado-btn--secondary jurado-btn--small" href="' + escapeHtml(juradoPageUrl('historial')) + '" target="_blank" rel="noopener">Abrir en página</a>' +
+      '</div>' +
+      '<div id="historialPaneRoot" class="jurado-history-page-list"></div>' +
+      '<div id="historialPaneDetail" class="jurado-history-pane-detail" hidden></div>' +
+      '</div>';
+    organizer.appendChild(pane);
+    var insertAfter = PAGE_MODE === 'config' ? 'inscripciones' : 'control';
+    ensureDashTab('historial', 'Historial', insertAfter);
+  }
+
+  function renderCompetitionHistoryPanel() {
+    ensureHistorialPane();
+    var root = $('historialPaneRoot');
+    if (!root || !window.CompetitionHistory) return;
+    var editions = window.CompetitionHistory.getEditions();
+    root.innerHTML = window.CompetitionHistory.renderEditionsList(editions, {
+      detailBaseUrl: juradoPageUrl('historial') + '?',
+      showActions: true
+    });
+    bindHistoryDownloadButtons(root);
+    root.querySelectorAll('a[href*="edicion="]').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        var match = (link.getAttribute('href') || '').match(/edicion=([^&]+)/);
+        if (!match) return;
+        e.preventDefault();
+        var detail = $('historialPaneDetail');
+        if (!detail) return;
+        var edition = window.CompetitionHistory.getEdition(decodeURIComponent(match[1]));
+        detail.hidden = !edition;
+        detail.innerHTML = edition ? window.CompetitionHistory.renderEditionDetail(edition) : '';
+      });
+    });
   }
 
   function renderHubLinks() {
     var box = $('hubLinksGrid');
     if (!box) return;
     box.innerHTML = getEventLinkRoles().filter(function (c) { return c.key !== 'hub'; }).map(function (c) {
-      return '<a class="jurado-hub-card" href="' + escapeHtml(c.url) + '">' +
+      var vis = getLinkVisual(c.key);
+      return '<a class="jurado-hub-card jurado-hub-card--' + escapeHtml(vis.tone) + '" href="' + escapeHtml(c.url) + '">' +
         '<span class="jurado-hub-tag">' + escapeHtml(c.tag) + '</span>' +
+        '<span class="jurado-hub-icon" aria-hidden="true">' + vis.icon + '</span>' +
         '<strong>' + escapeHtml(c.label) + '</strong>' +
         '<p class="jurado-hint">' + escapeHtml(c.desc) + '</p></a>';
     }).join('');
@@ -2292,6 +2382,7 @@
       pane.classList.toggle('jurado-dash-pane--active', match);
     });
     if (tabId === 'export') renderExportPreview();
+    if (tabId === 'historial') renderCompetitionHistoryPanel();
     if (tabId === 'enlaces') renderEventLinksPanel();
     if (tabId === 'inscripciones') {
       renderInscripcionesPanel();
@@ -3466,6 +3557,7 @@
       config: juradoPageUrl('config', '?pin=' + encodeURIComponent(pinOrg)),
       organizador: juradoPageUrl('organizador', '?pin=' + encodeURIComponent(pinOrg)),
       resultados: juradoPageUrl('resultados'),
+      historial: juradoPageUrl('historial'),
       inscripcion: tenantSlug ? competenciaTorneoUrl() : ((window.SiteLinks && SiteLinks.absUrl) ? SiteLinks.absUrl('competencia') : 'competencia.html'),
       competencia: tenantSlug ? competenciaTorneoUrl() : ((window.SiteLinks && SiteLinks.absUrl) ? SiteLinks.absUrl('competencia') : 'competencia.html')
     };

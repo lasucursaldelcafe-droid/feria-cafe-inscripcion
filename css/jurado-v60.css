@@ -1902,6 +1902,134 @@ body.jurado-page--organizer .jurado-header-brand {
   margin: 0;
 }
 
+/* ——— Historial de competencias ——— */
+
+.jurado-hub-history {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.jurado-history-grid {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 720px) {
+  .jurado-history-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.jurado-history-edition {
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.jurado-history-edition--done {
+  border-color: rgba(201, 162, 39, 0.35);
+}
+
+.jurado-history-edition--live {
+  border-color: rgba(72, 187, 120, 0.45);
+  box-shadow: 0 0 0 1px rgba(72, 187, 120, 0.15);
+}
+
+.jurado-history-edition--upcoming {
+  opacity: 0.92;
+}
+
+.jurado-history-edition-head h3 {
+  margin: 8px 0 6px;
+  font-size: 1rem;
+}
+
+.jurado-history-edition-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.jurado-history-edition--done .jurado-history-edition-badge {
+  background: rgba(201, 162, 39, 0.2);
+  color: #e8c547;
+}
+
+.jurado-history-edition--live .jurado-history-edition-badge {
+  background: rgba(72, 187, 120, 0.2);
+  color: #9ae6b4;
+}
+
+.jurado-history-edition-meta {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.jurado-history-podio {
+  margin: 12px 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+}
+
+.jurado-history-podio-pos {
+  display: inline-block;
+  min-width: 1.6rem;
+  font-weight: 700;
+  color: var(--jurado-accent, #e8c547);
+}
+
+.jurado-history-edition-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.jurado-history-page-list .jurado-history-grid {
+  margin-top: 4px;
+}
+
+.jurado-history-pane-detail,
+.jurado-history-detail {
+  margin-top: 16px;
+}
+
+.jurado-history-all-rounds {
+  margin-top: 16px;
+}
+
+.jurado-history-all-rounds summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.jurado-hub-card--history {
+  border-color: rgba(201, 162, 39, 0.25);
+}
+
+.jurado-hub-icon {
+  display: block;
+  font-size: 1.4rem;
+  margin: 4px 0 8px;
+}
+
+.jurado-card-head--toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 /* ——— Sorteo y plan de fases ——— */
 
 .jurado-plan-box {

@@ -60,6 +60,7 @@ HOSTING_ROUTES: list[tuple[str, str, bool]] = [
     ("/jurado/organizador", "Jurado organizador", True),
     ("/jurado/juez", "Jurado juez", True),
     ("/jurado/resultados", "Jurado resultados", True),
+    ("/jurado/historial", "Jurado historial", True),
     ("/competencia/torneo", "Inscripción torneo tenant", True),
 ]
 
@@ -342,6 +343,7 @@ def check_forms_pages(report: VerificationReport) -> None:
         ("/jurado-v60", ["jurado-v60.js", "Consola principal"]),
         ("/jurado/config", ["jurado-v60.js", '<base href="/">']),
         ("/jurado/organizador", ["jurado-v60.js", '<base href="/">']),
+        ("/jurado/historial", ["competition-history.js", "Historial de competencias"]),
         ("/competencia/torneo", ["competencia-torneo.js", '<base href="/">']),
     ]
     for path, tokens in pages:

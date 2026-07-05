@@ -182,6 +182,12 @@
       "sitemap": false
     },
     {
+      "key": "juradoHistorial",
+      "local": "jurado-historial.html",
+      "hosted": "/jurado/historial",
+      "sitemap": false
+    },
+    {
       "key": "panelFidelizacion",
       "local": "dashboard-fidelizacion.html",
       "hosted": "/panel-fidelizacion",

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <title>Historial de competencias — Jurado sensorial</title>
+  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado35">
+</head>
+<body class="jurado-page jurado-page--history" data-jurado-page="historial">
+  <div class="jurado-shell">
+    <header class="jurado-header" id="juradoHeader">
+      <div class="jurado-header-brand">
+        <img id="headerLogo" src="assets/logo-la-sucursal-del-cafe.png" alt="Evento" width="120" height="48">
+        <div class="jurado-header-text">
+          <p class="jurado-header-kicker">Circuito V60 Championship</p>
+          <h1 id="headerTitle">Historial de competencias</h1>
+          <p id="headerSubtitle">Archivo de ediciones y resultados del circuito V60</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="jurado-card">
+      <div class="jurado-card-head jurado-card-head--toolbar">
+        <div>
+          <h2>Ediciones del circuito</h2>
+          <p class="jurado-hint">Preliminares, final y resultados archivados. La Preliminar 1 incluye ranking completo y kit JSON.</p>
+        </div>
+        <a id="historialBackBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small" href="jurado-v60.html">← Consola principal</a>
+      </div>
+      <div id="historialList" class="jurado-history-page-list" aria-live="polite">
+        <p class="jurado-hint">Cargando historial…</p>
+      </div>
+    </section>
+
+    <section class="jurado-card" id="historialDetail" hidden aria-labelledby="historialDetailTitle">
+      <div class="jurado-card-head">
+        <h2 id="historialDetailTitle">Detalle de edición</h2>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/preliminar-1-results.js?v=20260705jurado34"></script>
+  <script src="js/competition-history.js?v=20260705jurado35"></script>
+  <script src="js/event-config.js?v=20260705jurado29"></script>
+  <script src="js/site-links.js?v=20260705jurado29"></script>
+  <script src="js/jurado-historial.js?v=20260705jurado35"></script>
+</body>
+</html>

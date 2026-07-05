@@ -8,7 +8,7 @@
   <title>Consola principal — Jurado sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado32">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado35">
 </head>
 <body class="jurado-page" data-jurado-page="hub">
   <div class="jurado-shell">
@@ -32,6 +32,7 @@
         <p class="jurado-hint">Cada rol tiene su propia página: configuración, torneo en vivo, resultados para competidores y enlaces de jurados.</p>
       </div>
       <div id="hubLinksGrid" class="jurado-hub-grid"></div>
+      <div id="hubHistorialPreview" class="jurado-hub-history"></div>
     </section>
 
     <section id="pinSection" class="jurado-card" hidden>
@@ -106,6 +107,7 @@
         <button type="button" class="jurado-dash-tab" data-dash-tab="torneo">Torneo</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="puntajes">Puntajes</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="control">Control</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="historial">Historial</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="config">Marca y reglas</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="export">Exportar</button>
       </nav>
@@ -471,12 +473,14 @@
     <p id="loadingMsg" class="jurado-loading">Cargando…</p>
   </div>
 
+  <script src="js/preliminar-1-results.js?v=20260705jurado34"></script>
+  <script src="js/competition-history.js?v=20260705jurado35"></script>
   <script src="js/event-config.js?v=20260705jurado29"></script>
   <script>
     window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxEVH5x6x8xj5vBFlwbkQjkEtpVNnfBoaeOwRDSk9FbF9K9_vuQFfwNBR9Kghtn2i6u/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado32"></script>
+  <script src="js/jurado-v60.js?v=20260705jurado35"></script>
 </body>
 </html>

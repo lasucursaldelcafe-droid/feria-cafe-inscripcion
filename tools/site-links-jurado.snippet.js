@@ -44,6 +44,7 @@
       config: pageUrl('juradoConfig', 'jurado-config.html', Object.assign({}, commonEvt, { pin: pinOrg })),
       organizador: pageUrl('juradoOrganizador', 'jurado-organizador.html', Object.assign({}, commonEvt, { pin: pinOrg })),
       resultados: pageUrl('juradoResultados', 'jurado-resultados.html', commonEvt),
+      historial: pageUrl('juradoHistorial', 'jurado-historial.html', commonEvt),
       competencia: evt
         ? pageUrl('competenciaTorneo', 'competencia-torneo.html', { evt: evt })
         : pageUrl('competencia', 'competencia.html', {}),
@@ -82,6 +83,7 @@
       { id: 'config', label: 'Configuración', desc: 'Marca, reglas, criterios y formulario' },
       { id: 'organizador', label: 'Torneo en vivo', desc: 'Rondas, puntajes y control' },
       { id: 'resultados', label: 'Resultados', desc: 'Portal competidor (nombre + cédula)' },
+      { id: 'historial', label: 'Historial', desc: 'Ediciones anteriores y rankings archivados' },
       { id: 'inscripcion', label: 'Inscripción', desc: 'Formulario público de competidores' }
     ];
     for (var n = 1; n <= juradoJudgeCount(); n++) {
