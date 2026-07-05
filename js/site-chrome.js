@@ -492,12 +492,19 @@
     enhanceForms();
   }
 
+  function applyEditorialTheme() {
+    if (document.body.classList.contains('page-festival')) {
+      document.body.classList.add('page-festival--editorial');
+    }
+  }
+
   function ensureFestivalBizcard() {
     if (!document.body.classList.contains('page-festival')) return;
+    if (document.body.classList.contains('page-festival--editorial')) return;
     if (document.body.getAttribute('data-bizcard-native') === '1') return;
     if (document.querySelector('script[data-festival-bizcard]')) return;
     var s = document.createElement('script');
-    s.src = 'js/festival-bizcard.js?v=20260703global';
+    s.src = 'js/festival-bizcard.js?v=20260705pergamino1';
     s.setAttribute('data-festival-bizcard', '1');
     document.body.appendChild(s);
   }
@@ -518,6 +525,7 @@
     renderSiteFooter();
     renderWhatsappFloat();
     ensureAnalytics();
+    applyEditorialTheme();
     ensureFestivalBizcard();
     enhancePageUx();
   }

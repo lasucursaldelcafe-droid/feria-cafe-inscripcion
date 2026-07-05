@@ -246,7 +246,7 @@
     if (!shell || !main) return;
 
     var layout = document.createElement('main');
-    layout.className = 'bizcard-layout';
+    layout.className = 'bizcard-layout bizcard-layout--editorial';
     layout.id = main.id || 'contenido';
 
     if (hero) {
@@ -295,6 +295,7 @@
   function init() {
     var body = document.body;
     if (!body.classList.contains('page-festival')) return;
+    if (body.classList.contains('page-festival--editorial')) return;
     if (body.getAttribute('data-bizcard-native') === '1') return;
     if (body.classList.contains('page-festival--bizcard-ready')) return;
     body.classList.add('page-festival--bizcard-ready');
