@@ -174,10 +174,10 @@ function doGet(e) {
     return jsonResponse(getPasaporteConfig_(params.key || 'niveles'));
   }
   if (params.action === 'jurado_competidores') {
-    return jsonResponse(handleJuradoCompetidoresGet_(params.pin || ''));
+    return jsonResponse(handleJuradoCompetidoresGet_(params.pin || '', params.evt || ''));
   }
   if (params.action === 'jurado_calificaciones') {
-    return jsonResponse(handleJuradoCalificacionesGet_(params.pin || '', params.competidorId || ''));
+    return jsonResponse(handleJuradoCalificacionesGet_(params.pin || '', params.competidorId || '', params.evt || ''));
   }
   if (params.action === 'jurado_instances') {
     return jsonResponse(listJuradoInstances_());
@@ -3369,30 +3369,71 @@ function juradoCriteriaSlug_(label) {
     .replace(/^_+|_+$/g, '');
 }
 
-function juradoCriteriaApiList_() {
-  return JURADO_V60_CRITERIA.map(function (label) {
-    return { label: label, key: juradoCriteriaSlug_(label) };
-  });
+function juradoCriteriaApiList_(criteria) {
+  var list = criteria && criteria.length ? criteria : null;
+  if (!list) {
+    return JURADO_V60_CRITERIA.map(function (label) {
+      return { label: label, key: juradoCriteriaSlug_(label) };
+    });
+  }
+  return list.map(function (c) {
+    var label = String(c.label || '').trim();
+    var key = String(c.key || juradoCriteriaSlug_(label)).trim();
+    return { label: label, key: key };
+  }).filter(function (c) { return c.label && c.key; });
 }
 
-function parseJuradoScore_(value) {
+function getJuradoScoringConfig_(evt) {
+  var platformCfg = getPasaporteConfig_(juradoTenantKey_('jurado_v60_platform', evt));
+  var platform = platformCfg.data || {};
+  var scoring = platform.scoring || {};
+  var rawCriteria = Array.isArray(scoring.criteria) ? scoring.criteria : [];
+  var criteria = juradoCriteriaApiList_(rawCriteria.length ? rawCriteria : null);
+  var scaleMin = parseInt(scoring.scaleMin, 10);
+  var scaleMax = parseInt(scoring.scaleMax, 10);
+  if (isNaN(scaleMin)) scaleMin = 1;
+  if (isNaN(scaleMax)) scaleMax = 5;
+  if (scaleMin >= scaleMax) {
+    scaleMin = 1;
+    scaleMax = 5;
+  }
+  var jueces = parseInt(scoring.jueces, 10);
+  if (isNaN(jueces) || jueces < 1 || jueces > 5) jueces = 3;
+  return {
+    criteria: criteria,
+    scaleMin: scaleMin,
+    scaleMax: scaleMax,
+    jueces: jueces,
+    modo: scoring.modo === 'puntaje_general' ? 'puntaje_general' : 'duelos'
+  };
+}
+
+function parseJuradoScore_(value, scaleMin, scaleMax) {
+  var min = scaleMin != null ? parseInt(scaleMin, 10) : 1;
+  var max = scaleMax != null ? parseInt(scaleMax, 10) : 5;
+  if (isNaN(min)) min = 1;
+  if (isNaN(max)) max = 5;
   var n = parseInt(value, 10);
-  if (isNaN(n) || n < 1 || n > 5) return null;
+  if (isNaN(n) || n < min || n > max) return null;
   return n;
 }
 
-function sumJuradoJudgeScores_(scores) {
+function sumJuradoJudgeScores_(scores, criteria, scaleMin, scaleMax) {
+  var list = criteria && criteria.length ? criteria : juradoCriteriaApiList_(null);
   var total = 0;
-  for (var i = 0; i < JURADO_V60_CRITERIA.length; i++) {
-    var slug = juradoCriteriaSlug_(JURADO_V60_CRITERIA[i]);
-    var val = parseJuradoScore_(scores[slug]);
+  for (var i = 0; i < list.length; i++) {
+    var slug = list[i].key;
+    var val = parseJuradoScore_(scores[slug], scaleMin, scaleMax);
     if (val === null) return null;
     total += val;
   }
   return total;
 }
 
-function juradoRowObjectFromPayload_(competidorId, nombre, judges, notas) {
+function juradoRowObjectFromPayload_(competidorId, nombre, judges, notas, scoringCfg) {
+  var cfg = scoringCfg || getJuradoScoringConfig_('');
+  var criteria = cfg.criteria || juradoCriteriaApiList_(null);
+  var jueces = cfg.jueces || 3;
   var row = {
     'Fecha actualización': new Date().toISOString(),
     'Competidor ID': competidorId,
@@ -3402,35 +3443,48 @@ function juradoRowObjectFromPayload_(competidorId, nombre, judges, notas) {
   var sumaTotal = 0;
   var subtotales = [];
 
-  for (var j = 1; j <= 3; j++) {
+  for (var j = 1; j <= jueces; j++) {
     var judgeKey = 'j' + j;
     var judgeScores = judges[judgeKey] || judges['J' + j] || {};
-    var subtotal = sumJuradoJudgeScores_(judgeScores);
+    var subtotal = sumJuradoJudgeScores_(judgeScores, criteria, cfg.scaleMin, cfg.scaleMax);
     if (subtotal === null) {
-      return { ok: false, error: 'Completa todas las calificaciones (1–5) de los 3 jueces.' };
+      return {
+        ok: false,
+        error: 'Completa todas las calificaciones (escala ' + cfg.scaleMin + '–' + cfg.scaleMax + ') de los ' + jueces + ' jueces.'
+      };
     }
     subtotales.push(subtotal);
     sumaTotal += subtotal;
-    for (var c = 0; c < JURADO_V60_CRITERIA.length; c++) {
-      var crit = JURADO_V60_CRITERIA[c];
-      var slug = juradoCriteriaSlug_(crit);
-      row['J' + j + ' ' + crit] = parseJuradoScore_(judgeScores[slug]);
+    for (var c = 0; c < criteria.length; c++) {
+      var crit = criteria[c];
+      var slug = crit.key;
+      var header = 'J' + j + ' ' + crit.label;
+      if (HEADERS_JURADO_V60.indexOf(header) >= 0) {
+        row[header] = parseJuradoScore_(judgeScores[slug], cfg.scaleMin, cfg.scaleMax);
+      }
     }
-    row['J' + j + ' Subtotal'] = subtotal;
+    var subHeader = 'J' + j + ' Subtotal';
+    if (HEADERS_JURADO_V60.indexOf(subHeader) >= 0) {
+      row[subHeader] = subtotal;
+    }
   }
 
   row['Suma total'] = sumaTotal;
-  row['Promedio jueces'] = Math.round((sumaTotal / 3) * 100) / 100;
+  row['Promedio jueces'] = Math.round((sumaTotal / jueces) * 100) / 100;
   return { ok: true, row: row, sumaTotal: sumaTotal, promedio: row['Promedio jueces'], subtotales: subtotales };
 }
 
-function juradoRowToApi_(rowObj) {
+function juradoRowToApi_(rowObj, scoringCfg) {
+  var cfg = scoringCfg || getJuradoScoringConfig_('');
+  var criteria = cfg.criteria || juradoCriteriaApiList_(null);
+  var jueces = cfg.jueces || 3;
   var judges = {};
-  for (var j = 1; j <= 3; j++) {
+  for (var j = 1; j <= jueces; j++) {
     var scores = {};
-    for (var c = 0; c < JURADO_V60_CRITERIA.length; c++) {
-      var crit = JURADO_V60_CRITERIA[c];
-      scores[juradoCriteriaSlug_(crit)] = rowObj['J' + j + ' ' + crit];
+    for (var c = 0; c < criteria.length; c++) {
+      var crit = criteria[c];
+      var header = 'J' + j + ' ' + crit.label;
+      scores[crit.key] = rowObj[header] != null ? rowObj[header] : null;
     }
     judges['j' + j] = {
       scores: scores,
@@ -3486,27 +3540,32 @@ function listJuradoCompetidores_() {
   return competidores;
 }
 
-function readAllJuradoCalificaciones_() {
+function readAllJuradoCalificaciones_(evt) {
   var sheet = getOrCreateSheet_(SHEET_JURADO_V60, HEADERS_JURADO_V60);
-  return readAllSheetRows_(SHEET_JURADO_V60, HEADERS_JURADO_V60, false).map(juradoRowToApi_);
+  var scoringCfg = getJuradoScoringConfig_(evt);
+  return readAllSheetRows_(SHEET_JURADO_V60, HEADERS_JURADO_V60, false).map(function (row) {
+    return juradoRowToApi_(row, scoringCfg);
+  });
 }
 
-function handleJuradoCompetidoresGet_(pin) {
+function handleJuradoCompetidoresGet_(pin, evt) {
   var access = assertJuradoV60Pin_(pin);
   if (!access.ok) return access;
+  var scoringCfg = getJuradoScoringConfig_(evt);
   return {
     ok: true,
-    criterios: juradoCriteriaApiList_(),
-    escala: { min: 1, max: 5 },
-    jueces: 3,
+    criterios: scoringCfg.criteria,
+    escala: { min: scoringCfg.scaleMin, max: scoringCfg.scaleMax },
+    jueces: scoringCfg.jueces,
+    modo: scoringCfg.modo,
     competidores: listJuradoCompetidores_()
   };
 }
 
-function handleJuradoCalificacionesGet_(pin, competidorId) {
+function handleJuradoCalificacionesGet_(pin, competidorId, evt) {
   var access = assertJuradoV60Pin_(pin);
   if (!access.ok) return access;
-  var all = readAllJuradoCalificaciones_();
+  var all = readAllJuradoCalificaciones_(evt);
   if (competidorId) {
     var one = null;
     for (var i = 0; i < all.length; i++) {
@@ -3540,11 +3599,14 @@ function handleJuradoGuardar_(payload) {
   }
   if (!nombre) return { ok: false, error: 'Competidor no encontrado o no habilitado.' };
 
+  var evt = String(payload.evt || payload.tenantSlug || '').trim();
+  var scoringCfg = getJuradoScoringConfig_(evt);
   var built = juradoRowObjectFromPayload_(
     competidorId,
     nombre,
     payload.judges || payload.jueces || {},
-    payload.notas || ''
+    payload.notas || '',
+    scoringCfg
   );
   if (!built.ok) return built;
 
@@ -3566,7 +3628,7 @@ function handleJuradoGuardar_(payload) {
     sumaTotal: built.sumaTotal,
     promedio: built.promedio,
     subtotales: built.subtotales,
-    calificacion: juradoRowToApi_(built.row)
+    calificacion: juradoRowToApi_(built.row, scoringCfg)
   };
 }
 

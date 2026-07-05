@@ -51,6 +51,7 @@
   var bracketState = null;
   var guardando = false;
   var refreshTimer = null;
+  var judgeRefreshTimer = null;
   var organizerUiBound = false;
   var organizerAdminBound = false;
   var organizerManualBound = false;
@@ -1248,6 +1249,82 @@
       ' (' + scoringModeLabel().toLowerCase() + '). Cada uno abre su enlace desde el celular.';
   }
 
+  function scoringConfigFingerprint(cfg) {
+    cfg = cfg || platformConfig;
+    if (!cfg || !cfg.scoring) return '';
+    var sc = cfg.scoring;
+    return JSON.stringify({
+      disciplina: sc.disciplina,
+      modo: sc.modo,
+      scaleMin: sc.scaleMin,
+      scaleMax: sc.scaleMax,
+      jueces: sc.jueces,
+      avancePorRonda: sc.avancePorRonda,
+      autoAvance: sc.autoAvance,
+      mostrarFotos: sc.mostrarFotos,
+      criteria: (sc.criteria || []).map(function (c) {
+        return String(c.key || '') + ':' + String(c.label || '');
+      })
+    });
+  }
+
+  function syncEvaluationUi(opts) {
+    opts = opts || {};
+    updateScoringHints();
+    renderFifaTableHead();
+    renderRankingTableHead();
+    if (mode === 'organizer' && !opts.skipOrganizer) {
+      try {
+        renderOrganizerViews(calificacionesList());
+      } catch (e) { /* ignore render errors during sync */ }
+    }
+    if (mode === 'judge') {
+      var judgeSel = $('judgeCompetidorSelect');
+      var judgeId = judgeSel && judgeSel.value ? judgeSel.value : '';
+      if (opts.refreshJudgeForm || judgeId) {
+        renderJudgeForm(judgeId ? (calificacionesMap[judgeId] || null) : null);
+      }
+      updateJudgeUiHints();
+    }
+    if ($('platformConfigForm') && activeDashTab === 'config') {
+      renderPlatformConfigForm();
+    }
+  }
+
+  function reloadPlatformConfigIfChanged() {
+    var prevFp = scoringConfigFingerprint(platformConfig);
+    return sheetsGet('pasaporte_config', { key: storageKey(PLATFORM_KEY) }).then(function (res) {
+      var next = normalizePlatformConfig(res.data);
+      var nextFp = scoringConfigFingerprint(next);
+      if (nextFp !== prevFp) {
+        platformConfig = next;
+        applyPlatformBranding();
+        syncEvaluationUi({ refreshJudgeForm: true });
+      } else if (next.actualizado !== (platformConfig && platformConfig.actualizado)) {
+        platformConfig = next;
+        applyPlatformBranding();
+      }
+      return platformConfig;
+    }).catch(function () {
+      return platformConfig;
+    });
+  }
+
+  function startJudgeConfigRefresh() {
+    if (judgeRefreshTimer) clearInterval(judgeRefreshTimer);
+    judgeRefreshTimer = setInterval(function () {
+      if (mode !== 'judge' || document.hidden) return;
+      reloadPlatformConfigIfChanged().catch(function () { /* silencioso */ });
+    }, REFRESH_MS);
+  }
+
+  function stopJudgeConfigRefresh() {
+    if (judgeRefreshTimer) {
+      clearInterval(judgeRefreshTimer);
+      judgeRefreshTimer = null;
+    }
+  }
+
   function isScoreInScale(v) {
     var n = parseInt(v, 10);
     return !isNaN(n) && n >= getScaleMin() && n <= getScaleMax();
@@ -1371,10 +1448,12 @@
     return sheetsGet('pasaporte_config', { key: storageKey(PLATFORM_KEY) }).then(function (res) {
       platformConfig = normalizePlatformConfig(res.data);
       applyPlatformBranding();
+      syncEvaluationUi({ skipOrganizer: true });
       return platformConfig;
     }).catch(function () {
       platformConfig = defaultPlatformConfig();
       applyPlatformBranding();
+      syncEvaluationUi({ skipOrganizer: true });
       return platformConfig;
     });
   }
@@ -1392,6 +1471,7 @@
     }).then(function () {
       platformConfig = normalizePlatformConfig(cfg);
       applyPlatformBranding();
+      syncEvaluationUi({ refreshJudgeForm: true });
       if (mode === 'organizer') {
         return refreshOrganizer().then(function () { return platformConfig; });
       }
@@ -1682,6 +1762,7 @@
 
   var FASE_LABELS = {
     grupos: 'Fase de grupos',
+    ranking: 'Clasificación por puntaje',
     '16avos': 'Dieciseisavos de final',
     '8avos': 'Octavos de final',
     '4tos': 'Cuartos de final',
@@ -1719,9 +1800,33 @@
     return numGroups * 2;
   }
 
+  function estimateAdvanceForPlan(n) {
+    var count = parseInt(n, 10) || 0;
+    if (count < 1) return 0;
+    var custom = platformConfig && platformConfig.scoring && platformConfig.scoring.avancePorRonda;
+    if (custom > 0) return Math.min(custom, count);
+    if (count <= 2) return 1;
+    return Math.ceil(count / 2);
+  }
+
   function computeTournamentPlan(participantCount) {
     var n = Math.max(0, parseInt(participantCount, 10) || 0);
     if (n < 2) return ['final'];
+
+    if (isPuntajeGeneralMode()) {
+      if (n > 32) {
+        return ['grupos', 'ranking', 'ranking', 'final'];
+      }
+      var plan = [];
+      var remaining = n;
+      while (remaining > 2) {
+        plan.push('ranking');
+        remaining = estimateAdvanceForPlan(remaining);
+      }
+      plan.push('final');
+      return plan.length ? plan : ['final'];
+    }
+
     if (n > 32) {
       var q = estimateGroupQualifiers(n);
       var ko = knockoutPlanForCount(Math.min(q, 32));
@@ -1852,8 +1957,11 @@
 
     var qualified = shuffleArray(bracketState.clasificadosGrupos.slice());
     var plan = bracketState.plan || computeTournamentPlan(qualified.length);
-    var koStart = plan.indexOf('grupos') >= 0 ? plan[plan.indexOf('grupos') + 1] : plan[0];
-    if (!koStart) koStart = phaseForActiveCount(qualified.length);
+    var afterGrupos = plan.indexOf('grupos') >= 0 ? plan[plan.indexOf('grupos') + 1] : plan[0];
+    var koStart = afterGrupos;
+    if (!koStart) {
+      koStart = isPuntajeGeneralMode() ? 'ranking' : phaseForActiveCount(qualified.length);
+    }
 
     bracketState.fase = koStart;
     bracketState.activos = qualified;
@@ -2772,6 +2880,7 @@
     document.body.classList.remove('jurado-page--organizer');
     applyPlatformBranding();
     renderJudgeBadge();
+    syncEvaluationUi({ skipOrganizer: true, refreshJudgeForm: true });
 
     fillCompetidorSelect($('judgeCompetidorSelect'), true, competidoresActivos());
     renderJudgeForm(null);
@@ -2781,9 +2890,11 @@
     $('judgeSaveBtn').addEventListener('click', onJudgeSave);
     $('judgeLogoutBtn').addEventListener('click', function () {
       clearSession();
+      stopJudgeConfigRefresh();
       if (pin === pinJuezEffective()) showRolePicker();
       else showPinError('Sesión cerrada.');
     });
+    startJudgeConfigRefresh();
   }
 
   function calificacionesList() {
@@ -3095,7 +3206,9 @@
     var previousActivos = activos.slice();
     recordRankingRoundHistory(ranked, winners, previousActivos);
     bracketState.activos = winners;
-    bracketState.fase = phaseForActiveCount(winners.length);
+    bracketState.fase = winners.length <= 2
+      ? 'final'
+      : (isPuntajeGeneralMode() ? 'ranking' : phaseForActiveCount(winners.length));
     bracketState.rondaEnFase = (bracketState.rondaEnFase || 1) + 1;
     bracketState.overrides = {};
     previousActivos.forEach(function (id) {
@@ -3706,13 +3819,7 @@
         }
         if (PAGE_MODE === 'config') switchDashTab('enlaces');
         if (activeDashTab === 'inscripciones') loadInscripcionesTable();
-        applyPlatformBranding();
-        updateScoringHints();
-        if (mode === 'judge') {
-          var judgeSel = $('judgeCompetidorSelect');
-          var judgeId = judgeSel && judgeSel.value ? judgeSel.value : '';
-          renderJudgeForm(judgeId ? (calificacionesMap[judgeId] || null) : null);
-        }
+        syncEvaluationUi({ refreshJudgeForm: true });
       }).catch(function (err) {
         $('platformConfigError').textContent = err.message || 'No se pudo guardar.';
         $('platformConfigError').hidden = false;
@@ -5206,7 +5313,9 @@
   function refreshOrganizer() {
     var updated = $('organizerUpdated');
     if (updated) updated.textContent = 'Actualizando…';
-    return Promise.all([loadBracketStore(), loadCalificacionesStore()]).then(function (results) {
+    return reloadPlatformConfigIfChanged().then(function () {
+      return Promise.all([loadBracketStore(), loadCalificacionesStore()]);
+    }).then(function (results) {
       clearOrganizerError();
       return maybeAutoAdvance().then(function (didAdvance) {
         if (didAdvance) {
