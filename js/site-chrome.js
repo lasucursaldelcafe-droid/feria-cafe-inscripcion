@@ -310,6 +310,44 @@
     });
   }
 
+  function injectPasaporteNav() {
+    var label = (cfg.fidelizacion && cfg.fidelizacion.nav) || 'Pasaporte Cafetero';
+    document.querySelectorAll('.festival-nav__menu').forEach(function (menu) {
+      if (menu.querySelector('[data-nav="fidelizacion"]')) return;
+      var ref = menu.querySelector('[data-nav="competencia"]');
+      if (!ref || !ref.parentElement) return;
+      var li = document.createElement('li');
+      var link = document.createElement('a');
+      link.setAttribute('data-link', 'fidelizacion');
+      link.setAttribute('data-nav', 'fidelizacion');
+      link.setAttribute('href', 'fidelizacion.html');
+      link.textContent = label;
+      li.appendChild(link);
+      ref.parentElement.insertAdjacentElement('afterend', li);
+    });
+
+    document.querySelectorAll('.festival-footer__nav').forEach(function (nav) {
+      if (nav.querySelector('a[data-link="fidelizacion"]')) return;
+      var ref = nav.querySelector('a[data-link="competencia"]');
+      if (!ref) return;
+      var link = document.createElement('a');
+      link.setAttribute('data-link', 'fidelizacion');
+      link.setAttribute('href', 'fidelizacion.html');
+      link.textContent = label;
+      ref.insertAdjacentElement('afterend', link);
+    });
+  }
+
+  function applyPasaporteNav() {
+    var label = (cfg.fidelizacion && cfg.fidelizacion.nav) || 'Pasaporte Cafetero';
+    document.querySelectorAll('[data-nav="fidelizacion"]').forEach(function (el) {
+      el.textContent = label;
+    });
+    document.querySelectorAll('.festival-footer__nav a[data-link="fidelizacion"]').forEach(function (el) {
+      el.textContent = label;
+    });
+  }
+
   function injectMarcasNav() {
     document.querySelectorAll('.festival-nav__menu').forEach(function (menu) {
       if (menu.querySelector('[data-nav="marcas"]')) return;
@@ -514,11 +552,13 @@
       global.SiteLinks.apply(document);
     }
     injectMarcasNav();
+    injectPasaporteNav();
     if (global.SiteLinks && global.SiteLinks.apply) {
       global.SiteLinks.apply(document);
     }
     applyFeriaVisitanteNav();
     applyStandsNav();
+    applyPasaporteNav();
     applyPageCopy();
     applyInstagramLink();
     ensureOgMeta();

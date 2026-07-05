@@ -135,6 +135,11 @@ window.EVENT_CONFIG = {
       }
     ]
   },
+  fidelizacion: {
+    nav: 'Pasaporte Cafetero',
+    titulo: 'Pasaporte Cafetero',
+    resumen: 'Acumula sellos en la feria y canjea beneficios con marcas aliadas.'
+  },
   stands: {
     nav: 'Adquiere tu stand',
     titulo: 'Adquiere tu stand',

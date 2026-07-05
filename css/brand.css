@@ -6094,8 +6094,52 @@ textarea.has-value {
   color: var(--editorial-ink);
 }
 
-.page-festival--editorial .feria-modal__note {
+.page-festival--editorial .festival-explore__note {
   color: var(--editorial-muted);
+}
+
+/* Distribución editorial: una columna real en subpáginas y paneles */
+.page-festival--editorial .festival-grid,
+.page-festival--editorial .festival-grid--activities {
+  grid-template-columns: 1fr;
+}
+
+.page-festival--editorial .festival-stats {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 480px) {
+  .page-festival--editorial .festival-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.page-festival--editorial .festival-explore--bizcard .festival-explore__panel {
+  background: var(--editorial-surface);
+  border: 1px solid var(--editorial-line);
+  border-radius: 16px;
+}
+
+.page-festival--editorial .bizcard--hero-editorial .bizcard__logo {
+  display: none;
+}
+
+.page-festival--editorial .bizcard--explore .bizcard__heading,
+.page-festival--editorial .bizcard--sponsors .bizcard__heading {
+  text-align: left;
+}
+
+.page-festival--editorial .festival-back-link--bizcard {
+  text-align: left;
+}
+
+.page-festival--editorial .bizcard--identity .bizcard__heading,
+.page-festival--editorial .bizcard--contact .bizcard__heading {
+  text-align: center;
+}
+
+.page-festival--editorial .site-shell--bizcard {
+  background: var(--editorial-bg);
 }
 
 @media (min-width: 768px) {
