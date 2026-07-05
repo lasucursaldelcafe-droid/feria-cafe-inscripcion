@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="index, follow">
+  <title>Inscripción — Torneo</title>
+  <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado25">
+</head>
+<body class="jurado-page jurado-page--inscripcion">
+  <div class="jurado-shell">
+    <header class="jurado-header" id="torneoHeader">
+      <div class="jurado-header-brand">
+        <img id="headerLogo" src="assets/logo-la-sucursal-del-cafe.png" alt="Evento" width="120" height="48">
+        <div class="jurado-header-text">
+          <p class="jurado-header-kicker" id="headerKicker">Inscripción en línea</p>
+          <h1 id="headerTitle">Torneo sensorial</h1>
+          <p id="headerSubtitle">Completa el formulario para participar</p>
+        </div>
+      </div>
+    </header>
+
+    <section id="torneoMeta" class="jurado-card jurado-inscripcion-meta" hidden>
+      <div id="torneoBadges" class="jurado-inscripcion-badges"></div>
+      <p id="torneoCupoMsg" class="jurado-hint"></p>
+    </section>
+
+    <section id="torneoFormSection" class="jurado-card jurado-card--login" hidden>
+      <div class="jurado-login-hero">
+        <div class="jurado-login-icon" aria-hidden="true">📝</div>
+        <h2 id="formTitle">Datos del competidor</h2>
+        <p class="jurado-hint">Los campos marcados con * son obligatorios.</p>
+      </div>
+      <form id="torneoInscripcionForm" class="jurado-login-form" autocomplete="on">
+        <div id="torneoFieldsRoot"></div>
+        <label class="jurado-checkbox-label jurado-field--checkbox">
+          <input type="checkbox" id="aceptaDatos" required>
+          Acepto el tratamiento de mis datos personales para este torneo.
+        </label>
+        <label class="jurado-checkbox-label jurado-field--checkbox">
+          <input type="checkbox" id="aceptaReglas" required>
+          Acepto el reglamento del torneo <span id="reglamentoLinkWrap"></span>
+        </label>
+        <p id="torneoFormError" class="jurado-error" hidden></p>
+        <button type="submit" class="jurado-btn" id="torneoSubmitBtn">Enviar inscripción</button>
+      </form>
+    </section>
+
+    <section id="torneoSuccessSection" class="jurado-card jurado-result-blocked" hidden>
+      <div class="jurado-result-blocked-icon" aria-hidden="true">✓</div>
+      <h2>¡Inscripción recibida!</h2>
+      <p id="torneoSuccessMsg" class="jurado-hint"></p>
+    </section>
+
+    <section id="torneoErrorSection" class="jurado-card" hidden>
+      <h2>No disponible</h2>
+      <p id="torneoLoadError" class="jurado-error"></p>
+    </section>
+
+    <p id="loadingMsg" class="jurado-loading">Cargando formulario…</p>
+
+    <footer class="jurado-page-footer">
+      Inscripción en línea · plataforma de torneos sensoriales
+    </footer>
+  </div>
+
+  <script src="js/event-config.js?v=20260705jurado25"></script>
+  <script src="js/site-links.js?v=20260705jurado25"></script>
+  <script>
+    window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
+      WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec'
+    };
+  </script>
+  <script src="js/competencia-torneo.js?v=20260705jurado25"></script>
+</body>
+</html>

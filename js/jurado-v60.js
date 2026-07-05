@@ -17,6 +17,19 @@
     { key: 'limpieza_taza', label: 'Limpieza de taza', desc: 'Ausencia de defectos u off-flavors' }
   ];
 
+  var DEFAULT_FORM_FIELDS = [
+    { key: 'nombre', label: 'Nombre completo', type: 'text', required: true, enabled: true, placeholder: 'Nombre y apellido' },
+    { key: 'documento', label: 'Documento de identidad', type: 'text', required: true, enabled: true, placeholder: '' },
+    { key: 'celular', label: 'Celular', type: 'tel', required: true, enabled: true, placeholder: '+57 300…' },
+    { key: 'correo', label: 'Correo electrónico', type: 'email', required: true, enabled: true, placeholder: 'correo@ejemplo.com' },
+    { key: 'edad', label: 'Edad', type: 'number', required: false, enabled: false, placeholder: '' },
+    { key: 'ciudad', label: 'Ciudad', type: 'text', required: false, enabled: true, placeholder: '' },
+    { key: 'representa', label: 'Representa (marca/finca)', type: 'text', required: false, enabled: true, placeholder: '' },
+    { key: 'rol', label: 'Rol en la cadena del café', type: 'text', required: false, enabled: false, placeholder: '' },
+    { key: 'experiencia', label: 'Experiencia en café', type: 'textarea', required: false, enabled: false, placeholder: '' },
+    { key: 'observaciones', label: 'Notas / alergias', type: 'textarea', required: false, enabled: true, placeholder: '' }
+  ];
+
   var PIN_JUEZ = 'v60sensorial';
   var PIN_ORGANIZADOR = 'v60organizador';
   var CONFIG_KEY = 'jurado_v60_calificaciones';
@@ -46,6 +59,7 @@
   var platformConfig = null;
   var dashboardTabsBound = false;
   var platformConfigBound = false;
+  var inscripcionesBound = false;
   var activeDashTab = 'vista';
   var autoAdvancing = false;
   var autoAdvanceCooldownUntil = 0;
@@ -75,11 +89,21 @@
 
   function getAllowedDashTabs() {
     var map = {
-      config: ['config', 'export'],
+      config: ['config', 'inscripciones', 'export'],
       organizador: ['vista', 'recorrido', 'torneo', 'puntajes', 'control'],
       all: ['vista', 'recorrido', 'torneo', 'puntajes', 'control', 'config', 'export']
     };
     return map[PAGE_MODE] || map.all;
+  }
+
+  function competenciaTorneoUrl() {
+    var ev = window.EVENT_CONFIG || {};
+    var site = String(ev.siteUrl || window.location.origin).replace(/\/$/, '');
+    var isLocal = window.location.protocol === 'file:' ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+    if (isLocal) return appendTenantToUrl('competencia-torneo.html');
+    return appendTenantToUrl(site + '/competencia/torneo');
   }
 
   function juradoPageUrl(pageKey, extraQuery) {
@@ -157,7 +181,7 @@
           nav.parentNode.insertBefore(welcome, nav);
         }
         welcome.innerHTML = '<h2>Configura tu torneo</h2>' +
-          '<p class="jurado-hint">Personaliza marca, reglas, criterios y PINs. Al guardar, comparte los enlaces de la pestaña <strong>Exportar</strong> con tu equipo.</p>' +
+          '<p class="jurado-hint">Personaliza marca, reglas, criterios, campos del formulario y PINs. Comparte el enlace de la pestaña <strong>Inscripciones</strong> con los competidores.</p>' +
           '<p class="jurado-meta">ID del torneo: <code>' + escapeHtml(tenantSlug) + '</code></p>';
         welcome.hidden = false;
       }
@@ -182,7 +206,7 @@
     var cards = [
       {
         title: 'Configuración del evento',
-        desc: 'Marca, reglas, criterios, PINs y exportación.',
+        desc: 'Marca, reglas, criterios, PINs y formulario de inscripción.',
         href: juradoPageUrl('config', '?pin=' + encodeURIComponent(pinOrg)),
         tag: 'Organizador'
       },
@@ -199,9 +223,13 @@
         tag: 'Competidor'
       },
       {
-        title: 'Inscripción al evento',
-        desc: 'Formulario de registro de competidores.',
-        href: (window.SiteLinks && SiteLinks.href) ? SiteLinks.href('competencia') : 'competencia.html',
+        title: tenantSlug ? 'Inscripción en línea' : 'Inscripción al evento',
+        desc: tenantSlug
+          ? 'Formulario público configurable de este torneo.'
+          : 'Formulario de registro de competidores del festival.',
+        href: tenantSlug
+          ? competenciaTorneoUrl()
+          : ((window.SiteLinks && SiteLinks.href) ? SiteLinks.href('competencia') : 'competencia.html'),
         tag: 'Público'
       }
     ];
@@ -234,9 +262,11 @@
       primaryColor: '#3d281c',
       pinOrganizador: j.pinOrganizador || PIN_ORGANIZADOR,
       pinJuez: j.pinJuez || PIN_JUEZ,
-      tenantSlug: String(raw.tenantSlug || raw.eventId || tenantSlug || '').trim(),
-      eventId: String(raw.eventId || raw.tenantSlug || tenantSlug || '').trim(),
-      clientName: String(raw.clientName || '').trim(),
+      tenantSlug: tenantSlug || '',
+      eventId: tenantSlug || '',
+      clientName: '',
+      sheetName: '',
+      formFields: DEFAULT_FORM_FIELDS.map(function (f) { return Object.assign({}, f); }),
       registration: {
         title: 'Inscripción competencia',
         fee: torneo.precio || '$90.000 COP',
@@ -297,6 +327,27 @@
       return DEFAULT_CRITERIA.map(function (c) { return Object.assign({}, c); });
     }
     return out;
+  }
+
+  function normalizeFormFieldsList(rawList) {
+    var defaults = DEFAULT_FORM_FIELDS;
+    var byKey = {};
+    defaults.forEach(function (f) { byKey[f.key] = f; });
+    if (!Array.isArray(rawList) || !rawList.length) {
+      return defaults.map(function (f) { return Object.assign({}, f); });
+    }
+    return rawList.map(function (f) {
+      if (!f || !f.key) return null;
+      var base = byKey[f.key] || { key: f.key, label: f.key, type: 'text', required: false, enabled: true, placeholder: '' };
+      return {
+        key: String(f.key || base.key).trim(),
+        label: String(f.label || base.label).trim() || base.label,
+        type: String(f.type || base.type).trim() || 'text',
+        required: f.required === true || f.required === 'true',
+        enabled: f.enabled !== false && f.enabled !== 'false',
+        placeholder: String(f.placeholder != null ? f.placeholder : base.placeholder || '').trim()
+      };
+    }).filter(Boolean);
   }
 
   function normalizeScoringConfig(raw, base) {
@@ -679,6 +730,11 @@
       primaryColor: String(raw.primaryColor || base.primaryColor).trim() || base.primaryColor,
       pinOrganizador: String(raw.pinOrganizador || base.pinOrganizador).trim().toLowerCase() || base.pinOrganizador,
       pinJuez: String(raw.pinJuez || base.pinJuez).trim().toLowerCase() || base.pinJuez,
+      tenantSlug: String(raw.tenantSlug || raw.eventId || tenantSlug || base.tenantSlug || '').trim(),
+      eventId: String(raw.eventId || raw.tenantSlug || tenantSlug || base.eventId || '').trim(),
+      clientName: String(raw.clientName || base.clientName || '').trim(),
+      sheetName: String(raw.sheetName || base.sheetName || '').trim(),
+      formFields: normalizeFormFieldsList(raw.formFields),
       registration: {
         title: String(reg.title || base.registration.title).trim() || base.registration.title,
         fee: String(reg.fee || base.registration.fee).trim() || base.registration.fee,
@@ -1872,6 +1928,7 @@
     renderOrganizerScoresTable();
     renderPlatformConfigForm();
     renderExportPreview();
+    renderInscripcionesPanel();
     var detailId = $('organizerCompetidorSelect') ? $('organizerCompetidorSelect').value : '';
     if (!(manualEditDirty && detailId && detailId === manualEditCompetidorId)) {
       renderOrganizerDetail(detailId);
@@ -1891,6 +1948,11 @@
       pane.hidden = !match;
       pane.classList.toggle('jurado-dash-pane--active', match);
     });
+    if (tabId === 'export') renderExportPreview();
+    if (tabId === 'inscripciones') {
+      renderInscripcionesPanel();
+      loadInscripcionesTable();
+    }
   }
 
   function bindDashboardTabs() {
@@ -2251,6 +2313,164 @@
     return html;
   }
 
+  function readFormFieldsFromEditor() {
+    var rows = document.querySelectorAll('.jurado-form-field-row');
+    var list = [];
+    rows.forEach(function (row) {
+      var key = row.getAttribute('data-field-key') || '';
+      var labelEl = row.querySelector('[data-field-label]');
+      var enabledEl = row.querySelector('[data-field-enabled]');
+      var requiredEl = row.querySelector('[data-field-required]');
+      var typeEl = row.querySelector('[data-field-type]');
+      var phEl = row.querySelector('[data-field-placeholder]');
+      if (!key || !labelEl) return;
+      list.push({
+        key: key,
+        label: labelEl.value.trim(),
+        type: typeEl ? typeEl.value : 'text',
+        enabled: enabledEl ? enabledEl.checked : true,
+        required: requiredEl ? requiredEl.checked : false,
+        placeholder: phEl ? phEl.value.trim() : ''
+      });
+    });
+    return normalizeFormFieldsList(list);
+  }
+
+  function renderFormFieldsEditor(fields) {
+    var box = $('formFieldsEditorList');
+    if (!box) return;
+    var list = normalizeFormFieldsList(fields);
+    box.innerHTML = list.map(function (f) {
+      return '<div class="jurado-form-field-row" data-field-key="' + escapeHtml(f.key) + '">' +
+        '<label class="jurado-checkbox-label"><input type="checkbox" data-field-enabled' + (f.enabled ? ' checked' : '') + '> Activo</label>' +
+        '<input type="text" data-field-label value="' + escapeHtml(f.label) + '" maxlength="80" placeholder="Etiqueta">' +
+        '<select data-field-type>' +
+        ['text', 'email', 'tel', 'number', 'textarea'].map(function (t) {
+          return '<option value="' + t + '"' + (f.type === t ? ' selected' : '') + '>' + t + '</option>';
+        }).join('') +
+        '</select>' +
+        '<label class="jurado-checkbox-label"><input type="checkbox" data-field-required' + (f.required ? ' checked' : '') + '> Obligatorio</label>' +
+        '<input type="text" data-field-placeholder value="' + escapeHtml(f.placeholder || '') + '" maxlength="80" placeholder="Placeholder">' +
+        '</div>';
+    }).join('');
+  }
+
+  function renderInscripcionesPanel() {
+    var urlEl = $('inscripcionPublicUrl');
+    var hint = $('inscripcionPublicHint');
+    if (!urlEl) return;
+    if (!tenantSlug) {
+      urlEl.textContent = '—';
+      if (hint) hint.textContent = 'Disponible solo en torneos white-label (URL con ?evt=slug).';
+      return;
+    }
+    var url = competenciaTorneoUrl();
+    urlEl.textContent = url;
+    urlEl.setAttribute('data-url', url);
+    var openLink = $('inscripcionOpenLink');
+    if (openLink) openLink.href = url;
+    if (hint) {
+      hint.textContent = 'Comparte este enlace en redes, QR o correo. Los datos se guardan en la hoja del torneo.';
+    }
+  }
+
+  function inscripcionesDisplayColumns() {
+    var fields = (platformConfig && platformConfig.formFields) || DEFAULT_FORM_FIELDS;
+    return normalizeFormFieldsList(fields).filter(function (f) { return f.enabled; }).map(function (f) {
+      var colMap = {
+        nombre: 'Nombre',
+        documento: 'Documento',
+        celular: 'Celular',
+        correo: 'Correo',
+        edad: 'Edad',
+        ciudad: 'Ciudad',
+        representa: 'Representa',
+        rol: 'Rol',
+        experiencia: 'Experiencia café',
+        observaciones: 'Observaciones'
+      };
+      return { key: f.key, label: f.label, col: colMap[f.key] || f.label };
+    });
+  }
+
+  function renderInscripcionesTable(rows) {
+    var head = $('inscripcionesTableHead');
+    var tbody = $('inscripcionesTableBody');
+    if (!tbody) return;
+    var cols = inscripcionesDisplayColumns();
+    if (head) {
+      head.innerHTML = '<tr>' +
+        cols.map(function (c) { return '<th>' + escapeHtml(c.label) + '</th>'; }).join('') +
+        '<th>Fecha</th><th>Habilitado</th></tr>';
+    }
+    if (!rows || !rows.length) {
+      tbody.innerHTML = '<tr><td colspan="' + (cols.length + 2) + '" class="jurado-empty">Aún no hay inscripciones en línea.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(function (row) {
+      var cells = cols.map(function (c) {
+        return '<td>' + escapeHtml(row[c.col] != null ? row[c.col] : '') + '</td>';
+      }).join('');
+      return '<tr>' + cells +
+        '<td>' + escapeHtml(row['Fecha registro'] || '') + '</td>' +
+        '<td>' + escapeHtml(row.Habilitado || '—') + '</td></tr>';
+    }).join('');
+  }
+
+  function loadInscripcionesTable() {
+    var tbody = $('inscripcionesTableBody');
+    var meta = $('inscripcionesMeta');
+    if (!tbody) return;
+    if (!tenantSlug) {
+      tbody.innerHTML = '<tr><td colspan="99" class="jurado-empty">Abre este panel con un torneo (?evt=slug en la URL).</td></tr>';
+      if (meta) meta.textContent = '';
+      return;
+    }
+    tbody.innerHTML = '<tr><td colspan="99" class="jurado-empty">Cargando inscripciones…</td></tr>';
+    sheetsGet('competencia_torneo_inscripciones', {
+      evt: tenantSlug,
+      pin: pinOrganizadorEffective()
+    }).then(function (data) {
+      var rows = data.rows || [];
+      renderInscripcionesTable(rows);
+      if (meta && data.registration) {
+        var reg = data.registration;
+        meta.textContent = rows.length + ' inscripción(es) · cupo ' +
+          (reg.inscritos != null ? reg.inscritos : rows.length) + '/' + (reg.cupo || '—');
+      }
+    }).catch(function (err) {
+      tbody.innerHTML = '<tr><td colspan="99" class="jurado-error">' +
+        escapeHtml(err.message || 'No se pudieron cargar las inscripciones.') + '</td></tr>';
+      if (meta) meta.textContent = '';
+    });
+  }
+
+  function bindInscripcionesPanel() {
+    if (inscripcionesBound) return;
+    var copyBtn = $('inscripcionCopyBtn');
+    var refreshBtn = $('inscripcionesRefreshBtn');
+    if (!copyBtn && !refreshBtn) return;
+    inscripcionesBound = true;
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var urlEl = $('inscripcionPublicUrl');
+        var url = urlEl ? (urlEl.getAttribute('data-url') || urlEl.textContent) : '';
+        if (!url || url === '—') return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(function () {
+            copyBtn.textContent = 'Copiado';
+            setTimeout(function () { copyBtn.textContent = 'Copiar enlace'; }, 1500);
+          });
+        }
+      });
+    }
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', function () {
+        loadInscripcionesTable();
+      });
+    }
+  }
+
   function readCriteriaFromEditor() {
     var rows = document.querySelectorAll('.jurado-criterion-row');
     var list = [];
@@ -2314,6 +2534,7 @@
         whatsapp: val('cfgRegWhatsapp'),
         reglamentoUrl: val('cfgRegReglamento')
       },
+      formFields: readFormFieldsFromEditor(),
       scoring: scoring
     });
   }
@@ -2353,6 +2574,7 @@
     var autoEl = $('cfgAutoAvance');
     if (autoEl) autoEl.checked = sc.autoAvance !== false;
     renderCriteriaEditor(sc.criteria);
+    renderFormFieldsEditor(cfg.formFields);
     updateConfigPreview(cfg);
   }
 
@@ -2407,6 +2629,7 @@
   function renderPlatformConfigForm() {
     fillPlatformConfigForm(platformConfig);
     bindCriteriaEditorActions();
+    bindInscripcionesPanel();
   }
 
   function bindPlatformConfigForm() {
@@ -2434,6 +2657,8 @@
           ' · ' + getJudgeCount() + ' juez(es). Los enlaces se actualizaron.';
         $('platformConfigSuccess').hidden = false;
         renderOrganizerLinksPanel();
+        renderInscripcionesPanel();
+        if (activeDashTab === 'inscripciones') loadInscripcionesTable();
         applyPlatformBranding();
         updateScoringHints();
       }).catch(function (err) {
@@ -3831,8 +4056,13 @@
       return Promise.all([loadCompetidores(), loadCalificacionesStore()])
         .then(function (results) {
           competidores = results[0];
-          if (!competidores.length) {
+          if (!competidores.length && PAGE_MODE !== 'config') {
             showPinError('No hay competidores habilitados.');
+            return;
+          }
+          if (PAGE_MODE === 'config' && !competidores.length) {
+            $('loadingMsg').hidden = true;
+            showOrganizerUI();
             return;
           }
           return loadBracketStore().then(function () {

@@ -93,7 +93,7 @@ jobs:
         run: |
           BASE="https://la-sucursal-del-cafe.web.app"
           FAIL=0
-          for path in / /pasaporte /escanear-pasaporte /jurado-v60 /jurado/organizador /jurado/config /jurado/juez /jurado/resultados /registro-fidelizacion /panel-fidelizacion /qr /fidelizacion /inscripcion; do
+          for path in / /pasaporte /escanear-pasaporte /jurado-v60 /jurado/organizador /jurado/config /jurado/juez /jurado/resultados /competencia/torneo /registro-fidelizacion /panel-fidelizacion /qr /fidelizacion /inscripcion; do
             CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE$path")
             echo "$CODE $path"
             if [ "$CODE" != "200" ]; then FAIL=1; fi

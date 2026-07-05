@@ -63,6 +63,12 @@
       "sitemap": { "changefreq": "weekly", "priority": "0.8" }
     },
     {
+      "key": "competenciaTorneo",
+      "local": "competencia-torneo.html",
+      "hosted": "/competencia/torneo",
+      "sitemap": false
+    },
+    {
       "key": "reglas",
       "local": "reglas-v60-championship.html",
       "hosted": "/reglas",

@@ -49,6 +49,12 @@ var HEADERS_COMPETENCIA = [
   'Observaciones', 'Estado pago', 'Cupo confirmado', 'Habilitado', 'Notas admin'
 ];
 
+var HEADERS_COMP_EVENTO = [
+  'Fecha registro', 'ID', 'Nombre', 'Documento', 'Edad', 'Celular', 'Correo',
+  'Ciudad', 'Representa', 'Rol', 'Experiencia café', 'Observaciones',
+  'Acepta datos', 'Acepta reglas', 'Habilitado', 'Notas admin'
+];
+
 var HEADERS_STANDS = [
   'Fecha registro', 'ID', 'Stand ID', 'Marca o negocio', 'Persona contacto', 'Celular', 'Correo',
   'Plan stand', 'Ciudad', 'Descripción exhibición',
@@ -170,6 +176,15 @@ function doGet(e) {
   if (params.action === 'jurado_instances') {
     return jsonResponse(listJuradoInstances_());
   }
+  if (params.action === 'competencia_torneo_form') {
+    return jsonResponse(handleCompetenciaTorneoFormGet_(params.evt || ''));
+  }
+  if (params.action === 'competencia_torneo_inscripciones') {
+    return jsonResponse(handleCompetenciaTorneoInscripcionesGet_(
+      params.evt || '',
+      params.pin || ''
+    ));
+  }
   return jsonResponse({
     ok: true,
     message: 'API de inscripciones — La Sucursal del Café',
@@ -259,6 +274,9 @@ function doPost(e) {
     }
     if (action === 'jurado_resultados_login') {
       return jsonResponse(handleJuradoResultadosLogin_(payload));
+    }
+    if (action === 'competencia_torneo_inscripcion') {
+      return jsonResponse(handleCompetenciaTorneoInscripcion_(payload));
     }
     if (action === 'jurado_guardar') {
       return jsonResponse(handleJuradoGuardar_(payload));
@@ -3657,6 +3675,275 @@ function juradoTenantKey_(base, slug) {
   return base + '__' + slug;
 }
 
+function juradoTenantKey_(base, slug) {
+  slug = String(slug || '').trim();
+  if (!slug) return base;
+  return base + '__' + slug;
+}
+
+function defaultCompetenciaFormFields_() {
+  return [
+    { key: 'nombre', label: 'Nombre completo', type: 'text', required: true, enabled: true, placeholder: 'Nombre y apellido' },
+    { key: 'documento', label: 'Documento de identidad', type: 'text', required: true, enabled: true, placeholder: '' },
+    { key: 'celular', label: 'Celular', type: 'tel', required: true, enabled: true, placeholder: '+57 300…' },
+    { key: 'correo', label: 'Correo electrónico', type: 'email', required: true, enabled: true, placeholder: 'correo@ejemplo.com' },
+    { key: 'edad', label: 'Edad', type: 'number', required: false, enabled: false, placeholder: '' },
+    { key: 'ciudad', label: 'Ciudad', type: 'text', required: false, enabled: true, placeholder: '' },
+    { key: 'representa', label: 'Representa (marca/finca)', type: 'text', required: false, enabled: true, placeholder: '' },
+    { key: 'rol', label: 'Rol en la cadena del café', type: 'text', required: false, enabled: false, placeholder: '' },
+    { key: 'experiencia', label: 'Experiencia en café', type: 'textarea', required: false, enabled: false, placeholder: '' },
+    { key: 'observaciones', label: 'Notas / alergias', type: 'textarea', required: false, enabled: true, placeholder: '' }
+  ];
+}
+
+function competenciaEventoSheetName_(slug) {
+  return 'Comp. ' + String(slug || 'evento').slice(0, 28);
+}
+
+function ensureCompetenciaEventoSheet_(slug) {
+  var sheetName = competenciaEventoSheetName_(slug);
+  return getOrCreateSheet_(sheetName, HEADERS_COMP_EVENTO);
+}
+
+function getJuradoTenantPlatform_(slug) {
+  slug = String(slug || '').trim();
+  if (!slug) return null;
+  var cfg = getPasaporteConfig_(juradoTenantKey_('jurado_v60_platform', slug));
+  return cfg.data || null;
+}
+
+function assertJuradoTenantOrganizerPin_(slug, pin) {
+  slug = String(slug || '').trim();
+  var pinNorm = String(pin || '').trim().toLowerCase();
+  if (!slug) return { ok: false, error: 'Torneo no especificado.' };
+  if (!pinNorm) return { ok: false, error: 'PIN de organizador requerido.' };
+  var platform = getJuradoTenantPlatform_(slug);
+  var expected = platform && platform.pinOrganizador
+    ? String(platform.pinOrganizador).trim().toLowerCase()
+    : '';
+  if (!expected) {
+    var list = listJuradoInstances_().instances || [];
+    var inst = list.filter(function (i) { return i.slug === slug; })[0];
+    expected = inst && inst.pinOrganizador ? String(inst.pinOrganizador).trim().toLowerCase() : '';
+  }
+  if (!expected || pinNorm !== expected) {
+    return { ok: false, error: 'PIN de organizador incorrecto.' };
+  }
+  return { ok: true };
+}
+
+function normalizeCompetenciaFormFields_(raw) {
+  var defaults = defaultCompetenciaFormFields_();
+  if (!Array.isArray(raw) || !raw.length) return defaults;
+  var byKey = {};
+  defaults.forEach(function (f) { byKey[f.key] = f; });
+  return raw.map(function (f) {
+    if (!f || !f.key) return null;
+    var base = byKey[f.key] || { key: f.key, label: f.key, type: 'text', required: false, enabled: true };
+    return {
+      key: String(f.key || base.key).trim(),
+      label: String(f.label || base.label).trim() || base.label,
+      type: String(f.type || base.type).trim() || 'text',
+      required: f.required === true || f.required === 'true',
+      enabled: f.enabled !== false && f.enabled !== 'false',
+      placeholder: String(f.placeholder || base.placeholder || '').trim()
+    };
+  }).filter(Boolean);
+}
+
+function getCompetenciaTorneoCount_(slug) {
+  var sheet = ensureCompetenciaEventoSheet_(slug);
+  var lastRow = sheet.getLastRow();
+  return lastRow > 1 ? lastRow - 1 : 0;
+}
+
+function readCompetenciaTorneoRows_(slug, onlyHabilitado) {
+  var sheet = ensureCompetenciaEventoSheet_(slug);
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+  var values = sheet.getRange(2, 1, lastRow, HEADERS_COMP_EVENTO.length).getValues();
+  var rows = [];
+  for (var i = 0; i < values.length; i++) {
+    var row = rowObjectFromValues_(HEADERS_COMP_EVENTO, values[i]);
+    if (onlyHabilitado && !isHabilitado_(row['Habilitado'])) continue;
+    rows.push(row);
+  }
+  return rows;
+}
+
+function handleCompetenciaTorneoFormGet_(evt) {
+  var slug = String(evt || '').trim().toLowerCase();
+  if (!slug || !/^[a-z0-9][a-z0-9-]{0,48}$/.test(slug)) {
+    return { ok: false, error: 'Torneo no válido.' };
+  }
+  var platform = getJuradoTenantPlatform_(slug);
+  if (!platform) {
+    return { ok: false, error: 'No encontramos este torneo. Verifica el enlace.' };
+  }
+  var reg = platform.registration || {};
+  var cupo = parseInt(reg.cupo, 10) || 32;
+  var count = getCompetenciaTorneoCount_(slug);
+  return {
+    ok: true,
+    evt: slug,
+    evento: {
+      nombre: String(platform.eventName || '').trim(),
+      subtitulo: String(platform.eventSubtitle || '').trim(),
+      organizador: String(platform.organizerName || '').trim(),
+      logoUrl: String(platform.logoUrl || '').trim(),
+      accentColor: String(platform.accentColor || '#c9a227').trim(),
+      primaryColor: String(platform.primaryColor || '#3d281c').trim()
+    },
+    registration: {
+      title: String(reg.title || 'Inscripción').trim(),
+      fee: String(reg.fee || '').trim(),
+      cupo: cupo,
+      inscritos: count,
+      disponibles: Math.max(0, cupo - count),
+      completo: count >= cupo,
+      fecha: String(reg.fecha || '').trim(),
+      hora: String(reg.hora || '').trim(),
+      lugar: String(reg.lugar || '').trim(),
+      contactEmail: String(reg.contactEmail || '').trim(),
+      whatsapp: String(reg.whatsapp || '').trim(),
+      reglamentoUrl: String(reg.reglamentoUrl || '').trim()
+    },
+    formFields: normalizeCompetenciaFormFields_(platform.formFields).filter(function (f) {
+      return f.enabled;
+    }),
+    sheetName: String(platform.sheetName || competenciaEventoSheetName_(slug)).trim()
+  };
+}
+
+function handleCompetenciaTorneoInscripcion_(payload) {
+  var slug = String(payload.evt || '').trim().toLowerCase();
+  if (!slug) return { ok: false, error: 'Torneo no especificado.' };
+  var formRes = handleCompetenciaTorneoFormGet_(slug);
+  if (!formRes.ok) return formRes;
+  if (formRes.registration.completo) {
+    return { ok: false, error: 'Cupo completo para este torneo.', cupoCompleto: true };
+  }
+
+  var data = payload.data && typeof payload.data === 'object' ? payload.data : payload;
+  var fields = formRes.formFields || [];
+  var normalized = {};
+  for (var fi = 0; fi < fields.length; fi++) {
+    var f = fields[fi];
+    normalized[f.key] = String(data[f.key] != null ? data[f.key] : '').trim();
+    if (f.required && !normalized[f.key]) {
+      return { ok: false, error: 'Completa el campo: ' + f.label };
+    }
+  }
+
+  if (payload.acepta_datos !== true && payload.acepta_datos !== 'true' && data.acepta_datos !== true) {
+    return { ok: false, error: 'Debes aceptar el tratamiento de datos personales.' };
+  }
+  if (payload.acepta_reglas !== true && payload.acepta_reglas !== 'true' && data.acepta_reglas !== true) {
+    return { ok: false, error: 'Debes aceptar el reglamento del torneo.' };
+  }
+
+  var correo = normalizeEmail_(normalized.correo || data.correo || '');
+  var documento = String(normalized.documento || data.documento || '').trim();
+  var nombre = String(normalized.nombre || data.nombre || '').trim();
+  if (!nombre) return { ok: false, error: 'Nombre requerido.' };
+  if (!correo) return { ok: false, error: 'Correo requerido.' };
+
+  var tenantSheet = ensureCompetenciaEventoSheet_(slug);
+  if (findDuplicateInSheet_(tenantSheet, HEADERS_COMP_EVENTO, correo, documento)) {
+    return { ok: false, error: 'Ya existe una inscripción con este correo o documento.', duplicate: true };
+  }
+
+  var mainSheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
+  if (findDuplicateInSheet_(mainSheet, HEADERS_COMPETENCIA, correo, documento)) {
+    return { ok: false, error: 'Ya existe una inscripción con este correo o documento.', duplicate: true };
+  }
+
+  var id = String(data.id || ('COMP-' + slug.toUpperCase().slice(0, 8) + '-' + Date.now().toString(36).toUpperCase())).trim();
+  var now = new Date().toISOString();
+  var reg = formRes.registration || {};
+
+  tenantSheet.appendRow([
+    now,
+    id,
+    nombre,
+    documento,
+    String(normalized.edad || '').trim(),
+    String(normalized.celular || data.celular || '').trim(),
+    correo,
+    String(normalized.ciudad || '').trim(),
+    String(normalized.representa || '').trim(),
+    String(normalized.rol || '').trim(),
+    String(normalized.experiencia || '').trim(),
+    String(normalized.observaciones || '').trim(),
+    'Sí',
+    'Sí',
+    'Sí',
+    ''
+  ]);
+
+  var legalCols = parseLegalAcceptances_({
+    aceptaVoluntaria: true,
+    aceptaPertenencias: true,
+    aceptaDatos: true,
+    aceptaNoReembolso: true,
+    aceptaDescalificacion: true,
+    aceptaReglas: true,
+    aceptaDisponibilidad: true,
+    aceptaImagen: true
+  });
+  var mainRow = joinRowParts_([
+    now,
+    id,
+    slug,
+    reg.fee || '',
+    nombre,
+    documento,
+    String(normalized.edad || '').trim(),
+    String(normalized.ciudad || '').trim(),
+    String(normalized.celular || data.celular || '').trim(),
+    correo,
+    '', '', '',
+    String(normalized.representa || '').trim(),
+    String(normalized.rol || '').trim(),
+    String(normalized.experiencia || '').trim(),
+    '', '', '', '', '', '',
+    '', '', '', '', '', '',
+    '', '', 'No', '', '', '', ''
+  ], legalCols, [
+    String(normalized.observaciones || '').trim(),
+    'Inscrito en línea',
+    'Sí',
+    'Sí',
+    'Torneo: ' + slug
+  ]);
+  mainSheet.appendRow(mainRow);
+
+  return {
+    ok: true,
+    id: id,
+    evt: slug,
+    nombre: nombre,
+    inscritos: getCompetenciaTorneoCount_(slug),
+    cupo: reg.cupo || 32
+  };
+}
+
+function handleCompetenciaTorneoInscripcionesGet_(evt, pin) {
+  var slug = String(evt || '').trim().toLowerCase();
+  var access = assertJuradoTenantOrganizerPin_(slug, pin);
+  if (!access.ok) return access;
+  var rows = readCompetenciaTorneoRows_(slug, false);
+  var formRes = handleCompetenciaTorneoFormGet_(slug);
+  return {
+    ok: true,
+    evt: slug,
+    columns: HEADERS_COMP_EVENTO,
+    rows: rows,
+    registration: formRes.ok ? formRes.registration : null,
+    formFields: formRes.ok ? formRes.formFields : []
+  };
+}
+
 function listJuradoInstances_() {
   var cfg = getPasaporteConfig_(JURADO_INSTANCES_KEY);
   var instances = cfg.data && Array.isArray(cfg.data.instances) ? cfg.data.instances : [];
@@ -3689,6 +3976,10 @@ function defaultJuradoPlatformForTenant_(instance) {
       whatsapp: '',
       reglamentoUrl: ''
     },
+    formFields: defaultCompetenciaFormFields_(),
+    sheetName: competenciaEventoSheetName_(instance.slug),
+    eventId: instance.slug,
+    tenantSlug: instance.slug,
     scoring: {
       modo: 'duelos',
       scaleMin: 1,
@@ -3724,6 +4015,7 @@ function handleJuradoInstanceCreate_(payload) {
   var pinOrg = generateJuradoPin_();
   var pinJuez = generateJuradoPin_();
   var now = new Date().toISOString();
+  var inscripcionUrl = SITE_PUBLIC_BASE_URL + '/competencia/torneo?evt=' + encodeURIComponent(slug);
   var instance = {
     slug: slug,
     clientName: clientName,
@@ -3731,6 +4023,7 @@ function handleJuradoInstanceCreate_(payload) {
     contactEmail: contactEmail,
     pinOrganizador: pinOrg,
     pinJuez: pinJuez,
+    inscripcionUrl: inscripcionUrl,
     status: 'active',
     createdAt: now
   };
@@ -3751,5 +4044,7 @@ function handleJuradoInstanceCreate_(payload) {
     data: null
   });
 
-  return { ok: true, instance: instance };
+  ensureCompetenciaEventoSheet_(slug);
+
+  return { ok: true, instance: instance, inscripcionUrl: inscripcionUrl };
 }

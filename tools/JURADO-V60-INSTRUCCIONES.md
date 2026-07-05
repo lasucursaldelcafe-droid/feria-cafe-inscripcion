@@ -12,6 +12,7 @@ Plataforma de calificación sensorial en vivo, configurable para otros eventos (
 | **Resultados competidor** | https://la-sucursal-del-cafe.web.app/jurado/resultados |
 | **Juez N** | `https://la-sucursal-del-cafe.web.app/jurado/juez?pin=v60sensorial&juez=N` |
 | **Inscripción evento** | https://la-sucursal-del-cafe.web.app/competencia |
+| **Inscripción torneo (white-label)** | `https://la-sucursal-del-cafe.web.app/competencia/torneo?evt=slug-del-torneo` |
 
 También desde el panel admin: **Competidores** → tarjeta «Enlaces del jurado».
 
@@ -33,15 +34,20 @@ En **Admin → Competidores → Clientes plataforma jurado**:
 
 1. Ingresa nombre del cliente y del torneo.
 2. Pulsa **Crear apartado y enlace**.
-3. Copia el **enlace de configuración** y envíaselo al cliente.
+3. Copia el **enlace de configuración** y el de **inscripción en línea** y envíaselos al cliente.
 
-El enlace tiene forma:
+El enlace de configuración tiene forma:
 
 `https://…/jurado/config?evt=slug-del-cliente&pin=…`
 
-- Cada cliente tiene **datos aislados** (config, puntajes, bracket).
-- El cliente configura marca, reglas y criterios en su panel.
-- Los competidores del torneo deben tener columna **Evento** = `slug` en el sheet (o vacía para incluir todos).
+El formulario público de inscripción:
+
+`https://…/competencia/torneo?evt=slug-del-cliente`
+
+- Cada cliente tiene **datos aislados** (config, puntajes, bracket, hoja de inscripciones).
+- El cliente configura marca, reglas, criterios y **campos del formulario** en su panel.
+- En la pestaña **Inscripciones** ve el enlace público y la lista de registros en tiempo real.
+- Los competidores del torneo deben tener columna **Evento** = `slug` en el sheet principal (o vacía para incluir todos).
 
 ---
 
