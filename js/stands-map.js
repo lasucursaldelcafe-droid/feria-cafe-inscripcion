@@ -1,87 +1,24 @@
 /**
- * Mapa interactivo de stands — selección, ocupación y logos.
+ * Listado de stands — selección, ocupación y logos.
  */
 (function (global) {
   'use strict';
 
   var PLANS_WITH_STAND = ['Zona Origen', 'Zona Gran Reserva'];
   var PLAN_ALIADO_PATROCINADOR = 'Aliado Patrocinador';
-  var MAP_FALLBACK = '/assets/stands-map-placeholder.svg';
-  var MAP_REAL = '/assets/stands-map.jpg';
-  /** SVG embebido — último recurso si fallan todos los assets externos. */
-  var MAP_INLINE =
-    'data:image/svg+xml,' + encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Plano de stands">' +
-      '<defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">' +
-      '<stop offset="0%" stop-color="#F5EDE4"/><stop offset="100%" stop-color="#E8D9C8"/></linearGradient></defs>' +
-      '<rect width="800" height="500" fill="url(#bg)"/>' +
-      '<rect x="280" y="52" width="240" height="70" rx="6" fill="#BB5E3C" opacity="0.18" stroke="#BB5E3C" stroke-width="2"/>' +
-      '<text x="400" y="72" text-anchor="middle" fill="#4B352A" font-family="Inter,sans-serif" font-size="11" font-weight="700">ALIADO PATROCINADOR</text>' +
-      '<rect x="24" y="130" width="340" height="340" rx="8" fill="#8B6914" opacity="0.12" stroke="#8B6914" stroke-width="2"/>' +
-      '<text x="194" y="155" text-anchor="middle" fill="#4B352A" font-family="Inter,sans-serif" font-size="12" font-weight="700">ZONA ORIGEN</text>' +
-      '<rect x="400" y="130" width="376" height="340" rx="8" fill="#4B352A" opacity="0.10" stroke="#4B352A" stroke-width="2"/>' +
-      '<text x="588" y="155" text-anchor="middle" fill="#4B352A" font-family="Inter,sans-serif" font-size="12" font-weight="700">ZONA GRAN RESERVA</text>' +
-      '<text x="400" y="488" text-anchor="middle" fill="#6B5344" font-family="Inter,sans-serif" font-size="11">Plano guía · Palmetto Plaza</text>' +
-      '</svg>'
-    );
-
-  function getAssetBase() {
-    if (typeof document !== 'undefined' && document.body) {
-      var dataBase = document.body.getAttribute('data-asset-base');
-      if (dataBase) return dataBase.replace(/\/?$/, '/');
-    }
-    return '/';
-  }
-
-  /** Rutas desde la raíz del sitio — válidas en /stands, /stands/ y stands.html. */
-  function resolveAssetUrl(path) {
-    if (!path) return MAP_FALLBACK;
-    var s = String(path).trim();
-    if (/^https?:\/\//i.test(s) || s.indexOf('data:') === 0) return s;
-    if (s.charAt(0) === '/') return s;
-    return getAssetBase() + s.replace(/^\.\//, '');
-  }
-
-  function setupMapImage(img, configuredPath, stage) {
-    if (!img) return;
-    var seen = {};
-    var candidates = [];
-    function add(url) {
-      if (!url || seen[url]) return;
-      seen[url] = true;
-      candidates.push(url);
-    }
-    add(resolveAssetUrl(configuredPath));
-    if (resolveAssetUrl(configuredPath) !== MAP_REAL) add(MAP_REAL);
-    add(MAP_FALLBACK);
-    add(MAP_INLINE);
-
-    var idx = 0;
-    img.removeAttribute('loading');
-    img.setAttribute('decoding', 'async');
-    img.setAttribute('width', '800');
-    img.setAttribute('height', '500');
-
-    function markReady() {
-      if (stage) stage.classList.add('stands-map-stage--ready');
-    }
-
-    img.onerror = function () {
-      idx += 1;
-      if (idx < candidates.length) {
-        img.src = candidates[idx];
-        return;
-      }
-      markReady();
-    };
-    img.onload = markReady;
-    img.src = candidates[0];
-  }
 
   function getMapConfig() {
     var cfg = global.EVENT_CONFIG || {};
     var stands = cfg.stands || {};
-    return stands.map || { positions: [], image: '' };
+    return stands.map || { positions: [] };
+  }
+
+  function escapeHtml(text) {
+    return String(text || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
   function normalizeStandId(id) {
@@ -196,48 +133,9 @@
     this.selectionEl = document.getElementById(options.selectionId || 'standSelectionLabel');
     this.hiddenInput = document.getElementById(options.hiddenInputId || 'standId');
     this.legendEl = document.getElementById(options.legendId || 'standsMapLegend');
-    this.tooltipEl = document.getElementById(options.tooltipId || 'standsMapTooltip');
     this.onOccupiedClick = options.onOccupiedClick || null;
     this.onZoneMismatch = options.onZoneMismatch || null;
   }
-
-  StandsMap.prototype.showTooltip = function (el, text) {
-    if (!this.tooltipEl || !el) return;
-    this.tooltipEl.textContent = text;
-    this.tooltipEl.hidden = false;
-    var rect = el.getBoundingClientRect();
-    var rootRect = this.root.getBoundingClientRect();
-    var top = rect.top - rootRect.top - 8;
-    var left = rect.left - rootRect.left + rect.width / 2;
-    this.tooltipEl.style.left = left + 'px';
-    this.tooltipEl.style.top = top + 'px';
-    this.tooltipEl.style.transform = 'translate(-50%, -100%)';
-  };
-
-  StandsMap.prototype.hideTooltip = function () {
-    if (!this.tooltipEl) return;
-    this.tooltipEl.hidden = true;
-    this.tooltipEl.textContent = '';
-  };
-
-  StandsMap.prototype.spotTooltipText = function (pos, sid, occupied, zoneMatch) {
-    if (occupied) {
-      var occ = this.occupied[sid];
-      var marcas = buildLogosFromOccupiedItem(occ).map(function (logo) {
-        return logo.marca;
-      }).filter(Boolean);
-      var marcasText = marcas.length ? marcas.join(' · ') : (occ && occ.marca) || '';
-      return 'Stand ' + pos.label + ' · ' + pos.zone + ' — Ocupado' +
-        (marcasText ? ' (' + marcasText + ')' : '');
-    }
-    if (!zoneMatch && planRequiresStand(this.currentPlan)) {
-      return 'Stand ' + pos.label + ' · ' + pos.zone + ' — No corresponde a tu plan';
-    }
-    if (sid === this.getSelectedStandId()) {
-      return 'Stand ' + pos.label + ' · ' + pos.zone + ' — Seleccionado';
-    }
-    return 'Stand ' + pos.label + ' · ' + pos.zone + ' — Disponible (toca para elegir)';
-  };
 
   StandsMap.prototype.clearFeedback = function () {
     var fb = document.getElementById('standsMapFeedback');
@@ -290,8 +188,8 @@
 
   StandsMap.prototype.refresh = function () {
     var self = this;
-    var hadMap = !!(self.root && self.root.querySelector('.stands-map-stage'));
-    if (self.statusEl && hadMap) {
+    var hadList = !!(self.root && self.root.querySelector('.stands-list'));
+    if (self.statusEl && hadList) {
       self.statusEl.textContent = 'Consultando disponibilidad…';
     }
 
@@ -383,16 +281,24 @@
 
   StandsMap.prototype.renderLegend = function () {
     if (!this.legendEl) return;
-    var total = this.positions.length;
-    var occCount = Object.keys(this.occupied).length;
+    var relevant = this.positionsForPlan();
+    var total = relevant.length;
+    var occCount = relevant.filter(function (pos) {
+      return !!this.occupied[normalizeStandId(pos.id)];
+    }, this).length;
     var avail = Math.max(0, total - occCount);
-    var hint = this.mapConfig.replaceHint || '';
     this.legendEl.innerHTML =
-      '<span class="stands-map-legend__item stands-map-legend__item--free">Disponible (verde)</span>' +
-      '<span class="stands-map-legend__item stands-map-legend__item--selected">Seleccionado</span>' +
-      '<span class="stands-map-legend__item stands-map-legend__item--occupied">Ocupado</span>' +
-      '<span class="stands-map-legend__count">' + avail + ' de ' + total + ' disponibles</span>' +
-      (hint ? '<p class="hint stands-map-replace-hint">' + hint + '</p>' : '');
+      '<span class="stands-list-legend__count">' + avail + ' de ' + total + ' disponibles en tu plan</span>';
+  };
+
+  StandsMap.prototype.positionsForPlan = function () {
+    var self = this;
+    if (!planRequiresStand(this.currentPlan) || !this.currentPlan) {
+      return this.positions.slice();
+    }
+    return this.positions.filter(function (pos) {
+      return pos.zone === self.currentPlan;
+    });
   };
 
   StandsMap.prototype.renderStatus = function () {
@@ -404,70 +310,59 @@
     }
     this.statusEl.classList.remove('stands-map-status--warn');
     if (!planRequiresStand(this.currentPlan) || !this.currentPlan) {
-      this.statusEl.textContent = 'Elige un plan arriba para ver los stands disponibles en el mapa.';
+      this.statusEl.textContent = 'Elige un plan arriba para ver los stands disponibles.';
       return;
     }
-    this.statusEl.textContent = 'Toca un stand verde de «' + this.currentPlan + '» para reservarlo.';
+    this.statusEl.textContent = 'Selecciona un stand disponible de «' + this.currentPlan + '».';
   };
 
-  StandsMap.prototype.renderSpotLogos = function (logoWrap, occ) {
-    if (!logoWrap) return;
-    var self = this;
-    var logos = buildLogosFromOccupiedItem(occ);
-    if (!logos.length) {
-      logoWrap.innerHTML = '';
-      logoWrap.hidden = true;
-      return;
+  StandsMap.prototype.listItemStatus = function (pos, sid, occupied, zoneMatch) {
+    if (occupied) {
+      var occ = this.occupied[sid];
+      var marcas = buildLogosFromOccupiedItem(occ).map(function (logo) {
+        return logo.marca;
+      }).filter(Boolean);
+      return 'Ocupado' + (marcas.length ? ' · ' + marcas.join(' · ') : (occ && occ.marca ? ' · ' + occ.marca : ''));
     }
-
-    var multi = logos.length > 1;
-    logoWrap.className = 'stands-map-spot__logos' + (multi ? ' stands-map-spot__logos--multi' : '');
-    logoWrap.innerHTML = logos.map(function (logo) {
-      var src = logo.logoEnlace ? self.driveImageUrl(logo.logoEnlace) : logo.logoEnlace;
-      var alt = 'Logo ' + (logo.marca || '');
-      if (src && String(src).indexOf('data:') === 0) {
-        return '<img src="' + src + '" alt="' + alt + '">';
-      }
-      if (src) {
-        return '<img src="' + src + '" alt="' + alt + '" loading="lazy" referrerpolicy="no-referrer">';
-      }
-      if (logo.marca) {
-        return '<span class="stands-map-spot__initial" title="' + logo.marca + '">' +
-          logo.marca.charAt(0).toUpperCase() + '</span>';
-      }
-      return '';
-    }).join('');
-    logoWrap.hidden = !logoWrap.innerHTML;
+    if (!zoneMatch && planRequiresStand(this.currentPlan)) {
+      return 'No corresponde a tu plan';
+    }
+    if (sid === this.getSelectedStandId()) {
+      return 'Seleccionado';
+    }
+    return 'Disponible';
   };
 
   StandsMap.prototype.renderSpots = function () {
     if (!this.root) return;
     var self = this;
-    var spots = this.root.querySelectorAll('.stands-map-spot');
-    spots.forEach(function (el) {
+    var showAll = !planRequiresStand(self.currentPlan) || !self.currentPlan;
+    self.root.querySelectorAll('.stands-list__item').forEach(function (el) {
       var sid = normalizeStandId(el.getAttribute('data-stand-id'));
       var pos = self.positions.find(function (p) {
         return normalizeStandId(p.id) === sid;
       });
+      if (!pos) return;
       var occupied = !!self.occupied[sid];
       var selected = sid === self.getSelectedStandId();
-      var zoneMatch = !planRequiresStand(self.currentPlan) || !self.currentPlan || (pos && pos.zone === self.currentPlan);
+      var zoneMatch = showAll || pos.zone === self.currentPlan;
       var disabled = occupied || !zoneMatch;
+      var hidden = !showAll && pos.zone !== self.currentPlan;
 
-      el.classList.toggle('stands-map-spot--occupied', occupied);
-      el.classList.toggle('stands-map-spot--selected', selected && !occupied);
-      el.classList.toggle('stands-map-spot--disabled', disabled && !occupied);
-      el.disabled = occupied;
-      el.setAttribute('aria-disabled', disabled ? 'true' : 'false');
-      el.setAttribute('aria-pressed', selected ? 'true' : 'false');
+      el.hidden = hidden;
+      el.classList.toggle('stands-list__item--occupied', occupied);
+      el.classList.toggle('stands-list__item--selected', selected && !occupied);
+      el.classList.toggle('stands-list__item--disabled', disabled && !occupied);
 
-      var logoWrap = el.querySelector('.stands-map-spot__logos') ||
-        el.querySelector('.stands-map-spot__logo');
-      if (logoWrap && occupied) {
-        self.renderSpotLogos(logoWrap, self.occupied[sid]);
-      } else if (logoWrap) {
-        logoWrap.innerHTML = '';
-        logoWrap.hidden = true;
+      var btn = el.querySelector('.stands-list__btn');
+      if (btn) {
+        btn.disabled = occupied;
+        btn.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+        btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
+      }
+      var statusEl = el.querySelector('.stands-list__status');
+      if (statusEl) {
+        statusEl.textContent = self.listItemStatus(pos, sid, occupied, zoneMatch);
       }
     });
   };
@@ -476,29 +371,22 @@
     if (!this.root) return;
     var self = this;
 
-    this.root.innerHTML =
-      '<div class="stands-map-stage">' +
-      '<img class="stands-map-image" alt="Plano de stands en Palmetto Plaza">' +
-      '<div class="stands-map-overlay" role="group" aria-label="Selección de stand"></div>' +
-      '</div>';
+    this.root.innerHTML = '<ul class="stands-list" role="listbox" aria-label="Listado de stands"></ul>';
+    var list = this.root.querySelector('.stands-list');
 
-    var stage = this.root.querySelector('.stands-map-stage');
-    setupMapImage(this.root.querySelector('.stands-map-image'), this.mapConfig.image, stage);
-
-    var overlay = this.root.querySelector('.stands-map-overlay');
     this.positions.forEach(function (pos) {
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'stands-map-spot';
-      btn.setAttribute('data-stand-id', pos.id);
-      btn.setAttribute('aria-label', 'Stand ' + pos.label + ', ' + pos.zone);
-      btn.style.left = pos.left + '%';
-      btn.style.top = pos.top + '%';
-      btn.style.width = pos.width + '%';
-      btn.style.height = pos.height + '%';
-      btn.innerHTML =
-        '<span class="stands-map-spot__label">' + pos.label + '</span>' +
-        '<span class="stands-map-spot__logos" hidden></span>';
+      var li = document.createElement('li');
+      li.className = 'stands-list__item';
+      li.setAttribute('data-stand-id', pos.id);
+      li.setAttribute('role', 'presentation');
+      li.innerHTML =
+        '<button type="button" class="stands-list__btn" data-stand-id="' + escapeHtml(pos.id) + '">' +
+        '<span class="stands-list__id">' + escapeHtml(pos.label) + '</span>' +
+        '<span class="stands-list__zone">' + escapeHtml(pos.zone) + '</span>' +
+        '<span class="stands-list__status">Disponible</span>' +
+        '</button>';
+
+      var btn = li.querySelector('.stands-list__btn');
       btn.addEventListener('click', function () {
         if (btn.disabled) return;
         var sid = normalizeStandId(pos.id);
@@ -519,33 +407,14 @@
           }
           return;
         }
-        self.hideTooltip();
         self.selectStand(sid === self.getSelectedStandId() ? '' : sid);
       });
-      btn.addEventListener('mouseenter', function () {
-        var sid = normalizeStandId(pos.id);
-        var occupied = !!self.occupied[sid];
-        var zoneMatch = !planRequiresStand(self.currentPlan) || !self.currentPlan || pos.zone === self.currentPlan;
-        self.showTooltip(btn, self.spotTooltipText(pos, sid, occupied, zoneMatch));
-      });
-      btn.addEventListener('mouseleave', function () {
-        self.hideTooltip();
-      });
-      btn.addEventListener('focus', function () {
-        var sid = normalizeStandId(pos.id);
-        var occupied = !!self.occupied[sid];
-        var zoneMatch = !planRequiresStand(self.currentPlan) || !self.currentPlan || pos.zone === self.currentPlan;
-        self.showTooltip(btn, self.spotTooltipText(pos, sid, occupied, zoneMatch));
-      });
-      btn.addEventListener('blur', function () {
-        self.hideTooltip();
-      });
-      overlay.appendChild(btn);
+      list.appendChild(li);
     });
   };
 
   StandsMap.prototype.render = function () {
-    if (!this.root.querySelector('.stands-map-stage')) {
+    if (!this.root.querySelector('.stands-list')) {
       this.buildDom();
     }
     this.renderLegend();
@@ -586,13 +455,13 @@
   StandsMap.prototype.validateSelection = function (plan) {
     if (!planRequiresStand(plan)) return '';
     var sid = this.getSelectedStandId();
-    if (!sid) return 'Selecciona un stand en el mapa.';
+    if (!sid) return 'Selecciona un stand de la lista.';
     var pos = this.positions.find(function (p) {
       return normalizeStandId(p.id) === sid;
     });
     if (!pos) return 'Stand seleccionado no válido.';
     if (pos.zone !== plan) return 'El stand ' + sid + ' no corresponde al plan ' + plan + '.';
-    if (this.occupied[sid]) return 'El stand ' + sid + ' ya está ocupado. Elige otro stand disponible (verde) en el mapa.';
+    if (this.occupied[sid]) return 'El stand ' + sid + ' ya está ocupado. Elige otro stand disponible.';
     return '';
   };
 
@@ -944,7 +813,6 @@
     planRequiresStand: planRequiresStand,
     planIsAliadoPatrocinador: planIsAliadoPatrocinador,
     normalizeStandId: normalizeStandId,
-    compressImageFile: compressImageFile,
-    resolveAssetUrl: resolveAssetUrl
+    compressImageFile: compressImageFile
   };
 })(window);
