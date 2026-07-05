@@ -201,3 +201,36 @@
   background: #fff3cd; border: 1px solid #ffe69c; color: #7a5c00; padding: 10px 16px; border-radius: 10px;
   font-size: 0.85rem; margin-bottom: 16px;
 }
+
+/* Editorial Pergamino (alineado con brand.css) */
+.page-festival--editorial .fid-section {
+  max-width: calc(var(--editorial-max, 760px) + 1.5rem);
+  padding: 1.75rem 1rem 2rem;
+}
+
+.page-festival--editorial .fid-niveles {
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.page-festival--editorial .fid-nivel-card {
+  border: 1px solid var(--editorial-line, rgba(75, 53, 42, 0.14));
+  box-shadow: 0 6px 20px rgba(58, 42, 34, 0.06);
+  padding: 1.15rem 1rem;
+}
+
+.page-festival--editorial .fid-tab {
+  color: var(--editorial-muted, #5C4A42);
+  border-color: var(--editorial-line, rgba(75, 53, 42, 0.14));
+  background: var(--editorial-surface, #fff);
+}
+
+.page-festival--editorial .fid-tab--active {
+  color: var(--editorial-ink, #3A2A22);
+  border-color: var(--editorial-accent, #8B5E3C);
+  background: var(--editorial-bg, #FAF7F2);
+}
+
+.page-festival--editorial .fid-tarjeta {
+  background: linear-gradient(135deg, var(--editorial-ink, #3A2A22), #2a1e18);
+}

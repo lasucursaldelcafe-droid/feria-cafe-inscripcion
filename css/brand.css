@@ -6349,3 +6349,94 @@ textarea.has-value {
     max-height: 260px;
   }
 }
+
+/* —— Editorial unify pergamino6: formularios, reglas, shell —— */
+
+.page-festival.page-festival--editorial.page-form .site-hero--coffee,
+.page-festival.page-festival--editorial.page-rules .site-hero--coffee {
+  background: var(--editorial-hero-bg);
+  color: var(--editorial-ink);
+  border-bottom: 1px solid var(--editorial-line);
+}
+
+.page-festival.page-festival--editorial.page-form .site-hero--coffee::before,
+.page-festival.page-festival--editorial.page-rules .site-hero--coffee::before {
+  display: block;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(187, 94, 60, 0.08) 0%, transparent 42%),
+    radial-gradient(circle at 88% 80%, rgba(95, 127, 78, 0.06) 0%, transparent 38%);
+}
+
+.page-festival.page-festival--editorial.page-form .site-hero--coffee .festival-sub-hero__title,
+.page-festival.page-festival--editorial.page-rules .site-hero--coffee .festival-sub-hero__title {
+  color: var(--editorial-ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.page-festival.page-festival--editorial.page-form .site-hero--coffee .festival-sub-hero__lead,
+.page-festival.page-festival--editorial.page-rules .site-hero--coffee .festival-sub-hero__lead {
+  color: var(--editorial-muted);
+}
+
+.page-festival.page-festival--editorial.page-form .site-hero--coffee .festival-kicker,
+.page-festival.page-festival--editorial.page-rules .site-hero--coffee .festival-kicker {
+  color: var(--editorial-accent);
+}
+
+.page-festival.page-festival--editorial.page-form .content-card {
+  width: 100%;
+  max-width: min(var(--editorial-max, 760px), 100%);
+  border-radius: 16px;
+  border: 1px solid var(--editorial-line);
+  box-shadow: 0 8px 28px rgba(58, 42, 34, 0.06);
+  background: var(--editorial-surface);
+}
+
+.page-festival.page-festival--editorial.page-form .site-main {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-bottom: 2rem;
+}
+
+.page-festival.page-festival--editorial .site-header:not(.site-header--bizcard) {
+  background: rgba(255, 253, 249, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--editorial-line);
+}
+
+.page-festival.page-festival--editorial .site-header:not(.site-header--bizcard) .festival-nav {
+  max-width: calc(var(--editorial-max, 760px) + 1.5rem);
+  margin: 0 auto;
+  padding: 0.55rem 1rem;
+}
+
+.page-festival.page-festival--editorial .site-shell:not(.site-shell--bizcard) {
+  background: var(--editorial-bg);
+  min-height: 0;
+}
+
+body.page-rules.page-festival--editorial {
+  background: var(--editorial-bg);
+}
+
+body.page-rules.page-festival--editorial .rules-doc {
+  background: #fff;
+  color: #222;
+}
+
+.page-festival--editorial .festival-footer__col-title {
+  color: rgba(233, 230, 221, 0.78);
+}
+
+.page-festival--editorial .festival-sponsor-card__avatar {
+  object-fit: contain;
+  background: var(--editorial-surface);
+}
+
+.page-festival--editorial img[src*="logo-la-sucursal"] {
+  height: auto;
+  max-height: 48px;
+  width: auto;
+  object-fit: contain;
+}

@@ -17,8 +17,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/brand.css?v=20260705pergamino5">
-  <link rel="stylesheet" href="css/fidelizacion.css?v=20260623a">
+  <link rel="stylesheet" href="css/brand.css?v=20260705pergamino6">
+  <link rel="stylesheet" href="css/fidelizacion.css?v=20260705pergamino6">
 </head>
 <body class="page-festival page-festival--editorial" data-festival-page="fidelizacion">
   <header class="site-header">
@@ -35,7 +35,7 @@
         <li><a data-link="stands" data-nav="stands" href="stands.html">Adquiere tu stand</a></li>
         <li><a data-link="feria" data-nav="inscripcion" href="inscripcion.html">Registro visitante</a></li>
         <li><a data-link="competencia" data-nav="competencia" href="competencia.html">Competencia</a></li>
-        <li><a data-link="fidelizacion" data-nav="fidelizacion" href="fidelizacion.html">Fidelización</a></li>
+        <li><a data-link="fidelizacion" data-nav="fidelizacion" href="fidelizacion.html">Pasaporte Cafetero</a></li>
       </ul>
     </nav>
   </header>
@@ -86,16 +86,48 @@
       </section>
     </main>
 
-    <footer class="festival-footer">
-      <div class="festival-footer__inner">
+    <footer id="contacto" class="festival-footer">
+      <div class="festival-wrap festival-footer__inner">
+        <div class="festival-footer__brand">
+          <p class="festival-footer__col-title">Evento</p>
+          <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="160" height="64" loading="lazy">
+          <p id="festivalInstagram" class="festival-social">
+            <a id="igLink" href="https://www.instagram.com/lasucursal.delcafe/" target="_blank" rel="noopener noreferrer" aria-label="Instagram @lasucursal.delcafe">@lasucursal.delcafe</a>
+          </p>
+        </div>
+        <nav class="festival-footer__nav" aria-label="Enlaces del sitio">
+          <p class="festival-footer__col-title">Navegación</p>
+          <a data-link="festival" href="index.html">Inicio</a>
+          <a data-link="evento" href="el-evento.html">El evento</a>
+          <a data-link="actividades" href="actividades.html">Actividades</a>
+          <a data-link="patrocinadores" href="patrocinadores.html">Patrocinadores</a>
+          <a data-link="stands" href="stands.html">Adquiere tu stand</a>
+          <a data-link="feria" href="inscripcion.html">Registro visitante</a>
+          <a data-link="fidelizacion" href="fidelizacion.html">Pasaporte Cafetero</a>
+          <a data-link="competencia" href="competencia.html">V60 Championship</a>
+          <a data-link="como-funciona" href="como-funciona-evento.html">Cómo funciona</a>
+          <a data-link="privacidad" href="privacidad.html">Privacidad</a>
+        </nav>
+        <div class="festival-footer__contact">
+          <p class="festival-footer__col-title">Contacto</p>
+          <p class="festival-footer__dates">
+            Feria · <span data-bind="feria.fecha">29 y 30 de agosto de 2026</span><br>
+            <span data-bind="feria.lugar">Palmetto Plaza, Cali</span>
+          </p>
+          <div class="festival-contact-actions">
+            <a class="btn-submit" id="waContact" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <a class="btn-secondary" id="emailContact" href="mailto:lasucursaldelcafe@gmail.com">Correo</a>
+          </div>
+        </div>
         <p class="festival-footer__copy">© 2026 La Sucursal del Café · Apoya lo nuestro, toma café colombiano.</p>
       </div>
     </footer>
   </div>
 
-  <script src="js/event-config.js?v=20260703global"></script>
-  <script src="js/site-links.js?v=20260703global"></script>
-  <script src="js/site-chrome.js?v=20260705pergamino2"></script>
-  <script src="js/festival-nav.js?v=20260703global"></script>
+  <script src="js/event-config.js?v=20260705pergamino6"></script>
+  <script src="js/site-links.js?v=20260705pergamino6"></script>
+  <script src="js/seo-structured-data.js"></script>
+  <script src="js/site-chrome.js?v=20260705pergamino6"></script>
+  <script src="js/festival-nav.js?v=20260705pergamino6"></script>
 </body>
 </html>

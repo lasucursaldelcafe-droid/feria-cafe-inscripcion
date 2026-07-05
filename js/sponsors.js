@@ -43,7 +43,7 @@
         escapeHtml(sponsor.image) +
         '" alt="' +
         alt +
-        '" width="72" height="72" loading="lazy">';
+        '" width="72" height="72" loading="lazy" decoding="async">';
     } else {
       avatar =
         '<span class="festival-sponsor-card__avatar festival-sponsor-card__avatar--placeholder" aria-hidden="true">' +
@@ -77,10 +77,25 @@
     return '<li class="' + classes + '"><div class="festival-sponsor-card__link">' + inner + '</div></li>';
   }
 
+  function attachAvatarFallback(root) {
+    if (!root) return;
+    root.querySelectorAll('img.festival-sponsor-card__avatar').forEach(function (img) {
+      img.addEventListener('error', function onAvatarError() {
+        img.removeEventListener('error', onAvatarError);
+        var span = document.createElement('span');
+        span.className = 'festival-sponsor-card__avatar festival-sponsor-card__avatar--placeholder';
+        span.setAttribute('aria-hidden', 'true');
+        span.textContent = initials(img.getAttribute('alt') || '');
+        img.replaceWith(span);
+      });
+    });
+  }
+
   function renderInto(selector) {
     var el = document.querySelector(selector);
     if (!el || !sponsors.length) return;
     el.innerHTML = sponsors.map(renderCard).join('');
+    attachAvatarFallback(el);
   }
 
   function init() {
