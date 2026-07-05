@@ -400,7 +400,7 @@
       eventName: 'Jurado sensorial V60',
       eventSubtitle: 'Calificación sensorial en vivo',
       organizerName: ev.organizerName || 'La Sucursal del Café',
-      logoUrl: 'assets/logo-la-sucursal-del-cafe.png',
+      logoUrl: '/assets/logo-la-sucursal-del-cafe.png',
       accentColor: '#c9a227',
       primaryColor: '#3d281c',
       pinOrganizador: j.pinOrganizador || PIN_ORGANIZADOR,
@@ -2793,7 +2793,7 @@
   function updateConfigPreview(cfg) {
     cfg = cfg || readPlatformConfigForm();
     var img = $('configPreviewLogo');
-    if (img) img.src = cfg.logoUrl || 'assets/logo-la-sucursal-del-cafe.png';
+    if (img) img.src = cfg.logoUrl || '/assets/logo-la-sucursal-del-cafe.png';
     var name = $('configPreviewName');
     if (name) name.textContent = cfg.eventName || 'Mi torneo';
     var sc = cfg.scoring || {};
