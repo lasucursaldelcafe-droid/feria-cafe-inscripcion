@@ -38,6 +38,8 @@ PASAPORTE_NAV = (
 
 SKIP = {
     "admin.html",
+    "competencia.html",
+    "competencia-torneo.html",
     "jurado-config.html",
     "jurado-juez.html",
     "jurado-organizador.html",

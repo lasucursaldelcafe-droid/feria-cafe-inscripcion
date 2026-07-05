@@ -319,7 +319,7 @@ def check_apps_script(report: VerificationReport, web_url: str) -> None:
 def check_forms_pages(report: VerificationReport) -> None:
     pages: list[tuple[str, list[str]]] = [
         ("/inscripcion", ["form-submit.js", "sheets-config.js"]),
-        ("/competencia", ["form-submit.js", "sheets-config.js"]),
+        ("/competencia", ["form-submit.js", "sheets-config.js", "jurado-v60.css"]),
         ("/admin", ["admin-dashboard.js", "sheets-config.js", "fidelizacion-sheets.js"]),
         ("/stands", ["stands-map.js"]),
         ("/marcas", ["participantes-directory.js"]),

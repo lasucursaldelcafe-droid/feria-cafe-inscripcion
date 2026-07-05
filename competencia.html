@@ -16,50 +16,33 @@
   <title>V60 Championship Cali 2026 | Inscripción competencia café filtrado</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/brand.css?v=20260705assets1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado29">
+  <link rel="stylesheet" href="css/competencia-jurado.css?v=20260705jurado29">
 </head>
-<body class="page-festival page-form page-festival--editorial" data-festival-page="competencia">
-  <header class="site-header">
-    <nav class="festival-nav" aria-label="Navegación principal">
-      <a class="festival-nav__brand" data-link="festival" href="index.html">
+<body class="jurado-page jurado-page--inscripcion jurado-page--competencia-festival" data-festival-page="competencia">
+  <div class="jurado-shell">
+    <header class="jurado-header" id="competenciaHeader">
+      <div class="jurado-header-brand">
         <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="120" height="48">
-      </a>
-      <button type="button" class="festival-nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navMenu">Menú</button>
-      <ul class="festival-nav__menu" id="navMenu">
-        <li><a data-link="festival" data-nav="home" href="index.html">Inicio</a></li>
-        <li><a data-link="evento" data-nav="evento" href="el-evento.html">El evento</a></li>
-        <li><a data-link="actividades" data-nav="actividades" href="actividades.html">Actividades</a></li>
-        <li><a data-link="patrocinadores" data-nav="patrocinadores" href="patrocinadores.html">Patrocinadores</a></li>
-        <li><a data-link="stands" data-nav="stands" href="stands.html">Adquiere tu stand</a></li>
-        <li><a data-link="feria" data-nav="inscripcion" href="inscripcion.html">Registro visitante</a></li>        <li><a data-link="fidelizacion" data-nav="fidelizacion" href="fidelizacion.html">Pasaporte Cafetero</a></li>
-
-        <li><a data-link="competencia" data-nav="competencia" href="competencia.html">Competencia</a></li>
-      </ul>
-    </nav>
-  </header>
-  <div class="site-shell">
-    <header class="site-hero site-hero--coffee">
-      <div class="festival-sub-hero">
-        <p class="festival-kicker">V60 Championship · 2.ª preliminar</p>
-        <h1 id="event-title" class="festival-sub-hero__title">Competencia</h1>
-        <p class="festival-sub-hero__lead">Café filtrado con V60 · 2 preliminares + final 29–30 ago 2026</p>
-        <div class="hero-meta">
-          <span class="badge">📅 Preliminar 2: <span data-bind="torneo.fecha">Por confirmar</span></span>
-          <span class="badge">🕠 Hora: <span data-bind="torneo.hora">5:30 p. m.</span></span>
-          <span class="badge">🏆 Final: 29–30 ago</span>
-          <span class="badge price">$90.000 COP</span>
-          <span class="badge">Cupo: 36</span>
+        <div class="jurado-header-text">
+          <p class="jurado-header-kicker">V60 Championship · 2.ª preliminar</p>
+          <h1 id="event-title">Competencia</h1>
+          <p id="headerSubtitle">Café filtrado con V60 · 2 preliminares + final 29–30 ago 2026</p>
         </div>
       </div>
-      <div class="hero-accent" aria-hidden="true"></div>
+      <div class="competencia-hero-badges" aria-label="Datos del torneo">
+        <span class="jurado-hub-tag">📅 Preliminar 2: <span data-bind="torneo.fecha">Por confirmar</span></span>
+        <span class="jurado-hub-tag">🕠 Hora: <span data-bind="torneo.hora">5:30 p. m.</span></span>
+        <span class="jurado-hub-tag">🏆 Final: 29–30 ago</span>
+        <span class="jurado-hub-tag jurado-hub-tag--price">$90.000 COP</span>
+        <span class="jurado-hub-tag">Cupo: 36</span>
+      </div>
     </header>
 
-    <main class="site-main">
-      <article class="content-card content-card--wide" aria-labelledby="event-title">
-        <div id="formPanel" class="form-panel card-body">
+    <section id="formPanel" class="jurado-card form-panel" aria-labelledby="event-title">
         <div class="info-box" role="note">
-          <p style="margin:0 0 0.5rem"><a data-link="festival" href="index.html">← Volver al evento</a></p>
+          <p class="competencia-back-link"><a data-link="festival" href="index.html">← Volver al evento</a></p>
           <strong>V60 Championship — Preliminar 2</strong> — competencia de café filtrado con V60 (cupo: 36 · inscripción $90.000 COP).
           <p style="margin:0.5rem 0 0">
             <strong>Preliminar 2:</strong> <span data-bind="torneo.fecha">Por confirmar</span> ·
@@ -68,7 +51,7 @@
             <strong>Final:</strong> 29 y 30 de agosto de 2026 · Palmetto Plaza, Cali.
           </p>
           <p class="hint" style="margin:0.5rem 0 0">Inscripción de pago solo para este torneo. La <a data-link="feria" href="inscripcion.html">feria</a> (29–30 ago, Palmetto Plaza) no tiene costo de ingreso; el registro como visitante es opcional. ¿Expones una marca? <a data-link="stands" href="stands.html">Adquiere tu stand</a>.</p>
-          <div class="info-box info-box--nested" style="margin-top:0.75rem;background:rgba(75,53,42,0.04);border-left:4px solid var(--brown-warm,#BB5E3C)">
+          <div class="info-box info-box--nested" style="margin-top:0.75rem">
             <p style="margin:0 0 0.5rem"><strong>2.ª preliminar del V60 Championship</strong> (2 preliminares + final 29–30 ago)</p>
             <p style="margin:0">
               Circuito, premios del festival, logística e inscripción paso a paso:
@@ -79,7 +62,7 @@
           </div>
           <p id="cupoStatus" class="cupo-status" aria-live="polite"></p>
           <div id="waitlistPanel" class="waitlist-panel" aria-live="polite">
-            <h3 style="margin:0 0 0.5rem;color:var(--red-brand)">Cupo completo — Lista de espera</h3>
+            <h3 class="waitlist-panel__title">Cupo completo — Lista de espera</h3>
             <p class="hint" style="margin:0 0 0.75rem">Déjanos tus datos y te contactamos si se libera un cupo.</p>
             <div class="field-row">
               <div class="field">
@@ -435,9 +418,9 @@
           <button type="submit" class="btn-submit" id="btnSubmit">Inscribirme en V60 Championship</button>
           <p id="syncNote" class="hint" style="text-align:center;margin-top:0.75rem;display:none"></p>
         </form>
-      </div>
+    </section>
 
-      <div id="successPanel" class="success-panel" role="status" aria-live="polite">
+    <section id="successPanel" class="jurado-card success-panel" role="status" aria-live="polite">
         <div style="font-size:3rem;margin-bottom:0.5rem" aria-hidden="true">🏆</div>
         <h2 id="successTitle">¡Inscripción completada!</h2>
         <p id="successLead"></p>
@@ -460,56 +443,32 @@
         </p>
         <p id="inscripcionId" class="hint"></p>
         <button type="button" id="btnNueva" class="btn-secondary">Nueva inscripción</button>
-        </div>
-      </article>
-    </main>
+    </section>
 
-    <footer id="contacto" class="festival-footer">
-      <div class="festival-wrap festival-footer__inner">
-        <div class="festival-footer__brand">
-          <p class="festival-footer__col-title">Evento</p>
-          <img src="assets/logo-la-sucursal-del-cafe.png" alt="La Sucursal del Café" width="160" height="64" loading="lazy">
-          <p id="festivalInstagram" class="festival-social">
-            <a id="igLink" href="https://www.instagram.com/lasucursal.delcafe/" target="_blank" rel="noopener noreferrer" aria-label="Instagram @lasucursal.delcafe">@lasucursal.delcafe</a>
-          </p>
-        </div>
-        <nav class="festival-footer__nav" aria-label="Enlaces del sitio">
-          <p class="festival-footer__col-title">Navegación</p>
-          <a data-link="festival" href="index.html">Inicio</a>
-          <a data-link="evento" href="el-evento.html">El evento</a>
-          <a data-link="actividades" href="actividades.html">Actividades</a>
-          <a data-link="patrocinadores" href="patrocinadores.html">Patrocinadores</a>
-          <a data-link="stands" href="stands.html">Adquiere tu stand</a>
-          <a data-link="feria" href="inscripcion.html">Registro visitante</a>
-          <a data-link="competencia" href="competencia.html">V60 Championship</a>
-          <a data-link="como-funciona" href="como-funciona-evento.html">Cómo funciona</a>
-          <a data-link="qr" href="qr-inscripcion.html">QR inscripción</a>
-          <a data-link="privacidad" href="privacidad.html">Privacidad</a>
-        </nav>
-        <div class="festival-footer__contact">
-          <p class="festival-footer__col-title">Contacto</p>
-          <p class="festival-footer__dates">
-            Competencia · Preliminar 2: <span data-bind="torneo.fecha">Por confirmar</span> · <span data-bind="torneo.hora">5:30 p. m.</span> · Final: 29–30 ago 2026<br>
-            <span data-bind="torneo.lugar">Por confirmar</span>
-          </p>
-          <div class="festival-contact-actions">
-            <a class="btn-submit" id="waContact" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-            <a class="btn-secondary" id="emailContact" href="mailto:lasucursaldelcafe@gmail.com">Correo</a>
-          </div>
-        </div>
-        <p class="festival-footer__copy">© 2026 La Sucursal del Café · Apoya lo nuestro, toma café colombiano.</p>
-      </div>
+    <footer class="jurado-page-footer">
+      <p>V60 Championship · La Sucursal del Café</p>
+      <nav class="competencia-footer-links" aria-label="Enlaces relacionados">
+        <a data-link="festival" href="index.html">Inicio</a>
+        <a data-link="reglas" href="reglas-v60-championship.html">Reglamento</a>
+        <a data-link="comoFunciona" href="como-funciona-evento.html">¿Cómo funciona?</a>
+        <a data-link="feria" href="inscripcion.html">Registro visitante</a>
+        <a data-link="privacidad" href="privacidad.html">Privacidad</a>
+      </nav>
+      <p class="jurado-meta" style="margin-top:0.75rem">
+        Preliminar 2: <span data-bind="torneo.fecha">Por confirmar</span> ·
+        <span data-bind="torneo.hora">5:30 p. m.</span> ·
+        <span data-bind="torneo.lugar">Por confirmar</span>
+      </p>
     </footer>
   </div>
 
-  <script src="js/event-config.js?v=20260705assets1"></script>
-  <script src="js/site-links.js?v=20260705assets1"></script>
+  <script src="js/event-config.js?v=20260705jurado29"></script>
+  <script src="js/site-links.js?v=20260705jurado29"></script>
   <script src="js/seo-structured-data.js"></script>
   <script src="js/sheets-config.js"></script>
   <script src="js/form-submit.js"></script>
   <script src="js/terms-disclosure.js"></script>
-  <script src="js/site-chrome.js?v=20260705assets1"></script>
-  <script src="js/festival-nav.js?v=20260705assets1"></script>
+  <script src="js/site-chrome.js?v=20260705jurado29"></script>
   <script>
     (function () {
       const cfg = window.EVENT_CONFIG || {};
