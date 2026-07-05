@@ -246,7 +246,7 @@
     if (!shell || !main) return;
 
     var layout = document.createElement('main');
-    layout.className = 'bizcard-layout';
+    layout.className = 'bizcard-layout bizcard-layout--editorial';
     layout.id = main.id || 'contenido';
 
     if (hero) {

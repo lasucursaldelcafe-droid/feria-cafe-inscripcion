@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" fill="none" role="img" aria-label="Feria de café especial: comunidad, cata y V60">
+  <rect width="640" height="420" rx="24" fill="#F5F0E8"/>
+  <circle cx="520" cy="72" r="48" fill="#E8DFD0" opacity=".9"/>
+  <circle cx="88" cy="340" r="64" fill="#EDE6DA" opacity=".85"/>
+  <path d="M120 300c40-72 88-108 148-108s108 36 148 108" stroke="#BB5E3C" stroke-width="2.5" stroke-linecap="round" opacity=".35"/>
+  <ellipse cx="320" cy="318" rx="200" ry="18" fill="#D9CFC0" opacity=".55"/>
+  <g stroke="#4B352A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M188 248v-86c0-22 18-40 40-40h44" fill="#FAF6F0"/>
+    <path d="M188 248h96c11 0 20-9 20-20v-52" fill="#FFFDF9"/>
+    <path d="M272 176h40c16 0 28 12 28 28v44c0 22-18 40-40 40h-92" fill="#E9E6DD"/>
+    <path d="M210 200c8-10 20-16 34-16s26 6 34 16" stroke="#BB5E3C"/>
+    <path d="M360 210l28-78c4-12 16-18 28-14s18 16 14 28l-34 96" fill="#5F7F4E" fill-opacity=".18"/>
+    <path d="M360 210l28-78c4-12 16-18 28-14s18 16 14 28l-34 96"/>
+    <path d="M388 132c10 2 16 12 14 22" stroke="#5F7F4E"/>
+    <path d="M404 248v-34c0-14 12-26 26-26h18" fill="#FAF6F0"/>
+    <path d="M404 248h44c11 0 20-9 20-20v-18" fill="#FFFDF9"/>
+    <path d="M432 180h12c8 0 14 6 14 14v34" fill="#E9E6DD"/>
+    <path d="M418 206c6-8 16-12 26-12" stroke="#BB5E3C"/>
+  </g>
+  <g fill="#4B352A">
+    <circle cx="154" cy="118" r="16"/>
+    <path d="M138 150c6-18 22-28 40-28h8" stroke="#4B352A" stroke-width="2.2" fill="none"/>
+    <circle cx="498" cy="132" r="15"/>
+    <path d="M482 164c8-16 24-24 40-24" stroke="#4B352A" stroke-width="2.2" fill="none"/>
+    <circle cx="248" cy="104" r="14"/>
+    <path d="M234 134c6-14 20-22 34-22" stroke="#4B352A" stroke-width="2.2" fill="none"/>
+  </g>
+  <g fill="#BB5E3C" opacity=".85">
+    <ellipse cx="126" cy="286" rx="7" ry="4"/>
+    <ellipse cx="146" cy="292" rx="7" ry="4"/>
+    <ellipse cx="166" cy="286" rx="7" ry="4"/>
+    <ellipse cx="456" cy="288" rx="7" ry="4"/>
+    <ellipse cx="476" cy="294" rx="7" ry="4"/>
+    <ellipse cx="496" cy="288" rx="7" ry="4"/>
+  </g>
+  <text x="320" y="56" text-anchor="middle" fill="#4B352A" font-family="Georgia, serif" font-size="15" letter-spacing="4" opacity=".55">CAFÉ · COMUNIDAD · CALI</text>
+</svg>
