@@ -13,7 +13,7 @@ window.EVENT_CONFIG = {
   },
   circuito: {
     preliminaresTotal: 2,
-    preliminarActual: 1,
+    preliminarActual: 2,
     principal: {
       fecha: '29 y 30 de agosto de 2026',
       fechaCorta: '29–30 ago 2026',
@@ -30,9 +30,25 @@ window.EVENT_CONFIG = {
     catacionMin: 5,
     catacionLabel: '5 min'
   },
+  torneoActivo: 'evento2',
   evento1: {
+    estado: 'realizada',
+    eventoId: 'V60 Championship — Preliminar 1',
     nombre: 'V60 Championship — Preliminar 1',
     preliminar: '1.ª de 2 preliminares',
+    fecha: 'Por confirmar',
+    fechaCorta: 'Por confirmar',
+    horaInicio: '5:30 p. m.',
+    sede: 'Por confirmar',
+    ciudad: 'Cali',
+    whatsappGrupoUrl: 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9',
+    whatsappGrupoNombre: 'V60 Championship — competidores'
+  },
+  evento2: {
+    estado: 'activa',
+    eventoId: 'V60 Championship — Preliminar 2',
+    nombre: 'V60 Championship — Preliminar 2',
+    preliminar: '2.ª de 2 preliminares',
     fecha: 'Por confirmar',
     fechaCorta: 'Por confirmar',
     horaInicio: '5:30 p. m.',

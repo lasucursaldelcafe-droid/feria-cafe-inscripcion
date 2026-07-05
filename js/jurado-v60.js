@@ -883,15 +883,29 @@
       });
   }
 
+  function competenciaEventKey(val) {
+    var s = String(val || '').trim();
+    if (!s) return '';
+    if (/preliminar\s*2/i.test(s) || /2\.ª/i.test(s)) return 'V60 Championship — Preliminar 2';
+    if (/preliminar\s*1/i.test(s) || /1\.ª/i.test(s)) return 'V60 Championship — Preliminar 1';
+    if (s === 'V60 Championship') return 'V60 Championship — Preliminar 1';
+    return s;
+  }
+
   function loadCompetidores() {
     return sheetsGet('admin_dashboard', {}).then(function (data) {
       var eventFilter = tenantSlug || (platformConfig && (platformConfig.eventId || platformConfig.tenantSlug)) || '';
+      if (!eventFilter && window.EVENT_CONFIG) {
+        var activeEv = window.EVENT_CONFIG.getEventoActivo
+          ? window.EVENT_CONFIG.getEventoActivo()
+          : (window.EVENT_CONFIG.evento2 || window.EVENT_CONFIG.evento1 || {});
+        eventFilter = String(activeEv.eventoId || activeEv.nombre || '').trim();
+      }
       return (data.allCompetencia || [])
         .filter(function (row) { return isHabilitado(row.Habilitado); })
         .filter(function (row) {
           if (!eventFilter) return true;
-          var ev = String(row.Evento || '').trim();
-          return !ev || ev === eventFilter;
+          return competenciaEventKey(row.Evento) === competenciaEventKey(eventFilter);
         })
         .map(function (row) {
           return {
