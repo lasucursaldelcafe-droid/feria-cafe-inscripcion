@@ -5578,28 +5578,29 @@ textarea.has-value {
   color: var(--editorial-ink);
 }
 
+.page-festival--editorial .bizcard-layout,
 .page-festival--editorial .bizcard-layout--editorial {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 1.15rem;
   max-width: calc(var(--editorial-max) + 2.5rem);
   padding: 0 1.25rem 3rem;
 }
 
 .page-festival--editorial .bizcard {
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  border-bottom: 1px solid var(--editorial-line);
+  background: var(--editorial-surface);
+  border: 1px solid var(--editorial-line);
+  border-radius: 20px;
+  box-shadow: 0 10px 36px rgba(58, 42, 34, 0.07);
+  margin-bottom: 0;
 }
 
 .page-festival--editorial .bizcard:last-child {
-  border-bottom: none;
+  border-bottom: 1px solid var(--editorial-line);
 }
 
 .page-festival--editorial .bizcard__body {
-  padding: 2.25rem 0;
+  padding: 1.75rem 1.5rem 1.85rem;
   gap: 0.85rem;
 }
 
@@ -5710,9 +5711,10 @@ textarea.has-value {
 }
 
 .page-festival--editorial .festival-explore__panel {
-  background: transparent;
-  border: none;
-  padding: 1rem 0 0;
+  background: var(--editorial-surface);
+  border: 1px solid var(--editorial-line);
+  border-radius: 16px;
+  padding: 1rem 1.1rem 1.15rem;
 }
 
 .page-festival--editorial .festival-explore__illustration {
@@ -5827,21 +5829,75 @@ textarea.has-value {
 }
 
 .page-festival--editorial .festival-section {
-  border-bottom: 1px solid var(--editorial-line);
+  border-bottom: none;
+  padding: 2.5rem 0;
 }
 
 .page-festival--editorial .festival-section--light {
-  background: transparent;
+  background: var(--editorial-bg);
+}
+
+.page-festival--editorial .festival-wrap {
+  max-width: var(--editorial-max);
+  margin: 0 auto;
+}
+
+.page-festival--editorial .festival-why {
+  background: var(--editorial-surface);
+  border: 1px solid var(--editorial-line);
+  border-left: 4px solid var(--editorial-accent);
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(58, 42, 34, 0.05);
+}
+
+.page-festival--editorial .festival-stat {
+  background: var(--editorial-surface);
+  border: 1px solid var(--editorial-line);
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(58, 42, 34, 0.05);
+}
+
+.page-festival--editorial .festival-card {
+  background: var(--editorial-surface);
+  border: 1px solid var(--editorial-line);
+  box-shadow: 0 8px 28px rgba(58, 42, 34, 0.05);
+  border-radius: 16px;
+}
+
+.page-festival--editorial .festival-lead,
+.page-festival--editorial .festival-lead--dark {
+  color: var(--editorial-muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
 }
 
 .page-festival--editorial .content-card {
   background: var(--editorial-surface);
-  border-color: var(--editorial-line);
-  box-shadow: none;
+  border: 1px solid var(--editorial-line);
+  box-shadow: 0 12px 40px rgba(58, 42, 34, 0.07);
   border-radius: 20px;
 }
 
+.page-festival--editorial .site-shell {
+  background: var(--editorial-bg);
+}
+
+.page-festival--editorial .festival-sub-hero {
+  max-width: calc(var(--editorial-max) + 2.5rem);
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.page-festival--editorial .box,
+.page-festival--editorial .prizes {
+  background: var(--editorial-surface);
+  border: 1px solid var(--editorial-line);
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(58, 42, 34, 0.05);
+}
+
 @media (min-width: 768px) {
+  .page-festival--editorial .bizcard-layout,
   .page-festival--editorial .bizcard-layout--editorial {
     padding-bottom: 4rem;
   }

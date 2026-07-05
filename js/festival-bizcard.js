@@ -295,6 +295,7 @@
   function init() {
     var body = document.body;
     if (!body.classList.contains('page-festival')) return;
+    if (body.classList.contains('page-festival--editorial')) return;
     if (body.getAttribute('data-bizcard-native') === '1') return;
     if (body.classList.contains('page-festival--bizcard-ready')) return;
     body.classList.add('page-festival--bizcard-ready');

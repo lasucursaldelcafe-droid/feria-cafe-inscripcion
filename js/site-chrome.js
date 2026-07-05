@@ -500,6 +500,7 @@
 
   function ensureFestivalBizcard() {
     if (!document.body.classList.contains('page-festival')) return;
+    if (document.body.classList.contains('page-festival--editorial')) return;
     if (document.body.getAttribute('data-bizcard-native') === '1') return;
     if (document.querySelector('script[data-festival-bizcard]')) return;
     var s = document.createElement('script');
