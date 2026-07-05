@@ -90,32 +90,42 @@
     return base + '/' + path;
   }
 
-  function juradoUrl(role) {
+  function juradoJudgeCount() {
     var cfg = global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60;
-    var pinOrg = (cfg && cfg.pinOrganizador) || 'v60organizador';
-    var pinJuez = (cfg && cfg.pinJuez) || 'v60sensorial';
-    if (cfg && cfg.links) {
-      if (role === 'organizador') return cfg.links.organizador;
-      var n = parseInt(role, 10);
-      if (n === 1) return cfg.links.juez1;
-      if (n === 2) return cfg.links.juez2;
-      if (n === 3) return cfg.links.juez3;
+    var n = cfg && cfg.jueces != null ? parseInt(cfg.jueces, 10) : 3;
+    if (isNaN(n) || n < 1) n = 1;
+    if (n > 5) n = 5;
+    return n;
+  }
+
+  function buildJuradoUrls(opts) {
+    opts = opts || {};
+    var cfg = global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60;
+    var pinOrg = opts.pinOrganizador || (cfg && cfg.pinOrganizador) || 'v60organizador';
+    var pinJuez = opts.pinJuez || (cfg && cfg.pinJuez) || 'v60sensorial';
+    var jueces = opts.jueces != null ? opts.jueces : juradoJudgeCount();
+    jueces = Math.max(1, Math.min(5, parseInt(jueces, 10) || 3));
+    var base = opts.base || absUrl('juradoV60');
+    var urls = { organizador: base + '?pin=' + encodeURIComponent(pinOrg) };
+    for (var j = 1; j <= jueces; j++) {
+      urls['juez' + j] = base + '?pin=' + encodeURIComponent(pinJuez) + '&juez=' + j;
     }
-    var base = absUrl('juradoV60');
-    if (role === 'organizador') return base + '?pin=' + encodeURIComponent(pinOrg);
-    var url = base + '?pin=' + encodeURIComponent(pinJuez);
-    var juezNum = parseInt(role, 10);
-    if (juezNum >= 1 && juezNum <= 3) url += '&juez=' + juezNum;
-    return url;
+    return urls;
+  }
+
+  function juradoUrl(role) {
+    if (global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60 && global.EVENT_CONFIG.juradoV60.links) {
+      var links = global.EVENT_CONFIG.juradoV60.links;
+      if (role === 'organizador') return links.organizador;
+      var n = parseInt(role, 10);
+      if (n >= 1 && links['juez' + n]) return links['juez' + n];
+    }
+    return buildJuradoUrls()[role === 'organizador' ? 'organizador' : ('juez' + parseInt(role, 10))] ||
+      buildJuradoUrls().organizador;
   }
 
   function allJuradoUrls() {
-    return {
-      organizador: juradoUrl('organizador'),
-      juez1: juradoUrl(1),
-      juez2: juradoUrl(2),
-      juez3: juradoUrl(3)
-    };
+    return buildJuradoUrls();
   }
 
   function applyLinkElements(root) {
@@ -134,6 +144,8 @@
     absUrl: absUrl,
     juradoUrl: juradoUrl,
     allJuradoUrls: allJuradoUrls,
+    buildJuradoUrls: buildJuradoUrls,
+    juradoJudgeCount: juradoJudgeCount,
     apply: applyLinkElements,
     LOCAL: LOCAL,
     HOSTED: HOSTED

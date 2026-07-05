@@ -2,7 +2,7 @@
  * Jurado V60 — panel jueces (móvil) + organizador configurable.
  * URLs:
  *   Organizador: ?pin=v60organizador
- *   Juez N:      ?pin=v60sensorial&juez=1|2|3
+ *   Juez N:      ?pin=v60sensorial&juez=N (N según config, 1–5)
  */
 (function () {
   'use strict';
@@ -171,6 +171,14 @@
       ? 'puntaje_general' : 'duelos';
   }
 
+  function scoringModeLabel() {
+    return isPuntajeGeneralMode() ? 'Puntaje general' : 'Duelos 1v1';
+  }
+
+  function scoringSummaryLine() {
+    return scoringModeLabel() + ' · ' + scoringSubtitle();
+  }
+
   function isPuntajeGeneralMode() {
     return getScoringMode() === 'puntaje_general';
   }
@@ -256,6 +264,52 @@
     }
     var fifa = $('fifaModeHint');
     if (fifa) fifa.textContent = 'Tabla por puntaje total · ' + scoringSubtitle() + ' · se actualiza cada 3 s';
+    updateControlHint();
+    updateDashboardScoringChip();
+    updateJudgeUiHints();
+    updateRoleSectionHint();
+  }
+
+  function updateControlHint() {
+    var el = $('controlModeHint');
+    if (!el) return;
+    if (isGruposPhase()) {
+      el.textContent = 'Fase de grupos: califica a todos; clasifican los mejores por puntaje total.';
+    } else if (isPuntajeGeneralMode()) {
+      el.textContent = 'Modo puntaje general: cuando todos tengan nota completa, usa «Clasificar por puntaje» abajo.';
+    } else {
+      el.textContent = 'Modo duelos: tras cada ronda usa «Avanzar ganadores»; pasa el mayor puntaje total.';
+    }
+  }
+
+  function updateDashboardScoringChip() {
+    var el = $('dashboardScoringChip');
+    if (!el) return;
+    if (mode === 'organizer') {
+      el.textContent = scoringSummaryLine();
+      el.hidden = false;
+    } else {
+      el.hidden = true;
+    }
+  }
+
+  function updateJudgeUiHints() {
+    var scaleHint = $('judgeScaleHint');
+    if (scaleHint) {
+      scaleHint.textContent = 'Escala ' + getScaleMin() + ' (bajo) a ' + getScaleMax() +
+        ' (excelente) · ' + getCriteria().length + ' criterio' + (getCriteria().length === 1 ? '' : 's') +
+        '. Solo llenas tu columna (Juez ' + (judgeNum || '—') + ').';
+    }
+    var maxHint = $('judgeMaxHint');
+    if (maxHint) maxHint.textContent = 'Máx. ' + maxJudgeSubtotal() + ' pts';
+  }
+
+  function updateRoleSectionHint() {
+    var el = $('roleSectionHint');
+    if (!el) return;
+    var jmax = getJudgeCount();
+    el.textContent = 'Hay ' + jmax + ' juez' + (jmax === 1 ? '' : 'es') +
+      ' (' + scoringModeLabel().toLowerCase() + '). Cada uno abre su enlace desde el celular.';
   }
 
   function isScoreInScale(v) {
@@ -358,19 +412,25 @@
 
     if (mode === 'organizer') {
       $('headerTitle').textContent = cfg.eventName;
-      $('headerSubtitle').textContent = cfg.eventSubtitle;
+      $('headerSubtitle').textContent = cfg.eventSubtitle || scoringSummaryLine();
       var dashName = $('dashboardEventName');
       if (dashName) dashName.textContent = cfg.eventName;
       var kicker = $('headerKicker');
       if (kicker) kicker.textContent = cfg.organizerName;
       var live = $('livePill');
       if (live) live.hidden = false;
-    } else if (mode !== 'judge') {
+    } else if (mode === 'judge') {
+      $('headerTitle').textContent = 'Juez ' + judgeNum;
+      $('headerSubtitle').textContent = scoringSummaryLine();
+    } else {
       $('headerTitle').textContent = cfg.eventName;
-      $('headerSubtitle').textContent = scoringSubtitle();
+      $('headerSubtitle').textContent = scoringSummaryLine();
     }
 
     document.title = cfg.eventName + ' — Jurado en vivo';
+    updateDashboardScoringChip();
+    updateJudgeUiHints();
+    updateRoleSectionHint();
   }
 
   function webAppUrl() {
@@ -1150,6 +1210,7 @@
     }
 
     $('roleSection').hidden = false;
+    updateRoleSectionHint();
   }
 
   /* ——— Vista juez ——— */
@@ -1337,10 +1398,6 @@
     hideAll();
     document.body.classList.remove('jurado-page--organizer');
     applyPlatformBranding();
-    $('headerTitle').textContent = 'Juez ' + judgeNum;
-    $('headerSubtitle').textContent = scoringSubtitle();
-    var maxHint = $('judgeMaxHint');
-    if (maxHint) maxHint.textContent = 'Máx. ' + maxJudgeSubtotal() + ' pts';
     $('judgeBadge').textContent = 'Juez ' + judgeNum;
 
     fillCompetidorSelect($('judgeCompetidorSelect'), true, competidoresActivos());
@@ -1660,8 +1717,18 @@
     if (img) img.src = cfg.logoUrl || 'assets/logo-la-sucursal-del-cafe.png';
     var name = $('configPreviewName');
     if (name) name.textContent = cfg.eventName || 'Mi torneo';
+    var sc = cfg.scoring || {};
+    var modo = sc.modo === 'puntaje_general' ? 'Puntaje general' : 'Duelos 1v1';
+    var scaleMin = sc.scaleMin != null ? sc.scaleMin : 1;
+    var scaleMax = sc.scaleMax != null ? sc.scaleMax : 5;
+    var critN = (sc.criteria && sc.criteria.length) || getCriteria().length;
+    var juecesN = sc.jueces || getJudgeCount();
+    var summary = modo + ' · Escala ' + scaleMin + '–' + scaleMax + ' · ' + critN +
+      ' criterio' + (critN === 1 ? '' : 's') + ' · ' + juecesN + ' jueces';
     var sub = $('configPreviewSub');
-    if (sub) sub.textContent = cfg.eventSubtitle || scoringSubtitle();
+    if (sub) sub.textContent = cfg.eventSubtitle || summary;
+    var scoringLine = $('configPreviewScoring');
+    if (scoringLine) scoringLine.textContent = summary;
   }
 
   function bindCriteriaEditorActions() {
@@ -1705,9 +1772,10 @@
     if (!saveBtn || !exportJson || !exportHtml) return;
     platformConfigBound = true;
 
-    var inputs = document.querySelectorAll('#platformConfigForm input');
+    var inputs = document.querySelectorAll('#platformConfigForm input, #platformConfigForm select');
     inputs.forEach(function (inp) {
       inp.addEventListener('input', function () { updateConfigPreview(); });
+      inp.addEventListener('change', function () { updateConfigPreview(); });
     });
 
     $('platformConfigSaveBtn').addEventListener('click', function () {
@@ -1717,10 +1785,12 @@
       $('platformConfigSaveBtn').disabled = true;
       $('platformConfigSaveBtn').textContent = 'Guardando…';
       savePlatformConfig(cfg).then(function () {
-        $('platformConfigSuccess').textContent = '✓ Configuración guardada. Los enlaces usan los PIN configurados.';
+        $('platformConfigSuccess').textContent = '✓ Configuración guardada. Modo: ' + scoringModeLabel() +
+          ' · ' + getJudgeCount() + ' juez(es). Los enlaces se actualizaron.';
         $('platformConfigSuccess').hidden = false;
         renderOrganizerLinksPanel();
         applyPlatformBranding();
+        updateScoringHints();
       }).catch(function (err) {
         $('platformConfigError').textContent = err.message || 'No se pudo guardar.';
         $('platformConfigError').hidden = false;
@@ -1825,7 +1895,8 @@
       '<div class="jurado-export-card">' +
       '<strong>' + escapeHtml(cfg.eventName) + '</strong>' +
       '<p>' + escapeHtml(cfg.organizerName) + ' · ' + escapeHtml(reg.fecha) + ' · ' + escapeHtml(reg.lugar) + '</p>' +
-      '<p class="jurado-hint">El HTML incluye formulario de inscripción con tu logo, colores y datos. Conéctalo a tu backend o Google Apps Script.</p>' +
+      '<p class="jurado-meta">' + escapeHtml(scoringSummaryLine()) + '</p>' +
+      '<p class="jurado-hint">El JSON incluye criterios, escala y enlaces. El HTML es plantilla de inscripción con tu marca.</p>' +
       '</div>';
   }
 

@@ -1583,6 +1583,25 @@ body.jurado-page--organizer .jurado-header-brand {
   color: rgba(255, 255, 255, 0.65);
 }
 
+.jurado-config-preview-scoring {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.78rem !important;
+  color: var(--jurado-accent) !important;
+}
+
+.jurado-scoring-chip {
+  display: inline-block;
+  margin: 6px 0 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--jurado-accent-soft);
+  color: #f0e6c8;
+  border: 1px solid rgba(201, 162, 39, 0.35);
+}
+
 .jurado-config-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

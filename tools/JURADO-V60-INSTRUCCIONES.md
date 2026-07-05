@@ -11,7 +11,7 @@ Plataforma de calificación sensorial en vivo, configurable para otros eventos (
 
 También desde el panel admin: **Competidores** → tarjeta «Enlaces del jurado», o en el organizador → pestaña **Vista general** → **Enlaces del jurado**.
 
-> Si cambias los PIN o el número de jueces en **Marca**, los enlaces válidos serán los nuevos. Vuelve a copiar y compartir.
+> Si cambias los PIN o el número de jueces en **Marca y reglas**, los enlaces válidos serán los nuevos. Vuelve a copiar y compartir.
 
 ---
 
@@ -103,7 +103,7 @@ Depende del **modo de clasificación** configurado en Marca:
 
 #### Flujo manual (sin sorteo)
 
-### 5. Marca (white-label)
+### 5. Marca y reglas (white-label)
 
 Personaliza el torneo para vender la plataforma a otros eventos:
 
@@ -186,7 +186,7 @@ Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado
 | Duelo sin ganador | Espera a que todos los jueces califiquen o usa **Declarar ganador** / edición manual |
 | Modo ranking no avanza | Verifica que todos tengan nota completa; usa **Clasificar por puntaje** en Control |
 | Cambié PIN o jueces y el enlace viejo no funciona | Copia enlaces nuevos desde **Vista general** tras guardar en **Marca** |
-| Página con datos viejos | Forzar recarga (Ctrl+Shift+R); versión actual en URL: `jurado18` |
+| Página con datos viejos | Forzar recarga (Ctrl+Shift+R); versión actual en URL: `jurado19` |
 
 ---
 
@@ -202,4 +202,4 @@ Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado
 
 ---
 
-*Última actualización: julio 2026 · cache `jurado18`*
+*Última actualización: julio 2026 · cache `jurado19`*
