@@ -397,7 +397,7 @@ window.EVENT_CONFIG.getEventoActivo = function getEventoActivo() {
     competencia: site + '/competencia'
   };
   j.roles = [
-    { id: 'hub', label: 'Índice jurado', desc: 'Enlaces a todos los paneles' },
+    { id: 'hub', label: 'Consola principal', desc: 'Enlaces a todos los paneles del torneo' },
     { id: 'config', label: 'Configuración', desc: 'Marca, reglas y criterios' },
     { id: 'organizador', label: 'Torneo en vivo', desc: 'Vista general, rondas y control' },
     { id: 'resultados', label: 'Resultados', desc: 'Portal competidor (nombre + cédula)' }

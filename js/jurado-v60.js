@@ -186,8 +186,8 @@
     roles.push({
       step: 0,
       key: 'hub',
-      label: 'Índice de paneles',
-      desc: 'Mapa con todos los enlaces del evento.',
+      label: 'Consola principal',
+      desc: 'Mapa con todos los enlaces del torneo.',
       tag: 'Referencia',
       url: urls.hub
     });
@@ -341,7 +341,7 @@
       var cfgUrl = juradoPageUrl('config', '?pin=' + encodeURIComponent(pinOrganizadorEffective()));
       existing.innerHTML = 'Paneles: <a href="' + escapeHtml(cfgUrl) + '">Configuración</a> · ' +
         '<a href="' + escapeHtml(juradoPageUrl('resultados')) + '">Resultados competidores</a> · ' +
-        '<a href="' + escapeHtml(juradoPageUrl('hub')) + '">Índice jurado</a>';
+        '<a href="' + escapeHtml(juradoPageUrl('hub')) + '">Consola principal</a>';
     }
     if (nav && PAGE_MODE === 'config') {
       var existingCfg = $('juradoCrossLinks');
@@ -354,7 +354,7 @@
       var orgUrl = juradoPageUrl('organizador', '?pin=' + encodeURIComponent(pinOrganizadorEffective()));
       existingCfg.innerHTML = 'Paneles: <a href="' + escapeHtml(orgUrl) + '">Torneo en vivo</a> · ' +
         '<a href="' + escapeHtml(juradoPageUrl('resultados')) + '">Resultados competidores</a> · ' +
-        '<a href="' + escapeHtml(juradoPageUrl('hub')) + '">Índice jurado</a>';
+        '<a href="' + escapeHtml(juradoPageUrl('hub')) + '">Consola principal</a>';
       if (tenantSlug) {
         var welcome = $('tenantSetupBanner');
         if (!welcome) {
@@ -948,7 +948,13 @@
     var fav = $('faviconLink');
     if (fav && cfg.logoUrl) fav.href = cfg.logoUrl;
 
-    if (mode === 'organizer') {
+    if (PAGE_MODE === 'hub') {
+      $('headerTitle').textContent = 'Consola principal';
+      $('headerSubtitle').textContent = 'Mapa de todos los paneles del torneo';
+      var hubKicker = $('headerKicker');
+      if (hubKicker) hubKicker.textContent = cfg.organizerName || 'Torneo sensorial';
+      document.title = 'Consola principal — Jurado sensorial';
+    } else if (mode === 'organizer') {
       $('headerTitle').textContent = cfg.eventName;
       $('headerSubtitle').textContent = cfg.eventSubtitle || scoringSummaryLine();
       var dashName = $('dashboardEventName');
@@ -965,7 +971,9 @@
       $('headerSubtitle').textContent = scoringSummaryLine();
     }
 
-    document.title = cfg.eventName + ' — Jurado en vivo';
+    if (PAGE_MODE !== 'hub') {
+      document.title = cfg.eventName + ' — Jurado en vivo';
+    }
     updateDashboardScoringChip();
     updateJudgeUiHints();
     updateRoleSectionHint();

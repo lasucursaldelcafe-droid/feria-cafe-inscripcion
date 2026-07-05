@@ -180,7 +180,7 @@
     });
     j.links = urls;
     j.roles = [
-      { id: 'hub', label: 'Índice jurado', desc: 'Mapa de todos los paneles' },
+      { id: 'hub', label: 'Consola principal', desc: 'Mapa de todos los paneles del torneo' },
       { id: 'config', label: 'Configuración', desc: 'Marca, reglas, criterios y formulario' },
       { id: 'organizador', label: 'Torneo en vivo', desc: 'Rondas, puntajes y control' },
       { id: 'resultados', label: 'Resultados', desc: 'Portal competidor (nombre + cédula)' },

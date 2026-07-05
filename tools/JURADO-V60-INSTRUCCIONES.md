@@ -6,7 +6,7 @@ Plataforma de calificación sensorial en vivo, configurable para otros eventos (
 
 | Panel | URL |
 |-------|-----|
-| **Índice jurado** | https://la-sucursal-del-cafe.web.app/jurado-v60 |
+| **Consola principal** | https://la-sucursal-del-cafe.web.app/jurado-v60 |
 | **Configuración** | https://la-sucursal-del-cafe.web.app/jurado/config?pin=v60organizador |
 | **Torneo en vivo** | https://la-sucursal-del-cafe.web.app/jurado/organizador?pin=v60organizador |
 | **Resultados competidor** | https://la-sucursal-del-cafe.web.app/jurado/resultados |

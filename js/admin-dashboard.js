@@ -2368,7 +2368,7 @@
     }
 
     var roles = [
-      { key: 'hub', label: 'Índice jurado' },
+      { key: 'hub', label: 'Consola principal' },
       { key: 'config', label: '1. Configuración' },
       { key: 'inscripcion', label: '2. Inscripción' },
       { key: 'organizador', label: '3. Torneo en vivo' },
