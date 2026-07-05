@@ -8,7 +8,7 @@
   <title>Jurado sensorial V60 — La Sucursal del Café</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado9">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado10">
 </head>
 <body class="jurado-page">
   <div class="jurado-shell">
@@ -81,24 +81,31 @@
         <p id="organizerLoadError" class="jurado-error" hidden style="margin-top:8px"></p>
       </div>
 
+      <div class="jurado-card jurado-card--bracket">
+        <div class="jurado-card-head">
+          <h2>Clasificación por rondas</h2>
+          <p class="jurado-hint">Duelos de 2 competidores · pasa quien tenga mayor <strong>puntaje total</strong> (J1 + J2 + J3).</p>
+        </div>
+        <div id="organizerChampionStrip" class="jurado-leader-strip" hidden></div>
+        <div id="organizerRoundsNav" class="jurado-rounds-nav"></div>
+        <div id="organizerBracket" class="jurado-bracket"></div>
+      </div>
+
       <div class="jurado-card jurado-card--scores">
         <div class="jurado-card-head">
           <h2>Puntajes por competidor</h2>
-          <p class="jurado-hint">J1, J2 y J3 juntos en la misma fila · se actualizan en vivo al guardar cada juez.</p>
+          <p class="jurado-hint">J1, J2 y J3 · puntaje total cuando los 3 jueces calificaron.</p>
         </div>
-        <div id="organizerLeaderStrip" class="jurado-leader-strip" hidden></div>
         <div class="jurado-table-wrap">
           <table class="jurado-table jurado-table--ranking jurado-table--unified" id="organizerRankingTable">
             <thead>
               <tr>
-                <th>#</th>
                 <th>Competidor</th>
-                <th colspan="3" class="jurado-th-group">Puntajes de los 3 jueces</th>
-                <th>Suma</th>
-                <th>Prom.</th>
+                <th colspan="3" class="jurado-th-group">Jueces</th>
+                <th>Total</th>
+                <th>Estado</th>
               </tr>
               <tr class="jurado-subhead">
-                <th></th>
                 <th></th>
                 <th class="jurado-th-judge">J1</th>
                 <th class="jurado-th-judge">J2</th>
@@ -108,7 +115,7 @@
               </tr>
             </thead>
             <tbody id="organizerRankingBody">
-              <tr><td colspan="7" class="jurado-empty">Cargando competidores…</td></tr>
+              <tr><td colspan="6" class="jurado-empty">Cargando…</td></tr>
             </tbody>
           </table>
         </div>
@@ -117,7 +124,7 @@
       <div class="jurado-card">
         <div class="jurado-card-head">
           <h2>Detalle por competidor</h2>
-          <p class="jurado-hint">Selecciona un competidor para ver la nota de cada juez y el resultado final.</p>
+          <p class="jurado-hint">Selecciona un competidor para ver el desglose de los 3 jueces y su puntaje total.</p>
         </div>
         <div class="jurado-field">
           <label for="organizerCompetidorSelect">Competidor</label>
@@ -137,6 +144,6 @@
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado9"></script>
+  <script src="js/jurado-v60.js?v=20260705jurado10"></script>
 </body>
 </html>

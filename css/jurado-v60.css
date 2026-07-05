@@ -371,6 +371,160 @@ body.jurado-page {
   margin-top: 12px;
 }
 
+.jurado-card--bracket {
+  background: rgba(0, 0, 0, 0.32);
+  border-color: rgba(245, 217, 168, 0.25);
+}
+
+.jurado-rounds-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.jurado-round-tab {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8f4ef;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.jurado-round-tab--active {
+  background: rgba(245, 217, 168, 0.2);
+  border-color: rgba(245, 217, 168, 0.45);
+}
+
+.jurado-round-tab--live::after {
+  content: ' · en vivo';
+  color: #c8f5d0;
+  font-weight: 400;
+}
+
+.jurado-bracket {
+  display: grid;
+  gap: 12px;
+}
+
+.jurado-duel {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.jurado-duel--pending {
+  border-color: rgba(245, 217, 168, 0.25);
+}
+
+.jurado-duel-head {
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.jurado-duel-body {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+}
+
+.jurado-duel-vs {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+}
+
+.jurado-duel-player {
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
+}
+
+.jurado-duel-player--winner {
+  background: rgba(40, 120, 60, 0.18);
+  border-color: rgba(120, 220, 140, 0.35);
+}
+
+.jurado-duel-player--loser {
+  opacity: 0.65;
+}
+
+.jurado-duel-name {
+  font-weight: 700;
+  font-size: 0.92rem;
+  margin-bottom: 6px;
+}
+
+.jurado-duel-badge {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  background: rgba(120, 220, 140, 0.25);
+  color: #c8f5d0;
+  vertical-align: middle;
+}
+
+.jurado-duel-scores {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.72);
+  margin-bottom: 4px;
+}
+
+.jurado-duel-scores span {
+  white-space: nowrap;
+}
+
+.jurado-duel-total {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f5d9a8;
+}
+
+.jurado-duel-status {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.jurado-duel-status--pending { color: rgba(255, 255, 255, 0.6); }
+.jurado-duel-status--done { color: #c8f5d0; }
+.jurado-duel-status--tie { color: #ffc9c9; }
+.jurado-duel-status--bye { color: rgba(255, 255, 255, 0.55); font-style: italic; }
+
+.jurado-estado--listo { color: #c8f5d0; font-weight: 600; }
+.jurado-estado--parcial { color: #f5d9a8; }
+.jurado-estado--pendiente { color: rgba(255, 255, 255, 0.45); }
+
+@media (max-width: 560px) {
+  .jurado-duel-body {
+    grid-template-columns: 1fr;
+  }
+
+  .jurado-duel-vs {
+    padding: 4px 0;
+  }
+}
+
 .jurado-card--scores {
   background: rgba(0, 0, 0, 0.32);
   border-color: rgba(245, 217, 168, 0.22);
