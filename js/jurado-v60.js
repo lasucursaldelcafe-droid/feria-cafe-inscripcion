@@ -96,6 +96,75 @@
     return map[PAGE_MODE] || map.all;
   }
 
+  var SETUP_WIZARD_STEPS = [
+    { id: 'config', num: 1, label: 'Configurar', short: 'Marca y reglas' },
+    { id: 'inscripciones', num: 2, label: 'Inscripciones', short: 'Formulario público' },
+    { id: 'enlaces', num: 3, label: 'Enlaces', short: 'Compartir links' },
+    { id: 'export', num: 4, label: 'Exportar', short: 'Kit del evento' }
+  ];
+
+  var setupStepperBound = false;
+  var configSavedOnce = false;
+
+  function getLinkVisual(roleKey) {
+    if (roleKey === 'config') return { icon: '⚙️', tone: 'config' };
+    if (roleKey === 'inscripcion') return { icon: '📝', tone: 'public' };
+    if (roleKey === 'organizador') return { icon: '🏆', tone: 'live' };
+    if (roleKey === 'resultados') return { icon: '📊', tone: 'results' };
+    if (String(roleKey).indexOf('juez') === 0) return { icon: '👨‍⚖️', tone: 'judge' };
+    return { icon: '🔗', tone: 'config' };
+  }
+
+  function renderSetupStepper() {
+    var nav = $('setupStepper');
+    if (!nav || PAGE_MODE !== 'config') return;
+    var stepOrder = ['config', 'inscripciones', 'enlaces', 'export'];
+    var activeIdx = stepOrder.indexOf(activeDashTab);
+    nav.innerHTML = SETUP_WIZARD_STEPS.map(function (s) {
+      var idx = stepOrder.indexOf(s.id);
+      var isActive = s.id === activeDashTab;
+      var isDone = activeIdx > idx || (configSavedOnce && s.id === 'config');
+      var cls = 'jurado-setup-step' +
+        (isActive ? ' jurado-setup-step--active' : '') +
+        (isDone && !isActive ? ' jurado-setup-step--done' : '');
+      return '<button type="button" class="' + cls + '" data-goto-tab="' + s.id + '">' +
+        '<span class="jurado-setup-step__num">' + (isDone && !isActive ? '✓' : s.num) + '</span>' +
+        '<span class="jurado-setup-step__label">' + escapeHtml(s.label) + '</span>' +
+        '<span class="jurado-setup-step__short">' + escapeHtml(s.short) + '</span>' +
+        '</button>';
+    }).join('');
+    if (!setupStepperBound) {
+      setupStepperBound = true;
+      nav.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-goto-tab]');
+        if (!btn) return;
+        switchDashTab(btn.getAttribute('data-goto-tab'));
+      });
+    }
+  }
+
+  function updateSetupStepper() {
+    if (PAGE_MODE !== 'config') return;
+    renderSetupStepper();
+  }
+
+  function applyConfigModeVisuals() {
+    if (PAGE_MODE !== 'config') return;
+    document.body.classList.add('jurado-page--setup');
+    var wizard = $('setupWizardHeader');
+    if (wizard) wizard.hidden = false;
+    var meta = $('setupWizardMeta');
+    if (meta) {
+      if (tenantSlug) {
+        meta.textContent = 'ID del torneo: ' + tenantSlug;
+        meta.hidden = false;
+      } else {
+        meta.hidden = true;
+      }
+    }
+    renderSetupStepper();
+  }
+
   function getEventLinkRoles() {
     var urls = getJuradoShareUrls();
     var roles = [
@@ -176,7 +245,7 @@
     pane.innerHTML =
       '<div class="jurado-card jurado-card--links">' +
       '<div class="jurado-card-head">' +
-      '<h2>Enlaces del evento</h2>' +
+      '<h2>' + (PAGE_MODE === 'config' ? '3. Enlaces del evento' : 'Enlaces del evento') + '</h2>' +
       '<p class="jurado-hint">Tras guardar la configuración, copia y comparte cada enlace con quien corresponda. Se regeneran solos si cambias PINs o número de jueces.</p>' +
       '</div>' +
       '<ol class="jurado-setup-steps">' +
@@ -299,6 +368,7 @@
           '<p class="jurado-meta">ID del torneo: <code>' + escapeHtml(tenantSlug) + '</code></p>';
         welcome.hidden = false;
       }
+      applyConfigModeVisuals();
     }
   }
 
@@ -2041,6 +2111,7 @@
       renderInscripcionesPanel();
       loadInscripcionesTable();
     }
+    updateSetupStepper();
   }
 
   function bindDashboardTabs() {
@@ -2441,6 +2512,15 @@
         '<input type="text" data-field-placeholder value="' + escapeHtml(f.placeholder || '') + '" maxlength="80" placeholder="Placeholder">' +
         '</div>';
     }).join('');
+    bindFormFieldsEditorActions();
+  }
+
+  function bindFormFieldsEditorActions() {
+    var box = $('formFieldsEditorList');
+    if (!box || box.dataset.bound) return;
+    box.dataset.bound = '1';
+    box.addEventListener('input', function () { updateConfigPreview(); });
+    box.addEventListener('change', function () { updateConfigPreview(); });
   }
 
   function renderInscripcionesPanel() {
@@ -2586,6 +2666,14 @@
         '<button type="button" class="jurado-btn-inline jurado-btn-inline--danger" data-remove-crit aria-label="Quitar">✕</button>' +
         '</div>';
     }).join('');
+    bindCriteriaEditorPreview();
+  }
+
+  function bindCriteriaEditorPreview() {
+    var box = $('criteriaEditorList');
+    if (!box || box.dataset.previewBound) return;
+    box.dataset.previewBound = '1';
+    box.addEventListener('input', function () { updateConfigPreview(); });
   }
 
   function readPlatformConfigForm() {
@@ -2666,6 +2754,42 @@
     updateConfigPreview(cfg);
   }
 
+  function renderInscripcionPreviewMock(cfg) {
+    cfg = cfg || readPlatformConfigForm();
+    var reg = cfg.registration || {};
+    var title = $('previewRegTitle');
+    if (title) title.textContent = reg.title || cfg.eventName || 'Inscripción competencia';
+    var meta = $('previewRegMeta');
+    if (meta) {
+      var parts = [];
+      if (reg.fecha) parts.push(reg.fecha);
+      if (reg.hora) parts.push(reg.hora);
+      if (reg.lugar) parts.push(reg.lugar);
+      if (reg.cupo) parts.push('Cupo ' + reg.cupo);
+      meta.textContent = parts.length ? parts.join(' · ') : 'Fecha · Lugar · Cupo';
+    }
+    var fee = $('previewRegFee');
+    if (fee) fee.textContent = reg.fee || 'Tarifa del evento';
+    var fieldsBox = $('previewRegFields');
+    if (fieldsBox) {
+      var fields = (cfg.formFields && cfg.formFields.length)
+        ? cfg.formFields.filter(function (f) { return f.enabled !== false; })
+        : readFormFieldsFromEditor().filter(function (f) { return f.enabled; });
+      fieldsBox.innerHTML = fields.map(function (f) {
+        var area = f.type === 'textarea' ? ' jurado-inscripcion-mock__field--area' : '';
+        var req = f.required ? ' *' : '';
+        return '<div class="jurado-inscripcion-mock__field' + area + '">' +
+          '<label>' + escapeHtml(f.label || f.key) + req + '</label><span></span></div>';
+      }).join('') || '<p class="jurado-hint">Sin campos activos</p>';
+    }
+    var mock = $('inscripcionPreviewMock');
+    if (mock) mock.hidden = false;
+    var previewCard = $('configPreview');
+    if (previewCard && cfg.accentColor) {
+      previewCard.style.setProperty('--preview-accent', cfg.accentColor);
+    }
+  }
+
   function updateConfigPreview(cfg) {
     cfg = cfg || readPlatformConfigForm();
     var img = $('configPreviewLogo');
@@ -2684,6 +2808,7 @@
     if (sub) sub.textContent = cfg.eventSubtitle || summary;
     var scoringLine = $('configPreviewScoring');
     if (scoringLine) scoringLine.textContent = summary;
+    renderInscripcionPreviewMock(cfg);
   }
 
   function bindCriteriaEditorActions() {
@@ -2741,6 +2866,7 @@
       $('platformConfigSaveBtn').disabled = true;
       $('platformConfigSaveBtn').textContent = 'Guardando…';
       savePlatformConfig(cfg).then(function () {
+        configSavedOnce = true;
         $('platformConfigSuccess').textContent = '✓ Configuración guardada. Modo: ' + scoringModeLabel() +
           ' · ' + getJudgeCount() + ' juez(es). Revisa la pestaña «Enlaces del evento».';
         $('platformConfigSuccess').hidden = false;
@@ -2759,9 +2885,17 @@
         $('platformConfigError').hidden = false;
       }).finally(function () {
         $('platformConfigSaveBtn').disabled = false;
-        $('platformConfigSaveBtn').textContent = 'Guardar configuración';
+        $('platformConfigSaveBtn').textContent = 'Guardar y generar enlaces';
       });
     });
+
+    var gotoEnlaces = $('gotoEnlacesBtn');
+    if (gotoEnlaces && !gotoEnlaces.dataset.bound) {
+      gotoEnlaces.dataset.bound = '1';
+      gotoEnlaces.addEventListener('click', function () {
+        switchDashTab('enlaces');
+      });
+    }
 
     $('exportJsonBtn').addEventListener('click', downloadPlatformJson);
     $('exportHtmlBtn').addEventListener('click', downloadRegistrationHtml);
@@ -2915,8 +3049,10 @@
     if (!list) return;
     var roles = getEventLinkRoles().filter(function (r) { return r.key !== 'hub'; });
     list.innerHTML = roles.map(function (role) {
+      var vis = getLinkVisual(role.key);
       var step = role.step > 0 ? '<span class="jurado-link-step">Paso ' + role.step + '</span>' : '';
-      return '<div class="jurado-link-item">' +
+      return '<div class="jurado-link-item jurado-link-item--' + vis.tone + '">' +
+        '<div class="jurado-link-item__icon" aria-hidden="true">' + vis.icon + '</div>' +
         '<div class="jurado-link-meta">' + step +
         '<strong>' + escapeHtml(role.label) + '</strong>' +
         '<span class="jurado-hub-tag jurado-hub-tag--inline">' + escapeHtml(role.tag) + '</span>' +
