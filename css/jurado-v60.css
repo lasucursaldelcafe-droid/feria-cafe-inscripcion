@@ -1832,6 +1832,64 @@ body.jurado-page--organizer .jurado-header-brand {
   color: rgba(255, 255, 255, 0.7);
 }
 
+.jurado-preliminar-preview {
+  margin-top: 16px;
+}
+
+.jurado-preliminar-card {
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(201, 162, 39, 0.08);
+  border: 1px solid rgba(201, 162, 39, 0.25);
+}
+
+.jurado-preliminar-head h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.jurado-preliminar-table-wrap {
+  overflow-x: auto;
+  margin: 12px 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.jurado-preliminar-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.jurado-preliminar-table th,
+.jurado-preliminar-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.jurado-preliminar-table th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.jurado-preliminar-num,
+.jurado-preliminar-rank,
+.jurado-preliminar-total {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.jurado-preliminar-total strong {
+  color: var(--jurado-accent, #e8c547);
+}
+
+.jurado-preliminar-foot {
+  margin: 0;
+}
+
 /* ——— Sorteo y plan de fases ——— */
 
 .jurado-plan-box {

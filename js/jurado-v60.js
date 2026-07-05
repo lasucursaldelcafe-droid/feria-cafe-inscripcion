@@ -3165,6 +3165,47 @@
 
     $('exportJsonBtn').addEventListener('click', downloadPlatformJson);
     $('exportHtmlBtn').addEventListener('click', downloadRegistrationHtml);
+
+    var exportPreliminar1 = $('exportPreliminar1Btn');
+    if (exportPreliminar1 && !exportPreliminar1.dataset.bound) {
+      exportPreliminar1.dataset.bound = '1';
+      exportPreliminar1.addEventListener('click', downloadPreliminar1Kit);
+    }
+    var importPreliminar1 = $('importPreliminar1Btn');
+    if (importPreliminar1 && !importPreliminar1.dataset.bound) {
+      importPreliminar1.dataset.bound = '1';
+      importPreliminar1.addEventListener('click', function () {
+        var kit = getPreliminar1Kit();
+        var count = kit && kit.ranking ? kit.ranking.length : 0;
+        if (!count) {
+          var errBox = $('exportMsg');
+          if (errBox) { errBox.textContent = 'Kit Preliminar 1 no disponible.'; errBox.hidden = false; }
+          return;
+        }
+        if (!window.confirm('¿Cargar ' + count + ' calificaciones de Preliminar 1 en la consola? Se fusionarán con las existentes.')) return;
+        importPreliminar1.disabled = true;
+        importPreliminar1.textContent = 'Cargando…';
+        importPreliminar1Results().then(function (result) {
+          var msg = $('exportMsg');
+          var txt = '✓ Preliminar 1 cargada: ' + result.imported + ' competidor(es). Revisa la pestaña «Vista general».';
+          if (result.unmatched && result.unmatched.length) {
+            txt += ' Sin coincidencia en inscripciones: ' + result.unmatched.join(', ') + '.';
+          }
+          if (msg) { msg.textContent = txt; msg.hidden = false; }
+          renderOrganizerViews(calificacionesList());
+          if (activeDashTab === 'export') renderPreliminar1ExportPreview();
+        }).catch(function (err) {
+          var msgErr = $('exportMsg');
+          if (msgErr) {
+            msgErr.textContent = err.message || 'No se pudo importar Preliminar 1.';
+            msgErr.hidden = false;
+          }
+        }).finally(function () {
+          importPreliminar1.disabled = false;
+          importPreliminar1.textContent = 'Cargar calificaciones Preliminar 1';
+        });
+      });
+    }
   }
 
   function slugifyFilename(str) {
@@ -3261,6 +3302,142 @@
       '<p class="jurado-meta">' + escapeHtml(scoringSummaryLine()) + '</p>' +
       '<p class="jurado-hint">El JSON incluye criterios, escala y enlaces. El HTML es plantilla de inscripción con tu marca.</p>' +
       '</div>';
+    renderPreliminar1ExportPreview();
+  }
+
+  function slugifyCompetidorName(name) {
+    return String(name || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  function findCompetidorIdForPreliminar(nombre) {
+    var slug = slugifyCompetidorName(nombre);
+    for (var i = 0; i < competidores.length; i++) {
+      var c = competidores[i];
+      if (slugifyCompetidorName(c.nombre) === slug) return c.id;
+      if (String(c.id || '').toLowerCase() === slug) return c.id;
+    }
+    return slug;
+  }
+
+  function getPreliminar1Kit() {
+    if (!window.Preliminar1Results || !window.Preliminar1Results.exportKit) return null;
+    return window.Preliminar1Results.exportKit();
+  }
+
+  function renderPreliminar1ExportPreview() {
+    var box = $('preliminar1Preview');
+    if (!box) return;
+    var kit = getPreliminar1Kit();
+    if (!kit) {
+      box.innerHTML = '';
+      return;
+    }
+    var ranking = kit.ranking || [];
+    var rawCount = (kit.rawRows || []).length;
+    var rows = ranking.map(function (row) {
+      return '<tr>' +
+        '<td class="jurado-preliminar-rank">' + row.posicion + '</td>' +
+        '<td><strong>' + escapeHtml(row.participante) + '</strong></td>' +
+        '<td class="jurado-preliminar-num">T' + row.entrada + '</td>' +
+        '<td class="jurado-preliminar-num">' + row.j1 + '</td>' +
+        '<td class="jurado-preliminar-num">' + row.j2 + '</td>' +
+        '<td class="jurado-preliminar-num">' + row.j3 + '</td>' +
+        '<td class="jurado-preliminar-total"><strong>' + row.total + '</strong></td>' +
+        '</tr>';
+    }).join('');
+    box.innerHTML =
+      '<div class="jurado-preliminar-card">' +
+      '<div class="jurado-preliminar-head">' +
+      '<h3>Preliminar 1 — datos de referencia</h3>' +
+      '<p class="jurado-hint">' + escapeHtml(kit.event.nombre) + ' · ' + rawCount + ' tandas · ' +
+      ranking.length + ' competidores (mejor tanda) · 3 jueces · 8 parámetros SCA</p>' +
+      '</div>' +
+      '<div class="jurado-preliminar-table-wrap">' +
+      '<table class="jurado-preliminar-table">' +
+      '<thead><tr>' +
+      '<th>#</th><th>Competidor</th><th>Tanda</th><th>J1</th><th>J2</th><th>J3</th><th>Total</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table>' +
+      '</div>' +
+      '<p class="jurado-hint jurado-preliminar-foot">Descarga el JSON completo (21 tandas + desglose por parámetro) o cárgalo en la consola para poblar calificaciones.</p>' +
+      '</div>';
+  }
+
+  function downloadPreliminar1Kit() {
+    var kit = getPreliminar1Kit();
+    if (!kit) {
+      var msgErr = $('exportMsg');
+      if (msgErr) {
+        msgErr.textContent = 'No se encontró el módulo Preliminar 1.';
+        msgErr.hidden = false;
+      }
+      return;
+    }
+    var name = 'v60-preliminar-1-calificaciones.json';
+    downloadBlob(name, JSON.stringify(kit, null, 2), 'application/json');
+    var msg = $('exportMsg');
+    if (msg) {
+      msg.textContent = '✓ Descargado: ' + name + ' (' + (kit.ranking || []).length + ' competidores, ' + (kit.rawRows || []).length + ' tandas)';
+      msg.hidden = false;
+    }
+  }
+
+  function importPreliminar1Results() {
+    var kit = getPreliminar1Kit();
+    if (!kit || !kit.calificaciones || !kit.calificaciones.scores) {
+      return Promise.reject(new Error('No se encontró el kit de Preliminar 1.'));
+    }
+    var sourceScores = kit.calificaciones.scores;
+    var mapped = [];
+    var unmatched = [];
+    Object.keys(sourceScores).forEach(function (srcId) {
+      var row = sourceScores[srcId];
+      var targetId = findCompetidorIdForPreliminar(row.nombre);
+      var matched = false;
+      for (var i = 0; i < competidores.length; i++) {
+        if (competidores[i].id === targetId) { matched = true; break; }
+      }
+      if (!matched && competidores.length) unmatched.push(row.nombre);
+      mapped.push({
+        competidorId: targetId,
+        nombre: row.nombre,
+        judges: JSON.parse(JSON.stringify(row.judges || {})),
+        notasPorJuez: row.notasPorJuez || {},
+        meta: row.meta || {},
+        actualizado: new Date().toISOString()
+      });
+    });
+
+    return sheetsGet('pasaporte_config', { key: storageKey(CONFIG_KEY) }).then(function (res) {
+      var data = res.data || {};
+      if (!data.scores || typeof data.scores !== 'object') data.scores = {};
+      mapped.forEach(function (row) {
+        var normalized = normalizeCalificacion(row, row.competidorId);
+        if (normalized) data.scores[row.competidorId] = normalized;
+      });
+      data.actualizado = new Date().toISOString();
+      data.preliminar1Import = {
+        at: new Date().toISOString(),
+        evento: kit.event && kit.event.nombre ? kit.event.nombre : 'Preliminar 1',
+        count: mapped.length
+      };
+      return sheetsPost({
+        action: 'pasaporte_config_save',
+        key: storageKey(CONFIG_KEY),
+        data: data
+      }).then(function () {
+        calificacionesMap = {};
+        Object.keys(data.scores).forEach(function (id) {
+          var cal = normalizeCalificacion(data.scores[id], id);
+          if (cal) calificacionesMap[id] = cal;
+        });
+        return { imported: mapped.length, unmatched: unmatched };
+      });
+    });
   }
 
   function getJuradoShareUrls() {

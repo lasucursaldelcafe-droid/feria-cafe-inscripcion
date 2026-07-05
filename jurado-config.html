@@ -9,7 +9,7 @@
   <title>Configuración — Jurado sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado32">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado33">
 </head>
 <body class="jurado-page jurado-page--setup" data-jurado-page="config">
   <div class="jurado-shell">
@@ -600,8 +600,11 @@
           <div class="jurado-export-actions">
             <button type="button" id="exportJsonBtn" class="jurado-btn jurado-btn--secondary">Descargar config JSON</button>
             <button type="button" id="exportHtmlBtn" class="jurado-btn">Descargar formulario HTML</button>
+            <button type="button" id="exportPreliminar1Btn" class="jurado-btn jurado-btn--secondary">Descargar Preliminar 1 (JSON)</button>
+            <button type="button" id="importPreliminar1Btn" class="jurado-btn">Cargar calificaciones Preliminar 1</button>
           </div>
           <p id="exportMsg" class="jurado-success" hidden></p>
+          <div class="jurado-preliminar-preview" id="preliminar1Preview" aria-live="polite"></div>
           <div class="jurado-export-preview" id="exportPreview"></div>
         </div>
       </div>
@@ -611,12 +614,13 @@
   </div>
 
   <script src="js/tournament-presets.js?v=20260705jurado32"></script>
+  <script src="js/preliminar-1-results.js?v=20260705jurado33"></script>
   <script src="js/event-config.js?v=20260705jurado29"></script>
   <script>
     window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxEVH5x6x8xj5vBFlwbkQjkEtpVNnfBoaeOwRDSk9FbF9K9_vuQFfwNBR9Kghtn2i6u/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado32"></script>
+  <script src="js/jurado-v60.js?v=20260705jurado33"></script>
 </body>
 </html>
