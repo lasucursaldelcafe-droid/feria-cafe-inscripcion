@@ -2364,10 +2364,15 @@
 
     if (meta) {
       meta.textContent = juradoScoringSummary(platformCfg) +
-        '. Enlaces según config del servidor; edítala en el panel organizador → Marca y reglas.';
+        '. Paneles separados: config, torneo, resultados (nombre + cédula) y jurados.';
     }
 
-    var roles = [{ key: 'organizador', label: 'Organizador' }];
+    var roles = [
+      { key: 'hub', label: 'Índice jurado' },
+      { key: 'config', label: 'Configuración' },
+      { key: 'organizador', label: 'Torneo en vivo' },
+      { key: 'resultados', label: 'Resultados competidor' }
+    ];
     for (var j = 1; j <= jueces; j++) {
       roles.push({ key: 'juez' + j, label: 'Juez ' + j });
     }

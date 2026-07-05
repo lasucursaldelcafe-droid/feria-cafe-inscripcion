@@ -48,6 +48,142 @@
   var activeDashTab = 'vista';
   var autoAdvancing = false;
   var autoAdvanceCooldownUntil = 0;
+  var PAGE_MODE = (document.body && document.body.getAttribute('data-jurado-page')) || 'all';
+
+  function getAllowedDashTabs() {
+    var map = {
+      config: ['config', 'export'],
+      organizador: ['vista', 'recorrido', 'torneo', 'puntajes', 'control'],
+      all: ['vista', 'recorrido', 'torneo', 'puntajes', 'control', 'config', 'export']
+    };
+    return map[PAGE_MODE] || map.all;
+  }
+
+  function juradoPageUrl(pageKey, extraQuery) {
+    var ev = window.EVENT_CONFIG || {};
+    var j = ev.juradoV60 || {};
+    var paths = j.paths || {};
+    var site = String(ev.siteUrl || window.location.origin).replace(/\/$/, '');
+    var pathMap = {
+      hub: paths.hub || j.path || '/jurado-v60',
+      config: paths.config || '/jurado/config',
+      organizador: paths.organizador || '/jurado/organizador',
+      juez: paths.juez || '/jurado/juez',
+      resultados: paths.resultados || '/jurado/resultados'
+    };
+    var path = pathMap[pageKey] || pathMap.hub;
+    if (path.indexOf('http') === 0) return path + (extraQuery || '');
+    var isLocal = window.location.protocol === 'file:' ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+    var localFiles = {
+      hub: 'jurado-v60.html',
+      config: 'jurado-config.html',
+      organizador: 'jurado-organizador.html',
+      juez: 'jurado-juez.html',
+      resultados: 'jurado-resultados.html'
+    };
+    if (isLocal && localFiles[pageKey]) {
+      return localFiles[pageKey] + (extraQuery || '');
+    }
+    return site + path + (extraQuery || '');
+  }
+
+  function applyPageModeUI() {
+    if (PAGE_MODE === 'hub') return;
+    var allowed = getAllowedDashTabs();
+    document.querySelectorAll('.jurado-dash-tab').forEach(function (btn) {
+      var tab = btn.getAttribute('data-dash-tab');
+      btn.hidden = allowed.indexOf(tab) < 0;
+    });
+    if (allowed.indexOf(activeDashTab) < 0) {
+      activeDashTab = allowed[0] || 'vista';
+    }
+    var nav = $('dashboardNav');
+    if (nav && PAGE_MODE === 'organizador') {
+      var existing = $('juradoCrossLinks');
+      if (!existing) {
+        existing = document.createElement('p');
+        existing.id = 'juradoCrossLinks';
+        existing.className = 'jurado-cross-links jurado-hint';
+        nav.parentNode.insertBefore(existing, nav.nextSibling);
+      }
+      var cfgUrl = juradoPageUrl('config', '?pin=' + encodeURIComponent(pinOrganizadorEffective()));
+      existing.innerHTML = 'Paneles: <a href="' + escapeHtml(cfgUrl) + '">Configuración</a> · ' +
+        '<a href="' + escapeHtml(juradoPageUrl('resultados')) + '">Resultados competidores</a> · ' +
+        '<a href="' + escapeHtml(juradoPageUrl('hub')) + '">Índice jurado</a>';
+    }
+    if (nav && PAGE_MODE === 'config') {
+      var existingCfg = $('juradoCrossLinks');
+      if (!existingCfg) {
+        existingCfg = document.createElement('p');
+        existingCfg.id = 'juradoCrossLinks';
+        existingCfg.className = 'jurado-cross-links jurado-hint';
+        nav.parentNode.insertBefore(existingCfg, nav.nextSibling);
+      }
+      var orgUrl = juradoPageUrl('organizador', '?pin=' + encodeURIComponent(pinOrganizadorEffective()));
+      existingCfg.innerHTML = 'Paneles: <a href="' + escapeHtml(orgUrl) + '">Torneo en vivo</a> · ' +
+        '<a href="' + escapeHtml(juradoPageUrl('resultados')) + '">Resultados competidores</a> · ' +
+        '<a href="' + escapeHtml(juradoPageUrl('hub')) + '">Índice jurado</a>';
+    }
+  }
+
+  function showHubUI() {
+    hideAll();
+    var hub = $('hubSection');
+    if (!hub) return;
+    hub.hidden = false;
+    applyPlatformBranding();
+    renderHubLinks();
+  }
+
+  function renderHubLinks() {
+    var box = $('hubLinksGrid');
+    if (!box) return;
+    var pinOrg = pinOrganizadorEffective();
+    var pinJuez = pinJuezEffective();
+    var jmax = getJudgeCount();
+    var cards = [
+      {
+        title: 'Configuración del evento',
+        desc: 'Marca, reglas, criterios, PINs y exportación.',
+        href: juradoPageUrl('config', '?pin=' + encodeURIComponent(pinOrg)),
+        tag: 'Organizador'
+      },
+      {
+        title: 'Torneo en vivo',
+        desc: 'Vista general, recorrido, rondas, puntajes y control.',
+        href: juradoPageUrl('organizador', '?pin=' + encodeURIComponent(pinOrg)),
+        tag: 'Organizador'
+      },
+      {
+        title: 'Resultados por competidor',
+        desc: 'Portal público: nombre + cédula del formulario.',
+        href: juradoPageUrl('resultados'),
+        tag: 'Competidor'
+      },
+      {
+        title: 'Inscripción al evento',
+        desc: 'Formulario de registro de competidores.',
+        href: (window.SiteLinks && SiteLinks.href) ? SiteLinks.href('competencia') : 'competencia.html',
+        tag: 'Público'
+      }
+    ];
+    for (var j = 1; j <= jmax; j++) {
+      cards.push({
+        title: 'Juez ' + j,
+        desc: 'Calificación móvil · enlace individual.',
+        href: juradoPageUrl('juez', '?pin=' + encodeURIComponent(pinJuez) + '&juez=' + j),
+        tag: 'Jurado'
+      });
+    }
+    box.innerHTML = cards.map(function (c) {
+      return '<a class="jurado-hub-card" href="' + escapeHtml(c.href) + '">' +
+        '<span class="jurado-hub-tag">' + escapeHtml(c.tag) + '</span>' +
+        '<strong>' + escapeHtml(c.title) + '</strong>' +
+        '<p class="jurado-hint">' + escapeHtml(c.desc) + '</p></a>';
+    }).join('');
+  }
 
   function defaultPlatformConfig() {
     var ev = window.EVENT_CONFIG || {};
@@ -1297,6 +1433,7 @@
     $('roleSection').hidden = true;
     $('judgeSection').hidden = true;
     $('organizerSection').hidden = true;
+    if ($('hubSection')) $('hubSection').hidden = true;
     $('loadingMsg').hidden = true;
   }
 
@@ -3404,6 +3541,7 @@
     bindOrganizerManualEdit();
     bindDashboardTabs();
     bindPlatformConfigForm();
+    applyPageModeUI();
     switchDashTab(activeDashTab);
 
     try {
@@ -3454,6 +3592,16 @@
   }
 
   function init() {
+    if (PAGE_MODE === 'hub') {
+      $('loadingMsg').hidden = false;
+      return loadPlatformConfig().then(function () {
+        $('loadingMsg').hidden = true;
+        showHubUI();
+      }).catch(function (err) {
+        showPinError(err.message || 'No se pudo cargar la configuración.');
+      });
+    }
+
     var params = getParams();
     var rawPin = String(params.get('pin') || '').trim().toLowerCase();
 
@@ -3462,30 +3610,55 @@
     loadPlatformConfig().then(function () {
       pin = resolvePin(rawPin);
 
-      if (!pin) {
-        showPinError('Falta el PIN en la URL o no es válido. Pide el enlace al organizador.');
-        return;
-      }
-
-      var sess = readSession();
-      if (sess && sess.pin === pin && sess.mode === 'organizer' && pin === pinOrganizadorEffective()) {
-        mode = 'organizer';
-      } else if (sess && sess.pin === pin && sess.mode === 'judge' && pin === pinJuezEffective()) {
-        if (sess.judgeNum >= 1 && sess.judgeNum <= getJudgeCount()) {
-          mode = 'judge';
-          judgeNum = sess.judgeNum;
+      if (PAGE_MODE === 'juez') {
+        if (!pin || pin !== pinJuezEffective()) {
+          showPinError('Enlace de juez inválido. Pide el enlace completo al organizador.');
+          return;
         }
-      }
-
-      var juezParam = parseInt(params.get('juez') || '', 10);
-      if (!mode && pin === pinJuezEffective() && juezParam >= 1 && juezParam <= getJudgeCount()) {
+        var juezParam = parseInt(params.get('juez') || '', 10);
+        if (juezParam < 1 || juezParam > getJudgeCount()) {
+          showPinError('Falta el número de juez en la URL (?juez=1…' + getJudgeCount() + ').');
+          return;
+        }
         judgeNum = juezParam;
         mode = 'judge';
+        pin = pinJuezEffective();
         writeSession({ mode: 'judge', judgeNum: juezParam, pin: pin });
-      }
-      if (!mode && pin === pinOrganizadorEffective()) {
+      } else if (PAGE_MODE === 'config' || PAGE_MODE === 'organizador') {
+        if (!pin || pin !== pinOrganizadorEffective()) {
+          showPinError('PIN de organizador inválido. Usa el enlace con ?pin=…');
+          return;
+        }
         mode = 'organizer';
+        pin = pinOrganizadorEffective();
         writeSession({ mode: 'organizer', pin: pin });
+        if (PAGE_MODE === 'config') activeDashTab = 'config';
+      } else {
+        if (!pin) {
+          showPinError('Falta el PIN en la URL o no es válido. Pide el enlace al organizador.');
+          return;
+        }
+
+        var sess = readSession();
+        if (sess && sess.pin === pin && sess.mode === 'organizer' && pin === pinOrganizadorEffective()) {
+          mode = 'organizer';
+        } else if (sess && sess.pin === pin && sess.mode === 'judge' && pin === pinJuezEffective()) {
+          if (sess.judgeNum >= 1 && sess.judgeNum <= getJudgeCount()) {
+            mode = 'judge';
+            judgeNum = sess.judgeNum;
+          }
+        }
+
+        var juezParamLegacy = parseInt(params.get('juez') || '', 10);
+        if (!mode && pin === pinJuezEffective() && juezParamLegacy >= 1 && juezParamLegacy <= getJudgeCount()) {
+          judgeNum = juezParamLegacy;
+          mode = 'judge';
+          writeSession({ mode: 'judge', judgeNum: juezParamLegacy, pin: pin });
+        }
+        if (!mode && pin === pinOrganizadorEffective()) {
+          mode = 'organizer';
+          writeSession({ mode: 'organizer', pin: pin });
+        }
       }
 
       return Promise.all([loadCompetidores(), loadCalificacionesStore()])

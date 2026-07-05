@@ -297,10 +297,17 @@ window.EVENT_CONFIG = {
   /** Panel jurado sensorial V60 — enlaces con PIN (no indexados públicamente). */
   juradoV60: {
     path: '/jurado-v60',
+    paths: {
+      hub: '/jurado-v60',
+      organizador: '/jurado/organizador',
+      config: '/jurado/config',
+      juez: '/jurado/juez',
+      resultados: '/jurado/resultados'
+    },
     pinOrganizador: 'v60organizador',
     pinJuez: 'v60sensorial',
     jueces: 3,
-    cacheVersion: '20260705jurado20',
+    cacheVersion: '20260705jurado21',
     roles: []
   }
 };
@@ -309,23 +316,34 @@ window.EVENT_CONFIG = {
   var root = window.EVENT_CONFIG;
   if (!root || !root.juradoV60) return;
   var j = root.juradoV60;
-  var base = String(root.siteUrl || '').replace(/\/$/, '') + j.path;
+  var site = String(root.siteUrl || '').replace(/\/$/, '');
+  var paths = j.paths || {};
+  var pathHub = paths.hub || j.path || '/jurado-v60';
+  var pathOrg = paths.organizador || '/jurado/organizador';
+  var pathCfg = paths.config || '/jurado/config';
+  var pathJuez = paths.juez || '/jurado/juez';
+  var pathRes = paths.resultados || '/jurado/resultados';
   var jueces = Math.max(1, Math.min(5, parseInt(j.jueces, 10) || 3));
 
-  function linkOrganizador() {
-    return base + '?pin=' + encodeURIComponent(j.pinOrganizador);
+  function q(pin) {
+    return '?pin=' + encodeURIComponent(pin);
   }
 
-  function linkJuez(num) {
-    return base + '?pin=' + encodeURIComponent(j.pinJuez) + '&juez=' + num;
-  }
-
-  j.links = { organizador: linkOrganizador() };
+  j.links = {
+    hub: site + pathHub,
+    config: site + pathCfg + q(j.pinOrganizador),
+    organizador: site + pathOrg + q(j.pinOrganizador),
+    resultados: site + pathRes,
+    competencia: site + '/competencia'
+  };
   j.roles = [
-    { id: 'organizador', label: 'Organizador', desc: 'Panel general, rondas y edición manual' }
+    { id: 'hub', label: 'Índice jurado', desc: 'Enlaces a todos los paneles' },
+    { id: 'config', label: 'Configuración', desc: 'Marca, reglas y criterios' },
+    { id: 'organizador', label: 'Torneo en vivo', desc: 'Vista general, rondas y control' },
+    { id: 'resultados', label: 'Resultados', desc: 'Portal competidor (nombre + cédula)' }
   ];
   for (var n = 1; n <= jueces; n++) {
-    j.links['juez' + n] = linkJuez(n);
+    j.links['juez' + n] = site + pathJuez + q(j.pinJuez) + '&juez=' + n;
     j.roles.push({
       id: 'juez' + n,
       label: 'Juez ' + n,

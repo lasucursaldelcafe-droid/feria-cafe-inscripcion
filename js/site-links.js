@@ -29,6 +29,10 @@
     pasaporte: 'pasaporte-cafetero.html',
     escanearPasaporte: 'escanear-pasaporte.html',
     juradoV60: 'jurado-v60.html',
+    juradoOrganizador: 'jurado-organizador.html',
+    juradoConfig: 'jurado-config.html',
+    juradoJuez: 'jurado-juez.html',
+    juradoResultados: 'jurado-resultados.html',
     panelFidelizacion: 'dashboard-fidelizacion.html'
   };
 
@@ -56,6 +60,10 @@
     pasaporte: '/pasaporte',
     escanearPasaporte: '/escanear-pasaporte',
     juradoV60: '/jurado-v60',
+    juradoOrganizador: '/jurado/organizador',
+    juradoConfig: '/jurado/config',
+    juradoJuez: '/jurado/juez',
+    juradoResultados: '/jurado/resultados',
     panelFidelizacion: '/panel-fidelizacion'
   };
 
@@ -105,10 +113,19 @@
     var pinJuez = opts.pinJuez || (cfg && cfg.pinJuez) || 'v60sensorial';
     var jueces = opts.jueces != null ? opts.jueces : juradoJudgeCount();
     jueces = Math.max(1, Math.min(5, parseInt(jueces, 10) || 3));
-    var base = opts.base || absUrl('juradoV60');
-    var urls = { organizador: base + '?pin=' + encodeURIComponent(pinOrg) };
+    var hub = opts.hubBase || absUrl('juradoV60');
+    var orgBase = opts.organizadorBase || absUrl('juradoOrganizador');
+    var cfgBase = opts.configBase || absUrl('juradoConfig');
+    var juezBase = opts.juezBase || absUrl('juradoJuez');
+    var urls = {
+      hub: hub,
+      config: cfgBase + '?pin=' + encodeURIComponent(pinOrg),
+      organizador: orgBase + '?pin=' + encodeURIComponent(pinOrg),
+      resultados: absUrl('juradoResultados'),
+      competencia: absUrl('competencia')
+    };
     for (var j = 1; j <= jueces; j++) {
-      urls['juez' + j] = base + '?pin=' + encodeURIComponent(pinJuez) + '&juez=' + j;
+      urls['juez' + j] = juezBase + '?pin=' + encodeURIComponent(pinJuez) + '&juez=' + j;
     }
     return urls;
   }
@@ -117,11 +134,18 @@
     if (global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60 && global.EVENT_CONFIG.juradoV60.links) {
       var links = global.EVENT_CONFIG.juradoV60.links;
       if (role === 'organizador') return links.organizador;
+      if (role === 'config') return links.config;
+      if (role === 'resultados') return links.resultados;
+      if (role === 'hub') return links.hub;
       var n = parseInt(role, 10);
       if (n >= 1 && links['juez' + n]) return links['juez' + n];
     }
-    return buildJuradoUrls()[role === 'organizador' ? 'organizador' : ('juez' + parseInt(role, 10))] ||
-      buildJuradoUrls().organizador;
+    var built = buildJuradoUrls();
+    if (role === 'organizador') return built.organizador;
+    if (role === 'config') return built.config;
+    if (role === 'resultados') return built.resultados;
+    if (role === 'hub') return built.hub;
+    return built['juez' + parseInt(role, 10)] || built.organizador;
   }
 
   function allJuradoUrls() {

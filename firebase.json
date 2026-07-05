@@ -233,6 +233,46 @@
         "type": 301
       },
       {
+        "source": "/jurado/organizador/",
+        "destination": "/jurado/organizador",
+        "type": 301
+      },
+      {
+        "source": "/jurado-organizador.html",
+        "destination": "/jurado/organizador",
+        "type": 301
+      },
+      {
+        "source": "/jurado/config/",
+        "destination": "/jurado/config",
+        "type": 301
+      },
+      {
+        "source": "/jurado-config.html",
+        "destination": "/jurado/config",
+        "type": 301
+      },
+      {
+        "source": "/jurado/juez/",
+        "destination": "/jurado/juez",
+        "type": 301
+      },
+      {
+        "source": "/jurado-juez.html",
+        "destination": "/jurado/juez",
+        "type": 301
+      },
+      {
+        "source": "/jurado/resultados/",
+        "destination": "/jurado/resultados",
+        "type": 301
+      },
+      {
+        "source": "/jurado-resultados.html",
+        "destination": "/jurado/resultados",
+        "type": 301
+      },
+      {
         "source": "/panel-fidelizacion/",
         "destination": "/panel-fidelizacion",
         "type": 301
@@ -327,6 +367,22 @@
       {
         "source": "/jurado-v60",
         "destination": "/jurado-v60.html"
+      },
+      {
+        "source": "/jurado/organizador",
+        "destination": "/jurado-organizador.html"
+      },
+      {
+        "source": "/jurado/config",
+        "destination": "/jurado-config.html"
+      },
+      {
+        "source": "/jurado/juez",
+        "destination": "/jurado-juez.html"
+      },
+      {
+        "source": "/jurado/resultados",
+        "destination": "/jurado-resultados.html"
       },
       {
         "source": "/panel-fidelizacion",

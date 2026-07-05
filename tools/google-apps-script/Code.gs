@@ -251,6 +251,9 @@ function doPost(e) {
     if (action === 'pasaporte_config_save') {
       return jsonResponse(savePasaporteConfig_(payload));
     }
+    if (action === 'jurado_resultados_login') {
+      return jsonResponse(handleJuradoResultadosLogin_(payload));
+    }
     if (action === 'jurado_guardar') {
       return jsonResponse(handleJuradoGuardar_(payload));
     }
@@ -3458,5 +3461,142 @@ function handleJuradoGuardar_(payload) {
     promedio: built.promedio,
     subtotales: built.subtotales,
     calificacion: juradoRowToApi_(built.row)
+  };
+}
+
+function normalizeNombre_(v) {
+  return String(v || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ');
+}
+
+function findCompetidorByDocumentoNombre_(documento, nombre) {
+  var docNorm = normalizeDoc_(documento);
+  if (!docNorm || docNorm.length < 6) return null;
+  var nombreNorm = normalizeNombre_(nombre);
+  if (!nombreNorm) return null;
+
+  var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return null;
+
+  var values = sheet.getRange(2, 1, lastRow, HEADERS_COMPETENCIA.length).getValues();
+  for (var i = 0; i < values.length; i++) {
+    var row = rowObjectFromValues_(HEADERS_COMPETENCIA, values[i]);
+    if (!isHabilitado_(row['Habilitado'])) continue;
+    if (normalizeDoc_(row['Documento']) !== docNorm) continue;
+    if (normalizeNombre_(row['Nombre']) !== nombreNorm) continue;
+    return row;
+  }
+  return null;
+}
+
+function juradoBracketPhaseLabel_(fase, rondaEnFase) {
+  var labels = {
+    grupos: 'Fase de grupos',
+    '16avos': 'Dieciseisavos de final',
+    '8avos': 'Octavos de final',
+    '4tos': 'Cuartos de final',
+    semifinal: 'Semifinal',
+    final: 'Final'
+  };
+  var base = labels[fase] || String(fase || 'Torneo');
+  var r = parseInt(rondaEnFase, 10) || 1;
+  if (fase === 'grupos' && r > 1) return base + ' · ronda ' + r;
+  return base;
+}
+
+function juradoResultadosTorneoStatus_(bracket, competidorId) {
+  if (!bracket || !competidorId) {
+    return { fase: '', faseLabel: 'Torneo', estado: 'pendiente', activo: false, eliminado: false };
+  }
+  var activos = Array.isArray(bracket.activos) ? bracket.activos : [];
+  var eliminados = Array.isArray(bracket.eliminados) ? bracket.eliminados : [];
+  var activo = activos.indexOf(competidorId) >= 0;
+  var eliminado = eliminados.indexOf(competidorId) >= 0;
+  var fase = String(bracket.fase || '').trim();
+  var ronda = parseInt(bracket.rondaEnFase, 10) || 1;
+  var estado = 'pendiente';
+  if (eliminado) estado = 'eliminado';
+  else if (activo) estado = 'activo';
+  else if (!fase && !activos.length) estado = 'inscrito';
+  return {
+    fase: fase,
+    faseLabel: juradoBracketPhaseLabel_(fase, ronda),
+    rondaEnFase: ronda,
+    estado: estado,
+    activo: activo,
+    eliminado: eliminado
+  };
+}
+
+function handleJuradoResultadosLogin_(payload) {
+  var nombre = String(payload.nombre || '').trim();
+  var documento = String(payload.documento || '').trim();
+  if (!nombre || !documento) {
+    return { ok: false, error: 'Ingresa tu nombre y número de documento (cédula).' };
+  }
+
+  var row = findCompetidorByDocumentoNombre_(documento, nombre);
+  if (!row) {
+    return { ok: false, error: 'No encontramos un inscrito habilitado con ese nombre y documento.' };
+  }
+
+  var competidorId = String(row['ID'] || '').trim();
+  var calCfg = getPasaporteConfig_('jurado_v60_calificaciones');
+  var bracketCfg = getPasaporteConfig_('jurado_v60_bracket');
+  var platformCfg = getPasaporteConfig_('jurado_v60_platform');
+
+  var scoresRoot = calCfg.data && calCfg.data.scores ? calCfg.data.scores : {};
+  var calRaw = scoresRoot[competidorId] || null;
+  var calificacion = null;
+  if (calRaw) {
+    calificacion = {
+      competidorId: competidorId,
+      judges: calRaw.judges || {},
+      notas: String(calRaw.notas || '').trim(),
+      sumaTotal: calRaw.sumaTotal != null ? calRaw.sumaTotal : null,
+      promedio: calRaw.promedio != null ? calRaw.promedio : null
+    };
+  }
+
+  var bracket = bracketCfg.data || null;
+  var torneo = juradoResultadosTorneoStatus_(bracket, competidorId);
+  var platform = platformCfg.data || {};
+  var scoring = platform.scoring || {};
+  var criteria = Array.isArray(scoring.criteria) ? scoring.criteria : [];
+
+  return {
+    ok: true,
+    competidor: {
+      id: competidorId,
+      nombre: String(row['Nombre'] || '').trim(),
+      ciudad: String(row['Ciudad'] || '').trim(),
+      representa: String(row['Representa'] || '').trim()
+    },
+    torneo: torneo,
+    calificacion: calificacion,
+    evento: {
+      nombre: String(platform.eventName || 'Torneo sensorial').trim(),
+      subtitulo: String(platform.eventSubtitle || '').trim(),
+      logoUrl: String(platform.logoUrl || '').trim(),
+      accentColor: String(platform.accentColor || '#c9a227').trim(),
+      primaryColor: String(platform.primaryColor || '#3d281c').trim()
+    },
+    scoring: {
+      jueces: Math.max(1, Math.min(5, parseInt(scoring.jueces, 10) || 3)),
+      scaleMin: parseInt(scoring.scaleMin, 10) || 1,
+      scaleMax: parseInt(scoring.scaleMax, 10) || 5,
+      criteria: criteria.map(function (c) {
+        return {
+          key: String(c.key || '').trim(),
+          label: String(c.label || '').trim(),
+          desc: String(c.desc || '').trim()
+        };
+      }).filter(function (c) { return c.label; })
+    }
   };
 }

@@ -1,17 +1,29 @@
 # Jurado V60 — Instrucciones de uso
 
-Plataforma de calificación sensorial en vivo, configurable para otros eventos (white-label). Acceso solo por URL con PIN; no aparece en el menú público del sitio.
+Plataforma de calificación sensorial en vivo, configurable para otros eventos (white-label). Acceso por URL; paneles separados por rol.
 
 ## URLs de producción
 
-| Rol | URL |
-|-----|-----|
-| **Organizador** | https://la-sucursal-del-cafe.web.app/jurado-v60?pin=v60organizador |
-| **Juez N** | `https://la-sucursal-del-cafe.web.app/jurado-v60?pin=v60sensorial&juez=N` (N = 1…cantidad de jueces configurada) |
+| Panel | URL |
+|-------|-----|
+| **Índice jurado** | https://la-sucursal-del-cafe.web.app/jurado-v60 |
+| **Configuración** | https://la-sucursal-del-cafe.web.app/jurado/config?pin=v60organizador |
+| **Torneo en vivo** | https://la-sucursal-del-cafe.web.app/jurado/organizador?pin=v60organizador |
+| **Resultados competidor** | https://la-sucursal-del-cafe.web.app/jurado/resultados |
+| **Juez N** | `https://la-sucursal-del-cafe.web.app/jurado/juez?pin=v60sensorial&juez=N` |
+| **Inscripción evento** | https://la-sucursal-del-cafe.web.app/competencia |
 
-También desde el panel admin: **Competidores** → tarjeta «Enlaces del jurado», o en el organizador → pestaña **Vista general** → **Enlaces del jurado**.
+También desde el panel admin: **Competidores** → tarjeta «Enlaces del jurado».
 
-> Si cambias los PIN o el número de jueces en **Marca y reglas**, los enlaces válidos serán los nuevos. Vuelve a copiar y compartir.
+> Si cambias los PIN o el número de jueces en **Configuración**, vuelve a copiar y compartir los enlaces.
+
+### Portal resultados (competidor)
+
+Cada inscrito ingresa con:
+- **Usuario:** nombre completo (como en el formulario de inscripción)
+- **Clave:** número de cédula / documento de identidad
+
+Solo ve **sus** puntajes, estado en el torneo y desglose por juez.
 
 ---
 
