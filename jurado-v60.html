@@ -8,7 +8,7 @@
   <title>Jurado sensorial — Torneo en vivo</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado17">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado18">
 </head>
 <body class="jurado-page">
   <div class="jurado-shell">
@@ -66,7 +66,7 @@
         <div class="jurado-total-box jurado-total-box--accent" style="margin-top:14px">
           <span class="jurado-total-label">Tu subtotal</span>
           <strong id="judgeSubtotal" class="jurado-total-value">—</strong>
-          <span class="jurado-total-hint">Máx. 35 pts (7 criterios × 5)</span>
+          <span class="jurado-total-hint" id="judgeMaxHint">Máx. 35 pts</span>
         </div>
         <div class="jurado-field" style="margin-top:14px">
           <label for="judgeNotasInput">Notas (opcional)</label>
@@ -107,7 +107,7 @@
         <div class="jurado-card jurado-card--fifa">
           <div class="jurado-card-head jurado-card-head--fifa">
             <h2>Clasificación en vivo</h2>
-            <p class="jurado-hint">Tabla por puntaje total · estilo torneo · se actualiza cada 3 s</p>
+            <p class="jurado-hint" id="fifaModeHint">Tabla por puntaje total · estilo torneo · se actualiza cada 3 s</p>
           </div>
           <div class="jurado-fifa-wrap">
             <table class="jurado-fifa-table" id="fifaStandingsTable">
@@ -145,7 +145,7 @@
         <div class="jurado-card jurado-card--bracket">
           <div class="jurado-card-head">
             <h2>Clasificación por rondas</h2>
-            <p class="jurado-hint">Duelos de 2 competidores · pasa quien tenga mayor <strong>puntaje total</strong> (J1 + J2 + J3).</p>
+            <p class="jurado-hint" id="torneoModeHint">Duelos de 2 competidores · pasa quien tenga mayor <strong>puntaje total</strong>.</p>
           </div>
           <div id="organizerChampionStrip" class="jurado-leader-strip" hidden></div>
           <div id="organizerRoundsNav" class="jurado-rounds-nav"></div>
@@ -159,7 +159,7 @@
         <div class="jurado-card jurado-card--scores">
           <div class="jurado-card-head">
             <h2>Puntajes por competidor</h2>
-            <p class="jurado-hint">J1, J2 y J3 · puntaje total cuando los 3 jueces calificaron.</p>
+            <p class="jurado-hint" id="puntajesModeHint">Puntajes por juez · total cuando todos calificaron.</p>
           </div>
           <div class="jurado-table-wrap">
             <table class="jurado-table jurado-table--ranking jurado-table--unified" id="organizerRankingTable">
@@ -191,7 +191,7 @@
         <div class="jurado-card jurado-card--manual" id="organizerManualCard" hidden>
           <div class="jurado-card-head">
             <h2>Edición manual de puntajes</h2>
-            <p class="jurado-hint">Corrige o ingresa las notas de J1, J2 y J3 (escala 1–5 por criterio).</p>
+            <p class="jurado-hint" id="manualModeHint">Corrige o ingresa las notas de cada juez según la escala configurada.</p>
           </div>
           <p id="organizerManualTarget" class="jurado-phase-label"></p>
           <div id="organizerManualForm" class="jurado-manual-form"></div>
@@ -332,6 +332,37 @@
                 <input type="text" id="cfgPinJuez" maxlength="40" placeholder="v60sensorial">
               </div>
             </div>
+
+            <h3 class="jurado-admin-subtitle">Calificación y criterios</h3>
+            <p class="jurado-hint">Define escala, modo de clasificación y los criterios sensoriales del torneo.</p>
+            <div class="jurado-config-grid">
+              <div class="jurado-field">
+                <label for="cfgScoringModo">Modo de clasificación</label>
+                <select id="cfgScoringModo">
+                  <option value="duelos">Duelos 1v1 (mayor puntaje)</option>
+                  <option value="puntaje_general">Puntaje general (ranking)</option>
+                </select>
+              </div>
+              <div class="jurado-field">
+                <label for="cfgJueces">Número de jueces</label>
+                <input type="number" id="cfgJueces" min="1" max="5" value="3">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgScaleMin">Valor mínimo</label>
+                <input type="number" id="cfgScaleMin" min="0" max="99" value="1">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgScaleMax">Valor máximo</label>
+                <input type="number" id="cfgScaleMax" min="1" max="100" value="5">
+              </div>
+              <div class="jurado-field jurado-field--full">
+                <label for="cfgAvanceRonda">Avance por ronda (0 = automático)</label>
+                <input type="number" id="cfgAvanceRonda" min="0" max="99" value="0" placeholder="Ej. 8 para octavos fijos">
+              </div>
+            </div>
+            <div id="criteriaEditorList" class="jurado-criteria-editor"></div>
+            <button type="button" id="addCriterionBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">+ Añadir criterio</button>
+
             <h3 class="jurado-admin-subtitle">Datos de inscripción (para exportar)</h3>
             <div class="jurado-config-grid">
               <div class="jurado-field">
@@ -398,12 +429,12 @@
     <p id="loadingMsg" class="jurado-loading">Cargando…</p>
   </div>
 
-  <script src="js/event-config.js?v=20260705jurado17"></script>
+  <script src="js/event-config.js?v=20260705jurado18"></script>
   <script>
     window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado17"></script>
+  <script src="js/jurado-v60.js?v=20260705jurado18"></script>
 </body>
 </html>

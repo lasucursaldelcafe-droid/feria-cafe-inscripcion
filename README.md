@@ -29,7 +29,7 @@ Sitio del festival de café especial: páginas informativas + formularios de ins
 | Correo | mailto:lasucursaldelcafe@gmail.com |
 | Apps Script (formularios) | Ver `js/sheets-config.js` → `WEB_APP_URL` |
 
-Checklist operativo: [`CHECKLIST.md`](CHECKLIST.md) · Panel admin: [`tools/ADMIN-DASHBOARD.md`](tools/ADMIN-DASHBOARD.md)
+Checklist operativo: [`CHECKLIST.md`](CHECKLIST.md) · Panel admin: [`tools/ADMIN-DASHBOARD.md`](tools/ADMIN-DASHBOARD.md) · Jurado V60: [`tools/JURADO-V60-INSTRUCCIONES.md`](tools/JURADO-V60-INSTRUCCIONES.md)
 
 ## Estructura del sitio
 
