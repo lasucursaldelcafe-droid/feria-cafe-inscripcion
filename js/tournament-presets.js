@@ -11,6 +11,8 @@
       label: 'Filtrado / Brewers',
       entity: 'WCE — World Brewers Cup',
       reference: 'WBrC',
+      eventSubtitle: 'WBrC · Filtrado V60 en duelos 1v1',
+      reglamentoUrl: 'reglas',
       modo: 'duelos',
       jueces: 3,
       scaleMin: 1,
@@ -39,6 +41,8 @@
       label: 'Catación / Cup Tasters',
       entity: 'WCE — World Cup Tasters Championship',
       reference: 'WCTC',
+      eventSubtitle: 'WCTC · Catación por triángulos y ranking',
+      reglamentoUrl: 'https://worldcoffeeevents.org/competitions/world-cup-tasters-championship/',
       modo: 'puntaje_general',
       jueces: 3,
       scaleMin: 0,
@@ -64,6 +68,8 @@
       label: 'Arte latte',
       entity: 'WCE — World Latte Art Championship',
       reference: 'WLAC',
+      eventSubtitle: 'WLAC · Arte latte en duelos eliminatorios',
+      reglamentoUrl: 'https://worldcoffeeevents.org/competitions/world-latte-art-championship/',
       modo: 'duelos',
       jueces: 3,
       scaleMin: 1,
@@ -90,6 +96,8 @@
       label: 'Tostión',
       entity: 'WCE — World Coffee Roasting Championship',
       reference: 'WCRC',
+      eventSubtitle: 'WCRC · Tostión con ranking por puntaje',
+      reglamentoUrl: 'https://worldcoffeeevents.org/competitions/world-coffee-roasting-championship/',
       modo: 'puntaje_general',
       jueces: 3,
       scaleMin: 1,
@@ -118,6 +126,8 @@
       label: 'Aeropress',
       entity: 'WAC — World Aeropress Championship',
       reference: 'WAC',
+      eventSubtitle: 'WAC · Aeropress en duelos de taza',
+      reglamentoUrl: 'https://worldaeropresschampionship.com/',
       modo: 'duelos',
       jueces: 3,
       scaleMin: 1,
@@ -187,6 +197,32 @@
     return PRESETS[id] || PRESETS.personalizado;
   }
 
+  function resolveReglamentoUrl(ref) {
+    if (!ref) return '';
+    if (/^https?:\/\//i.test(ref)) return ref;
+    if (ref === 'reglas' || ref === 'reglasPdf') {
+      if (global.SiteLinks && global.SiteLinks.absUrl) {
+        return global.SiteLinks.absUrl(ref);
+      }
+      return ref === 'reglasPdf' ? '/assets/reglas-v60-championship.pdf' : '/reglas';
+    }
+    if (ref.charAt(0) === '/') return ref;
+    return ref;
+  }
+
+  function applyPresetRegistration(presetId, currentRegistration) {
+    var preset = getPreset(presetId);
+    var base = currentRegistration && typeof currentRegistration === 'object' ? currentRegistration : {};
+    var out = Object.assign({}, base);
+    if (preset.reglamentoUrl) {
+      out.reglamentoUrl = resolveReglamentoUrl(preset.reglamentoUrl);
+    }
+    if (preset.registrationTitle) {
+      out.title = preset.registrationTitle;
+    }
+    return out;
+  }
+
   function getClassificationModes() {
     return CLASSIFICATION_MODES.slice();
   }
@@ -217,10 +253,15 @@
   function presetSummaryHtml(presetId) {
     var preset = getPreset(presetId);
     var mode = CLASSIFICATION_MODES.find(function (m) { return m.id === preset.modo; });
+    var regUrl = preset.reglamentoUrl ? resolveReglamentoUrl(preset.reglamentoUrl) : '';
     var html = '<div class="jurado-preset-summary">' +
       '<p class="jurado-preset-summary__entity"><strong>' + preset.entity + '</strong> · ' + preset.reference + '</p>';
     if (mode) {
       html += '<p class="jurado-hint">' + mode.label + ' — ' + mode.desc + '</p>';
+    }
+    if (regUrl) {
+      html += '<p class="jurado-preset-summary__rules">Reglamento sugerido: <a href="' + regUrl +
+        '" target="_blank" rel="noopener noreferrer">' + regUrl + '</a></p>';
     }
     html += '<ul class="jurado-preset-tips">';
     preset.tips.forEach(function (tip) {
@@ -235,6 +276,8 @@
     get: getPreset,
     classificationModes: getClassificationModes,
     applyToScoring: applyPresetToScoring,
+    applyToRegistration: applyPresetRegistration,
+    resolveReglamentoUrl: resolveReglamentoUrl,
     summaryHtml: presetSummaryHtml
   };
 })(typeof window !== 'undefined' ? window : globalThis);

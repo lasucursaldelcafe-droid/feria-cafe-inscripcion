@@ -564,6 +564,11 @@ body.jurado-page--organizer .jurado-header-brand {
   margin-bottom: 8px;
 }
 
+.jurado-link-url,
+.jurado-link-actions {
+  grid-column: 2;
+}
+
 .jurado-link-url {
   display: block;
   font-size: 0.72rem;
@@ -3683,6 +3688,17 @@ body.jurado-page--resultados .jurado-shell {
   color: var(--jurado-accent);
 }
 
+.jurado-inscripcion-mock__reglamento {
+  margin: 0 0 10px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.jurado-inscripcion-mock__reglamento a {
+  color: var(--jurado-accent-light);
+}
+
 .jurado-inscripcion-url-box--highlight {
   padding: 14px;
   border-radius: 12px;
@@ -3706,6 +3722,18 @@ body.jurado-page--resultados .jurado-shell {
 .jurado-preset-summary__entity {
   margin: 0 0 8px;
   font-size: 0.92rem;
+}
+
+.jurado-preset-summary__rules {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--jurado-text-muted);
+}
+
+.jurado-preset-summary__rules a {
+  color: var(--jurado-accent-light);
+  word-break: break-all;
 }
 
 .jurado-preset-tips {

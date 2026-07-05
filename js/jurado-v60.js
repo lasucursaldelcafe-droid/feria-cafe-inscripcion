@@ -853,8 +853,12 @@
       updateConfigPreview();
       return;
     }
+    var preset = window.TournamentPresets.get(disciplina);
     var current = readPlatformConfigForm();
     var scoring = window.TournamentPresets.applyToScoring(disciplina, current.scoring);
+    var registration = window.TournamentPresets.applyToRegistration
+      ? window.TournamentPresets.applyToRegistration(disciplina, current.registration)
+      : current.registration;
     var el;
     el = $('cfgScoringModo'); if (el) el.value = scoring.modo;
     el = $('cfgScaleMin'); if (el) el.value = scoring.scaleMin;
@@ -863,6 +867,8 @@
     el = $('cfgAvanceRonda'); if (el) el.value = scoring.avancePorRonda || 0;
     el = $('cfgCompetidoresEsperados'); if (el) el.value = scoring.competidoresEsperados;
     el = $('cfgRegCupo'); if (el && scoring.competidoresEsperados) el.value = scoring.competidoresEsperados;
+    el = $('cfgRegReglamento'); if (el && registration.reglamentoUrl) el.value = registration.reglamentoUrl;
+    el = $('cfgEventSubtitle'); if (el && preset.eventSubtitle) el.value = preset.eventSubtitle;
     var autoEl = $('cfgAutoAvance');
     if (autoEl) autoEl.checked = scoring.autoAvance !== false;
     renderCriteriaEditor(scoring.criteria);
@@ -3518,6 +3524,17 @@
     }
     var fee = $('previewRegFee');
     if (fee) fee.textContent = reg.fee || 'Tarifa del evento';
+    var reglamento = $('previewRegReglamento');
+    if (reglamento) {
+      if (reg.reglamentoUrl) {
+        reglamento.innerHTML = 'Al enviar aceptas el <a href="' + escapeHtml(reg.reglamentoUrl) +
+          '" target="_blank" rel="noopener noreferrer">reglamento del torneo</a>.';
+        reglamento.hidden = false;
+      } else {
+        reglamento.textContent = 'Sin URL de reglamento configurada.';
+        reglamento.hidden = false;
+      }
+    }
     var fieldsBox = $('previewRegFields');
     if (fieldsBox) {
       var fields = (cfg.formFields && cfg.formFields.length)
@@ -3622,7 +3639,10 @@
     var modoSel = $('cfgScoringModo');
     if (modoSel && !modoSel.dataset.bound) {
       modoSel.dataset.bound = '1';
-      modoSel.addEventListener('change', renderScoringModoHint);
+      modoSel.addEventListener('change', function () {
+        renderScoringModoHint();
+        updateConfigPreview();
+      });
     }
     var panelFile = $('cfgPanelImageFile');
     if (panelFile && !panelFile.dataset.bound) {
@@ -3688,6 +3708,11 @@
         if (activeDashTab === 'inscripciones') loadInscripcionesTable();
         applyPlatformBranding();
         updateScoringHints();
+        if (mode === 'judge') {
+          var judgeSel = $('judgeCompetidorSelect');
+          var judgeId = judgeSel && judgeSel.value ? judgeSel.value : '';
+          renderJudgeForm(judgeId ? (calificacionesMap[judgeId] || null) : null);
+        }
       }).catch(function (err) {
         $('platformConfigError').textContent = err.message || 'No se pudo guardar.';
         $('platformConfigError').hidden = false;
