@@ -257,25 +257,324 @@
 
   function normalizeBracketState(raw) {
     if (!raw || !raw.fase) return null;
+    var fase = raw.fase;
+    if (fase === 'clasificatoria') fase = '8avos';
     return {
-      fase: raw.fase,
+      fase: fase,
       rondaEnFase: parseInt(raw.rondaEnFase, 10) || 1,
       activos: Array.isArray(raw.activos) ? raw.activos.slice() : [],
       eliminados: Array.isArray(raw.eliminados) ? raw.eliminados.slice() : [],
       overrides: raw.overrides && typeof raw.overrides === 'object' ? Object.assign({}, raw.overrides) : {},
+      plan: Array.isArray(raw.plan) ? raw.plan.slice() : [],
+      sorteo: raw.sorteo && typeof raw.sorteo === 'object' ? Object.assign({}, raw.sorteo) : null,
+      grupos: Array.isArray(raw.grupos) ? raw.grupos.map(function (g) {
+        return {
+          nombre: g.nombre || 'A',
+          ids: Array.isArray(g.ids) ? g.ids.slice() : [],
+          avance: parseInt(g.avance, 10) || 2,
+          cerrado: !!g.cerrado
+        };
+      }) : [],
+      grupoIndex: parseInt(raw.grupoIndex, 10) || 0,
+      clasificadosGrupos: Array.isArray(raw.clasificadosGrupos) ? raw.clasificadosGrupos.slice() : [],
       actualizado: raw.actualizado || ''
     };
   }
 
   function defaultBracketState() {
+    var ids = competidores.map(function (c) { return c.id; });
+    var plan = computeTournamentPlan(ids.length);
     return {
-      fase: 'semifinal',
+      fase: plan[0] || 'semifinal',
       rondaEnFase: 1,
-      activos: competidores.map(function (c) { return c.id; }),
+      activos: ids.slice(),
       eliminados: [],
       overrides: {},
+      plan: plan,
+      sorteo: null,
+      grupos: [],
+      grupoIndex: 0,
+      clasificadosGrupos: [],
       actualizado: new Date().toISOString()
     };
+  }
+
+  var FASE_LABELS = {
+    grupos: 'Fase de grupos',
+    '16avos': 'Dieciseisavos de final',
+    '8avos': 'Octavos de final',
+    '4tos': 'Cuartos de final',
+    semifinal: 'Semifinal',
+    final: 'Final'
+  };
+
+  function shuffleArray(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i];
+      a[i] = a[j];
+      a[j] = t;
+    }
+    return a;
+  }
+
+  function nextPowerOf2(n) {
+    var p = 1;
+    while (p < n) p *= 2;
+    return p;
+  }
+
+  function knockoutPlanForCount(n) {
+    if (n <= 2) return ['final'];
+    if (n <= 4) return ['semifinal', 'final'];
+    if (n <= 8) return ['4tos', 'semifinal', 'final'];
+    if (n <= 16) return ['8avos', '4tos', 'semifinal', 'final'];
+    return ['16avos', '8avos', '4tos', 'semifinal', 'final'];
+  }
+
+  function estimateGroupQualifiers(n) {
+    var numGroups = Math.ceil(n / 4);
+    return numGroups * 2;
+  }
+
+  function computeTournamentPlan(participantCount) {
+    var n = Math.max(0, parseInt(participantCount, 10) || 0);
+    if (n < 2) return ['final'];
+    if (n > 32) {
+      var q = estimateGroupQualifiers(n);
+      var ko = knockoutPlanForCount(Math.min(q, 32));
+      return ['grupos'].concat(ko);
+    }
+    return knockoutPlanForCount(n);
+  }
+
+  function phaseForActiveCount(count) {
+    var n = parseInt(count, 10) || 0;
+    if (n <= 2) return 'final';
+    if (n <= 4) return 'semifinal';
+    if (n <= 8) return '4tos';
+    if (n <= 16) return '8avos';
+    if (n <= 32) return '16avos';
+    return 'grupos';
+  }
+
+  function buildGroupsFromOrder(orderedIds) {
+    var groups = [];
+    var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    var i = 0;
+    var g = 0;
+    while (i < orderedIds.length) {
+      var remaining = orderedIds.length - i;
+      var size = remaining <= 5 ? remaining : 4;
+      if (remaining === 5) size = 3;
+      groups.push({
+        nombre: letters[g] || String(g + 1),
+        ids: orderedIds.slice(i, i + size),
+        avance: size >= 4 ? 2 : 1,
+        cerrado: false
+      });
+      i += size;
+      g++;
+    }
+    return groups;
+  }
+
+  function runSorteoAutomatico(forceReshuffle) {
+    if (!competidores.length) {
+      return Promise.reject(new Error('No hay competidores inscritos habilitados.'));
+    }
+    var ids = competidores.map(function (c) { return c.id; });
+    var shuffled = shuffleArray(ids);
+    var plan = computeTournamentPlan(ids.length);
+    if (!bracketState) bracketState = defaultBracketState();
+
+    bracketState.plan = plan;
+    bracketState.sorteo = {
+      at: new Date().toISOString(),
+      orden: shuffled,
+      total: ids.length,
+      reshuffle: !!forceReshuffle
+    };
+    bracketState.eliminados = [];
+    bracketState.overrides = {};
+    bracketState.clasificadosGrupos = [];
+    bracketState.grupoIndex = 0;
+    bracketState.rondaEnFase = 1;
+
+    if (plan[0] === 'grupos') {
+      bracketState.grupos = buildGroupsFromOrder(shuffled);
+      bracketState.fase = 'grupos';
+      bracketState.activos = bracketState.grupos[0] ? bracketState.grupos[0].ids.slice() : shuffled;
+    } else {
+      bracketState.grupos = [];
+      bracketState.fase = plan[0];
+      bracketState.activos = shuffled.slice();
+    }
+
+    return saveBracketStore(bracketState).then(function () {
+      return resetAllScoresStore();
+    });
+  }
+
+  function getCurrentGrupo() {
+    if (!bracketState || !bracketState.grupos || !bracketState.grupos.length) return null;
+    return bracketState.grupos[bracketState.grupoIndex] || null;
+  }
+
+  function isGruposPhase() {
+    return bracketState && bracketState.fase === 'grupos';
+  }
+
+  function closeCurrentGrupo() {
+    var grupo = getCurrentGrupo();
+    if (!grupo) return Promise.reject(new Error('No hay grupo activo.'));
+    var members = grupo.ids.map(getRowById).sort(function (a, b) {
+      var ta = puntajeTotal(a) != null ? puntajeTotal(a) : partialScore(a);
+      var tb = puntajeTotal(b) != null ? puntajeTotal(b) : partialScore(b);
+      if (tb !== ta) return tb - ta;
+      return (a.nombre || '').localeCompare(b.nombre || '', 'es');
+    });
+    var advance = grupo.avance || 2;
+    var notReady = members.filter(function (m) { return puntajeEstado(m) !== 'listo'; });
+    if (notReady.length) {
+      return Promise.reject(new Error('Faltan calificaciones completas en el grupo ' + grupo.nombre + ' (' + notReady.length + ' pendiente(s)).'));
+    }
+    var winners = members.slice(0, advance).map(function (m) { return m.competidorId; });
+    var losers = members.slice(advance).map(function (m) { return m.competidorId; });
+
+    grupo.cerrado = true;
+    winners.forEach(function (id) {
+      if (bracketState.clasificadosGrupos.indexOf(id) < 0) bracketState.clasificadosGrupos.push(id);
+    });
+    losers.forEach(function (id) {
+      if (bracketState.eliminados.indexOf(id) < 0) bracketState.eliminados.push(id);
+    });
+
+    var nextIndex = bracketState.grupoIndex + 1;
+    if (nextIndex < bracketState.grupos.length) {
+      bracketState.grupoIndex = nextIndex;
+      bracketState.activos = bracketState.grupos[nextIndex].ids.slice();
+      bracketState.rondaEnFase = 1;
+      bracketState.overrides = {};
+      return saveBracketStore(bracketState).then(function () {
+        return resetScoresForIds(bracketState.activos);
+      });
+    }
+
+    var qualified = shuffleArray(bracketState.clasificadosGrupos.slice());
+    var plan = bracketState.plan || computeTournamentPlan(qualified.length);
+    var koStart = plan.indexOf('grupos') >= 0 ? plan[plan.indexOf('grupos') + 1] : plan[0];
+    if (!koStart) koStart = phaseForActiveCount(qualified.length);
+
+    bracketState.fase = koStart;
+    bracketState.activos = qualified;
+    bracketState.grupos = bracketState.grupos;
+    bracketState.rondaEnFase = 1;
+    bracketState.overrides = {};
+
+    return saveBracketStore(bracketState).then(function () {
+      return resetScoresForIds(qualified);
+    });
+  }
+
+  function renderTournamentPlanPanel() {
+    var box = $('tournamentPlanBox');
+    if (!box) return;
+    var n = competidores.length;
+    var plan = (bracketState && bracketState.plan && bracketState.plan.length)
+      ? bracketState.plan
+      : computeTournamentPlan(n);
+
+    var planHtml = plan.map(function (f, i) {
+      var active = bracketState && bracketState.fase === f;
+      return '<span class="jurado-plan-chip' + (active ? ' jurado-plan-chip--active' : '') + '">' +
+        (i + 1) + '. ' + escapeHtml(faseLabel(f)) + '</span>';
+    }).join('');
+
+    var sorteoInfo = '';
+    if (bracketState && bracketState.sorteo && bracketState.sorteo.at) {
+      sorteoInfo = '<p class="jurado-meta">Último sorteo: ' +
+        new Date(bracketState.sorteo.at).toLocaleString('es-CO') +
+        ' · ' + bracketState.sorteo.total + ' participantes</p>';
+    }
+
+    box.innerHTML =
+      '<p><strong>' + n + '</strong> inscrito(s) habilitado(s)</p>' +
+      '<p class="jurado-hint">Formato sugerido para este cupo:</p>' +
+      '<div class="jurado-plan-chips">' + planHtml + '</div>' +
+      sorteoInfo;
+
+    var reshuffle = $('reshuffleSorteoBtn');
+    if (reshuffle) reshuffle.hidden = !(bracketState && bracketState.sorteo);
+
+    var closeGrupo = $('closeGrupoBtn');
+    if (closeGrupo) closeGrupo.hidden = !isGruposPhase();
+
+    renderSorteoResult();
+    renderGruposPanel();
+  }
+
+  function renderSorteoResult() {
+    var box = $('sorteoResultBox');
+    if (!box) return;
+    if (!bracketState || !bracketState.sorteo || !bracketState.sorteo.orden) {
+      box.hidden = true;
+      box.innerHTML = '';
+      return;
+    }
+    box.hidden = false;
+    var orden = bracketState.sorteo.orden;
+    var html = '<h3 class="jurado-admin-subtitle">Orden del sorteo</h3><ol class="jurado-sorteo-list">';
+    orden.forEach(function (id, idx) {
+      var c = competidores.find(function (x) { return x.id === id; });
+      html += '<li><span class="jurado-sorteo-seed">#' + (idx + 1) + '</span> ' +
+        escapeHtml(c ? c.nombre : id) + '</li>';
+    });
+    html += '</ol>';
+    box.innerHTML = html;
+  }
+
+  function renderGruposPanel() {
+    var panel = $('gruposPanel');
+    if (!panel) return;
+    if (!bracketState || !bracketState.grupos || !bracketState.grupos.length) {
+      panel.hidden = true;
+      panel.innerHTML = '';
+      return;
+    }
+    panel.hidden = false;
+    var html = '<h3 class="jurado-admin-subtitle">Grupos</h3><div class="jurado-grupos-grid">';
+    bracketState.grupos.forEach(function (g, idx) {
+      var isCurrent = isGruposPhase() && bracketState.grupoIndex === idx;
+      html += '<article class="jurado-grupo-card' + (g.cerrado ? ' jurado-grupo-card--done' : '') +
+        (isCurrent ? ' jurado-grupo-card--active' : '') + '">';
+      html += '<header>Grupo ' + escapeHtml(g.nombre) +
+        (g.cerrado ? ' ✓' : isCurrent ? ' · en juego' : '') + '</header><ul>';
+      g.ids.forEach(function (id) {
+        var c = competidores.find(function (x) { return x.id === id; });
+        var row = getRowById(id);
+        var pts = puntajeTotal(row);
+        html += '<li>' + escapeHtml(c ? c.nombre : id) +
+          (pts != null ? ' <em>' + pts + ' pts</em>' : '') + '</li>';
+      });
+      html += '</ul><p class="jurado-hint">Clasifican ' + (g.avance || 2) + '</p></article>';
+    });
+    html += '</div>';
+    panel.innerHTML = html;
+  }
+
+  function showSorteoMsg(msg, isError) {
+    var ok = $('sorteoMsg');
+    var err = $('sorteoError');
+    if (ok) ok.hidden = true;
+    if (err) err.hidden = true;
+    if (isError) {
+      if (err) { err.textContent = msg; err.hidden = false; }
+    } else if (ok) {
+      ok.textContent = msg;
+      ok.hidden = false;
+    }
   }
 
   function loadBracketStore() {
@@ -283,6 +582,9 @@
       var normalized = normalizeBracketState(res.data);
       if (normalized) {
         bracketState = normalized;
+        if (!bracketState.plan || !bracketState.plan.length) {
+          bracketState.plan = computeTournamentPlan(competidores.length || bracketState.activos.length);
+        }
         if (!bracketState.activos.length && competidores.length) {
           bracketState.activos = competidores.map(function (c) { return c.id; });
         }
@@ -336,13 +638,17 @@
   }
 
   function faseLabel(fase) {
-    var map = { clasificatoria: 'Clasificatoria', semifinal: 'Semifinal', final: 'Final' };
-    return map[fase] || fase;
+    return FASE_LABELS[fase] || fase;
   }
 
   function currentPhaseTitle() {
     if (!bracketState) return 'Ronda 1';
-    return faseLabel(bracketState.fase) + ' · Ronda ' + (bracketState.rondaEnFase || 1);
+    var base = faseLabel(bracketState.fase);
+    if (bracketState.fase === 'grupos') {
+      var g = getCurrentGrupo();
+      if (g) return base + ' · Grupo ' + g.nombre;
+    }
+    return base + ' · Ronda ' + (bracketState.rondaEnFase || 1);
   }
 
   function getActiveCompetitorIds() {
@@ -845,6 +1151,7 @@
     renderOrganizerStats();
     renderFifaStandings();
     renderOrganizerLinksPanel();
+    renderTournamentPlanPanel();
     renderOrganizerAdminPanel();
     renderOrganizerBracket();
     renderOrganizerScoresTable();
@@ -1225,7 +1532,8 @@
     var phaseLabel = $('bracketPhaseLabel');
     if (faseSel) faseSel.value = bracketState.fase || 'semifinal';
     if (rondaSel) rondaSel.value = String(bracketState.rondaEnFase || 1);
-    if (phaseLabel) phaseLabel.textContent = 'Fase actual: ' + currentPhaseTitle();
+    if (phaseLabel) phaseLabel.textContent = 'Fase actual: ' + currentPhaseTitle() +
+      ' · ' + getActiveCompetitorIds().length + ' activo(s)';
 
     var activosBox = $('bracketActivosList');
     var elimWrap = $('bracketEliminadosWrap');
@@ -1314,6 +1622,10 @@
     var advanceBtn = $('advanceWinnersBtn');
     if (advanceBtn) {
       advanceBtn.addEventListener('click', function () {
+        if (isGruposPhase()) {
+          showAdminMsg('En fase de grupos usa «Cerrar grupo actual» cuando todos estén calificados.', true);
+          return;
+        }
         var current = buildCurrentDuelRound();
         if (!current || current.matches.length < 1) {
           showAdminMsg('No hay duelos en esta ronda.', true);
@@ -1337,6 +1649,7 @@
         if (!confirm('¿Avanzar ' + winners.length + ' ganador(es) a la siguiente ronda, limpiar puntajes y eliminar perdedores?')) return;
         var previousActivos = getActiveCompetitorIds();
         bracketState.activos = winners;
+        bracketState.fase = phaseForActiveCount(winners.length);
         bracketState.rondaEnFase = (bracketState.rondaEnFase || 1) + 1;
         bracketState.overrides = {};
         previousActivos.forEach(function (id) {
@@ -1348,10 +1661,67 @@
           return resetScoresForIds(winners);
         }).then(function () {
           selectedRoundNum = 0;
-          showAdminMsg('Avanzaron a ' + currentPhaseTitle() + '. Puntajes limpiados para nueva catación.');
+          showAdminMsg('Avanzaron a ' + currentPhaseTitle() + ' (' + faseLabel(bracketState.fase) + '). Puntajes limpiados.');
           refreshOrganizer();
         }).catch(function (err) {
           showAdminMsg(err.message || 'Error al avanzar', true);
+        });
+      });
+    }
+
+    var closeGrupoBtn = $('closeGrupoBtn');
+    if (closeGrupoBtn) {
+      closeGrupoBtn.addEventListener('click', function () {
+        var g = getCurrentGrupo();
+        if (!g) {
+          showAdminMsg('No hay grupo activo.', true);
+          return;
+        }
+        if (!confirm('¿Cerrar grupo ' + g.nombre + ' y clasificar los ' + (g.avance || 2) + ' mejores por puntaje?')) return;
+        closeCurrentGrupo().then(function () {
+          if (isGruposPhase()) {
+            showAdminMsg('Grupo cerrado. Activo: Grupo ' + (getCurrentGrupo() ? getCurrentGrupo().nombre : '?'));
+          } else {
+            showAdminMsg('Fase de grupos terminada. Inicia ' + faseLabel(bracketState.fase) + ' con ' + bracketState.activos.length + ' clasificados.');
+          }
+          showSorteoMsg('Grupo clasificado correctamente.');
+          refreshOrganizer();
+        }).catch(function (err) {
+          showAdminMsg(err.message || 'Error al cerrar grupo', true);
+        });
+      });
+    }
+
+    var sorteoBtn = $('runSorteoBtn');
+    if (sorteoBtn) {
+      sorteoBtn.addEventListener('click', function () {
+        var msg = '¿Sorteo automático de ' + competidores.length + ' inscrito(s)? Se reiniciarán puntajes y el cuadro.';
+        if (bracketState && bracketState.sorteo) msg = '¿Rehacer el sorteo? Se perderán puntajes y posiciones actuales.';
+        if (!confirm(msg)) return;
+        sorteoBtn.disabled = true;
+        sorteoBtn.textContent = 'Sorteando…';
+        runSorteoAutomatico(!!(bracketState && bracketState.sorteo)).then(function () {
+          showSorteoMsg('✓ Sorteo listo · ' + faseLabel(bracketState.fase) + ' · ' + getActiveCompetitorIds().length + ' activo(s)');
+          showAdminMsg('Sorteo aplicado: ' + currentPhaseTitle());
+          refreshOrganizer();
+        }).catch(function (err) {
+          showSorteoMsg(err.message || 'Error en sorteo', true);
+        }).finally(function () {
+          sorteoBtn.disabled = false;
+          sorteoBtn.textContent = '🎲 Sorteo automático';
+        });
+      });
+    }
+
+    var reshuffleBtn = $('reshuffleSorteoBtn');
+    if (reshuffleBtn) {
+      reshuffleBtn.addEventListener('click', function () {
+        if (!confirm('¿Re-sortear posiciones? Se reinician puntajes.')) return;
+        runSorteoAutomatico(true).then(function () {
+          showSorteoMsg('✓ Nuevo orden de sorteo aplicado.');
+          refreshOrganizer();
+        }).catch(function (err) {
+          showSorteoMsg(err.message || 'Error', true);
         });
       });
     }
@@ -1850,6 +2220,39 @@
     var champ = $('organizerChampionStrip');
     var summary = $('organizerRoundSummary');
     if (!nav || !box) return;
+
+    if (isGruposPhase()) {
+      var grupo = getCurrentGrupo();
+      nav.innerHTML = '<span class="jurado-round-tab jurado-round-tab--active">' + escapeHtml(currentPhaseTitle()) + '</span>';
+      if (!grupo) {
+        box.innerHTML = '<p class="jurado-hint">Sin grupo activo. Ejecuta el sorteo en Control.</p>';
+        return;
+      }
+      var ranked = grupo.ids.map(getRowById).sort(function (a, b) {
+        var ta = puntajeTotal(a) != null ? puntajeTotal(a) : partialScore(a);
+        var tb = puntajeTotal(b) != null ? puntajeTotal(b) : partialScore(b);
+        if (tb !== ta) return tb - ta;
+        return (a.nombre || '').localeCompare(b.nombre || '', 'es');
+      });
+      var html = '<div class="jurado-grupo-play">';
+      html += '<p class="jurado-hint">Fase de grupos: califica a <strong>todos</strong> los del grupo. Clasifican los <strong>' + (grupo.avance || 2) + '</strong> mejores por puntaje total. Usa «Cerrar grupo actual» en Control.</p>';
+      html += '<ol class="jurado-round-rank">';
+      ranked.forEach(function (p, idx) {
+        var t = puntajeTotal(p);
+        var passes = idx < (grupo.avance || 2);
+        html += '<li class="jurado-round-rank-item' + (passes ? ' jurado-round-rank-item--pass' : '') + '">';
+        html += '<span class="jurado-round-rank-pos">' + (idx + 1) + '</span>';
+        html += '<span class="jurado-round-rank-name">' + escapeHtml(p.nombre) + '</span>';
+        html += '<span class="jurado-round-rank-score">' + (t != null ? t + ' pts' : '—') + '</span>';
+        if (passes) html += '<span class="jurado-duel-badge">Clasifica</span>';
+        html += '</li>';
+      });
+      html += '</ol></div>';
+      box.innerHTML = html;
+      if (summary) { summary.hidden = true; summary.innerHTML = ''; }
+      if (champ) champ.hidden = true;
+      return;
+    }
 
     var current = buildCurrentDuelRound();
     if (!current || current.matches.length < 1) {

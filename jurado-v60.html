@@ -8,7 +8,7 @@
   <title>Jurado sensorial — Torneo en vivo</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado16">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado17">
 </head>
 <body class="jurado-page">
   <div class="jurado-shell">
@@ -217,17 +217,36 @@
 
       <!-- Tab: Control -->
       <div class="jurado-dash-pane" data-dash-pane="control" hidden>
+        <div class="jurado-card jurado-card--sorteo" id="sorteoCard">
+          <div class="jurado-card-head">
+            <h2>Sorteo y formato del torneo</h2>
+            <p class="jurado-hint">Sorteo automático de inscritos habilitados. El sistema sugiere fases según el cupo.</p>
+          </div>
+          <div id="tournamentPlanBox" class="jurado-plan-box"></div>
+          <div class="jurado-admin-actions jurado-admin-actions--sorteo">
+            <button type="button" id="runSorteoBtn" class="jurado-btn">🎲 Sorteo automático</button>
+            <button type="button" id="reshuffleSorteoBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small" hidden>Re-sortear</button>
+          </div>
+          <div id="sorteoResultBox" class="jurado-sorteo-result" hidden></div>
+          <div id="gruposPanel" class="jurado-grupos-panel" hidden></div>
+          <p id="sorteoMsg" class="jurado-success" hidden></p>
+          <p id="sorteoError" class="jurado-error" hidden></p>
+        </div>
+
         <div class="jurado-card jurado-card--admin">
           <div class="jurado-card-head">
             <h2>Control de ronda</h2>
-            <p class="jurado-hint">Configura la fase actual, elimina participantes y reinicia puntajes.</p>
+            <p class="jurado-hint">Fase actual, eliminados y reinicio de puntajes.</p>
           </div>
           <div class="jurado-admin-grid">
             <div class="jurado-field">
               <label for="bracketFaseSelect">Fase</label>
               <select id="bracketFaseSelect">
-                <option value="clasificatoria">Clasificatoria</option>
-                <option value="semifinal" selected>Semifinal</option>
+                <option value="grupos">Fase de grupos</option>
+                <option value="16avos">Dieciseisavos</option>
+                <option value="8avos">Octavos</option>
+                <option value="4tos">Cuartos</option>
+                <option value="semifinal">Semifinal</option>
                 <option value="final">Final</option>
               </select>
             </div>
@@ -251,6 +270,7 @@
             <button type="button" id="resetActivosScoresBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Reiniciar puntajes de activos</button>
             <button type="button" id="resetAllScoresBtn" class="jurado-btn jurado-btn--danger jurado-btn--small">Reiniciar TODOS los puntajes</button>
             <button type="button" id="advanceWinnersBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Avanzar ganadores + limpiar puntajes</button>
+            <button type="button" id="closeGrupoBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small" hidden>Cerrar grupo actual (top 2)</button>
           </div>
           <p id="organizerAdminMsg" class="jurado-success" hidden></p>
           <p id="organizerAdminError" class="jurado-error" hidden></p>
@@ -378,12 +398,12 @@
     <p id="loadingMsg" class="jurado-loading">Cargando…</p>
   </div>
 
-  <script src="js/event-config.js?v=20260705jurado16"></script>
+  <script src="js/event-config.js?v=20260705jurado17"></script>
   <script>
     window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado16"></script>
+  <script src="js/jurado-v60.js?v=20260705jurado17"></script>
 </body>
 </html>

@@ -52,22 +52,49 @@ Cada juez abre **su enlace** desde el celular, elige competidor activo y calific
 
 ### 4. Control
 
+#### Sorteo automático (inicio del torneo)
+
+1. Ve a **Control** → bloque **Sorteo y formato del torneo**
+2. Revisa el **formato sugerido** según inscritos habilitados:
+
+| Inscritos | Fases típicas |
+|-----------|----------------|
+| 2 | Final |
+| 3–4 | Semifinal → Final |
+| 5–8 | Cuartos → Semifinal → Final |
+| 9–16 | Octavos → Cuartos → Semifinal → Final |
+| 17–32 | Dieciseisavos → Octavos → Cuartos → Semifinal → Final |
+| 33+ | **Grupos** (top 2 por grupo) → eliminatorias |
+
+3. Pulsa **🎲 Sorteo automático** — mezcla inscritos, asigna grupos si aplica y reinicia puntajes
+4. El orden del sorteo y los grupos quedan guardados en el servidor
+
+#### Fase de grupos (>32 inscritos o formato con grupos)
+
+- Califica a **todos** los del grupo activo (no son duelos 1v1)
+- Clasifican los **2 mejores** por puntaje total (o 1 si el grupo es de 3)
+- **Cerrar grupo actual (top 2)** → pasa al siguiente grupo o a octavos/cuartos según cupo
+
+#### Eliminatorias (dieciseisavos → final)
+
 | Acción | Cuándo usarla |
 |--------|----------------|
-| **Aplicar fase** | Cambiar entre Clasificatoria, Semifinal o Final y número de ronda |
+| **Aplicar fase** | Cambiar manualmente la fase (grupos, 16avos, 8avos, 4tos, semifinal, final) |
 | **Reiniciar puntajes de activos** | Nueva catación con los mismos participantes |
 | **Reiniciar TODOS** | Borrar todos los puntajes del torneo |
-| **Avanzar ganadores** | Pasar ganadores de duelos a la siguiente ronda y limpiar puntajes |
+| **Avanzar ganadores** | Tras duelos 1v1: pasan los de mayor puntaje; la fase se ajusta sola al cupo restante |
+| **Cerrar grupo actual** | Solo en fase de grupos |
 | **Eliminar / Restaurar** | Sacar o volver a meter participantes de la ronda |
 
-#### Flujo típico — semifinal ronda 1
+#### Flujo típico — torneo de 16
 
-1. **Control** → Fase: Semifinal · Ronda 1 → **Aplicar fase**
-2. **Eliminar** participantes que no van a semifinal
-3. **Reiniciar puntajes de activos** (empieza catación limpia)
-4. Jueces califican desde sus móviles **o** edición manual en **Puntajes**
-5. Revisar duelos en **Torneo**
-6. **Avanzar ganadores + limpiar puntajes** para la siguiente ronda
+1. **Sorteo automático** (formato: octavos → cuartos → semifinal → final)
+2. **Reiniciar puntajes de activos** si hace falta
+3. Jueces califican duelos 1v1 en **Torneo**
+4. **Avanzar ganadores** tras cada ronda (la fase cambia sola: 8 → 4 → 2)
+5. Final: último duelo define campeón
+
+#### Flujo manual (sin sorteo)
 
 ### 5. Marca (white-label)
 
@@ -119,7 +146,7 @@ El HTML incluye tu logo, colores y campos básicos (nombre, documento, correo, c
 | Clave `pasaporte_config` | Contenido |
 |--------------------------|-----------|
 | `jurado_v60_calificaciones` | Puntajes por competidor y juez |
-| `jurado_v60_bracket` | Fase, ronda, activos, eliminados, ganadores forzados |
+| `jurado_v60_bracket` | Fase, ronda, activos, eliminados, sorteo, grupos, plan de fases |
 | `jurado_v60_platform` | Marca, colores, PINs, datos de inscripción |
 
 Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado** = sí).
@@ -144,7 +171,7 @@ Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado
 | No aparecen competidores | Revisa hoja Competencia y columna Habilitado |
 | Duelo sin ganador | Espera los 3 jueces o usa **Declarar ganador** / edición manual |
 | Cambié PIN y el enlace viejo no funciona | Copia enlaces nuevos desde **Vista general** tras guardar en **Marca** |
-| Página con datos viejos | Forzar recarga (Ctrl+Shift+R); versión actual en URL: `jurado16` |
+| Página con datos viejos | Forzar recarga (Ctrl+Shift+R); versión actual en URL: `jurado17` |
 
 ---
 
@@ -160,4 +187,4 @@ Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado
 
 ---
 
-*Última actualización: julio 2026 · cache `jurado16`*
+*Última actualización: julio 2026 · cache `jurado17`*

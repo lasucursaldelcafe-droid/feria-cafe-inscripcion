@@ -1637,3 +1637,108 @@ body.jurado-page--organizer .jurado-header-brand {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.7);
 }
+
+/* ——— Sorteo y plan de fases ——— */
+
+.jurado-plan-box {
+  margin-bottom: 14px;
+}
+
+.jurado-plan-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.jurado-plan-chip {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--jurado-border);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.jurado-plan-chip--active {
+  background: var(--jurado-accent-soft);
+  border-color: var(--jurado-accent);
+  color: #fff;
+}
+
+.jurado-admin-actions--sorteo {
+  margin-bottom: 12px;
+}
+
+.jurado-sorteo-list {
+  margin: 0;
+  padding: 0 0 0 8px;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.jurado-sorteo-list li {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.88rem;
+}
+
+.jurado-sorteo-seed {
+  display: inline-block;
+  min-width: 28px;
+  font-weight: 700;
+  color: var(--jurado-accent);
+}
+
+.jurado-grupos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.jurado-grupo-card {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--jurado-border);
+}
+
+.jurado-grupo-card--active {
+  border-color: var(--jurado-accent);
+  background: var(--jurado-accent-soft);
+}
+
+.jurado-grupo-card--done {
+  opacity: 0.65;
+}
+
+.jurado-grupo-card header {
+  font-weight: 700;
+  font-size: 0.88rem;
+  margin-bottom: 8px;
+}
+
+.jurado-grupo-card ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.82rem;
+}
+
+.jurado-grupo-card li {
+  padding: 3px 0;
+}
+
+.jurado-grupo-card em {
+  color: var(--jurado-accent);
+  font-style: normal;
+  font-weight: 600;
+}
+
+.jurado-grupo-play {
+  padding: 4px 0;
+}

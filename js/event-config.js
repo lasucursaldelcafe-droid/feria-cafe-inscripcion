@@ -299,7 +299,7 @@ window.EVENT_CONFIG = {
     path: '/jurado-v60',
     pinOrganizador: 'v60organizador',
     pinJuez: 'v60sensorial',
-    cacheVersion: '20260705jurado16',
+    cacheVersion: '20260705jurado17',
     roles: [
       { id: 'organizador', label: 'Organizador', desc: 'Panel general, rondas y edición manual' },
       { id: 'juez1', label: 'Juez 1', desc: 'Calificación móvil · columna J1' },
