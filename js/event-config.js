@@ -245,12 +245,13 @@ window.EVENT_CONFIG = {
     nombre: 'V60 Championship — Preliminar 2',
     preliminar: '2.ª de 2 preliminares',
     clasificatoria: '2.ª de 2 preliminares',
-    fecha: 'Por confirmar',
-    fechaCorta: 'Por confirmar',
+    fecha: '8 de agosto de 2026',
+    fechaCorta: '8 ago 2026',
+    fechaIso: '2026-08-08',
     horaInicio: '5:30 p. m.',
-    sede: 'Por confirmar',
+    sede: 'Mas Café',
     ciudad: 'Cali',
-    mapsQuery: 'Cali Valle del Cauca',
+    mapsQuery: 'Mas Café Cali',
     horario: [
       { hora: '5:30 p. m.', actividad: 'Registro, bienvenida y entrega de café de ronda' },
       { hora: '6:00 p. m.', actividad: 'Sorteo de método y explicación del protocolo' },
@@ -271,7 +272,7 @@ window.EVENT_CONFIG = {
   },
   proximosEventos: [
     { num: 1, label: 'Preliminar 1', estado: 'Realizada', fecha: 'Edición cerrada', sede: '—' },
-    { num: 2, label: 'Preliminar 2', estado: 'Inscripción abierta', fecha: 'Por confirmar', sede: 'Por confirmar' },
+    { num: 2, label: 'Preliminar 2', estado: 'Inscripción abierta', fecha: '8 de agosto de 2026', sede: 'Mas Café, Cali' },
     {
       num: 3,
       label: 'Competencia principal',
