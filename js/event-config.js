@@ -293,5 +293,37 @@ window.EVENT_CONFIG = {
     {
       name: 'Black Coffee Design & Souvenirs'
     }
-  ]
+  ],
+  /** Panel jurado sensorial V60 — enlaces con PIN (no indexados públicamente). */
+  juradoV60: {
+    path: '/jurado-v60',
+    pinOrganizador: 'v60organizador',
+    pinJuez: 'v60sensorial',
+    cacheVersion: '20260705jurado14',
+    roles: [
+      { id: 'organizador', label: 'Organizador', desc: 'Panel general, rondas y edición manual' },
+      { id: 'juez1', label: 'Juez 1', desc: 'Calificación móvil · columna J1' },
+      { id: 'juez2', label: 'Juez 2', desc: 'Calificación móvil · columna J2' },
+      { id: 'juez3', label: 'Juez 3', desc: 'Calificación móvil · columna J3' }
+    ]
+  }
 };
+
+(function initJuradoV60Links() {
+  var root = window.EVENT_CONFIG;
+  if (!root || !root.juradoV60) return;
+  var j = root.juradoV60;
+  var base = String(root.siteUrl || '').replace(/\/$/, '') + j.path;
+  function link(role, num) {
+    if (role === 'organizador') return base + '?pin=' + encodeURIComponent(j.pinOrganizador);
+    var url = base + '?pin=' + encodeURIComponent(j.pinJuez);
+    if (num >= 1 && num <= 3) url += '&juez=' + num;
+    return url;
+  }
+  j.links = {
+    organizador: link('organizador'),
+    juez1: link('juez', 1),
+    juez2: link('juez', 2),
+    juez3: link('juez', 3)
+  };
+})();

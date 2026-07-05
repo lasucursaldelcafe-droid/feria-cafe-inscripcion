@@ -2322,6 +2322,55 @@
     }
   }
 
+  function renderAdminJuradoLinks() {
+    var root = document.getElementById('adminJuradoLinksRoot');
+    var orgQuick = document.getElementById('adminJuradoOrganizadorLink');
+    if (!root) return;
+
+    var urls = null;
+    if (global.SiteLinks && global.SiteLinks.allJuradoUrls) {
+      urls = global.SiteLinks.allJuradoUrls();
+    } else if (global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60 && global.EVENT_CONFIG.juradoV60.links) {
+      urls = global.EVENT_CONFIG.juradoV60.links;
+    }
+    if (!urls) return;
+
+    if (orgQuick) orgQuick.href = urls.organizador;
+
+    var roles = [
+      { key: 'organizador', label: 'Organizador' },
+      { key: 'juez1', label: 'Juez 1' },
+      { key: 'juez2', label: 'Juez 2' },
+      { key: 'juez3', label: 'Juez 3' }
+    ];
+
+    root.innerHTML = roles.map(function (role) {
+      var url = urls[role.key] || '#';
+      return '<div class="admin-jurado-link-row">' +
+        '<div class="admin-jurado-link-label"><strong>' + escapeHtml(role.label) + '</strong></div>' +
+        '<a class="admin-jurado-link-url" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(url) + '</a>' +
+        '<div class="admin-jurado-link-actions">' +
+        '<button type="button" class="admin-btn admin-btn--secondary admin-btn--small" data-admin-copy-link="' + escapeHtml(url) + '">Copiar</button>' +
+        '<a class="admin-btn admin-btn--secondary admin-btn--small" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">Abrir</a>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  function bindAdminJuradoLinkCopy() {
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-admin-copy-link]');
+      if (!btn) return;
+      var url = btn.getAttribute('data-admin-copy-link');
+      if (!url) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function () {
+          btn.textContent = 'Copiado';
+          setTimeout(function () { btn.textContent = 'Copiar'; }, 1500);
+        });
+      }
+    });
+  }
+
   function init() {
     bindEvents();
     bindAdminNav();
@@ -2334,6 +2383,8 @@
     bindCompetidorMinimalZipButton();
     bindAdminCreateVisitanteForm();
     bindAdminMarcaLogoPreview();
+    bindAdminJuradoLinkCopy();
+    renderAdminJuradoLinks();
     restoreAdminTabFromStorage();
     syncAdminTabUi();
     syncMarcaPlanFromTab();

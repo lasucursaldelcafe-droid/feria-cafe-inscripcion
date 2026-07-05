@@ -721,6 +721,7 @@
   }
 
   function renderOrganizerViews(list) {
+    renderOrganizerLinksPanel();
     renderOrganizerAdminPanel();
     renderOrganizerBracket();
     renderOrganizerScoresTable();
@@ -730,6 +731,66 @@
     }
     if (detailId) renderOrganizerManualEdit(detailId);
     else hideOrganizerManualEdit();
+  }
+
+  function getJuradoShareUrls() {
+    if (window.EVENT_CONFIG && window.EVENT_CONFIG.juradoV60 && window.EVENT_CONFIG.juradoV60.links) {
+      return window.EVENT_CONFIG.juradoV60.links;
+    }
+    var base = String(window.location.origin || 'https://la-sucursal-del-cafe.web.app').replace(/\/$/, '');
+    return {
+      organizador: base + '/jurado-v60?pin=' + PIN_ORGANIZADOR,
+      juez1: base + '/jurado-v60?pin=' + PIN_JUEZ + '&juez=1',
+      juez2: base + '/jurado-v60?pin=' + PIN_JUEZ + '&juez=2',
+      juez3: base + '/jurado-v60?pin=' + PIN_JUEZ + '&juez=3'
+    };
+  }
+
+  function copyTextToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'absolute';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  function renderOrganizerLinksPanel() {
+    var list = $('organizerLinksList');
+    if (!list) return;
+    var urls = getJuradoShareUrls();
+    var roles = [
+      { key: 'organizador', label: 'Organizador', desc: 'Panel general · rondas · edición manual' },
+      { key: 'juez1', label: 'Juez 1', desc: 'Calificación móvil · columna J1' },
+      { key: 'juez2', label: 'Juez 2', desc: 'Calificación móvil · columna J2' },
+      { key: 'juez3', label: 'Juez 3', desc: 'Calificación móvil · columna J3' }
+    ];
+    list.innerHTML = roles.map(function (role) {
+      var url = urls[role.key] || '';
+      return '<div class="jurado-link-item">' +
+        '<div class="jurado-link-meta">' +
+        '<strong>' + escapeHtml(role.label) + '</strong>' +
+        '<span>' + escapeHtml(role.desc) + '</span>' +
+        '</div>' +
+        '<a class="jurado-link-url" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(url) + '</a>' +
+        '<div class="jurado-link-actions">' +
+        '<button type="button" class="jurado-btn-inline" data-copy-link="' + escapeHtml(url) + '">Copiar</button>' +
+        '<a class="jurado-btn-inline jurado-btn-inline--open" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">Abrir</a>' +
+        '</div></div>';
+    }).join('');
   }
 
   function renderOrganizerAdminPanel() {
@@ -929,6 +990,19 @@
         renderOrganizerManualEdit(editId);
         var card = $('organizerManualCard');
         if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      var copyBtn = e.target.closest('[data-copy-link]');
+      if (copyBtn) {
+        var linkUrl = copyBtn.getAttribute('data-copy-link');
+        copyTextToClipboard(linkUrl).then(function () {
+          var ok = $('organizerLinksCopied');
+          if (ok) {
+            ok.textContent = '✓ Enlace copiado al portapapeles';
+            ok.hidden = false;
+          }
+        }).catch(function () {
+          showAdminMsg('No se pudo copiar el enlace', true);
+        });
       }
     });
   }

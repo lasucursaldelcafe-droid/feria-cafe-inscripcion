@@ -90,6 +90,34 @@
     return base + '/' + path;
   }
 
+  function juradoUrl(role) {
+    var cfg = global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60;
+    var pinOrg = (cfg && cfg.pinOrganizador) || 'v60organizador';
+    var pinJuez = (cfg && cfg.pinJuez) || 'v60sensorial';
+    if (cfg && cfg.links) {
+      if (role === 'organizador') return cfg.links.organizador;
+      var n = parseInt(role, 10);
+      if (n === 1) return cfg.links.juez1;
+      if (n === 2) return cfg.links.juez2;
+      if (n === 3) return cfg.links.juez3;
+    }
+    var base = absUrl('juradoV60');
+    if (role === 'organizador') return base + '?pin=' + encodeURIComponent(pinOrg);
+    var url = base + '?pin=' + encodeURIComponent(pinJuez);
+    var juezNum = parseInt(role, 10);
+    if (juezNum >= 1 && juezNum <= 3) url += '&juez=' + juezNum;
+    return url;
+  }
+
+  function allJuradoUrls() {
+    return {
+      organizador: juradoUrl('organizador'),
+      juez1: juradoUrl(1),
+      juez2: juradoUrl(2),
+      juez3: juradoUrl(3)
+    };
+  }
+
   function applyLinkElements(root) {
     (root || document).querySelectorAll('[data-link]').forEach(function (el) {
       var key = resolveKey(el.getAttribute('data-link'));
@@ -104,6 +132,8 @@
   global.SiteLinks = {
     href: href,
     absUrl: absUrl,
+    juradoUrl: juradoUrl,
+    allJuradoUrls: allJuradoUrls,
     apply: applyLinkElements,
     LOCAL: LOCAL,
     HOSTED: HOSTED
