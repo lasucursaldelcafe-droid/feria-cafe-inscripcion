@@ -2369,9 +2369,10 @@
 
     var roles = [
       { key: 'hub', label: 'Índice jurado' },
-      { key: 'config', label: 'Configuración' },
-      { key: 'organizador', label: 'Torneo en vivo' },
-      { key: 'resultados', label: 'Resultados competidor' }
+      { key: 'config', label: '1. Configuración' },
+      { key: 'inscripcion', label: '2. Inscripción' },
+      { key: 'organizador', label: '3. Torneo en vivo' },
+      { key: 'resultados', label: '4. Resultados competidor' }
     ];
     for (var j = 1; j <= jueces; j++) {
       roles.push({ key: 'juez' + j, label: 'Juez ' + j });
@@ -2428,20 +2429,38 @@
       try {
         created = new Date(inst.createdAt).toLocaleString('es-CO', { dateStyle: 'short' });
       } catch (e) { created = inst.createdAt || ''; }
+      var urls = global.SiteLinks && global.SiteLinks.buildJuradoUrls
+        ? global.SiteLinks.buildJuradoUrls({
+          evt: inst.slug,
+          pinOrganizador: inst.pinOrganizador,
+          pinJuez: inst.pinJuez,
+          jueces: 3
+        })
+        : {};
+      var linkBlocks = [
+        { label: '1. Configuración (envía esto al cliente)', url: cfgUrl },
+        { label: '2. Inscripción en línea', url: inscUrl },
+        { label: '3. Torneo en vivo', url: urls.organizador || '' },
+        { label: '4. Resultados competidor', url: urls.resultados || '' }
+      ].filter(function (item) { return item.url; }).map(function (item) {
+        return '<p class="admin-jurado-client-config"><span class="admin-table-meta">' + escapeHtml(item.label) + ':</span><br>' +
+          '<a href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(item.url) + '</a></p>';
+      }).join('');
+      var judgeLinks = [];
+      for (var jn = 1; jn <= 3; jn++) {
+        if (urls['juez' + jn]) judgeLinks.push('<a href="' + escapeHtml(urls['juez' + jn]) + '" target="_blank" rel="noopener noreferrer">Juez ' + jn + '</a>');
+      }
       return '<article class="admin-jurado-client-row">' +
         '<div class="admin-jurado-client-head">' +
         '<strong>' + escapeHtml(inst.clientName) + '</strong>' +
         '<span class="admin-table-meta">' + escapeHtml(inst.eventName) + ' · ' + escapeHtml(inst.slug) + '</span>' +
         '</div>' +
-        '<p class="admin-jurado-client-config"><span class="admin-table-meta">Configuración (envía esto al cliente):</span><br>' +
-        '<a href="' + escapeHtml(cfgUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(cfgUrl) + '</a></p>' +
-        (inscUrl ? '<p class="admin-jurado-client-config"><span class="admin-table-meta">Inscripción en línea:</span><br>' +
-        '<a href="' + escapeHtml(inscUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(inscUrl) + '</a></p>' : '') +
+        linkBlocks +
+        (judgeLinks.length ? '<p class="admin-jurado-client-config"><span class="admin-table-meta">5. Jurados (día del evento):</span><br>' + judgeLinks.join(' · ') + '</p>' : '') +
         '<div class="admin-jurado-link-actions">' +
-        '<button type="button" class="admin-btn admin-btn--secondary admin-btn--small" data-admin-copy-link="' + escapeHtml(cfgUrl) + '">Copiar enlace config</button>' +
+        '<button type="button" class="admin-btn admin-btn--secondary admin-btn--small" data-admin-copy-link="' + escapeHtml(cfgUrl) + '">Copiar config</button>' +
         (inscUrl ? '<button type="button" class="admin-btn admin-btn--secondary admin-btn--small" data-admin-copy-link="' + escapeHtml(inscUrl) + '">Copiar inscripción</button>' : '') +
-        (urls.organizador ? '<a class="admin-btn admin-btn--secondary admin-btn--small" href="' + escapeHtml(urls.organizador) + '" target="_blank" rel="noopener noreferrer">Torneo</a>' : '') +
-        (urls.resultados ? '<a class="admin-btn admin-btn--secondary admin-btn--small" href="' + escapeHtml(urls.resultados) + '" target="_blank" rel="noopener noreferrer">Resultados</a>' : '') +
+        (urls.organizador ? '<button type="button" class="admin-btn admin-btn--secondary admin-btn--small" data-admin-copy-link="' + escapeHtml(urls.organizador) + '">Copiar torneo</button>' : '') +
         '</div>' +
         '<p class="admin-table-meta">Creado ' + escapeHtml(created) +
         (inst.contactEmail ? ' · ' + escapeHtml(inst.contactEmail) : '') + '</p>' +

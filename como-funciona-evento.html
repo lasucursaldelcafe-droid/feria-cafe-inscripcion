@@ -45,8 +45,8 @@
         <h1 class="festival-sub-hero__title">¿Cómo funciona el evento?</h1>
         <p class="festival-sub-hero__lead">Circuito V60 · 2 preliminares + final 29–30 ago 2026 · Palmetto Plaza</p>
         <div class="hero-meta">
-          <span class="badge">1.ª preliminar</span>
-          <span class="badge">📅 Preliminar 1: <span data-bind="torneo.fecha">Por confirmar</span></span>
+          <span class="badge">2.ª preliminar</span>
+          <span class="badge">📅 Preliminar 2: <span data-bind="torneo.fecha">Por confirmar</span></span>
           <span class="badge">🕠 Hora: <span data-bind="torneo.hora">5:30 p. m.</span></span>
           <span class="badge">🏆 Final: 29–30 ago</span>
         </div>
@@ -73,7 +73,7 @@
         <section class="section" id="que-es">
           <h2>¿Qué es el V60 Championship?</h2>
           <p>
-            Es la <strong>1.ª de 2 ediciones preliminares</strong> de café filtrado con método
+            Es la <strong>2.ª de 2 ediciones preliminares</strong> de café filtrado con método
             <strong>V60</strong>, organizada por La Sucursal del Café antes de la
             <strong>competencia principal</strong> (29 y 30 de agosto de 2026 en Palmetto Plaza). Hasta <strong>36 baristas y entusiastas</strong> compiten en
             rondas eliminatorias hasta coronar al campeón de esta preliminar.
@@ -96,9 +96,9 @@
         </section>
 
         <section class="section" id="fecha-sede">
-          <h2>Fecha y sede — Preliminar 1</h2>
+          <h2>Fecha y sede — Preliminar 2</h2>
           <p>
-            La <strong>1.ª edición preliminar</strong> (V60 Championship — Preliminar 1) inicia a las
+            La <strong>2.ª edición preliminar</strong> (V60 Championship — Preliminar 2) inicia a las
             <strong><span data-bind="torneo.hora">5:30 p. m.</span></strong>. La fecha y sede siguen
             <strong>por confirmar</strong>; te avisaremos por correo y WhatsApp en cuanto se publiquen.
           </p>
@@ -110,7 +110,7 @@
         </section>
 
         <section class="section" id="horario">
-          <h2>Horario referencial — Preliminar 1</h2>
+          <h2>Horario referencial — Preliminar 2</h2>
           <table class="horario-table" id="tablaHorario">
             <thead><tr><th>Hora</th><th>Actividad</th></tr></thead>
             <tbody></tbody>
@@ -160,7 +160,7 @@
             </ul>
           </div>
           <p class="hint">
-            Los detalles de inscripción al cupo directo se anunciarán oportunamente. Las dos preliminares siguen abiertas para quien prefiera
+            Los detalles de inscripción al cupo directo se anunciarán oportunamente. La Preliminar 2 sigue abierta para quien prefiera
             construir su camino paso a paso hacia la final del 29 y 30 de agosto.
           </p>
         </section>
@@ -188,7 +188,7 @@
               Llegará a la dirección que indicaste. Úsalo para familiarizarte con el lote antes del evento.
             </li>
             <li>
-              <strong>Día de la preliminar 1 (fecha por confirmar): compite en la sede que anunciaremos</strong>
+              <strong>Día de la preliminar 2 (fecha por confirmar): compite en la sede que anunciaremos</strong>
               En cada ronda en la que avances recibirás café oficial en bolsa etiquetada.
               Sigue el cronograma y horario asignado a tu estación.
             </li>
@@ -274,9 +274,9 @@
         </section>
 
         <section class="section" id="premios">
-          <h2>Premios — 1.ª preliminar</h2>
+          <h2>Premios — 2.ª preliminar</h2>
           <p>
-            Esta primera preliminar otorga <strong>cupos asegurados a la competencia principal</strong>
+            Esta segunda preliminar otorga <strong>cupos asegurados a la competencia principal</strong>
             para el podio (1.º, 2.º y 3.º lugar). Además, es tu mejor escenario de fogueo antes de la final.
           </p>
           <div class="prizes">
@@ -362,7 +362,7 @@
         <div class="festival-footer__contact">
           <p class="festival-footer__col-title">Contacto</p>
           <p class="festival-footer__dates">
-            Competencia · Preliminar 1: <span data-bind="torneo.fecha">Por confirmar</span> · <span data-bind="torneo.hora">5:30 p. m.</span> · Final: 29–30 ago 2026<br>
+            Competencia · Preliminar 2: <span data-bind="torneo.fecha">Por confirmar</span> · <span data-bind="torneo.hora">5:30 p. m.</span> · Final: 29–30 ago 2026<br>
             <span data-bind="torneo.lugar">Por confirmar</span>
           </p>
           <div class="festival-contact-actions">
@@ -381,7 +381,7 @@
   <script src="js/festival-nav.js?v=20260703global"></script>
   <script>
     (function () {
-      var ev = window.EVENT_CONFIG && EVENT_CONFIG.evento1;
+      var ev = window.EVENT_CONFIG && (EVENT_CONFIG.getEventoActivo ? EVENT_CONFIG.getEventoActivo() : (EVENT_CONFIG.evento2 || EVENT_CONFIG.evento1));
       if (!ev) return;
       var tbody = document.querySelector('#tablaHorario tbody');
       if (tbody && ev.horario) {

@@ -32,6 +32,23 @@ Solo ve **sus** puntajes, estado en el torneo y desglose por juez.
 
 ---
 
+## Flujo del cliente (orden recomendado)
+
+El cliente **no arma enlaces a mano**: configura el torneo y el sistema genera los links automáticamente en la pestaña **«3. Enlaces del evento»**.
+
+| Paso | Qué hace el cliente | Dónde |
+|------|---------------------|-------|
+| **0. Alta** | La Sucursal crea el apartado en Admin | Admin → Clientes plataforma jurado |
+| **1. Configurar** | Marca, reglas, tipo de torneo, criterios, jueces, PINs, campos del formulario | `/jurado/config?evt=slug&pin=…` → pestaña **1. Configurar torneo** |
+| **2. Inscripciones** | Copia el formulario público y revisa registros | Misma URL → pestaña **2. Inscripciones** |
+| **3. Enlaces** | Copia torneo en vivo, jueces y resultados (se regeneran al guardar) | Misma URL → pestaña **3. Enlaces del evento** |
+| **4. Día del evento** | Organizador controla rondas; cada juez usa su enlace móvil | `/jurado/organizador` y `/jurado/juez` |
+| **5. Resultados** | Competidores consultan con nombre + documento | `/jurado/resultados?evt=slug` |
+
+Los enlaces se generan desde `SiteLinks.buildJuradoUrls()` (única fuente en `js/site-links.js`).
+
+---
+
 ## Vender la plataforma (white-label)
 
 En **Admin → Competidores → Clientes plataforma jurado**:
@@ -55,14 +72,13 @@ El formulario público de inscripción:
 
 ### Flujo rápido — inscripción en línea
 
-1. **Admin** crea el apartado → copia enlace de **config** y de **inscripción**.
+1. **Admin** crea el apartado → copia enlace de **config** (paso 1 al cliente).
 2. El **cliente** abre `/jurado/config?evt=slug&pin=…`.
-3. En **Marca y reglas**: logo, colores, cupo, reglamento y **campos del formulario** → **Guardar**.
-4. En **Inscripciones**: copia el enlace público y compártelo (redes, QR, correo).
-5. Cada registro se guarda en:
-   - Hoja **`Comp. {slug}`** (base del torneo)
-   - Hoja **`Competencia`** (registro global, columna **Evento** = slug)
-6. En el panel **Torneo en vivo**, los inscritos habilitados aparecen para sorteo y calificación.
+3. **1. Configurar torneo**: logo, colores, modo (duelos/ranking), criterios, jueces, cupo, reglamento y campos → **Guardar** (abre automáticamente enlaces).
+4. **2. Inscripciones**: copia el enlace público y compártelo (redes, QR, correo).
+5. **3. Enlaces del evento**: copia torneo en vivo, un link por juez y resultados.
+6. Cada registro se guarda en hoja **`Comp. {slug}`** y **`Competencia`** (columna **Evento** = slug).
+7. En **Torneo en vivo**, los inscritos habilitados aparecen para sorteo y calificación.
 
 ---
 

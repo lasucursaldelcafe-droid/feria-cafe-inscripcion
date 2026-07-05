@@ -9,7 +9,7 @@
   var brand = cfg.brandName || 'La Sucursal del Café';
   var contact = cfg.contact || {};
   var feria = cfg.feria || {};
-  var ev = cfg.evento1 || {};
+  var ev = (cfg.getEventoActivo && cfg.getEventoActivo()) || cfg.evento2 || cfg.evento1 || {};
   var pago = cfg.pago || {};
 
   function pageKind() {

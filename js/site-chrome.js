@@ -8,7 +8,7 @@
   var contact = cfg.contact || {};
   var feria = cfg.feria || {};
   var stands = cfg.stands || {};
-  var ev = cfg.evento1 || {};
+  var ev = (cfg.getEventoActivo && cfg.getEventoActivo()) || cfg.evento2 || cfg.evento1 || {};
   var siteUrl = (cfg.siteUrl || '').replace(/\/$/, '');
   var INSTAGRAM_URL = 'https://www.instagram.com/lasucursal.delcafe/';
   var INSTAGRAM_HANDLE = '@lasucursal.delcafe';

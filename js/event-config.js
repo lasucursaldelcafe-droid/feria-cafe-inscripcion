@@ -180,7 +180,7 @@ window.EVENT_CONFIG = {
   },
   circuito: {
     preliminaresTotal: 2,
-    preliminarActual: 1,
+    preliminarActual: 2,
     resumen:
       'Dos ediciones preliminares antes de la gran final (29 y 30 de agosto de 2026). En cada una compites por cupo a la competencia principal, reconocimientos de patrocinadores y experiencia de fogueo bajo presión real.',
     motivoPreliminares:
@@ -214,10 +214,37 @@ window.EVENT_CONFIG = {
     catacionMin: 5,
     catacionLabel: '5 min'
   },
+  /** Clave del evento activo para inscripción, copy público y filtro del jurado festival. */
+  torneoActivo: 'evento2',
   evento1: {
+    estado: 'realizada',
+    eventoId: 'V60 Championship — Preliminar 1',
     nombre: 'V60 Championship — Preliminar 1',
     preliminar: '1.ª de 2 preliminares',
     clasificatoria: '1.ª de 2 preliminares',
+    fecha: 'Realizada',
+    fechaCorta: 'Realizada',
+    horaInicio: '5:30 p. m.',
+    sede: 'Por confirmar',
+    ciudad: 'Cali',
+    mapsQuery: 'Cali Valle del Cauca',
+    horario: [
+      { hora: '5:30 p. m.', actividad: 'Registro, bienvenida y entrega de café de ronda' },
+      { hora: '6:00 p. m.', actividad: 'Sorteo de método y explicación del protocolo' },
+      { hora: '6:30 p. m.', actividad: 'Ronda clasificatoria — estaciones en competencia' },
+      { hora: '7:45 p. m.', actividad: 'Catación / evaluación de jueces (estimado)' },
+      { hora: '8:30 p. m.', actividad: 'Resultados y cierre de la edición' }
+    ],
+    horarioNota: 'Edición realizada. Los resultados permanecen en el sistema interno del organizador.',
+    whatsappGrupoUrl: 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9',
+    whatsappGrupoNombre: 'V60 Championship — competidores'
+  },
+  evento2: {
+    estado: 'activa',
+    eventoId: 'V60 Championship — Preliminar 2',
+    nombre: 'V60 Championship — Preliminar 2',
+    preliminar: '2.ª de 2 preliminares',
+    clasificatoria: '2.ª de 2 preliminares',
     fecha: 'Por confirmar',
     fechaCorta: 'Por confirmar',
     horaInicio: '5:30 p. m.',
@@ -231,7 +258,7 @@ window.EVENT_CONFIG = {
       { hora: '7:45 p. m.', actividad: 'Catación / evaluación de jueces (estimado)' },
       { hora: '8:30 p. m.', actividad: 'Resultados y cierre de la edición' }
     ],
-    horarioNota: 'La 1.ª edición inicia a las 5:30 p. m.; el juez principal confirmará tiempos exactos el día del evento.',
+    horarioNota: 'La 2.ª edición inicia a las 5:30 p. m.; el juez principal confirmará tiempos exactos el día del evento.',
     whatsappGrupoUrl: 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9',
     whatsappGrupoNombre: 'V60 Championship — competidores'
   },
@@ -243,7 +270,8 @@ window.EVENT_CONFIG = {
     titular: 'Manuel Barraza'
   },
   proximosEventos: [
-    { num: 2, label: 'Preliminar 2', estado: 'Por confirmar', fecha: 'Por confirmar', sede: 'Por confirmar' },
+    { num: 1, label: 'Preliminar 1', estado: 'Realizada', fecha: 'Edición cerrada', sede: '—' },
+    { num: 2, label: 'Preliminar 2', estado: 'Inscripción abierta', fecha: 'Por confirmar', sede: 'Por confirmar' },
     {
       num: 3,
       label: 'Competencia principal',
@@ -307,12 +335,30 @@ window.EVENT_CONFIG = {
     pinOrganizador: 'v60organizador',
     pinJuez: 'v60sensorial',
     jueces: 3,
-    cacheVersion: '20260705jurado24',
+    cacheVersion: '20260705jurado25',
     roles: []
   }
 };
 
-(function initJuradoV60Links() {
+/**
+ * Devuelve el evento de torneo activo (inscripción, copy público, jurado festival).
+ * Mantiene evento1 archivado con estado "realizada" para datos históricos.
+ */
+window.EVENT_CONFIG.getEventoActivo = function getEventoActivo() {
+  var root = window.EVENT_CONFIG || {};
+  var key = root.torneoActivo;
+  if (!key && root.circuito && root.circuito.preliminarActual) {
+    key = 'evento' + root.circuito.preliminarActual;
+  }
+  return (key && root[key]) || root.evento2 || root.evento1 || {};
+};
+
+/** @deprecated Los enlaces se sincronizan desde js/site-links.js (SiteLinks.syncJuradoV60Links). */
+(function initJuradoV60LinksLegacy() {
+  if (window.SiteLinks && window.SiteLinks.syncJuradoV60Links) {
+    window.SiteLinks.syncJuradoV60Links();
+    return;
+  }
   var root = window.EVENT_CONFIG;
   if (!root || !root.juradoV60) return;
   var j = root.juradoV60;

@@ -17,6 +17,8 @@ var HEADERS_ANALYTICS = [
   'Timestamp', 'Path', 'Titulo', 'Referrer', 'Session ID', 'User agent'
 ];
 var CUPO_MAX_COMPETENCIA = 36;
+/** Evento activo para cupo, duplicados e inscripciones nuevas (Preliminar 2). */
+var ACTIVE_COMPETENCIA_EVENTO = 'V60 Championship — Preliminar 2';
 var COMPROBANTE_PREVIEW_MAX = 1000;
 var DRIVE_FOLDER_NAME = 'V60 Championship — Comprobantes';
 var DRIVE_FOTOS_FOLDER_NAME = 'V60 Championship — Fotos participantes';
@@ -411,10 +413,61 @@ function findDuplicateInSheet_(sheet, headers, correo, documento) {
   return false;
 }
 
-function getCompetenciaCount_() {
+function normalizeCompetenciaEvento_(evento) {
+  return String(evento || '').trim();
+}
+
+function extractCompetenciaPreliminarKey_(evento) {
+  var s = normalizeCompetenciaEvento_(evento);
+  if (!s) return '';
+  if (/preliminar\s*2/i.test(s) || /2\.ª/i.test(s)) return 'V60 Championship — Preliminar 2';
+  if (/preliminar\s*1/i.test(s) || /1\.ª/i.test(s)) return 'V60 Championship — Preliminar 1';
+  if (s === 'V60 Championship') return 'V60 Championship — Preliminar 1';
+  return s;
+}
+
+function isSameCompetenciaEvento_(rowEvento, targetEvento) {
+  var rowKey = extractCompetenciaPreliminarKey_(rowEvento);
+  var targetKey = extractCompetenciaPreliminarKey_(targetEvento || ACTIVE_COMPETENCIA_EVENTO);
+  return !!rowKey && rowKey === targetKey;
+}
+
+function findDuplicateCompetenciaInEvent_(sheet, headers, correo, documento, evento) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return false;
+
+  var eventoCol = headers.indexOf('Evento') + 1;
+  var correoCol = headers.indexOf('Correo') + 1;
+  var docCol = headers.indexOf('Documento') + 1;
+  var emailNorm = normalizeEmail_(correo);
+  var docNorm = documento ? normalizeDoc_(documento) : '';
+  var targetEvento = normalizeCompetenciaEvento_(evento || ACTIVE_COMPETENCIA_EVENTO);
+  var values = sheet.getRange(2, 1, lastRow, headers.length).getValues();
+
+  for (var i = 0; i < values.length; i++) {
+    var rowEvento = eventoCol > 0 ? values[i][eventoCol - 1] : '';
+    if (!isSameCompetenciaEvento_(rowEvento, targetEvento)) continue;
+    if (emailNorm && correoCol > 0 && normalizeEmail_(values[i][correoCol - 1]) === emailNorm) return true;
+    if (docNorm && docCol > 0 && normalizeDoc_(values[i][docCol - 1]) === docNorm) return true;
+  }
+  return false;
+}
+
+function getCompetenciaCount_(evento) {
   var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
   var lastRow = sheet.getLastRow();
-  return lastRow > 1 ? lastRow - 1 : 0;
+  if (lastRow < 2) return 0;
+
+  var targetEvento = normalizeCompetenciaEvento_(evento || ACTIVE_COMPETENCIA_EVENTO);
+  var eventoCol = HEADERS_COMPETENCIA.indexOf('Evento') + 1;
+  if (eventoCol <= 0) return lastRow - 1;
+
+  var values = sheet.getRange(2, eventoCol, lastRow, 1).getValues();
+  var count = 0;
+  for (var i = 0; i < values.length; i++) {
+    if (isSameCompetenciaEvento_(values[i][0], targetEvento)) count++;
+  }
+  return count;
 }
 
 /** Une columnas base + legales + cola (sin .concat anidado dentro de appendRow). */
@@ -1172,14 +1225,14 @@ function handleAdminCreateCompetitor_(payload) {
   }
 
   var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
-  if (findDuplicateInSheet_(sheet, HEADERS_COMPETENCIA, correo, payload.documento || null)) {
-    return { ok: false, error: 'Ya existe una inscripción con este correo o documento.' };
+  if (findDuplicateCompetenciaInEvent_(sheet, HEADERS_COMPETENCIA, correo, payload.documento || null, payload.evento || ACTIVE_COMPETENCIA_EVENTO)) {
+    return { ok: false, error: 'Ya existe una inscripción con este correo o documento para esta preliminar.' };
   }
 
   var data = {
     fecha: new Date().toISOString(),
     id: String(payload.id || ('COMP-' + Date.now().toString(36).toUpperCase())).trim(),
-    evento: 'V60 Championship',
+    evento: payload.evento || ACTIVE_COMPETENCIA_EVENTO,
     nombre: nombre,
     documento: String(payload.documento || '').trim(),
     celular: celular,
@@ -1848,8 +1901,8 @@ function appendCompetencia_(data) {
   }
 
   var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
-  if (findDuplicateInSheet_(sheet, HEADERS_COMPETENCIA, data.correo, data.documento)) {
-    throw new Error('Ya existe una inscripción de competencia con este correo o documento.');
+  if (findDuplicateCompetenciaInEvent_(sheet, HEADERS_COMPETENCIA, data.correo, data.documento, data.evento || ACTIVE_COMPETENCIA_EVENTO)) {
+    throw new Error('Ya existe una inscripción de competencia con este correo o documento para esta preliminar.');
   }
 
   var equipo = data.equipoPropio || {};
@@ -1864,7 +1917,7 @@ function appendCompetencia_(data) {
   var compRow = joinRowParts_([
     data.fecha || new Date().toISOString(),
     data.id || '',
-    data.evento || 'V60 Championship',
+    data.evento || 'V60 Championship — Preliminar 2',
     data.valorInscripcion || '',
     data.nombre || '',
     data.documento || '',
@@ -2039,10 +2092,22 @@ function buildWaMeUrl_(phone, text) {
   return url;
 }
 
+function getCompetenciaEventoLabel_(data) {
+  var evento = String((data && data.evento) || 'V60 Championship — Preliminar 2').trim();
+  if (/preliminar\s*2/i.test(evento) || /2\.ª/i.test(evento)) {
+    return { corto: '2.ª preliminar', tabla: 'Preliminar 2', evento: evento };
+  }
+  if (/preliminar\s*1/i.test(evento) || /1\.ª/i.test(evento)) {
+    return { corto: '1.ª preliminar', tabla: 'Preliminar 1', evento: evento };
+  }
+  return { corto: '2.ª preliminar', tabla: 'Preliminar 2', evento: evento };
+}
+
 function buildCompetenciaWaOrganizadorUrl_(data) {
   var nombre = String(data.nombre || 'Participante').trim();
   var id = String(data.id || '').trim();
-  var msg = 'Hola, me inscribí al V60 Championship (1.ª preliminar). ' +
+  var label = getCompetenciaEventoLabel_(data).corto;
+  var msg = 'Hola, me inscribí al V60 Championship (' + label + '). ' +
     'Nombre: ' + nombre + '. Inscripción: ' + (id || 'pendiente') + '. Confirmo mi participación.';
   return buildWaMeUrl_(WHATSAPP_ORGANIZADOR, msg);
 }
@@ -2061,13 +2126,14 @@ function buildCompetenciaEmailPlain_(data) {
   var reglasUrl = getReglasUrl_();
   var waOrganizador = buildCompetenciaWaOrganizadorUrl_(data);
   var tieneComprobante = !!(data.comprobanteArchivo && data.comprobanteArchivo.tieneComprobante);
+  var evLabel = getCompetenciaEventoLabel_(data);
   var lines = [
     'Hola ' + nombre + ',',
     '',
-    '¡Bienvenido/a al V60 Championship! Recibimos tu inscripción a la 1.ª preliminar del circuito de café filtrado con V60.',
+    '¡Bienvenido/a al V60 Championship! Recibimos tu inscripción a la ' + evLabel.corto + ' del circuito de café filtrado con V60.',
     '',
     'Número de inscripción: ' + id,
-    'Preliminar 1: Por confirmar (te avisaremos fecha y sede)',
+    evLabel.tabla + ': Por confirmar (te avisaremos fecha y sede)',
     'Competencia principal: 29 y 30 de agosto de 2026 · Palmetto Plaza, Cali',
     'Pago: $90.000 COP a Nubank @mbl616 (Manuel Barraza)',
     '',
@@ -2099,7 +2165,7 @@ function buildCompetenciaEmailPlain_(data) {
   lines.push('Dudas: ' + ORGANIZER_EMAIL);
   lines.push('');
   lines.push('— La Sucursal del Café');
-  lines.push('V60 Championship · 1.ª preliminar');
+  lines.push('V60 Championship · ' + evLabel.corto);
   return lines.join('\n');
 }
 
@@ -2111,6 +2177,7 @@ function buildCompetenciaEmailHtml_(data) {
   var waOrganizador = escapeHtml_(buildCompetenciaWaOrganizadorUrl_(data));
   var organizerEmail = escapeHtml_(ORGANIZER_EMAIL);
   var tieneComprobante = !!(data.comprobanteArchivo && data.comprobanteArchivo.tieneComprobante);
+  var evLabel = getCompetenciaEventoLabel_(data);
   var pagoNote = tieneComprobante
     ? 'Recibimos tu comprobante de pago. Validaremos los $90.000 COP en Nubank @mbl616 y te confirmaremos tu cupo.'
     : 'Pendiente: realiza tu pago de $90.000 COP a Nubank @mbl616 (Manuel Barraza) y envía el comprobante si aún no lo adjuntaste.';
@@ -2121,10 +2188,10 @@ function buildCompetenciaEmailHtml_(data) {
   return [
     '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#3d2b1f;max-width:600px;">',
     '<p style="margin:0 0 16px;">Hola <strong>' + nombre + '</strong>,</p>',
-    '<p style="margin:0 0 16px;">¡Bienvenido/a al <strong>V60 Championship</strong>! Recibimos tu inscripción a la <strong>1.ª preliminar</strong> del circuito de café filtrado con V60 (2 preliminares + final 29–30 ago 2026), organizado por La Sucursal del Café.</p>',
+    '<p style="margin:0 0 16px;">¡Bienvenido/a al <strong>V60 Championship</strong>! Recibimos tu inscripción a la <strong>' + escapeHtml_(evLabel.corto) + '</strong> del circuito de café filtrado con V60 (2 preliminares + final 29–30 ago 2026), organizado por La Sucursal del Café.</p>',
     '<table style="width:100%;border-collapse:collapse;margin:0 0 20px;font-size:14px;">',
     '<tr><td style="padding:6px 0;color:#6b5344;width:38%;">Número de inscripción</td><td style="padding:6px 0;"><strong>' + id + '</strong></td></tr>',
-    '<tr><td style="padding:6px 0;color:#6b5344;">Preliminar 1</td><td style="padding:6px 0;">Por confirmar (te avisaremos fecha y sede)</td></tr>',
+    '<tr><td style="padding:6px 0;color:#6b5344;">' + escapeHtml_(evLabel.tabla) + '</td><td style="padding:6px 0;">Por confirmar (te avisaremos fecha y sede)</td></tr>',
     '<tr><td style="padding:6px 0;color:#6b5344;">Competencia principal</td><td style="padding:6px 0;">29 y 30 de agosto de 2026 · Palmetto Plaza, Cali</td></tr>',
     '<tr><td style="padding:6px 0;color:#6b5344;">Pago</td><td style="padding:6px 0;">$90.000 COP · Nubank <strong>@mbl616</strong> (Manuel Barraza)</td></tr>',
     '</table>',
@@ -2147,7 +2214,7 @@ function buildCompetenciaEmailHtml_(data) {
     '<p style="margin:0 0 8px;font-size:13px;color:#888;">WhatsApp no puede enviarse automáticamente desde este sistema; usa los botones anteriores para unirte al grupo o contactarnos.</p>',
     '<p style="margin:16px 0 0;">Dudas: <a href="mailto:' + organizerEmail + '" style="color:#8b4513;">' + organizerEmail + '</a></p>',
     '<hr style="border:none;border-top:1px solid #e0d5c8;margin:24px 0;">',
-    '<p style="margin:0;font-size:13px;color:#888;">— La Sucursal del Café<br>V60 Championship · 1.ª preliminar</p>',
+    '<p style="margin:0;font-size:13px;color:#888;">— La Sucursal del Café<br>V60 Championship · ' + escapeHtml_(evLabel.corto) + '</p>',
     '</div>'
   ].join('');
 }

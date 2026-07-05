@@ -8,9 +8,9 @@
   <title>Configuración — Jurado sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado25">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado27">
 </head>
-<body class="jurado-page" data-jurado-page="config">
+<body class="jurado-page jurado-page--setup" data-jurado-page="config">
   <div class="jurado-shell">
     <header class="jurado-header" id="juradoHeader">
       <div class="jurado-header-brand">
@@ -80,7 +80,17 @@
 
     <!-- Vista organizador — dashboard configurable -->
     <section id="organizerSection" hidden>
-      <div class="jurado-card jurado-toolbar-card jurado-dashboard-toolbar">
+      <div id="setupWizardHeader" class="jurado-setup-wizard" hidden>
+        <div class="jurado-setup-wizard__intro">
+          <p class="jurado-setup-wizard__kicker">Panel del organizador</p>
+          <h2 class="jurado-setup-wizard__title">Configura tu competencia</h2>
+          <p class="jurado-setup-wizard__lead">Marca, reglas, jurado, inscripción y enlaces — todo desde aquí. Al guardar, los links se generan solos.</p>
+          <p id="setupWizardMeta" class="jurado-meta" hidden></p>
+        </div>
+        <nav id="setupStepper" class="jurado-setup-stepper" aria-label="Pasos de configuración"></nav>
+      </div>
+
+      <div class="jurado-card jurado-toolbar-card jurado-dashboard-toolbar" id="organizerToolbarCard">
         <div class="jurado-toolbar">
           <div>
             <strong id="dashboardEventName">Panel del torneo</strong>
@@ -92,15 +102,11 @@
         <p id="organizerLoadError" class="jurado-error" hidden style="margin-top:8px"></p>
       </div>
 
-      <nav class="jurado-dash-nav" id="dashboardNav" aria-label="Secciones del panel">
-        <button type="button" class="jurado-dash-tab jurado-dash-tab--active" data-dash-tab="vista">Vista general</button>
-        <button type="button" class="jurado-dash-tab" data-dash-tab="recorrido">Recorrido</button>
-        <button type="button" class="jurado-dash-tab" data-dash-tab="torneo">Torneo</button>
-        <button type="button" class="jurado-dash-tab" data-dash-tab="puntajes">Puntajes</button>
-        <button type="button" class="jurado-dash-tab" data-dash-tab="control">Control</button>
-        <button type="button" class="jurado-dash-tab" data-dash-tab="config">Marca y reglas</button>
-        <button type="button" class="jurado-dash-tab" data-dash-tab="inscripciones">Inscripciones</button>
-        <button type="button" class="jurado-dash-tab" data-dash-tab="export">Exportar</button>
+      <nav class="jurado-dash-nav" id="dashboardNav" aria-label="Pasos de configuración">
+        <button type="button" class="jurado-dash-tab jurado-dash-tab--active" data-dash-tab="config">1. Configurar torneo</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="inscripciones">2. Inscripciones</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="enlaces" hidden>3. Enlaces del evento</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="export">4. Exportar kit</button>
       </nav>
 
       <!-- Tab: Vista general -->
@@ -309,20 +315,23 @@
 
       <!-- Tab: Marca / Config -->
       <div class="jurado-dash-pane" data-dash-pane="config" hidden>
+        <div class="jurado-config-layout">
+          <div class="jurado-config-main">
         <div class="jurado-card jurado-card--config">
           <div class="jurado-card-head">
-            <h2>Personaliza tu torneo</h2>
-            <p class="jurado-hint">Marca, reglas de calificación y criterios sensoriales. Los cambios se guardan en el servidor.</p>
+            <h2>1. Torneo, marca y reglas</h2>
+            <p class="jurado-hint">Define cómo se ve tu evento y cómo califica el jurado.</p>
           </div>
           <form id="platformConfigForm" class="jurado-config-form" onsubmit="return false">
-            <div class="jurado-config-preview" id="configPreview">
-              <img id="configPreviewLogo" src="assets/logo-la-sucursal-del-cafe.png" alt="" width="80">
-              <div>
-                <strong id="configPreviewName">Mi torneo</strong>
-                <span id="configPreviewSub">Subtítulo del evento</span>
-                <span id="configPreviewScoring" class="jurado-config-preview-scoring"></span>
+
+            <section class="jurado-config-block" aria-labelledby="cfgBlockMarca">
+              <div class="jurado-config-block__head">
+                <span class="jurado-config-block__icon" aria-hidden="true">🎨</span>
+                <div>
+                  <h3 id="cfgBlockMarca">Marca del evento</h3>
+                  <p class="jurado-hint">Logo, colores y nombre que verán competidores y jueces.</p>
+                </div>
               </div>
-            </div>
             <div class="jurado-config-grid">
               <div class="jurado-field">
                 <label for="cfgEventName">Nombre del torneo</label>
@@ -357,10 +366,16 @@
                 <input type="text" id="cfgPinJuez" maxlength="40" placeholder="v60sensorial">
               </div>
             </div>
+            </section>
 
-            <h3 class="jurado-admin-subtitle">Calificación y criterios</h3>
-            <p class="jurado-hint">Define escala, modo de clasificación y los criterios sensoriales del torneo.</p>
-            <div class="jurado-config-grid">
+            <section class="jurado-config-block" aria-labelledby="cfgBlockScoring">
+              <div class="jurado-config-block__head">
+                <span class="jurado-config-block__icon" aria-hidden="true">⚖️</span>
+                <div>
+                  <h3 id="cfgBlockScoring">Tipo de torneo y jurado</h3>
+                  <p class="jurado-hint">Modo de clasificación, escala y criterios sensoriales.</p>
+                </div>
+              </div>
               <div class="jurado-field">
                 <label for="cfgScoringModo">Modo de clasificación</label>
                 <select id="cfgScoringModo">
@@ -390,16 +405,30 @@
                   Avance automático al completar puntajes de la ronda
                 </label>
               </div>
-            </div>
             <div id="criteriaEditorList" class="jurado-criteria-editor"></div>
             <button type="button" id="addCriterionBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">+ Añadir criterio</button>
+            </section>
 
-            <h3 class="jurado-admin-subtitle">Campos del formulario en línea</h3>
-            <p class="jurado-hint">Activa, renombra y marca obligatorios los campos que verán los competidores al inscribirse.</p>
+            <section class="jurado-config-block" aria-labelledby="cfgBlockForm">
+              <div class="jurado-config-block__head">
+                <span class="jurado-config-block__icon" aria-hidden="true">📝</span>
+                <div>
+                  <h3 id="cfgBlockForm">Formulario de inscripción</h3>
+                  <p class="jurado-hint">Campos que completan los competidores en línea.</p>
+                </div>
+              </div>
             <div id="formFieldsEditorList" class="jurado-form-fields-editor"></div>
+            </section>
 
-            <h3 class="jurado-admin-subtitle">Datos del evento (formulario público)</h3>
-            <div class="jurado-config-grid">
+            <section class="jurado-config-block" aria-labelledby="cfgBlockEvento">
+              <div class="jurado-config-block__head">
+                <span class="jurado-config-block__icon" aria-hidden="true">📅</span>
+                <div>
+                  <h3 id="cfgBlockEvento">Datos públicos del evento</h3>
+                  <p class="jurado-hint">Fecha, sede, cupo y tarifa en el formulario de inscripción.</p>
+                </div>
+              </div>
+              <div class="jurado-config-grid">
               <div class="jurado-field">
                 <label for="cfgRegTitle">Título inscripción</label>
                 <input type="text" id="cfgRegTitle" maxlength="120" placeholder="Inscripción competencia">
@@ -436,11 +465,41 @@
                 <label for="cfgRegReglamento">URL reglamento</label>
                 <input type="url" id="cfgRegReglamento" maxlength="500" placeholder="https://…/reglamento">
               </div>
-            </div>
+              </div>
+            </section>
+
             <p id="platformConfigError" class="jurado-error" hidden></p>
             <p id="platformConfigSuccess" class="jurado-success" hidden></p>
-            <button type="button" id="platformConfigSaveBtn" class="jurado-btn">Guardar configuración</button>
+            <div class="jurado-config-save-row">
+              <button type="button" id="platformConfigSaveBtn" class="jurado-btn">Guardar y generar enlaces</button>
+              <button type="button" id="gotoEnlacesBtn" class="jurado-btn jurado-btn--secondary">Ver enlaces →</button>
+            </div>
           </form>
+        </div>
+          </div>
+
+          <aside class="jurado-config-aside" aria-label="Vista previa">
+            <div class="jurado-card jurado-card--preview-sticky">
+              <div class="jurado-card-head">
+                <h2>Vista previa</h2>
+                <p class="jurado-hint">Así verán tu evento competidores y jueces.</p>
+              </div>
+              <div class="jurado-config-preview" id="configPreview">
+                <img id="configPreviewLogo" src="assets/logo-la-sucursal-del-cafe.png" alt="" width="80">
+                <div>
+                  <strong id="configPreviewName">Mi torneo</strong>
+                  <span id="configPreviewSub">Subtítulo del evento</span>
+                  <span id="configPreviewScoring" class="jurado-config-preview-scoring"></span>
+                </div>
+              </div>
+              <div class="jurado-inscripcion-mock" id="inscripcionPreviewMock" aria-hidden="true">
+                <p class="jurado-inscripcion-mock__title" id="previewRegTitle">Inscripción competencia</p>
+                <p class="jurado-inscripcion-mock__meta" id="previewRegMeta">Fecha · Lugar · Cupo</p>
+                <div class="jurado-inscripcion-mock__fields" id="previewRegFields"></div>
+                <p class="jurado-inscripcion-mock__fee" id="previewRegFee">$90.000 COP</p>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
 
@@ -448,10 +507,10 @@
       <div class="jurado-dash-pane" data-dash-pane="inscripciones" hidden>
         <div class="jurado-card jurado-card--inscripciones">
           <div class="jurado-card-head">
-            <h2>Inscripciones en línea</h2>
-            <p class="jurado-hint" id="inscripcionPublicHint">Formulario público de este torneo. Los registros se guardan en la hoja del evento.</p>
+            <h2>2. Inscripciones en línea</h2>
+            <p class="jurado-hint" id="inscripcionPublicHint">Comparte el formulario público. Cada registro aparece abajo en tiempo real.</p>
           </div>
-          <div class="jurado-inscripcion-url-box">
+          <div class="jurado-inscripcion-url-box jurado-inscripcion-url-box--highlight">
             <label class="jurado-meta" for="inscripcionPublicUrl">Enlace público</label>
             <p id="inscripcionPublicUrl" class="jurado-inscripcion-url">—</p>
             <div class="jurado-admin-actions">
@@ -500,6 +559,6 @@
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzpxE3fFv-mS9hai146Mo-LOWRf3KaRYwyZf_S9wk-iB7X-8Ke09eMx2-KftQQV1yfz/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado25"></script>
+  <script src="js/jurado-v60.js?v=20260705jurado27"></script>
 </body>
 </html>
