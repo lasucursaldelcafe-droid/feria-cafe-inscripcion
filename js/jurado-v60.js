@@ -21,7 +21,7 @@
   var PIN_ORGANIZADOR = 'v60organizador';
   var CONFIG_KEY = 'jurado_v60_calificaciones';
   var SESSION_KEY = 'lsc_jurado_v60_session';
-  var REFRESH_MS = 15000;
+  var REFRESH_MS = 5000;
 
   var WEB_APP_URL_CANONICAL =
     'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec';
@@ -111,7 +111,9 @@
     return sheetsGet('pasaporte_config', { key: CONFIG_KEY }).then(function (res) {
       var data = res.data || {};
       var scores = data.scores && typeof data.scores === 'object' ? data.scores : {};
-      var list = Object.keys(scores).map(function (id) { return normalizeCalificacion(scores[id]); });
+      var list = Object.keys(scores).map(function (id) {
+        return normalizeCalificacion(scores[id], id);
+      }).filter(Boolean);
       list.sort(function (a, b) { return (b.promedio || 0) - (a.promedio || 0); });
       calificacionesMap = {};
       list.forEach(function (row) {
@@ -121,17 +123,41 @@
     });
   }
 
-  function saveCalificacionStore(calificacion) {
+  function saveCalificacionStore(calificacion, judgeKey) {
+    var jKey = judgeKey || ('j' + judgeNum);
     return sheetsGet('pasaporte_config', { key: CONFIG_KEY }).then(function (res) {
       var data = res.data || {};
       if (!data.scores || typeof data.scores !== 'object') data.scores = {};
-      data.scores[calificacion.competidorId] = calificacion;
+
+      var existing = normalizeCalificacion(data.scores[calificacion.competidorId], calificacion.competidorId) || {
+        competidorId: calificacion.competidorId,
+        nombre: calificacion.nombre,
+        judges: {},
+        notasPorJuez: {}
+      };
+      existing.nombre = calificacion.nombre || existing.nombre;
+      existing.judges = existing.judges || {};
+      existing.notasPorJuez = existing.notasPorJuez || {};
+
+      if (calificacion.judges && calificacion.judges[jKey]) {
+        existing.judges[jKey] = calificacion.judges[jKey];
+      }
+      if (calificacion.notasPorJuez) {
+        if (calificacion.notasPorJuez[jKey]) existing.notasPorJuez[jKey] = calificacion.notasPorJuez[jKey];
+        else delete existing.notasPorJuez[jKey];
+      }
+
+      var t = computeTotals(existing.judges);
+      existing.sumaTotal = t.sumaTotal;
+      existing.promedio = t.promedio;
+      existing.actualizado = new Date().toISOString();
+      data.scores[calificacion.competidorId] = existing;
       data.actualizado = new Date().toISOString();
       return sheetsPost({
         action: 'pasaporte_config_save',
         key: CONFIG_KEY,
         data: data
-      }).then(function () { return calificacion; });
+      }).then(function () { return existing; });
     });
   }
 
@@ -160,9 +186,10 @@
     return { sumaTotal: null, promedio: null };
   }
 
-  function normalizeCalificacion(raw) {
+  function normalizeCalificacion(raw, competidorIdFallback) {
     if (!raw) return null;
     var cal = Object.assign({}, raw);
+    if (!cal.competidorId && competidorIdFallback) cal.competidorId = competidorIdFallback;
     if (!cal.judges) cal.judges = {};
     for (var j = 1; j <= 3; j++) {
       var key = 'j' + j;
@@ -174,6 +201,12 @@
     cal.sumaTotal = t.sumaTotal;
     cal.promedio = t.promedio;
     return cal;
+  }
+
+  function judgeScoreValue(row, j) {
+    var g = row.judges && row.judges['j' + j];
+    if (g && g.subtotal != null) return g.subtotal;
+    return null;
   }
 
   function judgeDone(judges, num) {
@@ -361,7 +394,11 @@
     }
     meta.textContent = competidorMeta(found);
     meta.hidden = !meta.textContent;
-    renderJudgeForm(calificacionesMap[id] || null);
+    loadCalificacionesStore().then(function () {
+      renderJudgeForm(calificacionesMap[id] || null);
+    }).catch(function () {
+      renderJudgeForm(calificacionesMap[id] || null);
+    });
   }
 
   function mergeJudgeSave(competidorId, nombre, judgeData, notas) {
@@ -415,7 +452,7 @@
       $('judgeNotasInput').value.trim()
     );
 
-    saveCalificacionStore(cal)
+    saveCalificacionStore(cal, 'j' + judgeNum)
       .then(function (saved) {
         calificacionesMap[saved.competidorId] = saved;
         $('judgeSaveSuccess').textContent =
@@ -490,39 +527,73 @@
   }
 
   function notaJuezDisplay(row, j) {
-    var n = row.notasPorJuez && row.notasPorJuez['j' + j];
-    if (n != null) return '<span class="jurado-score-done">' + n + '</span>';
-    var g = row.judges && row.judges['j' + j];
-    if (g && g.subtotal != null) return '<span class="jurado-score-done">' + g.subtotal + '</span>';
+    var score = judgeScoreValue(row, j);
+    if (score != null) return '<span class="jurado-score-done">' + score + '</span>';
     return '<span class="jurado-score-pending">—</span>';
+  }
+
+  function formatJudgeScores(row) {
+    var j1 = judgeScoreValue(row, 1);
+    var j2 = judgeScoreValue(row, 2);
+    var j3 = judgeScoreValue(row, 3);
+    return {
+      j1: j1 != null ? j1 : '—',
+      j2: j2 != null ? j2 : '—',
+      j3: j3 != null ? j3 : '—'
+    };
+  }
+
+  function hasAnyJudgeScore(row) {
+    return judgeDone(row.judges, 1) || judgeDone(row.judges, 2) || judgeDone(row.judges, 3);
   }
 
   function renderOrganizerFinalSummary(list) {
     var box = $('organizerFinalSummary');
     if (!box) return;
 
+    var withScores = list.filter(hasAnyJudgeScore);
     var completos = list.filter(function (r) { return r.promedio != null; });
-    var sorted = sortOrganizerRows(completos);
+    var enProgreso = withScores.filter(function (r) { return r.promedio == null; });
+    var sortedCompletos = sortOrganizerRows(completos);
+    var sortedProgreso = enProgreso.slice().sort(function (a, b) {
+      return (a.nombre || '').localeCompare(b.nombre || '', 'es');
+    });
 
-    if (!sorted.length) {
-      box.innerHTML = '<p class="jurado-hint">Aún no hay resultado final. Se publicará cuando los 3 jueces califiquen al menos un competidor.</p>';
+    var html = '';
+
+    if (sortedProgreso.length) {
+      html += '<div class="jurado-live-block"><h3 class="jurado-live-title">En vivo · esperando los 3 jueces</h3><div class="jurado-live-list">';
+      html += sortedProgreso.map(function (row) {
+        var s = formatJudgeScores(row);
+        return '<article class="jurado-live-item">' +
+          '<div class="jurado-live-name">' + escapeHtml(row.nombre || row.competidorId) + '</div>' +
+          '<div class="jurado-live-scores">' +
+          '<span class="' + (s.j1 !== '—' ? 'jurado-score-done' : 'jurado-score-pending') + '">J1: ' + s.j1 + '</span> · ' +
+          '<span class="' + (s.j2 !== '—' ? 'jurado-score-done' : 'jurado-score-pending') + '">J2: ' + s.j2 + '</span> · ' +
+          '<span class="' + (s.j3 !== '—' ? 'jurado-score-done' : 'jurado-score-pending') + '">J3: ' + s.j3 + '</span>' +
+          '</div></article>';
+      }).join('');
+      html += '</div></div>';
+    }
+
+    if (!sortedCompletos.length) {
+      html += sortedProgreso.length
+        ? '<p class="jurado-hint">El resultado final aparecerá aquí cuando los 3 jueces califiquen a un competidor.</p>'
+        : '<p class="jurado-hint">Aún no hay calificaciones. Aparecerán en cuanto los jueces guarden.</p>';
+      box.innerHTML = html;
       return;
     }
 
-    var leader = sorted[0];
-    var j1l = leader.notasPorJuez && leader.notasPorJuez.j1 != null ? leader.notasPorJuez.j1 : (leader.judges && leader.judges.j1 ? leader.judges.j1.subtotal : '—');
-    var j2l = leader.notasPorJuez && leader.notasPorJuez.j2 != null ? leader.notasPorJuez.j2 : (leader.judges && leader.judges.j2 ? leader.judges.j2.subtotal : '—');
-    var j3l = leader.notasPorJuez && leader.notasPorJuez.j3 != null ? leader.notasPorJuez.j3 : (leader.judges && leader.judges.j3 ? leader.judges.j3.subtotal : '—');
+    var leader = sortedCompletos[0];
+    var ls = formatJudgeScores(leader);
 
-    var podium = sorted.slice(0, 3).map(function (row, idx) {
+    var podium = sortedCompletos.slice(0, 3).map(function (row, idx) {
       var medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉';
-      var j1 = row.notasPorJuez && row.notasPorJuez.j1 != null ? row.notasPorJuez.j1 : (row.judges && row.judges.j1 ? row.judges.j1.subtotal : '—');
-      var j2 = row.notasPorJuez && row.notasPorJuez.j2 != null ? row.notasPorJuez.j2 : (row.judges && row.judges.j2 ? row.judges.j2.subtotal : '—');
-      var j3 = row.notasPorJuez && row.notasPorJuez.j3 != null ? row.notasPorJuez.j3 : (row.judges && row.judges.j3 ? row.judges.j3.subtotal : '—');
+      var s = formatJudgeScores(row);
       return '<article class="jurado-final-podium-item">' +
         '<div class="jurado-final-podium-rank">' + medal + ' #' + (idx + 1) + '</div>' +
         '<div class="jurado-final-podium-name">' + escapeHtml(row.nombre || row.competidorId) + '</div>' +
-        '<div class="jurado-final-podium-scores">J1: ' + j1 + ' · J2: ' + j2 + ' · J3: ' + j3 + '</div>' +
+        '<div class="jurado-final-podium-scores">J1: ' + s.j1 + ' · J2: ' + s.j2 + ' · J3: ' + s.j3 + '</div>' +
         '<div class="jurado-final-podium-result">' +
         '<span class="jurado-final-podium-prom">' + row.promedio.toFixed(2) + '</span>' +
         '<span class="jurado-final-podium-label">promedio final</span>' +
@@ -530,10 +601,12 @@
         '</div></article>';
     }).join('');
 
-    box.innerHTML =
-      '<p class="jurado-final-leader">Líder actual: <strong>' + escapeHtml(leader.nombre) + '</strong> — ' +
-      '<strong>' + leader.promedio.toFixed(2) + '</strong> pts (J1 ' + j1l + ', J2 ' + j2l + ', J3 ' + j3l + ')</p>' +
-      '<div class="jurado-final-podium">' + podium + '</div>';
+    html += '<div class="jurado-live-block jurado-live-block--final"><h3 class="jurado-live-title">Resultado final</h3>' +
+      '<p class="jurado-final-leader">Líder: <strong>' + escapeHtml(leader.nombre) + '</strong> — ' +
+      '<strong>' + leader.promedio.toFixed(2) + '</strong> pts (J1 ' + ls.j1 + ', J2 ' + ls.j2 + ', J3 ' + ls.j3 + ')</p>' +
+      '<div class="jurado-final-podium">' + podium + '</div></div>';
+
+    box.innerHTML = html;
   }
 
   function renderOrganizerRanking(list) {
@@ -541,9 +614,7 @@
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    var withAny = list.filter(function (r) {
-      return judgeDone(r.judges, 1) || judgeDone(r.judges, 2) || judgeDone(r.judges, 3);
-    });
+    var withAny = list.filter(hasAnyJudgeScore);
     var ranked = sortOrganizerRows(withAny);
 
     if (!ranked.length) {
@@ -674,6 +745,8 @@
   }
 
   function refreshOrganizer() {
+    var updated = $('organizerUpdated');
+    if (updated) updated.textContent = 'Actualizando…';
     return loadCalificacionesStore().then(function (list) {
       clearOrganizerError();
       renderOrganizerViews(list);
@@ -723,6 +796,14 @@
     refreshTimer = setInterval(function () {
       refreshOrganizer().catch(function () { /* silencioso */ });
     }, REFRESH_MS);
+
+    document.addEventListener('visibilitychange', onOrganizerVisibility);
+  }
+
+  function onOrganizerVisibility() {
+    if (mode === 'organizer' && !document.hidden) {
+      refreshOrganizer().catch(function () { /* silencioso */ });
+    }
   }
 
   function resolvePin(value) {

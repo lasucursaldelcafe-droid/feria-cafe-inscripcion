@@ -91,6 +91,36 @@ async function main() {
     data: { scores, actualizado: new Date().toISOString() }
   });
 
+  // Prueba merge: juez 1 y juez 2 no se pisan
+  const mergeId = '_e2e_merge_' + Date.now();
+  const cfgBase = await getJson(WEB + '?action=pasaporte_config&key=' + CONFIG_KEY);
+  const scoresBase = cfgBase.data?.scores || {};
+  scoresBase[mergeId] = {
+    competidorId: mergeId,
+    nombre: 'E2E Merge',
+    judges: {
+      j1: { scores: { aroma: 3, dulzor: 3, acidez: 3, sabor: 3, balance: 3, cuerpo: 3, limpieza_taza: 3 }, subtotal: 21 }
+    }
+  };
+  await postJson({ action: 'pasaporte_config_save', key: CONFIG_KEY, data: { scores: scoresBase, actualizado: new Date().toISOString() } });
+
+  const cfgMid = await getJson(WEB + '?action=pasaporte_config&key=' + CONFIG_KEY);
+  const scoresMid = cfgMid.data?.scores || {};
+  const existing = scoresMid[mergeId] || { competidorId: mergeId, nombre: 'E2E Merge', judges: {} };
+  existing.judges = existing.judges || {};
+  existing.judges.j2 = { scores: { aroma: 5, dulzor: 5, acidez: 5, sabor: 5, balance: 5, cuerpo: 5, limpieza_taza: 5 }, subtotal: 35 };
+  scoresMid[mergeId] = existing;
+  await postJson({ action: 'pasaporte_config_save', key: CONFIG_KEY, data: { scores: scoresMid, actualizado: new Date().toISOString() } });
+
+  const cfgMerge = await getJson(WEB + '?action=pasaporte_config&key=' + CONFIG_KEY);
+  const merged = cfgMerge.data?.scores?.[mergeId];
+  const okMerge = merged?.judges?.j1?.subtotal === 21 && merged?.judges?.j2?.subtotal === 35;
+  console.log(okMerge ? '[OK]' : '[FAIL]', 'Merge jueces j1+j2 conservados');
+  if (!okMerge) failed++;
+
+  delete scoresMid[mergeId];
+  await postJson({ action: 'pasaporte_config_save', key: CONFIG_KEY, data: { scores: scoresMid, actualizado: new Date().toISOString() } });
+
   console.log(failed ? '\nFALLÓ: ' + failed + ' prueba(s)' : '\nTodas las pruebas OK');
   process.exit(failed ? 1 : 0);
 }

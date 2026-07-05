@@ -380,6 +380,46 @@ body.jurado-page {
   margin-top: 4px;
 }
 
+.jurado-live-block {
+  margin-bottom: 16px;
+}
+
+.jurado-live-block--final {
+  margin-bottom: 0;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.jurado-live-title {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.jurado-live-list {
+  display: grid;
+  gap: 8px;
+}
+
+.jurado-live-item {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.jurado-live-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-bottom: 4px;
+}
+
+.jurado-live-scores {
+  font-size: 0.82rem;
+}
+
 .jurado-final-leader {
   margin: 0 0 14px;
   font-size: 0.92rem;
