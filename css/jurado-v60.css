@@ -2072,17 +2072,41 @@ body.jurado-page--organizer .jurado-header-brand {
 }
 
 body.jurado-page--history .jurado-shell {
-  max-width: 1080px;
+  max-width: 900px;
+}
+
+.jurado-history-pane-detail {
+  margin-top: 14px;
+  font-size: 0.92rem;
+}
+
+.jurado-history-pane-detail .jurado-clasificacion-section {
+  margin-top: 16px;
+  padding-top: 14px;
+}
+
+.jurado-history-pane-detail .jurado-podium-map {
+  gap: 8px;
+}
+
+.jurado-history-pane-detail .jurado-clasificacion-grid {
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 8px;
+}
+
+.jurado-history-pane-detail .jurado-grupos-rondas {
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 
 .jurado-history-detail-head {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .jurado-history-detail-head h2 {
   margin: 8px 0 6px;
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.35rem;
+  font-size: 1.15rem;
 }
 
 .jurado-history-podio--photos {
@@ -2097,10 +2121,18 @@ body.jurado-page--history .jurado-shell {
 .jurado-history-podio-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
+  gap: 8px;
+  padding: 6px 8px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
+}
+
+.jurado-history-podio-item .jurado-clasificacion-photo,
+.jurado-history-podio-item .jurado-clasificacion-photo--empty {
+  width: 40px;
+  height: 40px;
+  max-width: 40px;
+  max-height: 40px;
 }
 
 .jurado-history-podio-item.jurado-clasificacion-card--gold {
@@ -2136,8 +2168,8 @@ body.jurado-page--history .jurado-shell {
 }
 
 .jurado-clasificacion-section {
-  margin-top: 24px;
-  padding-top: 20px;
+  margin-top: 18px;
+  padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -2148,16 +2180,19 @@ body.jurado-page--history .jurado-shell {
 }
 
 .jurado-clasificacion-title {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 
 .jurado-clasificacion-photo {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: var(--jurado-photo-size, 44px);
+  height: var(--jurado-photo-size, 44px);
+  max-width: var(--jurado-photo-size, 44px);
+  max-height: var(--jurado-photo-size, 44px);
+  flex-shrink: 0;
   object-fit: cover;
   border-radius: 50%;
   border: 2px solid rgba(201, 162, 39, 0.4);
@@ -2166,6 +2201,11 @@ body.jurado-page--history .jurado-shell {
 
 .jurado-clasificacion-photo--empty {
   display: inline-block;
+  width: var(--jurado-photo-size, 44px);
+  height: var(--jurado-photo-size, 44px);
+  max-width: var(--jurado-photo-size, 44px);
+  max-height: var(--jurado-photo-size, 44px);
+  flex-shrink: 0;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.06);
   border: 2px dashed rgba(255, 255, 255, 0.18);
@@ -2173,10 +2213,11 @@ body.jurado-page--history .jurado-shell {
 
 .jurado-podium-map {
   display: grid;
-  grid-template-columns: 1fr 1.15fr 1fr;
+  grid-template-columns: 1fr 1.08fr 1fr;
   align-items: end;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 6px;
+  max-width: 520px;
 }
 
 .jurado-podium-slot {
@@ -2184,31 +2225,29 @@ body.jurado-page--history .jurado-shell {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 8px;
-  padding: 14px 10px;
-  border-radius: 14px;
+  gap: 6px;
+  padding: 10px 8px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .jurado-podium-slot .jurado-clasificacion-photo,
 .jurado-podium-slot .jurado-clasificacion-photo--empty {
-  width: 88px;
-  height: 88px;
+  --jurado-photo-size: 56px;
 }
 
 .jurado-podium-slot.jurado-clasificacion-card--gold {
   order: 0;
-  transform: translateY(-6px);
+  transform: translateY(-4px);
   border-color: rgba(232, 197, 71, 0.5);
   background: linear-gradient(180deg, rgba(201, 162, 39, 0.18), rgba(255, 255, 255, 0.04));
-  box-shadow: 0 8px 24px rgba(201, 162, 39, 0.15);
+  box-shadow: 0 4px 16px rgba(201, 162, 39, 0.12);
 }
 
 .jurado-podium-slot.jurado-clasificacion-card--gold .jurado-clasificacion-photo,
 .jurado-podium-slot.jurado-clasificacion-card--gold .jurado-clasificacion-photo--empty {
-  width: 104px;
-  height: 104px;
+  --jurado-photo-size: 64px;
 }
 
 .jurado-podium-pos {
@@ -2220,8 +2259,8 @@ body.jurado-page--history .jurado-shell {
 }
 
 .jurado-podium-name {
-  font-size: 0.92rem;
-  line-height: 1.25;
+  font-size: 0.82rem;
+  line-height: 1.2;
 }
 
 .jurado-podium-meta {
@@ -2230,16 +2269,16 @@ body.jurado-page--history .jurado-shell {
 }
 
 .jurado-podium-pts {
-  font-size: 1rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: var(--jurado-accent-light);
 }
 
 .jurado-clasificacion-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
-  gap: 12px;
-  margin-top: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .jurado-clasificacion-card {
@@ -2248,17 +2287,16 @@ body.jurado-page--history .jurado-shell {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 6px;
-  padding: 14px 10px 12px;
-  border-radius: 14px;
+  gap: 4px;
+  padding: 10px 8px 8px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .jurado-clasificacion-card .jurado-clasificacion-photo,
 .jurado-clasificacion-card .jurado-clasificacion-photo--empty {
-  width: 72px;
-  height: 72px;
+  --jurado-photo-size: 48px;
 }
 
 .jurado-clasificacion-card--gold {
@@ -2284,8 +2322,8 @@ body.jurado-page--history .jurado-shell {
 }
 
 .jurado-clasificacion-name {
-  font-size: 0.88rem;
-  line-height: 1.25;
+  font-size: 0.8rem;
+  line-height: 1.2;
 }
 
 .jurado-clasificacion-planilla {
@@ -2304,7 +2342,7 @@ body.jurado-page--history .jurado-shell {
 }
 
 .jurado-clasificacion-total {
-  font-size: 0.95rem;
+  font-size: 0.86rem;
   font-weight: 700;
   color: var(--jurado-accent-light);
 }
@@ -2319,8 +2357,7 @@ body.jurado-page--history .jurado-shell {
 
 .jurado-clasificacion-table-photo .jurado-clasificacion-photo,
 .jurado-clasificacion-table-photo .jurado-clasificacion-photo--empty {
-  width: 40px;
-  height: 40px;
+  --jurado-photo-size: 36px;
   margin: 0 auto;
 }
 
@@ -2392,8 +2429,7 @@ body.jurado-page--history .jurado-shell {
 
 .jurado-phase-chip .jurado-clasificacion-photo,
 .jurado-phase-chip .jurado-clasificacion-photo--empty {
-  width: 36px;
-  height: 36px;
+  --jurado-photo-size: 32px;
 }
 
 .jurado-phase-chip-name {
@@ -2415,6 +2451,7 @@ body.jurado-page--history .jurado-shell {
   .jurado-podium-map {
     grid-template-columns: 1fr;
     align-items: stretch;
+    max-width: none;
   }
 
   .jurado-podium-slot.jurado-clasificacion-card--gold {
@@ -2428,14 +2465,27 @@ body.jurado-page--history .jurado-shell {
 }
 
 .jurado-history-format {
-  margin: 10px 0 0;
-  padding: 12px 14px;
+  margin: 8px 0 0;
+  padding: 10px 12px;
   border-radius: 10px;
   background: rgba(201, 162, 39, 0.08);
   border: 1px solid rgba(201, 162, 39, 0.22);
-  font-size: 0.88rem;
-  line-height: 1.45;
+  font-size: 0.82rem;
+  line-height: 1.4;
   color: var(--jurado-text-muted);
+}
+
+.jurado-history-detail .jurado-preliminar-table {
+  font-size: 0.78rem;
+}
+
+.jurado-history-detail .jurado-preliminar-table th,
+.jurado-history-detail .jurado-preliminar-table td {
+  padding: 6px 8px;
+}
+
+.jurado-history-detail .jurado-preliminar-breakdown-wrap {
+  font-size: 0.78rem;
 }
 
 .jurado-grupos-rondas {
@@ -2496,9 +2546,7 @@ body.jurado-page--history .jurado-shell {
 
 .jurado-grupo-duo .jurado-clasificacion-photo,
 .jurado-grupo-duo .jurado-clasificacion-photo--empty {
-  width: 48px;
-  height: 48px;
-  flex-shrink: 0;
+  --jurado-photo-size: 40px;
 }
 
 .jurado-grupo-duo--semi {
@@ -3716,68 +3764,71 @@ body.jurado-page--resultados .jurado-shell {
 .judge-competitor-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
-  .judge-competitor-photo {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--jurado-accent);
-    flex-shrink: 0;
-  }
+.judge-competitor-photo {
+  width: 48px;
+  height: 48px;
+  max-width: 48px;
+  max-height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--jurado-accent);
+  flex-shrink: 0;
+}
 
-  .jurado-card--judge-onboarding {
-    border-color: rgba(201, 162, 39, 0.35);
-  }
+.jurado-card--judge-onboarding {
+  border-color: rgba(201, 162, 39, 0.35);
+}
 
-  .judge-profile-photo-preview {
-    margin-top: 12px;
-    display: flex;
-    justify-content: center;
-  }
+.judge-profile-photo-preview {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
 
-  .judge-profile-photo-preview__img {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--jurado-accent);
-    box-shadow: var(--jurado-shadow-soft);
-  }
+.judge-profile-photo-preview__img {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--jurado-accent);
+  box-shadow: var(--jurado-shadow-soft);
+}
 
-  .jurado-badge--with-photo {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px 6px 6px;
-  }
+.jurado-badge--with-photo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  font-size: 0.82rem;
+}
 
-  .judge-badge-photo {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(201, 162, 39, 0.5);
-    flex-shrink: 0;
-  }
+.judge-badge-photo {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(201, 162, 39, 0.5);
+  flex-shrink: 0;
+}
 
-  .jurado-link-item__icon--photo {
-    padding: 0;
-    overflow: hidden;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-  }
+.jurado-link-item__icon--photo {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
 
-  .jurado-link-item__icon--photo img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+.jurado-link-item__icon--photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 @media (max-width: 560px) {
   .jurado-fifa-photo-col {
