@@ -2419,37 +2419,33 @@
       var cfgUrl = buildJuradoTenantConfigUrl(inst.slug, inst.pinOrganizador);
       var site = String((global.EVENT_CONFIG && global.EVENT_CONFIG.siteUrl) || global.location.origin).replace(/\/$/, '');
       var inscUrl = inst.inscripcionUrl || (site + '/competencia/torneo?evt=' + encodeURIComponent(inst.slug));
+      var hubUrl = site + ((global.SiteLinks && global.SiteLinks.HOSTED && global.SiteLinks.HOSTED.juradoV60) || '/jurado-v60') +
+        '?evt=' + encodeURIComponent(inst.slug);
       var urls = global.SiteLinks && global.SiteLinks.buildJuradoUrls
         ? global.SiteLinks.buildJuradoUrls({
           evt: inst.slug,
           pinOrganizador: inst.pinOrganizador,
           pinJuez: inst.pinJuez,
-          jueces: 3
+          jueces: inst.jueces || 3
         })
         : {};
       var created = '';
       try {
         created = new Date(inst.createdAt).toLocaleString('es-CO', { dateStyle: 'short' });
       } catch (e) { created = inst.createdAt || ''; }
-      var urls = global.SiteLinks && global.SiteLinks.buildJuradoUrls
-        ? global.SiteLinks.buildJuradoUrls({
-          evt: inst.slug,
-          pinOrganizador: inst.pinOrganizador,
-          pinJuez: inst.pinJuez,
-          jueces: 3
-        })
-        : {};
+      var judgeCount = inst.jueces || 3;
       var linkBlocks = [
         { label: '1. Configuración (envía esto al cliente)', url: cfgUrl },
         { label: '2. Inscripción en línea', url: inscUrl },
         { label: '3. Torneo en vivo', url: urls.organizador || '' },
-        { label: '4. Resultados competidor', url: urls.resultados || '' }
+        { label: '4. Resultados competidor', url: urls.resultados || '' },
+        { label: '5. Consola principal (jurados según config)', url: hubUrl }
       ].filter(function (item) { return item.url; }).map(function (item) {
         return '<p class="admin-jurado-client-config"><span class="admin-table-meta">' + escapeHtml(item.label) + ':</span><br>' +
           '<a href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(item.url) + '</a></p>';
       }).join('');
       var judgeLinks = [];
-      for (var jn = 1; jn <= 3; jn++) {
+      for (var jn = 1; jn <= judgeCount; jn++) {
         if (urls['juez' + jn]) judgeLinks.push('<a href="' + escapeHtml(urls['juez' + jn]) + '" target="_blank" rel="noopener noreferrer">Juez ' + jn + '</a>');
       }
       return '<article class="admin-jurado-client-row">' +
@@ -2458,7 +2454,7 @@
         '<span class="admin-table-meta">' + escapeHtml(inst.eventName) + ' · ' + escapeHtml(inst.slug) + '</span>' +
         '</div>' +
         linkBlocks +
-        (judgeLinks.length ? '<p class="admin-jurado-client-config"><span class="admin-table-meta">5. Jurados (día del evento):</span><br>' + judgeLinks.join(' · ') + '</p>' : '') +
+        (judgeLinks.length ? '<p class="admin-jurado-client-config"><span class="admin-table-meta">Jurados (según config del torneo):</span><br>' + judgeLinks.join(' · ') + ' · <a href="' + escapeHtml(hubUrl) + '" target="_blank" rel="noopener noreferrer">Consola</a></p>' : '') +
         '<div class="admin-jurado-link-actions">' +
         '<button type="button" class="admin-btn admin-btn--secondary admin-btn--small" data-admin-copy-link="' + escapeHtml(cfgUrl) + '">Copiar config</button>' +
         (inscUrl ? '<button type="button" class="admin-btn admin-btn--secondary admin-btn--small" data-admin-copy-link="' + escapeHtml(inscUrl) + '">Copiar inscripción</button>' : '') +

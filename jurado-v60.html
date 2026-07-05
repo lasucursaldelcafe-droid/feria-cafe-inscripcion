@@ -8,7 +8,7 @@
   <title>Consola principal — Jurado sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado35">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260706jurado1">
 </head>
 <body class="jurado-page" data-jurado-page="hub">
   <div class="jurado-shell">
@@ -29,8 +29,13 @@
     <section id="hubSection" class="jurado-card jurado-card--hub" hidden>
       <div class="jurado-card-head">
         <h2>Consola principal</h2>
-        <p class="jurado-hint">Cada rol tiene su propia página: configuración, torneo en vivo, resultados para competidores y enlaces de jurados.</p>
+        <p class="jurado-hint">Elige el torneo y luego comparte cada enlace. Los jurados dependen del torneo creado y de cuántos jueces configuraste en ese torneo.</p>
       </div>
+      <div id="hubTournamentPicker" class="jurado-hub-picker" hidden>
+        <h3 class="jurado-admin-subtitle">Selecciona el torneo</h3>
+        <div id="hubTournamentList" class="jurado-hub-tournament-list"></div>
+      </div>
+      <div id="hubTournamentActive" class="jurado-hub-active" hidden></div>
       <div id="hubLinksGrid" class="jurado-hub-grid"></div>
       <div id="hubHistorialPreview" class="jurado-hub-history"></div>
     </section>
@@ -481,6 +486,6 @@
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxEVH5x6x8xj5vBFlwbkQjkEtpVNnfBoaeOwRDSk9FbF9K9_vuQFfwNBR9Kghtn2i6u/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado35"></script>
+  <script src="js/jurado-v60.js?v=20260706jurado1"></script>
 </body>
 </html>

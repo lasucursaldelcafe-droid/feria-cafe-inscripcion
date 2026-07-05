@@ -2350,6 +2350,44 @@ body.jurado-page[data-jurado-page="hub"] .jurado-shell {
   padding: 28px 24px;
 }
 
+.jurado-hub-picker {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--jurado-border);
+  border-radius: var(--jurado-radius);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.jurado-hub-tournament-list {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.jurado-hub-tournament {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.85rem 1rem;
+  border-radius: var(--jurado-radius-sm);
+  border: 1px solid var(--jurado-border);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s var(--jurado-ease), background 0.2s var(--jurado-ease);
+}
+
+.jurado-hub-tournament:hover {
+  border-color: rgba(201, 162, 39, 0.55);
+  background: rgba(201, 162, 39, 0.1);
+}
+
+.jurado-hub-active {
+  margin-bottom: 1rem;
+}
+
 .jurado-hub-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));

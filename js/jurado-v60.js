@@ -65,6 +65,38 @@
   var autoAdvanceCooldownUntil = 0;
   var pendingPanelImageDataUrl = null;
   var PAGE_MODE = (document.body && document.body.getAttribute('data-jurado-page')) || 'all';
+  var HUB_MAIN_KEY = 'lsc_jurado_hub_main';
+  var hubMainTournament = false;
+
+  function isHubMode() {
+    return PAGE_MODE === 'hub';
+  }
+
+  function hasHubTournamentContext() {
+    return !!tenantSlug || hubMainTournament;
+  }
+
+  function readHubMainSelection() {
+    try {
+      return sessionStorage.getItem(HUB_MAIN_KEY) === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function writeHubMainSelection(active) {
+    try {
+      if (active) sessionStorage.setItem(HUB_MAIN_KEY, '1');
+      else sessionStorage.removeItem(HUB_MAIN_KEY);
+    } catch (e) { /* ignore */ }
+  }
+
+  function initHubTournamentContext() {
+    hubMainTournament = false;
+    if (!isHubMode()) return;
+    if (tenantSlug) return;
+    hubMainTournament = readHubMainSelection();
+  }
 
   function storageKey(base) {
     if (!tenantSlug) return base;
@@ -170,6 +202,14 @@
   function getEventLinkRoles() {
     var urls = getJuradoShareUrls();
     var roles = [
+      { step: 5, key: 'historial', label: 'Historial de competencias', desc: 'Ediciones anteriores, rankings archivados y kits JSON.', tag: 'Archivo', url: urls.historial }
+    ];
+
+    if (!hasHubTournamentContext() && isHubMode()) {
+      return roles.filter(function (r) { return r.url; });
+    }
+
+    roles = [
       { step: 1, key: 'config', label: 'Configuración del torneo', desc: 'Marca, reglas, criterios, jueces y formulario.', tag: 'Organizador', url: urls.config },
       { step: 2, key: 'inscripcion', label: 'Inscripción en línea', desc: tenantSlug ? 'Formulario público de este torneo.' : 'Formulario de registro de competidores.', tag: 'Público', url: urls.inscripcion || urls.competencia },
       { step: 3, key: 'organizador', label: 'Torneo en vivo', desc: 'Vista general, rondas, puntajes y control del día.', tag: 'Organizador', url: urls.organizador },
@@ -388,8 +428,116 @@
     if (!hub) return;
     hub.hidden = false;
     applyPlatformBranding();
+    renderHubTournamentPicker();
     renderHubLinks();
     renderHubHistorialPreview();
+  }
+
+  function renderHubTournamentPicker() {
+    var box = $('hubTournamentPicker');
+    if (!box || !isHubMode()) return;
+
+    if (hasHubTournamentContext()) {
+      box.hidden = true;
+      var active = $('hubTournamentActive');
+      if (active) {
+        active.hidden = false;
+        var name = (platformConfig && platformConfig.eventName) || 'Torneo seleccionado';
+        var slug = tenantSlug || 'principal';
+        active.innerHTML =
+          '<p class="jurado-hint">Mostrando enlaces de <strong>' + escapeHtml(name) + '</strong>' +
+          (tenantSlug ? ' · <code>' + escapeHtml(slug) + '</code>' : ' · circuito principal') +
+          ' · ' + getJudgeCount() + ' juez(es) según configuración.</p>' +
+          '<button type="button" class="jurado-btn jurado-btn--secondary jurado-btn--small" id="hubChangeTournamentBtn">Cambiar torneo</button>';
+        var changeBtn = $('hubChangeTournamentBtn');
+        if (changeBtn && !changeBtn.dataset.bound) {
+          changeBtn.dataset.bound = '1';
+          changeBtn.addEventListener('click', function () {
+            writeHubMainSelection(false);
+            hubMainTournament = false;
+            tenantSlug = '';
+            var url = juradoPageUrl('hub');
+            window.location.href = url.split('?')[0];
+          });
+        }
+      }
+      return;
+    }
+
+    box.hidden = false;
+    var activeHide = $('hubTournamentActive');
+    if (activeHide) activeHide.hidden = true;
+    var list = $('hubTournamentList');
+    if (!list) return;
+    list.innerHTML = '<p class="jurado-hint">Cargando torneos…</p>';
+
+    sheetsGet('jurado_instances', {}).then(function (data) {
+      var instances = (data && data.instances) || [];
+      var items = [];
+
+      items.push(
+        '<button type="button" class="jurado-hub-tournament" data-hub-tournament="main">' +
+        '<strong>V60 Championship — La Sucursal</strong>' +
+        '<span class="jurado-hint">Torneo principal del festival · sin cliente white-label</span>' +
+        '</button>'
+      );
+
+      instances.slice().reverse().forEach(function (inst) {
+        if (!inst || !inst.slug) return;
+        items.push(
+          '<button type="button" class="jurado-hub-tournament" data-hub-tournament="' + escapeHtml(inst.slug) + '">' +
+          '<strong>' + escapeHtml(inst.clientName || inst.eventName || inst.slug) + '</strong>' +
+          '<span class="jurado-hint">' + escapeHtml(inst.eventName || '') + ' · ' + escapeHtml(inst.slug) + '</span>' +
+          '</button>'
+        );
+      });
+
+      if (!instances.length) {
+        list.innerHTML =
+          '<p class="jurado-hint">Aún no hay torneos white-label creados en el panel admin. Puedes usar el torneo principal o crear uno nuevo desde Admin → Jurado.</p>' +
+          items.join('');
+      } else {
+        list.innerHTML =
+          '<p class="jurado-hint">Los enlaces de jurados aparecen solo después de elegir el torneo. El número de jueces sale de la configuración guardada de cada uno.</p>' +
+          items.join('');
+      }
+
+      list.querySelectorAll('[data-hub-tournament]').forEach(function (btn) {
+        if (btn.dataset.bound) return;
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', function () {
+          var slug = btn.getAttribute('data-hub-tournament');
+          if (slug === 'main') {
+            writeHubMainSelection(true);
+            hubMainTournament = true;
+            loadPlatformConfig().then(function () {
+              renderHubTournamentPicker();
+              renderHubLinks();
+            });
+            return;
+          }
+          var hubUrl = juradoPageUrl('hub');
+          var sep = hubUrl.indexOf('?') >= 0 ? '&' : '?';
+          window.location.href = hubUrl + sep + 'evt=' + encodeURIComponent(slug);
+        });
+      });
+    }).catch(function () {
+      list.innerHTML =
+        '<p class="jurado-hint">No se pudo cargar la lista de torneos. Usa el torneo principal o abre con <code>?evt=slug</code> en la URL.</p>' +
+        '<button type="button" class="jurado-hub-tournament" data-hub-tournament="main">' +
+        '<strong>V60 Championship — La Sucursal</strong></button>';
+      var fallback = list.querySelector('[data-hub-tournament="main"]');
+      if (fallback) {
+        fallback.addEventListener('click', function () {
+          writeHubMainSelection(true);
+          hubMainTournament = true;
+          loadPlatformConfig().then(function () {
+            renderHubTournamentPicker();
+            renderHubLinks();
+          });
+        });
+      }
+    });
   }
 
   function renderHubHistorialPreview() {
@@ -473,6 +621,10 @@
   function renderHubLinks() {
     var box = $('hubLinksGrid');
     if (!box) return;
+    if (!hasHubTournamentContext()) {
+      box.innerHTML = '<p class="jurado-hint">Selecciona un torneo arriba para ver configuración, organizador y enlaces de cada juez.</p>';
+      return;
+    }
     box.innerHTML = getEventLinkRoles().filter(function (c) { return c.key !== 'hub'; }).map(function (c) {
       var vis = getLinkVisual(c.key);
       return '<a class="jurado-hub-card jurado-hub-card--' + escapeHtml(vis.tone) + '" href="' + escapeHtml(c.url) + '">' +
@@ -3542,12 +3694,13 @@
   }
 
   function getJuradoShareUrls() {
+    var judgeCount = hasHubTournamentContext() ? getJudgeCount() : 0;
     if (window.SiteLinks && window.SiteLinks.buildJuradoUrls) {
       return window.SiteLinks.buildJuradoUrls({
         evt: tenantSlug || undefined,
         pinOrganizador: pinOrganizadorEffective(),
         pinJuez: pinJuezEffective(),
-        jueces: getJudgeCount()
+        jueces: judgeCount
       });
     }
     var pinOrg = pinOrganizadorEffective();
@@ -3561,7 +3714,7 @@
       inscripcion: tenantSlug ? competenciaTorneoUrl() : ((window.SiteLinks && SiteLinks.absUrl) ? SiteLinks.absUrl('competencia') : 'competencia.html'),
       competencia: tenantSlug ? competenciaTorneoUrl() : ((window.SiteLinks && SiteLinks.absUrl) ? SiteLinks.absUrl('competencia') : 'competencia.html')
     };
-    for (var j = 1; j <= getJudgeCount(); j++) {
+    for (var j = 1; j <= judgeCount; j++) {
       urls['juez' + j] = juradoPageUrl('juez', '?pin=' + encodeURIComponent(pinJ) + '&juez=' + j);
     }
     return urls;
@@ -4755,6 +4908,7 @@
 
   function init() {
     initTenantFromUrl();
+    initHubTournamentContext();
 
     if (PAGE_MODE === 'hub') {
       $('loadingMsg').hidden = false;
