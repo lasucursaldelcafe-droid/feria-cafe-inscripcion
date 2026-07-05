@@ -141,18 +141,25 @@
 
     var total = cal && cal.sumaTotal != null ? cal.sumaTotal + ' pts' : '—';
     $('resultTotalPts').textContent = total;
-    $('resultPromedio').textContent = cal && cal.promedio != null
-      ? 'Promedio jueces: ' + cal.promedio
-      : 'Aún sin puntaje completo';
+    var promedioEl = $('resultPromedio');
+    if (promedioEl) {
+      promedioEl.textContent = cal && cal.promedio != null
+        ? 'Promedio jueces: ' + cal.promedio
+        : 'Aún sin puntaje completo';
+    }
 
     var judgesHtml = '';
     for (var j = 1; j <= jmax; j++) {
       var judge = cal && cal.judges ? cal.judges['j' + j] : null;
       var done = judgeDone(cal && cal.judges, j);
-      judgesHtml += '<article class="jurado-result-judge-card' + (done ? ' jurado-result-judge-card--done' : '') + '">';
-      judgesHtml += '<h3>Juez ' + j + (done ? ' ✓' : '') + '</h3>';
+      judgesHtml += '<article class="jurado-result-judge-card' + (done ? ' jurado-result-judge-card--done' : ' jurado-result-judge-card--pending') + '">';
+      judgesHtml += '<h3><span>Juez ' + j + '</span>';
+      judgesHtml += done
+        ? '<span class="jurado-result-judge-badge">Listo</span>'
+        : '<span class="jurado-result-judge-badge jurado-result-judge-badge--pending">Pendiente</span>';
+      judgesHtml += '</h3>';
       if (!done) {
-        judgesHtml += '<p class="jurado-hint">Calificación pendiente</p>';
+        judgesHtml += '<p class="jurado-hint">El juez aún no ha enviado su calificación.</p>';
       } else {
         judgesHtml += '<p class="jurado-result-subtotal">Subtotal: <strong>' + judge.subtotal + ' pts</strong></p>';
         judgesHtml += '<ul class="jurado-result-criteria">';
@@ -195,8 +202,15 @@
     el.hidden = !msg;
   }
 
+  function setLoading(active) {
+    var loading = $('loadingMsg');
+    var login = $('loginSection');
+    if (loading) loading.hidden = !active;
+    if (active && login) login.hidden = true;
+  }
+
   function login(nombre, documento) {
-    $('loadingMsg').hidden = false;
+    setLoading(true);
     showError('');
     return sheetsPost({
       action: 'jurado_resultados_login',
@@ -215,7 +229,7 @@
       showError(err.message || 'Error al ingresar.');
       throw err;
     }).finally(function () {
-      $('loadingMsg').hidden = true;
+      setLoading(false);
     });
   }
 
