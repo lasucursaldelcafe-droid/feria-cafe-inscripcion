@@ -56,9 +56,9 @@
   --shadow-nav: 0 1px 0 rgba(75, 53, 42, 0.08), 0 4px 24px rgba(75, 53, 42, 0.06);
   --radius: 4px;
   --radius-sm: 4px;
-  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
-  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
-  --font-script: "Playfair Display", Georgia, serif;
+  --font-body: "Karla", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Montserrat", "Segoe UI", system-ui, sans-serif;
+  --font-script: "Montserrat", "Segoe UI", sans-serif;
   --section-pad: clamp(2.5rem, 6vw, 4rem);
   --content-max: 1080px;
   --nav-height: 72px;
@@ -6439,4 +6439,249 @@ body.page-rules.page-festival--editorial .rules-doc {
   max-height: 48px;
   width: auto;
   object-fit: contain;
+}
+
+/* —— Estilo Tropicália (referencia: tropicaliacoffee.com) —— */
+
+.page-festival--editorial {
+  --editorial-max: 1140px;
+  --editorial-bg: #fff7e7;
+  --editorial-surface: #fbefdb;
+  --editorial-line: rgba(179, 109, 24, 0.2);
+  --editorial-ink: #0b3959;
+  --editorial-muted: rgba(11, 57, 89, 0.72);
+  --editorial-muted-soft: rgba(11, 57, 89, 0.55);
+  --editorial-accent: #b36d18;
+  --editorial-accent-dark: #8f5612;
+  --editorial-hero-bg: #fff7e7;
+  --btn-radius: 2px;
+}
+
+.page-festival--editorial::-webkit-scrollbar {
+  width: 8px;
+}
+
+.page-festival--editorial::-webkit-scrollbar-track {
+  background: #fbefdb;
+}
+
+.page-festival--editorial::-webkit-scrollbar-thumb {
+  background: #b36d18;
+  border-radius: 5px;
+}
+
+.page-festival--editorial .festival-nav__menu a {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+}
+
+.page-festival--editorial .bizcard-layout,
+.page-festival--editorial .bizcard-layout--editorial {
+  gap: 0;
+  padding-bottom: 0;
+  max-width: 100%;
+}
+
+.page-festival--editorial .bizcard {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  border-bottom: 1px solid var(--editorial-line);
+  max-width: calc(var(--editorial-max) + 2rem);
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+
+.page-festival--editorial .bizcard--hero-editorial {
+  border-bottom: none;
+  max-width: 100%;
+}
+
+.page-festival--editorial .bizcard--hero-editorial .bizcard__illustration {
+  margin: 0 calc(50% - 50vw);
+  width: 100vw;
+  max-width: 100vw;
+}
+
+.page-festival--editorial .bizcard__illustration--hero img,
+.page-festival--editorial .bizcard--hero-editorial .bizcard__illustration img {
+  max-height: min(56vh, 520px);
+  width: 100%;
+  border-radius: 0;
+  object-fit: cover;
+  object-position: center 40%;
+}
+
+.page-festival--editorial .bizcard--hero-editorial .bizcard__body {
+  max-width: calc(var(--editorial-max) + 2rem);
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 2rem;
+  text-align: center;
+}
+
+.page-festival--editorial .bizcard__kicker,
+.page-festival--editorial .festival-kicker,
+.page-festival--editorial .section-eyebrow {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  color: var(--editorial-accent);
+}
+
+.page-festival--editorial .bizcard__title {
+  font-family: var(--font-display);
+  font-weight: 200;
+  font-size: clamp(2.35rem, 8vw, 3.75rem);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  text-transform: lowercase;
+  color: var(--editorial-ink);
+}
+
+.page-festival--editorial .bizcard__heading,
+.page-festival--editorial .festival-sub-hero__title,
+.page-festival--editorial .section-title {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--editorial-ink);
+}
+
+.page-festival--editorial .bizcard__lead,
+.page-festival--editorial .bizcard__text,
+.page-festival--editorial .festival-sub-hero__lead {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.page-festival--editorial .btn-submit,
+.page-festival--editorial .festival-btn-primary,
+.page-festival--editorial .feria-modal__cta,
+.page-festival--editorial .btn-rules,
+.page-festival--editorial .btn-guide,
+.page-festival--editorial .btn-whatsapp,
+.page-festival--editorial .btn-select-all {
+  background: var(--editorial-accent);
+  border: 1px solid var(--editorial-accent);
+  color: #fff;
+  border-radius: 2px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  min-width: 0;
+  box-shadow: none;
+}
+
+.page-festival--editorial .btn-submit:hover:not(:disabled),
+.page-festival--editorial .festival-btn-primary:hover,
+.page-festival--editorial .feria-modal__cta:hover,
+.page-festival--editorial .btn-rules:hover,
+.page-festival--editorial .btn-guide:hover,
+.page-festival--editorial .btn-whatsapp:hover,
+.page-festival--editorial .btn-select-all:hover {
+  background: var(--editorial-accent-dark);
+  border-color: var(--editorial-accent-dark);
+  color: #fff;
+}
+
+.page-festival--editorial .btn-secondary,
+.page-festival--editorial .festival-btn-secondary {
+  background: transparent;
+  border: 1px solid var(--editorial-ink);
+  color: var(--editorial-ink);
+  border-radius: 2px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.page-festival--editorial .btn-secondary:hover,
+.page-festival--editorial .festival-btn-secondary:hover {
+  background: var(--editorial-ink);
+  color: #fff;
+}
+
+.page-festival--editorial .bizcard__chip {
+  background: var(--editorial-surface);
+  border-color: var(--editorial-line);
+  color: var(--editorial-ink);
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 2px;
+}
+
+.page-festival--editorial .festival-explore__tab {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  border-radius: 0;
+}
+
+.page-festival--editorial .festival-explore__tab.is-active {
+  color: var(--editorial-accent);
+  border-bottom-color: var(--editorial-accent);
+}
+
+.page-festival--editorial .festival-explore__panel {
+  background: var(--editorial-surface);
+  border-radius: 0;
+}
+
+.page-festival--editorial .festival-sponsor-card {
+  background: var(--editorial-surface);
+  border-radius: 0;
+  border: 1px solid var(--editorial-line);
+}
+
+.page-festival--editorial .festival-footer {
+  background: var(--editorial-ink);
+  border-top: 3px solid var(--editorial-accent);
+  color: #fbefdb;
+}
+
+.page-festival--editorial .site-header,
+.page-festival--editorial .site-header--bizcard {
+  background: rgba(255, 247, 231, 0.94);
+  border-bottom: 1px solid var(--editorial-line);
+}
+
+.page-festival--editorial .site-hero--coffee,
+.page-festival.page-festival--editorial .site-hero--coffee {
+  background: var(--editorial-bg);
+}
+
+.page-festival--editorial .content-card {
+  border-radius: 0;
+  border: 1px solid var(--editorial-line);
+  box-shadow: none;
+  background: var(--editorial-surface);
+}
+
+.page-festival--editorial .festival-card {
+  border-radius: 0;
+  border: 1px solid var(--editorial-line);
+  background: var(--editorial-surface);
+  box-shadow: none;
+}
+
+@media (min-width: 768px) {
+  .page-festival--editorial .bizcard__illustration--hero img,
+  .page-festival--editorial .bizcard--hero-editorial .bizcard__illustration img {
+    max-height: min(62vh, 560px);
+  }
 }
