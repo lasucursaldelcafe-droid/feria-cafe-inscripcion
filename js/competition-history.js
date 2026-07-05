@@ -26,6 +26,138 @@
     return estado || '—';
   }
 
+  function driveThumbUrl(url, size) {
+    if (!url) return '';
+    var s = String(url).trim();
+    var m = s.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w' + (size || 200);
+    if (/^https?:\/\//i.test(s)) return s;
+    return '';
+  }
+
+  function competitorPhotoHtml(fotoUrl, size, alt) {
+    var url = driveThumbUrl(fotoUrl, size || 160);
+    if (!url) {
+      return '<span class="jurado-clasificacion-photo jurado-clasificacion-photo--empty" aria-hidden="true"></span>';
+    }
+    return '<img class="jurado-clasificacion-photo" src="' + escapeHtml(url) + '" alt="' +
+      escapeHtml(alt || '') + '" loading="lazy" referrerpolicy="no-referrer" width="' +
+      (size || 160) + '" height="' + (size || 160) + '">';
+  }
+
+  function posMedalClass(pos) {
+    if (pos === 1) return 'jurado-clasificacion-card--gold';
+    if (pos === 2) return 'jurado-clasificacion-card--silver';
+    if (pos === 3) return 'jurado-clasificacion-card--bronze';
+    return '';
+  }
+
+  function getPhaseRows(edition, entrada) {
+    var rows = edition.rawRows || [];
+    return rows.filter(function (r) { return r.entrada === entrada; })
+      .slice()
+      .sort(function (a, b) {
+        if (b.total !== a.total) return b.total - a.total;
+        return (a.participante || '').localeCompare(b.participante || '', 'es');
+      });
+  }
+
+  function phaseLabel(entrada) {
+    if (entrada === 1) return 'Clasificatoria';
+    if (entrada === 2) return 'Semifinal';
+    if (entrada === 3) return 'Final';
+    return 'Tanda ' + entrada;
+  }
+
+  function renderPodiumMap(edition) {
+    var top = (edition.ranking || []).slice(0, 3);
+    if (!top.length) return '';
+    var order = top.length >= 3 ? [top[1], top[0], top[2]] : top;
+    var cards = order.map(function (row) {
+      var name = row.nombreInscrito || row.participante;
+      return '<div class="jurado-podium-slot ' + posMedalClass(row.posicion) + '">' +
+        '<span class="jurado-podium-pos">' + row.posicion + '°</span>' +
+        competitorPhotoHtml(row.fotoUrl, 120, name) +
+        '<strong class="jurado-podium-name">' + escapeHtml(name) + '</strong>' +
+        '<span class="jurado-podium-meta">' + escapeHtml(row.representa || row.ciudad || '') + '</span>' +
+        '<span class="jurado-podium-pts">' + row.total + ' pts</span>' +
+        '</div>';
+    }).join('');
+    return '<section class="jurado-clasificacion-section">' +
+      '<h3 class="jurado-clasificacion-title">Podio</h3>' +
+      '<div class="jurado-podium-map">' + cards + '</div></section>';
+  }
+
+  function renderClassificationGrid(edition) {
+    var ranking = edition.ranking || [];
+    if (!ranking.length) return '';
+    var cards = ranking.map(function (row) {
+      var name = row.nombreInscrito || row.participante;
+      var sub = row.participante !== name
+        ? '<span class="jurado-clasificacion-planilla">' + escapeHtml(row.participante) + '</span>'
+        : '';
+      return '<article class="jurado-clasificacion-card ' + posMedalClass(row.posicion) + '">' +
+        '<span class="jurado-clasificacion-rank">' + row.posicion + '°</span>' +
+        competitorPhotoHtml(row.fotoUrl, 96, name) +
+        '<strong class="jurado-clasificacion-name">' + escapeHtml(name) + '</strong>' +
+        sub +
+        '<span class="jurado-clasificacion-meta">' + escapeHtml(row.representa || '') + '</span>' +
+        '<span class="jurado-clasificacion-scores">J1 ' + row.j1 + ' · J2 ' + row.j2 + ' · J3 ' + row.j3 + '</span>' +
+        '<span class="jurado-clasificacion-total">' + row.total + ' pts</span>' +
+        '<span class="jurado-clasificacion-phase">' + escapeHtml(phaseLabel(row.entrada)) + '</span>' +
+        '</article>';
+    }).join('');
+    return '<section class="jurado-clasificacion-section">' +
+      '<h3 class="jurado-clasificacion-title">Mapa de clasificación</h3>' +
+      '<p class="jurado-hint">Ranking final por mejor tanda · fotos de inscripción · totales de planilla.</p>' +
+      '<div class="jurado-clasificacion-grid">' + cards + '</div></section>';
+  }
+
+  function renderPhaseLanes(edition) {
+    var phases = [1, 2, 3].map(function (entrada) {
+      var rows = getPhaseRows(edition, entrada);
+      if (!rows.length) return '';
+      var items = rows.map(function (row, idx) {
+        var name = row.nombreInscrito || row.participante;
+        return '<div class="jurado-phase-chip">' +
+          '<span class="jurado-phase-chip-pos">' + (idx + 1) + '</span>' +
+          competitorPhotoHtml(row.fotoUrl, 48, name) +
+          '<span class="jurado-phase-chip-name">' + escapeHtml(name) + '</span>' +
+          '<span class="jurado-phase-chip-pts">' + row.total + '</span>' +
+          '</div>';
+      }).join('');
+      return '<div class="jurado-phase-lane jurado-phase-lane--' + entrada + '">' +
+        '<h4>' + phaseLabel(entrada) + ' <span class="jurado-phase-count">(' + rows.length + ')</span></h4>' +
+        '<div class="jurado-phase-lane-body">' + items + '</div></div>';
+    }).filter(Boolean).join('');
+    if (!phases) return '';
+    return '<section class="jurado-clasificacion-section">' +
+      '<h3 class="jurado-clasificacion-title">Recorrido por fases</h3>' +
+      '<div class="jurado-phase-lanes">' + phases + '</div></section>';
+  }
+
+  function renderBreakdownSection(edition) {
+    if (edition.id !== 'preliminar-1' || !global.Preliminar1Results) return '';
+    var P = global.Preliminar1Results;
+    var blocks = [1, 2, 3].map(function (entrada) {
+      var rows = P.getRowsByEntrada ? P.getRowsByEntrada(entrada) : [];
+      if (!rows.length) return '';
+      var items = rows.map(function (row) {
+        return '<details class="jurado-preliminar-phase-item">' +
+          '<summary><strong>' + escapeHtml(row.participante) + '</strong> · ' +
+          row.j1 + '+' + row.j2 + '+' + row.j3 + ' = ' + row.total + '</summary>' +
+          P.renderBreakdownTableHtml(row) +
+          '</details>';
+      }).join('');
+      return '<div class="jurado-preliminar-phase"><h4>' + escapeHtml(P.entradaLabel(entrada)) + '</h4>' + items + '</div>';
+    }).filter(Boolean).join('');
+    if (!blocks) return '';
+    return '<section class="jurado-clasificacion-section">' +
+      '<h3 class="jurado-clasificacion-title">Desglose por parámetros SCA</h3>' +
+      '<p class="jurado-hint">' + escapeHtml(P.scoringMethodNote()) + '</p>' +
+      '<div class="jurado-preliminar-phases">' + blocks + '</div></section>';
+  }
+
   function getPreliminar1Edition() {
     if (!global.Preliminar1Results) return null;
     var kit = global.Preliminar1Results.exportKit();
@@ -47,7 +179,10 @@
           posicion: r.posicion,
           nombre: r.nombreInscrito || r.participante,
           total: r.total,
-          id: r.competidorId
+          id: r.competidorId,
+          fotoUrl: r.fotoUrl || '',
+          representa: r.representa || '',
+          ciudad: r.ciudad || ''
         };
       }),
       ranking: ranking,
@@ -148,10 +283,17 @@
 
     var podioHtml = '';
     if (edition.podio && edition.podio.length) {
-      podioHtml = '<ol class="jurado-history-podio">' +
+      podioHtml = '<ol class="jurado-history-podio jurado-history-podio--photos">' +
         edition.podio.map(function (p) {
-          return '<li><span class="jurado-history-podio-pos">' + p.posicion + '°</span> ' +
-            escapeHtml(p.nombre) + ' <strong>' + p.total + '</strong></li>';
+          var photo = competitorPhotoHtml(p.fotoUrl, 56, p.nombre);
+          return '<li class="jurado-history-podio-item ' + posMedalClass(p.posicion) + '">' +
+            photo +
+            '<span class="jurado-history-podio-pos">' + p.posicion + '°</span> ' +
+            '<span class="jurado-history-podio-text">' +
+            '<strong>' + escapeHtml(p.nombre) + '</strong>' +
+            (p.representa ? '<span class="jurado-history-podio-meta">' + escapeHtml(p.representa) + '</span>' : '') +
+            '</span>' +
+            '<span class="jurado-history-podio-pts">' + p.total + ' pts</span></li>';
         }).join('') +
         '</ol>';
     }
@@ -204,12 +346,20 @@
       return html;
     }
 
+    html += renderPodiumMap(edition);
+    html += renderClassificationGrid(edition);
+    html += renderPhaseLanes(edition);
+
     var rows = edition.ranking.map(function (row) {
+      var name = row.nombreInscrito || row.participante;
       return '<tr>' +
         '<td class="jurado-preliminar-rank">' + row.posicion + '</td>' +
+        '<td class="jurado-clasificacion-table-photo">' + competitorPhotoHtml(row.fotoUrl, 40, name) + '</td>' +
         '<td><code class="jurado-preliminar-id">' + escapeHtml(row.competidorId) + '</code></td>' +
-        '<td><strong>' + escapeHtml(row.nombreInscrito || row.participante) + '</strong></td>' +
-        '<td class="jurado-preliminar-num">T' + row.entrada + '</td>' +
+        '<td><strong>' + escapeHtml(name) + '</strong>' +
+        (row.representa ? '<br><span class="jurado-hint">' + escapeHtml(row.representa) + '</span>' : '') +
+        '</td>' +
+        '<td class="jurado-preliminar-num">' + escapeHtml(phaseLabel(row.entrada)) + '</td>' +
         '<td class="jurado-preliminar-num">' + row.j1 + '</td>' +
         '<td class="jurado-preliminar-num">' + row.j2 + '</td>' +
         '<td class="jurado-preliminar-num">' + row.j3 + '</td>' +
@@ -218,10 +368,14 @@
     }).join('');
 
     html +=
+      '<section class="jurado-clasificacion-section">' +
+      '<h3 class="jurado-clasificacion-title">Tabla de resultados</h3>' +
       '<div class="jurado-preliminar-table-wrap">' +
       '<table class="jurado-preliminar-table">' +
-      '<thead><tr><th>#</th><th>ID</th><th>Competidor</th><th>Tanda</th><th>J1</th><th>J2</th><th>J3</th><th>Total</th></tr></thead>' +
-      '<tbody>' + rows + '</tbody></table></div>';
+      '<thead><tr><th>#</th><th>Foto</th><th>ID</th><th>Competidor</th><th>Fase</th><th>J1</th><th>J2</th><th>J3</th><th>Total</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody></table></div></section>';
+
+    html += renderBreakdownSection(edition);
 
     if (edition.rawRows && edition.rawRows.length > edition.ranking.length) {
       html += '<details class="jurado-history-all-rounds"><summary>Ver las ' + edition.rawRows.length + ' tandas de la planilla</summary>';
@@ -260,6 +414,9 @@
     renderEditionsList: renderEditionsList,
     renderEditionSummaryCard: renderEditionSummaryCard,
     renderEditionDetail: renderEditionDetail,
+    renderPodiumMap: renderPodiumMap,
+    renderClassificationGrid: renderClassificationGrid,
+    renderPhaseLanes: renderPhaseLanes,
     downloadEditionKit: downloadEditionKit
   };
 })(typeof window !== 'undefined' ? window : globalThis);

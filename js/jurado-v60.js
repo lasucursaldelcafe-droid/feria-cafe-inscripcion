@@ -614,6 +614,7 @@
         var edition = window.CompetitionHistory.getEdition(decodeURIComponent(match[1]));
         detail.hidden = !edition;
         detail.innerHTML = edition ? window.CompetitionHistory.renderEditionDetail(edition) : '';
+        if (edition) detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
   }
