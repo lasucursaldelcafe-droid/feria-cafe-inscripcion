@@ -77,17 +77,16 @@ def match_inscritos(rows: list[dict]) -> dict[str, dict]:
     return out
 
 
-def load_preliminar_js_ranking() -> list[dict]:
-    js = (ROOT / "js" / "preliminar-1-results.js").read_text(encoding="utf-8")
-    # Ejecutar módulo en Node sería ideal; aquí parseamos ranking vía node subprocess
+def load_preliminar_kit() -> dict:
     import subprocess
 
     script = r"""
 const fs = require('fs');
+const vm = require('vm');
 const code = fs.readFileSync('js/preliminar-1-results.js','utf8');
-eval(code.replace('global.Preliminar1Results','globalThis.Preliminar1Results').replace('typeof window','false && typeof window'));
-const k = globalThis.Preliminar1Results.getRankingConsolidado();
-console.log(JSON.stringify(k));
+const ctx = {};
+vm.runInNewContext(code, ctx);
+console.log(JSON.stringify(ctx.Preliminar1Results.exportKit()));
 """
     proc = subprocess.run(
         ["node", "-e", script],
@@ -99,7 +98,12 @@ console.log(JSON.stringify(k));
     return json.loads(proc.stdout)
 
 
-def write_markdown(inscritos: dict[str, dict], ranking: list[dict]) -> None:
+def load_preliminar_js_ranking() -> list[dict]:
+    return load_preliminar_kit().get("ranking") or []
+
+
+def write_markdown(inscritos: dict[str, dict], ranking: list[dict], kit: dict) -> None:
+    breakdown_md = kit.get("breakdownMarkdown") or ""
     lines = [
         "# V60 Championship — Preliminar 1",
         "",
@@ -134,6 +138,8 @@ def write_markdown(inscritos: dict[str, dict], ranking: list[dict]) -> None:
 
     lines += [
         "",
+        breakdown_md.rstrip(),
+        "",
         "_Generado con `python3 tools/build_preliminar1_from_inscritos.py`_",
         "",
     ]
@@ -151,8 +157,11 @@ def main() -> int:
         return 1
 
     ranking = load_preliminar_js_ranking()
-    write_markdown(inscritos, ranking)
-    print(f"OK: {len(inscritos)} inscritos · markdown → {MD_PATH}")
+    kit = load_preliminar_kit()
+    write_markdown(inscritos, ranking, kit)
+    kit_path = ROOT / "tools" / "PRELIMINAR-1-KIT.json"
+    kit_path.write_text(json.dumps(kit, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"OK: {len(inscritos)} inscritos · markdown → {MD_PATH} · kit → {kit_path}")
     return 0
 
 

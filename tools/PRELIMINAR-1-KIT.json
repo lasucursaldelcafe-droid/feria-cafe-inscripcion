@@ -83,6 +83,18 @@
       "documento": "1234198183"
     },
     {
+      "key": "colorado",
+      "id": "SC-MQQQCABR",
+      "nombre": "Santiago Colorado",
+      "planilla": "Colorado",
+      "ciudad": "Cali",
+      "representa": "Delta Coffee",
+      "habilitado": "",
+      "fotoUrl": "https://drive.google.com/file/d/1cDE3D6gPjgpbKDOg8a-DTVtxy9gmBX9x/view?usp=drivesdk",
+      "correo": "santiagocoloradotrujillo@gmail.com",
+      "documento": "1006170225"
+    },
+    {
       "key": "jessi",
       "id": "SC-MR2CEGBE",
       "nombre": "Jessica combita",
@@ -107,28 +119,16 @@
       "documento": "1006172292"
     },
     {
-      "key": "useche",
-      "id": "SC-MR488BBE",
-      "nombre": "José Alejandro Useche",
-      "planilla": "Useche",
+      "key": "linda",
+      "id": "SC-MR172ZIT",
+      "nombre": "Linda Hernandez",
+      "planilla": "Linda",
       "ciudad": "Cali",
-      "representa": "Purist café",
+      "representa": "Mas cafe",
       "habilitado": "Sí",
-      "fotoUrl": "https://drive.google.com/file/d/1Wohlim0taSLCBFsLR1W8rcD-n1XhTFfB/view?usp=drivesdk",
-      "correo": "josealejandro.usechemahecha@gmail.com",
-      "documento": "1006072215"
-    },
-    {
-      "key": "savedra",
-      "id": "SC-MR2NRDPE",
-      "nombre": "Juan David Saavedra cardona",
-      "planilla": "Savedra",
-      "ciudad": "Cali",
-      "representa": "Independiente",
-      "habilitado": "Sí",
-      "fotoUrl": "https://drive.google.com/file/d/1jET4LD5HZ92cjFeemK4PQyKv6ltLc6Ht/view?usp=drivesdk",
-      "correo": "judasaca34@gmail.com",
-      "documento": "1107847761"
+      "fotoUrl": "https://drive.google.com/file/d/1ArkCQeEZRqPOZjkFE2asOy9BdzidaoJP/view?usp=drivesdk",
+      "correo": "lindahernandez200025@gmail.com",
+      "documento": "1005974653"
     },
     {
       "key": "manjares",
@@ -143,42 +143,6 @@
       "documento": "1021396326"
     },
     {
-      "key": "vera",
-      "id": "SC-MR2KMUPR",
-      "nombre": "Juan sebastian vera",
-      "planilla": "Vera",
-      "ciudad": "Cali",
-      "representa": "Barista independiente",
-      "habilitado": "Sí",
-      "fotoUrl": "https://drive.google.com/file/d/173jY-rAN4sh7_EpIchcFlDTFznh8mO1g/view?usp=drivesdk",
-      "correo": "thesmilesmilingjj88@gmail.com",
-      "documento": "1006008177"
-    },
-    {
-      "key": "linda",
-      "id": "SC-MR172ZIT",
-      "nombre": "Linda Hernandez",
-      "planilla": "Linda",
-      "ciudad": "Cali",
-      "representa": "Mas cafe",
-      "habilitado": "Sí",
-      "fotoUrl": "https://drive.google.com/file/d/1ArkCQeEZRqPOZjkFE2asOy9BdzidaoJP/view?usp=drivesdk",
-      "correo": "lindahernandez200025@gmail.com",
-      "documento": "1005974653"
-    },
-    {
-      "key": "colorado",
-      "id": "SC-MQQQCABR",
-      "nombre": "Santiago Colorado",
-      "planilla": "Colorado",
-      "ciudad": "Cali",
-      "representa": "Delta Coffee",
-      "habilitado": "",
-      "fotoUrl": "https://drive.google.com/file/d/1cDE3D6gPjgpbKDOg8a-DTVtxy9gmBX9x/view?usp=drivesdk",
-      "correo": "santiagocoloradotrujillo@gmail.com",
-      "documento": "1006170225"
-    },
-    {
       "key": "polo",
       "id": "SC-MR5J8QUJ",
       "nombre": "Ximena polo",
@@ -189,6 +153,42 @@
       "fotoUrl": "https://drive.google.com/file/d/1VJsPhFiGTfDc6aXqYlIlDk1GhtweDjGM/view?usp=drivesdk",
       "correo": "ximena.polo@gmail.com",
       "documento": "31320969"
+    },
+    {
+      "key": "savedra",
+      "id": "SC-MR2NRDPE",
+      "nombre": "Juan David Saavedra cardona",
+      "planilla": "Savedra",
+      "ciudad": "Cali",
+      "representa": "Independiente",
+      "habilitado": "Sí",
+      "fotoUrl": "https://drive.google.com/file/d/1jET4LD5HZ92cjFeemK4PQyKv6ltLc6Ht/view?usp=drivesdk",
+      "correo": "judasaca34@gmail.com",
+      "documento": "1107847761"
+    },
+    {
+      "key": "useche",
+      "id": "SC-MR488BBE",
+      "nombre": "José Alejandro Useche",
+      "planilla": "Useche",
+      "ciudad": "Cali",
+      "representa": "Purist café",
+      "habilitado": "Sí",
+      "fotoUrl": "https://drive.google.com/file/d/1Wohlim0taSLCBFsLR1W8rcD-n1XhTFfB/view?usp=drivesdk",
+      "correo": "josealejandro.usechemahecha@gmail.com",
+      "documento": "1006072215"
+    },
+    {
+      "key": "vera",
+      "id": "SC-MR2KMUPR",
+      "nombre": "Juan sebastian vera",
+      "planilla": "Vera",
+      "ciudad": "Cali",
+      "representa": "Barista independiente",
+      "habilitado": "Sí",
+      "fotoUrl": "https://drive.google.com/file/d/173jY-rAN4sh7_EpIchcFlDTFznh8mO1g/view?usp=drivesdk",
+      "correo": "thesmilesmilingjj88@gmail.com",
+      "documento": "1006008177"
     }
   ],
   "crosswalk": {
@@ -245,7 +245,7 @@
             "impresion_general": 4
           },
           "subtotal": 29,
-          "actualizado": "2026-07-05T22:47:34.258Z",
+          "actualizado": "2026-07-05T23:10:33.129Z",
           "imported": true
         },
         "j2": {
@@ -260,7 +260,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.258Z",
+          "actualizado": "2026-07-05T23:10:33.129Z",
           "imported": true
         },
         "j3": {
@@ -275,7 +275,7 @@
             "impresion_general": 3
           },
           "subtotal": 27,
-          "actualizado": "2026-07-05T22:47:34.258Z",
+          "actualizado": "2026-07-05T23:10:33.129Z",
           "imported": true
         }
       },
@@ -386,7 +386,7 @@
             "impresion_general": 3
           },
           "subtotal": 18,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.130Z",
           "imported": true
         },
         "j2": {
@@ -401,7 +401,7 @@
             "impresion_general": 3
           },
           "subtotal": 18,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.130Z",
           "imported": true
         },
         "j3": {
@@ -416,7 +416,7 @@
             "impresion_general": 3
           },
           "subtotal": 22,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.130Z",
           "imported": true
         }
       },
@@ -527,7 +527,7 @@
             "impresion_general": 3
           },
           "subtotal": 26,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.130Z",
           "imported": true
         },
         "j2": {
@@ -542,7 +542,7 @@
             "impresion_general": 3
           },
           "subtotal": 22,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.130Z",
           "imported": true
         },
         "j3": {
@@ -557,7 +557,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.130Z",
           "imported": true
         }
       },
@@ -668,7 +668,7 @@
             "impresion_general": 3
           },
           "subtotal": 18,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.130Z",
           "imported": true
         },
         "j2": {
@@ -683,7 +683,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.130Z",
           "imported": true
         },
         "j3": {
@@ -698,7 +698,7 @@
             "impresion_general": 3
           },
           "subtotal": 23,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.130Z",
           "imported": true
         }
       },
@@ -809,7 +809,7 @@
             "impresion_general": 3
           },
           "subtotal": 26,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.130Z",
           "imported": true
         },
         "j2": {
@@ -824,7 +824,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.130Z",
           "imported": true
         },
         "j3": {
@@ -839,7 +839,7 @@
             "impresion_general": 4
           },
           "subtotal": 29,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.130Z",
           "imported": true
         }
       },
@@ -950,7 +950,7 @@
             "impresion_general": 3
           },
           "subtotal": 22,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j2": {
@@ -965,7 +965,7 @@
             "impresion_general": 3
           },
           "subtotal": 27,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j3": {
@@ -980,7 +980,7 @@
             "impresion_general": 2
           },
           "subtotal": 19,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         }
       },
@@ -1091,7 +1091,7 @@
             "impresion_general": 2
           },
           "subtotal": 18,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j2": {
@@ -1106,7 +1106,7 @@
             "impresion_general": 2
           },
           "subtotal": 19,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j3": {
@@ -1121,7 +1121,7 @@
             "impresion_general": 3
           },
           "subtotal": 21,
-          "actualizado": "2026-07-05T22:47:34.259Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         }
       },
@@ -1232,7 +1232,7 @@
             "impresion_general": 4
           },
           "subtotal": 28,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j2": {
@@ -1247,7 +1247,7 @@
             "impresion_general": 3
           },
           "subtotal": 21,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j3": {
@@ -1262,7 +1262,7 @@
             "impresion_general": 2
           },
           "subtotal": 19,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         }
       },
@@ -1373,7 +1373,7 @@
             "impresion_general": 4
           },
           "subtotal": 31,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j2": {
@@ -1388,7 +1388,7 @@
             "impresion_general": 3
           },
           "subtotal": 25,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j3": {
@@ -1403,7 +1403,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         }
       },
@@ -1514,7 +1514,7 @@
             "impresion_general": 4
           },
           "subtotal": 30,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j2": {
@@ -1529,7 +1529,7 @@
             "impresion_general": 3
           },
           "subtotal": 27,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j3": {
@@ -1544,7 +1544,7 @@
             "impresion_general": 3
           },
           "subtotal": 25,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         }
       },
@@ -1655,7 +1655,7 @@
             "impresion_general": 3
           },
           "subtotal": 27,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j2": {
@@ -1670,7 +1670,7 @@
             "impresion_general": 3
           },
           "subtotal": 26,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j3": {
@@ -1685,7 +1685,7 @@
             "impresion_general": 3
           },
           "subtotal": 26,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         }
       },
@@ -1796,7 +1796,7 @@
             "impresion_general": 3
           },
           "subtotal": 23,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j2": {
@@ -1811,7 +1811,7 @@
             "impresion_general": 3
           },
           "subtotal": 23,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j3": {
@@ -1826,7 +1826,7 @@
             "impresion_general": 3
           },
           "subtotal": 23,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         }
       },
@@ -1937,7 +1937,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j2": {
@@ -1952,7 +1952,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         },
         "j3": {
@@ -1967,7 +1967,7 @@
             "impresion_general": 3
           },
           "subtotal": 22,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.131Z",
           "imported": true
         }
       },
@@ -2078,7 +2078,7 @@
             "impresion_general": 2
           },
           "subtotal": 19,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j2": {
@@ -2093,7 +2093,7 @@
             "impresion_general": 2
           },
           "subtotal": 21,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j3": {
@@ -2108,7 +2108,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         }
       },
@@ -2219,7 +2219,7 @@
             "impresion_general": 3
           },
           "subtotal": 19,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j2": {
@@ -2234,7 +2234,7 @@
             "impresion_general": 3
           },
           "subtotal": 20,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j3": {
@@ -2249,7 +2249,7 @@
             "impresion_general": 3
           },
           "subtotal": 21,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         }
       },
@@ -2360,7 +2360,7 @@
             "impresion_general": 4
           },
           "subtotal": 27,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j2": {
@@ -2375,7 +2375,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j3": {
@@ -2390,7 +2390,7 @@
             "impresion_general": 3
           },
           "subtotal": 22,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         }
       },
@@ -2501,7 +2501,7 @@
             "impresion_general": 4
           },
           "subtotal": 26,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j2": {
@@ -2516,7 +2516,7 @@
             "impresion_general": 3
           },
           "subtotal": 23,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j3": {
@@ -2531,7 +2531,7 @@
             "impresion_general": 3
           },
           "subtotal": 21,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         }
       },
@@ -2642,7 +2642,7 @@
             "impresion_general": 4
           },
           "subtotal": 27,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j2": {
@@ -2657,7 +2657,7 @@
             "impresion_general": 3
           },
           "subtotal": 23,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j3": {
@@ -2672,7 +2672,7 @@
             "impresion_general": 4
           },
           "subtotal": 26,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         }
       },
@@ -2783,7 +2783,7 @@
             "impresion_general": 3
           },
           "subtotal": 27,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j2": {
@@ -2798,7 +2798,7 @@
             "impresion_general": 3
           },
           "subtotal": 26,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j3": {
@@ -2813,7 +2813,7 @@
             "impresion_general": 3
           },
           "subtotal": 26,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         }
       },
@@ -2924,7 +2924,7 @@
             "impresion_general": 3
           },
           "subtotal": 28,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j2": {
@@ -2939,7 +2939,7 @@
             "impresion_general": 3
           },
           "subtotal": 29,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j3": {
@@ -2954,7 +2954,7 @@
             "impresion_general": 3
           },
           "subtotal": 25,
-          "actualizado": "2026-07-05T22:47:34.260Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         }
       },
@@ -3065,7 +3065,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j2": {
@@ -3080,7 +3080,7 @@
             "impresion_general": 3
           },
           "subtotal": 26,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j3": {
@@ -3095,7 +3095,7 @@
             "impresion_general": 3
           },
           "subtotal": 21,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         }
       },
@@ -3208,7 +3208,7 @@
             "impresion_general": 3
           },
           "subtotal": 28,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         },
         "j2": {
@@ -3223,7 +3223,7 @@
             "impresion_general": 3
           },
           "subtotal": 29,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         },
         "j3": {
@@ -3238,7 +3238,7 @@
             "impresion_general": 3
           },
           "subtotal": 25,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         }
       },
@@ -3350,7 +3350,7 @@
             "impresion_general": 4
           },
           "subtotal": 30,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j2": {
@@ -3365,7 +3365,7 @@
             "impresion_general": 3
           },
           "subtotal": 27,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j3": {
@@ -3380,7 +3380,7 @@
             "impresion_general": 3
           },
           "subtotal": 25,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         }
       },
@@ -3492,7 +3492,7 @@
             "impresion_general": 4
           },
           "subtotal": 29,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j2": {
@@ -3507,7 +3507,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j3": {
@@ -3522,7 +3522,7 @@
             "impresion_general": 3
           },
           "subtotal": 27,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         }
       },
@@ -3634,7 +3634,7 @@
             "impresion_general": 3
           },
           "subtotal": 26,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j2": {
@@ -3649,7 +3649,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j3": {
@@ -3664,7 +3664,7 @@
             "impresion_general": 4
           },
           "subtotal": 29,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         }
       },
@@ -3776,7 +3776,7 @@
             "impresion_general": 4
           },
           "subtotal": 27,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         },
         "j2": {
@@ -3791,7 +3791,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         },
         "j3": {
@@ -3806,7 +3806,7 @@
             "impresion_general": 3
           },
           "subtotal": 22,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         }
       },
@@ -3918,7 +3918,7 @@
             "impresion_general": 3
           },
           "subtotal": 26,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j2": {
@@ -3933,7 +3933,7 @@
             "impresion_general": 3
           },
           "subtotal": 22,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j3": {
@@ -3948,7 +3948,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         }
       },
@@ -4060,7 +4060,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.262Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         },
         "j2": {
@@ -4075,7 +4075,7 @@
             "impresion_general": 3
           },
           "subtotal": 26,
-          "actualizado": "2026-07-05T22:47:34.262Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         },
         "j3": {
@@ -4090,7 +4090,7 @@
             "impresion_general": 3
           },
           "subtotal": 21,
-          "actualizado": "2026-07-05T22:47:34.262Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         }
       },
@@ -4202,7 +4202,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         },
         "j2": {
@@ -4217,7 +4217,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         },
         "j3": {
@@ -4232,7 +4232,7 @@
             "impresion_general": 3
           },
           "subtotal": 22,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         }
       },
@@ -4344,7 +4344,7 @@
             "impresion_general": 4
           },
           "subtotal": 28,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j2": {
@@ -4359,7 +4359,7 @@
             "impresion_general": 3
           },
           "subtotal": 21,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j3": {
@@ -4374,7 +4374,7 @@
             "impresion_general": 2
           },
           "subtotal": 19,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         }
       },
@@ -4486,7 +4486,7 @@
             "impresion_general": 2
           },
           "subtotal": 19,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         },
         "j2": {
@@ -4501,7 +4501,7 @@
             "impresion_general": 2
           },
           "subtotal": 21,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         },
         "j3": {
@@ -4516,7 +4516,7 @@
             "impresion_general": 3
           },
           "subtotal": 24,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         }
       },
@@ -4628,7 +4628,7 @@
             "impresion_general": 3
           },
           "subtotal": 19,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         },
         "j2": {
@@ -4643,7 +4643,7 @@
             "impresion_general": 3
           },
           "subtotal": 20,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         },
         "j3": {
@@ -4658,7 +4658,7 @@
             "impresion_general": 3
           },
           "subtotal": 21,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.133Z",
           "imported": true
         }
       },
@@ -4770,7 +4770,7 @@
             "impresion_general": 2
           },
           "subtotal": 18,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j2": {
@@ -4785,7 +4785,7 @@
             "impresion_general": 2
           },
           "subtotal": 19,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         },
         "j3": {
@@ -4800,7 +4800,7 @@
             "impresion_general": 3
           },
           "subtotal": 21,
-          "actualizado": "2026-07-05T22:47:34.261Z",
+          "actualizado": "2026-07-05T23:10:33.132Z",
           "imported": true
         }
       },
@@ -4892,7 +4892,7 @@
               "impresion_general": 3
             },
             "subtotal": 28,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j2": {
@@ -4907,7 +4907,7 @@
               "impresion_general": 3
             },
             "subtotal": 29,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j3": {
@@ -4922,7 +4922,7 @@
               "impresion_general": 3
             },
             "subtotal": 25,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           }
         },
@@ -4933,7 +4933,7 @@
         },
         "sumaTotal": 82,
         "promedio": 27.3,
-        "actualizado": "2026-07-05T22:47:34.262Z",
+        "actualizado": "2026-07-05T23:10:33.134Z",
         "meta": {
           "evento": "V60 Championship — Preliminar 1",
           "entradaUsada": 3,
@@ -4960,7 +4960,7 @@
               "impresion_general": 4
             },
             "subtotal": 30,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j2": {
@@ -4975,7 +4975,7 @@
               "impresion_general": 3
             },
             "subtotal": 27,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j3": {
@@ -4990,7 +4990,7 @@
               "impresion_general": 3
             },
             "subtotal": 25,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           }
         },
@@ -5001,7 +5001,7 @@
         },
         "sumaTotal": 82,
         "promedio": 27.3,
-        "actualizado": "2026-07-05T22:47:34.262Z",
+        "actualizado": "2026-07-05T23:10:33.134Z",
         "meta": {
           "evento": "V60 Championship — Preliminar 1",
           "entradaUsada": 2,
@@ -5028,7 +5028,7 @@
               "impresion_general": 4
             },
             "subtotal": 29,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j2": {
@@ -5043,7 +5043,7 @@
               "impresion_general": 3
             },
             "subtotal": 24,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j3": {
@@ -5058,7 +5058,7 @@
               "impresion_general": 3
             },
             "subtotal": 27,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           }
         },
@@ -5069,7 +5069,7 @@
         },
         "sumaTotal": 80,
         "promedio": 26.7,
-        "actualizado": "2026-07-05T22:47:34.262Z",
+        "actualizado": "2026-07-05T23:10:33.134Z",
         "meta": {
           "evento": "V60 Championship — Preliminar 1",
           "entradaUsada": 1,
@@ -5096,7 +5096,7 @@
               "impresion_general": 3
             },
             "subtotal": 26,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j2": {
@@ -5111,7 +5111,7 @@
               "impresion_general": 3
             },
             "subtotal": 24,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j3": {
@@ -5126,7 +5126,7 @@
               "impresion_general": 4
             },
             "subtotal": 29,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           }
         },
@@ -5137,7 +5137,7 @@
         },
         "sumaTotal": 79,
         "promedio": 26.3,
-        "actualizado": "2026-07-05T22:47:34.262Z",
+        "actualizado": "2026-07-05T23:10:33.134Z",
         "meta": {
           "evento": "V60 Championship — Preliminar 1",
           "entradaUsada": 2,
@@ -5164,7 +5164,7 @@
               "impresion_general": 4
             },
             "subtotal": 27,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j2": {
@@ -5179,7 +5179,7 @@
               "impresion_general": 3
             },
             "subtotal": 24,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j3": {
@@ -5194,7 +5194,7 @@
               "impresion_general": 3
             },
             "subtotal": 22,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           }
         },
@@ -5205,7 +5205,7 @@
         },
         "sumaTotal": 73,
         "promedio": 24.3,
-        "actualizado": "2026-07-05T22:47:34.262Z",
+        "actualizado": "2026-07-05T23:10:33.134Z",
         "meta": {
           "evento": "V60 Championship — Preliminar 1",
           "entradaUsada": 1,
@@ -5232,7 +5232,7 @@
               "impresion_general": 3
             },
             "subtotal": 26,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j2": {
@@ -5247,7 +5247,7 @@
               "impresion_general": 3
             },
             "subtotal": 22,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j3": {
@@ -5262,7 +5262,7 @@
               "impresion_general": 3
             },
             "subtotal": 24,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           }
         },
@@ -5273,7 +5273,7 @@
         },
         "sumaTotal": 72,
         "promedio": 24,
-        "actualizado": "2026-07-05T22:47:34.262Z",
+        "actualizado": "2026-07-05T23:10:33.134Z",
         "meta": {
           "evento": "V60 Championship — Preliminar 1",
           "entradaUsada": 1,
@@ -5300,7 +5300,7 @@
               "impresion_general": 3
             },
             "subtotal": 24,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.135Z",
             "imported": true
           },
           "j2": {
@@ -5315,7 +5315,7 @@
               "impresion_general": 3
             },
             "subtotal": 26,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.135Z",
             "imported": true
           },
           "j3": {
@@ -5330,7 +5330,7 @@
               "impresion_general": 3
             },
             "subtotal": 21,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.135Z",
             "imported": true
           }
         },
@@ -5341,7 +5341,7 @@
         },
         "sumaTotal": 71,
         "promedio": 23.7,
-        "actualizado": "2026-07-05T22:47:34.262Z",
+        "actualizado": "2026-07-05T23:10:33.134Z",
         "meta": {
           "evento": "V60 Championship — Preliminar 1",
           "entradaUsada": 1,
@@ -5368,7 +5368,7 @@
               "impresion_general": 3
             },
             "subtotal": 24,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j2": {
@@ -5383,7 +5383,7 @@
               "impresion_general": 3
             },
             "subtotal": 24,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j3": {
@@ -5398,7 +5398,7 @@
               "impresion_general": 3
             },
             "subtotal": 22,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           }
         },
@@ -5409,7 +5409,7 @@
         },
         "sumaTotal": 70,
         "promedio": 23.3,
-        "actualizado": "2026-07-05T22:47:34.262Z",
+        "actualizado": "2026-07-05T23:10:33.134Z",
         "meta": {
           "evento": "V60 Championship — Preliminar 1",
           "entradaUsada": 2,
@@ -5436,7 +5436,7 @@
               "impresion_general": 4
             },
             "subtotal": 28,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j2": {
@@ -5451,7 +5451,7 @@
               "impresion_general": 3
             },
             "subtotal": 21,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j3": {
@@ -5466,7 +5466,7 @@
               "impresion_general": 2
             },
             "subtotal": 19,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           }
         },
@@ -5477,7 +5477,7 @@
         },
         "sumaTotal": 68,
         "promedio": 22.7,
-        "actualizado": "2026-07-05T22:47:34.262Z",
+        "actualizado": "2026-07-05T23:10:33.134Z",
         "meta": {
           "evento": "V60 Championship — Preliminar 1",
           "entradaUsada": 1,
@@ -5504,7 +5504,7 @@
               "impresion_general": 2
             },
             "subtotal": 19,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j2": {
@@ -5519,7 +5519,7 @@
               "impresion_general": 2
             },
             "subtotal": 21,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j3": {
@@ -5534,7 +5534,7 @@
               "impresion_general": 3
             },
             "subtotal": 24,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           }
         },
@@ -5545,7 +5545,7 @@
         },
         "sumaTotal": 64,
         "promedio": 21.3,
-        "actualizado": "2026-07-05T22:47:34.262Z",
+        "actualizado": "2026-07-05T23:10:33.134Z",
         "meta": {
           "evento": "V60 Championship — Preliminar 1",
           "entradaUsada": 1,
@@ -5572,7 +5572,7 @@
               "impresion_general": 3
             },
             "subtotal": 19,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j2": {
@@ -5587,7 +5587,7 @@
               "impresion_general": 3
             },
             "subtotal": 20,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j3": {
@@ -5602,7 +5602,7 @@
               "impresion_general": 3
             },
             "subtotal": 21,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           }
         },
@@ -5613,7 +5613,7 @@
         },
         "sumaTotal": 60,
         "promedio": 20,
-        "actualizado": "2026-07-05T22:47:34.262Z",
+        "actualizado": "2026-07-05T23:10:33.134Z",
         "meta": {
           "evento": "V60 Championship — Preliminar 1",
           "entradaUsada": 1,
@@ -5640,7 +5640,7 @@
               "impresion_general": 2
             },
             "subtotal": 18,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j2": {
@@ -5655,7 +5655,7 @@
               "impresion_general": 2
             },
             "subtotal": 19,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           },
           "j3": {
@@ -5670,7 +5670,7 @@
               "impresion_general": 3
             },
             "subtotal": 21,
-            "actualizado": "2026-07-05T22:47:34.262Z",
+            "actualizado": "2026-07-05T23:10:33.134Z",
             "imported": true
           }
         },
@@ -5681,7 +5681,7 @@
         },
         "sumaTotal": 58,
         "promedio": 19.3,
-        "actualizado": "2026-07-05T22:47:34.262Z",
+        "actualizado": "2026-07-05T23:10:33.134Z",
         "meta": {
           "evento": "V60 Championship — Preliminar 1",
           "entradaUsada": 1,
@@ -5693,7 +5693,7 @@
         }
       }
     },
-    "actualizado": "2026-07-05T22:47:34.262Z"
+    "actualizado": "2026-07-05T23:10:33.134Z"
   },
   "competidores": [
     {
@@ -5887,5 +5887,7 @@
       ]
     }
   },
-  "exportedAt": "2026-07-05T22:47:34.264Z"
+  "scoringMethodNote": "La planilla original registra el subtotal de cada juez (J1+J2+J3). Como no hay nota por parámetro en papel, el sistema reconstruye el desglose en 8 criterios SCA/WBrC (escala 1–6 por criterio) repartiendo cada subtotal de forma determinística: la suma de los 8 parámetros de un juez coincide exactamente con su columna J1, J2 o J3.",
+  "breakdownMarkdown": "## Cómo se calcula el puntaje\n\nLa planilla original registra el subtotal de cada juez (J1+J2+J3). Como no hay nota por parámetro en papel, el sistema reconstruye el desglose en 8 criterios SCA/WBrC (escala 1–6 por criterio) repartiendo cada subtotal de forma determinística: la suma de los 8 parámetros de un juez coincide exactamente con su columna J1, J2 o J3.\n\n**Fórmula:** total competidor = subtotal J1 + subtotal J2 + subtotal J3, donde cada subtotal = suma de los 8 parámetros (máx. 48 pts por juez).\n\n**Parámetros evaluados:** Aroma, Sabor, Acidez, Dulzor, Cuerpo, Balance, Limpieza de taza, Impresión general.\n\n## Clasificatoria\n\n#### Andrenia — Clasificatoria (total **80**)\n\nSubtotales: J1=29 · J2=24 · J3=27 → **80**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 3 | **9** |\n| Sabor | 4 | 3 | 4 | **11** |\n| Acidez | 3 | 3 | 3 | **9** |\n| Dulzor | 4 | 3 | 4 | **11** |\n| Cuerpo | 4 | 3 | 4 | **11** |\n| Balance | 4 | 3 | 3 | **10** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 4 | 3 | 3 | **10** |\n| **Subtotal juez** | **29** | **24** | **27** | **80** |\n\n#### Useche — Clasificatoria (total **80**)\n\nSubtotales: J1=31 · J2=25 · J3=24 → **80**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 3 | **9** |\n| Sabor | 4 | 3 | 3 | **10** |\n| Acidez | 4 | 4 | 3 | **11** |\n| Dulzor | 4 | 3 | 3 | **10** |\n| Cuerpo | 4 | 3 | 3 | **10** |\n| Balance | 4 | 3 | 3 | **10** |\n| Limpieza de taza | 4 | 3 | 3 | **10** |\n| Impresión general | 4 | 3 | 3 | **10** |\n| **Subtotal juez** | **31** | **25** | **24** | **80** |\n\n#### Colorado — Clasificatoria (total **76**)\n\nSubtotales: J1=27 · J2=23 · J3=26 → **76**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 3 | **9** |\n| Sabor | 4 | 3 | 3 | **10** |\n| Acidez | 3 | 3 | 3 | **9** |\n| Dulzor | 3 | 3 | 3 | **9** |\n| Cuerpo | 3 | 2 | 3 | **8** |\n| Balance | 4 | 3 | 4 | **11** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 4 | 3 | 4 | **11** |\n| **Subtotal juez** | **27** | **23** | **26** | **76** |\n\n#### Linda — Clasificatoria (total **73**)\n\nSubtotales: J1=27 · J2=24 · J3=22 → **73**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 2 | **8** |\n| Sabor | 3 | 3 | 2 | **8** |\n| Acidez | 4 | 3 | 3 | **10** |\n| Dulzor | 3 | 3 | 3 | **9** |\n| Cuerpo | 4 | 3 | 3 | **10** |\n| Balance | 3 | 3 | 3 | **9** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 4 | 3 | 3 | **10** |\n| **Subtotal juez** | **27** | **24** | **22** | **73** |\n\n#### Angela — Clasificatoria (total **72**)\n\nSubtotales: J1=26 · J2=22 · J3=24 → **72**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 2 | 3 | **8** |\n| Sabor | 3 | 3 | 3 | **9** |\n| Acidez | 3 | 3 | 3 | **9** |\n| Dulzor | 4 | 3 | 3 | **10** |\n| Cuerpo | 4 | 3 | 3 | **10** |\n| Balance | 3 | 2 | 3 | **8** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **26** | **22** | **24** | **72** |\n\n#### Polo — Clasificatoria (total **71**)\n\nSubtotales: J1=24 · J2=26 · J3=21 → **71**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 3 | **9** |\n| Sabor | 3 | 3 | 3 | **9** |\n| Acidez | 3 | 4 | 2 | **9** |\n| Dulzor | 3 | 3 | 2 | **8** |\n| Cuerpo | 3 | 3 | 3 | **9** |\n| Balance | 3 | 3 | 2 | **8** |\n| Limpieza de taza | 3 | 4 | 3 | **10** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **24** | **26** | **21** | **71** |\n\n#### Savedra — Clasificatoria (total **69**)\n\nSubtotales: J1=23 · J2=23 · J3=23 → **69**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 3 | **9** |\n| Sabor | 3 | 3 | 3 | **9** |\n| Acidez | 2 | 2 | 2 | **6** |\n| Dulzor | 3 | 3 | 3 | **9** |\n| Cuerpo | 3 | 3 | 3 | **9** |\n| Balance | 3 | 3 | 3 | **9** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **23** | **23** | **23** | **69** |\n\n#### Joe — Clasificatoria (total **68**)\n\nSubtotales: J1=28 · J2=21 · J3=19 → **68**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 2 | **8** |\n| Sabor | 4 | 3 | 3 | **10** |\n| Acidez | 3 | 2 | 2 | **7** |\n| Dulzor | 3 | 2 | 2 | **7** |\n| Cuerpo | 4 | 3 | 3 | **10** |\n| Balance | 3 | 2 | 2 | **7** |\n| Limpieza de taza | 4 | 3 | 3 | **10** |\n| Impresión general | 4 | 3 | 2 | **9** |\n| **Subtotal juez** | **28** | **21** | **19** | **68** |\n\n#### Jessi — Clasificatoria (total **65**)\n\nSubtotales: J1=18 · J2=24 · J3=23 → **65**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 2 | 3 | 3 | **8** |\n| Sabor | 2 | 3 | 2 | **7** |\n| Acidez | 2 | 3 | 3 | **8** |\n| Dulzor | 2 | 3 | 3 | **8** |\n| Cuerpo | 2 | 3 | 3 | **8** |\n| Balance | 3 | 3 | 3 | **9** |\n| Limpieza de taza | 2 | 3 | 3 | **8** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **18** | **24** | **23** | **65** |\n\n#### Manjares — Clasificatoria (total **64**)\n\nSubtotales: J1=19 · J2=21 · J3=24 → **64**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 2 | 3 | 3 | **8** |\n| Sabor | 3 | 3 | 3 | **9** |\n| Acidez | 2 | 3 | 3 | **8** |\n| Dulzor | 3 | 3 | 3 | **9** |\n| Cuerpo | 2 | 2 | 3 | **7** |\n| Balance | 3 | 3 | 3 | **9** |\n| Limpieza de taza | 2 | 2 | 3 | **7** |\n| Impresión general | 2 | 2 | 3 | **7** |\n| **Subtotal juez** | **19** | **21** | **24** | **64** |\n\n#### Vera — Clasificatoria (total **60**)\n\nSubtotales: J1=19 · J2=20 · J3=21 → **60**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 3 | **9** |\n| Sabor | 2 | 2 | 2 | **6** |\n| Acidez | 2 | 2 | 3 | **7** |\n| Dulzor | 2 | 2 | 2 | **6** |\n| Cuerpo | 2 | 3 | 3 | **8** |\n| Balance | 2 | 2 | 2 | **6** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **19** | **20** | **21** | **60** |\n\n#### Brayan — Clasificatoria (total **58**)\n\nSubtotales: J1=18 · J2=19 · J3=21 → **58**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 2 | 2 | 2 | **6** |\n| Sabor | 2 | 3 | 3 | **8** |\n| Acidez | 3 | 3 | 3 | **9** |\n| Dulzor | 3 | 3 | 3 | **9** |\n| Cuerpo | 2 | 2 | 2 | **6** |\n| Balance | 2 | 2 | 3 | **7** |\n| Limpieza de taza | 2 | 2 | 2 | **6** |\n| Impresión general | 2 | 2 | 3 | **7** |\n| **Subtotal juez** | **18** | **19** | **21** | **58** |\n\n## Semifinal\n\n#### Useche — Semifinal (total **82**)\n\nSubtotales: J1=30 · J2=27 · J3=25 → **82**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 4 | 4 | 4 | **12** |\n| Sabor | 4 | 4 | 3 | **11** |\n| Acidez | 4 | 4 | 3 | **11** |\n| Dulzor | 4 | 3 | 3 | **10** |\n| Cuerpo | 4 | 3 | 3 | **10** |\n| Balance | 3 | 3 | 3 | **9** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 4 | 3 | 3 | **10** |\n| **Subtotal juez** | **30** | **27** | **25** | **82** |\n\n#### Colorado — Semifinal (total **79**)\n\nSubtotales: J1=27 · J2=26 · J3=26 → **79**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 3 | **9** |\n| Sabor | 4 | 4 | 4 | **12** |\n| Acidez | 4 | 4 | 4 | **12** |\n| Dulzor | 4 | 3 | 3 | **10** |\n| Cuerpo | 3 | 3 | 3 | **9** |\n| Balance | 3 | 3 | 3 | **9** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **27** | **26** | **26** | **79** |\n\n#### Jessi — Semifinal (total **79**)\n\nSubtotales: J1=26 · J2=24 · J3=29 → **79**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 4 | 3 | 4 | **11** |\n| Sabor | 3 | 3 | 3 | **9** |\n| Acidez | 3 | 3 | 3 | **9** |\n| Dulzor | 3 | 3 | 3 | **9** |\n| Cuerpo | 3 | 3 | 4 | **10** |\n| Balance | 4 | 3 | 4 | **11** |\n| Limpieza de taza | 3 | 3 | 4 | **10** |\n| Impresión general | 3 | 3 | 4 | **10** |\n| **Subtotal juez** | **26** | **24** | **29** | **79** |\n\n#### Linda — Semifinal (total **70**)\n\nSubtotales: J1=26 · J2=23 · J3=21 → **70**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 4 | 3 | 3 | **10** |\n| Sabor | 3 | 2 | 2 | **7** |\n| Acidez | 3 | 3 | 2 | **8** |\n| Dulzor | 3 | 3 | 3 | **9** |\n| Cuerpo | 3 | 3 | 3 | **9** |\n| Balance | 3 | 3 | 2 | **8** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 4 | 3 | 3 | **10** |\n| **Subtotal juez** | **26** | **23** | **21** | **70** |\n\n#### Savedra — Semifinal (total **70**)\n\nSubtotales: J1=24 · J2=24 · J3=22 → **70**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 3 | **9** |\n| Sabor | 3 | 3 | 2 | **8** |\n| Acidez | 3 | 3 | 2 | **8** |\n| Dulzor | 3 | 3 | 3 | **9** |\n| Cuerpo | 3 | 3 | 3 | **9** |\n| Balance | 3 | 3 | 3 | **9** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **24** | **24** | **22** | **70** |\n\n#### Andrenia — Semifinal (total **58**)\n\nSubtotales: J1=18 · J2=18 · J3=22 → **58**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 2 | 2 | 2 | **6** |\n| Sabor | 2 | 2 | 3 | **7** |\n| Acidez | 2 | 2 | 2 | **6** |\n| Dulzor | 2 | 2 | 3 | **7** |\n| Cuerpo | 3 | 3 | 3 | **9** |\n| Balance | 2 | 2 | 3 | **7** |\n| Limpieza de taza | 2 | 2 | 3 | **7** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **18** | **18** | **22** | **58** |\n\n## Final\n\n#### Colorado — Final (total **82**)\n\nSubtotales: J1=28 · J2=29 · J3=25 → **82**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 4 | 4 | **11** |\n| Sabor | 4 | 4 | 3 | **11** |\n| Acidez | 4 | 4 | 3 | **11** |\n| Dulzor | 4 | 4 | 3 | **11** |\n| Cuerpo | 3 | 4 | 3 | **10** |\n| Balance | 3 | 3 | 3 | **9** |\n| Limpieza de taza | 4 | 3 | 3 | **10** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **28** | **29** | **25** | **82** |\n\n#### Useche — Final (total **79**)\n\nSubtotales: J1=27 · J2=26 · J3=26 → **79**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 4 | 4 | 4 | **12** |\n| Sabor | 3 | 3 | 3 | **9** |\n| Acidez | 4 | 4 | 4 | **12** |\n| Dulzor | 3 | 3 | 3 | **9** |\n| Cuerpo | 4 | 3 | 3 | **10** |\n| Balance | 3 | 3 | 3 | **9** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **27** | **26** | **26** | **79** |\n\n#### Jessi — Final (total **68**)\n\nSubtotales: J1=22 · J2=27 · J3=19 → **68**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 4 | 3 | **10** |\n| Sabor | 2 | 3 | 2 | **7** |\n| Acidez | 2 | 3 | 2 | **7** |\n| Dulzor | 3 | 3 | 2 | **8** |\n| Cuerpo | 3 | 3 | 2 | **8** |\n| Balance | 3 | 4 | 3 | **10** |\n| Limpieza de taza | 3 | 4 | 3 | **10** |\n| Impresión general | 3 | 3 | 2 | **8** |\n| **Subtotal juez** | **22** | **27** | **19** | **68** |\n\n## Ranking importado (mejor tanda por competidor)\n\nAl pulsar «Cargar Preliminar 1» en la Consola, se usa la tanda con mayor total de cada uno.\n\n#### Colorado — Final (total **82**)\n\nSubtotales: J1=28 · J2=29 · J3=25 → **82**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 4 | 4 | **11** |\n| Sabor | 4 | 4 | 3 | **11** |\n| Acidez | 4 | 4 | 3 | **11** |\n| Dulzor | 4 | 4 | 3 | **11** |\n| Cuerpo | 3 | 4 | 3 | **10** |\n| Balance | 3 | 3 | 3 | **9** |\n| Limpieza de taza | 4 | 3 | 3 | **10** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **28** | **29** | **25** | **82** |\n\n#### Useche — Semifinal (total **82**)\n\nSubtotales: J1=30 · J2=27 · J3=25 → **82**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 4 | 4 | 4 | **12** |\n| Sabor | 4 | 4 | 3 | **11** |\n| Acidez | 4 | 4 | 3 | **11** |\n| Dulzor | 4 | 3 | 3 | **10** |\n| Cuerpo | 4 | 3 | 3 | **10** |\n| Balance | 3 | 3 | 3 | **9** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 4 | 3 | 3 | **10** |\n| **Subtotal juez** | **30** | **27** | **25** | **82** |\n\n#### Andrenia — Clasificatoria (total **80**)\n\nSubtotales: J1=29 · J2=24 · J3=27 → **80**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 3 | **9** |\n| Sabor | 4 | 3 | 4 | **11** |\n| Acidez | 3 | 3 | 3 | **9** |\n| Dulzor | 4 | 3 | 4 | **11** |\n| Cuerpo | 4 | 3 | 4 | **11** |\n| Balance | 4 | 3 | 3 | **10** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 4 | 3 | 3 | **10** |\n| **Subtotal juez** | **29** | **24** | **27** | **80** |\n\n#### Jessi — Semifinal (total **79**)\n\nSubtotales: J1=26 · J2=24 · J3=29 → **79**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 4 | 3 | 4 | **11** |\n| Sabor | 3 | 3 | 3 | **9** |\n| Acidez | 3 | 3 | 3 | **9** |\n| Dulzor | 3 | 3 | 3 | **9** |\n| Cuerpo | 3 | 3 | 4 | **10** |\n| Balance | 4 | 3 | 4 | **11** |\n| Limpieza de taza | 3 | 3 | 4 | **10** |\n| Impresión general | 3 | 3 | 4 | **10** |\n| **Subtotal juez** | **26** | **24** | **29** | **79** |\n\n#### Linda — Clasificatoria (total **73**)\n\nSubtotales: J1=27 · J2=24 · J3=22 → **73**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 2 | **8** |\n| Sabor | 3 | 3 | 2 | **8** |\n| Acidez | 4 | 3 | 3 | **10** |\n| Dulzor | 3 | 3 | 3 | **9** |\n| Cuerpo | 4 | 3 | 3 | **10** |\n| Balance | 3 | 3 | 3 | **9** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 4 | 3 | 3 | **10** |\n| **Subtotal juez** | **27** | **24** | **22** | **73** |\n\n#### Angela — Clasificatoria (total **72**)\n\nSubtotales: J1=26 · J2=22 · J3=24 → **72**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 2 | 3 | **8** |\n| Sabor | 3 | 3 | 3 | **9** |\n| Acidez | 3 | 3 | 3 | **9** |\n| Dulzor | 4 | 3 | 3 | **10** |\n| Cuerpo | 4 | 3 | 3 | **10** |\n| Balance | 3 | 2 | 3 | **8** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **26** | **22** | **24** | **72** |\n\n#### Polo — Clasificatoria (total **71**)\n\nSubtotales: J1=24 · J2=26 · J3=21 → **71**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 3 | **9** |\n| Sabor | 3 | 3 | 3 | **9** |\n| Acidez | 3 | 4 | 2 | **9** |\n| Dulzor | 3 | 3 | 2 | **8** |\n| Cuerpo | 3 | 3 | 3 | **9** |\n| Balance | 3 | 3 | 2 | **8** |\n| Limpieza de taza | 3 | 4 | 3 | **10** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **24** | **26** | **21** | **71** |\n\n#### Savedra — Semifinal (total **70**)\n\nSubtotales: J1=24 · J2=24 · J3=22 → **70**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 3 | **9** |\n| Sabor | 3 | 3 | 2 | **8** |\n| Acidez | 3 | 3 | 2 | **8** |\n| Dulzor | 3 | 3 | 3 | **9** |\n| Cuerpo | 3 | 3 | 3 | **9** |\n| Balance | 3 | 3 | 3 | **9** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **24** | **24** | **22** | **70** |\n\n#### Joe — Clasificatoria (total **68**)\n\nSubtotales: J1=28 · J2=21 · J3=19 → **68**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 2 | **8** |\n| Sabor | 4 | 3 | 3 | **10** |\n| Acidez | 3 | 2 | 2 | **7** |\n| Dulzor | 3 | 2 | 2 | **7** |\n| Cuerpo | 4 | 3 | 3 | **10** |\n| Balance | 3 | 2 | 2 | **7** |\n| Limpieza de taza | 4 | 3 | 3 | **10** |\n| Impresión general | 4 | 3 | 2 | **9** |\n| **Subtotal juez** | **28** | **21** | **19** | **68** |\n\n#### Manjares — Clasificatoria (total **64**)\n\nSubtotales: J1=19 · J2=21 · J3=24 → **64**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 2 | 3 | 3 | **8** |\n| Sabor | 3 | 3 | 3 | **9** |\n| Acidez | 2 | 3 | 3 | **8** |\n| Dulzor | 3 | 3 | 3 | **9** |\n| Cuerpo | 2 | 2 | 3 | **7** |\n| Balance | 3 | 3 | 3 | **9** |\n| Limpieza de taza | 2 | 2 | 3 | **7** |\n| Impresión general | 2 | 2 | 3 | **7** |\n| **Subtotal juez** | **19** | **21** | **24** | **64** |\n\n#### Vera — Clasificatoria (total **60**)\n\nSubtotales: J1=19 · J2=20 · J3=21 → **60**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 3 | 3 | 3 | **9** |\n| Sabor | 2 | 2 | 2 | **6** |\n| Acidez | 2 | 2 | 3 | **7** |\n| Dulzor | 2 | 2 | 2 | **6** |\n| Cuerpo | 2 | 3 | 3 | **8** |\n| Balance | 2 | 2 | 2 | **6** |\n| Limpieza de taza | 3 | 3 | 3 | **9** |\n| Impresión general | 3 | 3 | 3 | **9** |\n| **Subtotal juez** | **19** | **20** | **21** | **60** |\n\n#### Brayan — Clasificatoria (total **58**)\n\nSubtotales: J1=18 · J2=19 · J3=21 → **58**\n\n| Parámetro | J1 | J2 | J3 | Suma 3 jueces |\n|---|--:|--:|--:|--:|\n| Aroma | 2 | 2 | 2 | **6** |\n| Sabor | 2 | 3 | 3 | **8** |\n| Acidez | 3 | 3 | 3 | **9** |\n| Dulzor | 3 | 3 | 3 | **9** |\n| Cuerpo | 2 | 2 | 2 | **6** |\n| Balance | 2 | 2 | 3 | **7** |\n| Limpieza de taza | 2 | 2 | 2 | **6** |\n| Impresión general | 2 | 2 | 3 | **7** |\n| **Subtotal juez** | **18** | **19** | **21** | **58** |\n",
+  "exportedAt": "2026-07-05T23:10:33.140Z"
 }

@@ -1902,6 +1902,65 @@ body.jurado-page--organizer .jurado-header-brand {
   margin: 0;
 }
 
+.jurado-preliminar-method {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: var(--jurado-radius-sm);
+  background: rgba(201, 162, 39, 0.08);
+  border: 1px solid rgba(201, 162, 39, 0.2);
+}
+
+.jurado-preliminar-phases {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.jurado-preliminar-phase h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.jurado-preliminar-phase-item {
+  border: 1px solid var(--jurado-border);
+  border-radius: var(--jurado-radius-sm);
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.jurado-preliminar-phase-item summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.jurado-preliminar-breakdown-wrap {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+
+.jurado-preliminar-table--breakdown {
+  font-size: 0.82rem;
+}
+
+.jurado-preliminar-breakdown-total td {
+  border-top: 2px solid rgba(201, 162, 39, 0.35);
+  background: rgba(201, 162, 39, 0.06);
+}
+
+.jurado-preliminar-breakdown-lead {
+  margin: 0.35rem 0 0.5rem;
+  font-size: 0.86rem;
+}
+
+.jurado-preliminar-detail-row td {
+  padding: 0.75rem 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.jurado-preliminar-expand {
+  white-space: nowrap;
+}
+
 /* ——— Historial de competencias ——— */
 
 .jurado-hub-history {

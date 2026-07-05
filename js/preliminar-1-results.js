@@ -349,6 +349,124 @@
     return RAW_ROWS.map(enrichRow);
   }
 
+  function getRowsByEntrada(entrada) {
+    return getEnrichedRows().filter(function (r) { return r.entrada === entrada; })
+      .sort(function (a, b) {
+        if (b.total !== a.total) return b.total - a.total;
+        return a.participante.localeCompare(b.participante, 'es');
+      });
+  }
+
+  function entradaLabel(entrada) {
+    if (entrada === 1) return 'Clasificatoria';
+    if (entrada === 2) return 'Semifinal';
+    if (entrada === 3) return 'Final';
+    return 'Tanda ' + entrada;
+  }
+
+  /** Texto que explica la lógica del puntaje (planilla solo trae subtotales por juez). */
+  function scoringMethodNote() {
+    return 'La planilla original registra el subtotal de cada juez (J1+J2+J3). ' +
+      'Como no hay nota por parámetro en papel, el sistema reconstruye el desglose en 8 criterios SCA/WBrC ' +
+      '(escala ' + EVENT.scaleMin + '–' + EVENT.scaleMax + ' por criterio) repartiendo cada subtotal de forma ' +
+      'determinística: la suma de los 8 parámetros de un juez coincide exactamente con su columna J1, J2 o J3.';
+  }
+
+  function buildJudgeBreakdownLines(judgeKey, judgeBlock) {
+    var block = judgeBlock[judgeKey];
+    if (!block || !block.scores) return [];
+    return CRITERIA.map(function (c) {
+      return {
+        key: c.key,
+        label: c.label,
+        valor: block.scores[c.key],
+        judgeKey: judgeKey
+      };
+    });
+  }
+
+  function renderBreakdownTableHtml(row, opts) {
+    opts = opts || {};
+    var compact = !!opts.compact;
+    var judges = row.judges || {};
+    var head = '<thead><tr><th>Parámetro</th><th>J1</th><th>J2</th><th>J3</th><th>Suma</th></tr></thead>';
+    var body = CRITERIA.map(function (c) {
+      var v1 = judges.j1 && judges.j1.scores ? judges.j1.scores[c.key] : '—';
+      var v2 = judges.j2 && judges.j2.scores ? judges.j2.scores[c.key] : '—';
+      var v3 = judges.j3 && judges.j3.scores ? judges.j3.scores[c.key] : '—';
+      var suma = (typeof v1 === 'number' ? v1 : 0) + (typeof v2 === 'number' ? v2 : 0) + (typeof v3 === 'number' ? v3 : 0);
+      return '<tr><td>' + c.label + '</td>' +
+        '<td class="jurado-preliminar-num">' + v1 + '</td>' +
+        '<td class="jurado-preliminar-num">' + v2 + '</td>' +
+        '<td class="jurado-preliminar-num">' + v3 + '</td>' +
+        '<td class="jurado-preliminar-num"><strong>' + suma + '</strong></td></tr>';
+    }).join('');
+    var foot = '<tfoot><tr class="jurado-preliminar-breakdown-total">' +
+      '<td><strong>Subtotal juez</strong></td>' +
+      '<td class="jurado-preliminar-num"><strong>' + row.j1 + '</strong></td>' +
+      '<td class="jurado-preliminar-num"><strong>' + row.j2 + '</strong></td>' +
+      '<td class="jurado-preliminar-num"><strong>' + row.j3 + '</strong></td>' +
+      '<td class="jurado-preliminar-total"><strong>' + row.total + '</strong></td></tr></tfoot>';
+    var title = compact ? '' : (
+      '<p class="jurado-preliminar-breakdown-lead">' +
+      '<strong>' + row.participante + '</strong> · ' + entradaLabel(row.entrada) +
+      ' · total <strong>' + row.total + '</strong> = ' + row.j1 + ' + ' + row.j2 + ' + ' + row.j3 +
+      '</p>'
+    );
+    return title +
+      '<div class="jurado-preliminar-breakdown-wrap">' +
+      '<table class="jurado-preliminar-table jurado-preliminar-table--breakdown">' +
+      head + '<tbody>' + body + '</tbody>' + foot + '</table></div>';
+  }
+
+  function renderBreakdownMarkdown(row) {
+    var lines = [
+      '#### ' + row.participante + ' — ' + entradaLabel(row.entrada) + ' (total **' + row.total + '**)',
+      '',
+      'Subtotales: J1=' + row.j1 + ' · J2=' + row.j2 + ' · J3=' + row.j3 + ' → **' + row.total + '**',
+      '',
+      '| Parámetro | J1 | J2 | J3 | Suma 3 jueces |',
+      '|---|--:|--:|--:|--:|'
+    ];
+    (row.breakdown || []).forEach(function (b) {
+      lines.push('| ' + b.label + ' | ' + b.j1 + ' | ' + b.j2 + ' | ' + b.j3 + ' | **' + b.suma + '** |');
+    });
+    lines.push('| **Subtotal juez** | **' + row.j1 + '** | **' + row.j2 + '** | **' + row.j3 + '** | **' + row.total + '** |');
+    lines.push('');
+    return lines.join('\n');
+  }
+
+  function buildBreakdownDocumentMarkdown() {
+    var lines = [
+      '## Cómo se calcula el puntaje',
+      '',
+      scoringMethodNote(),
+      '',
+      '**Fórmula:** total competidor = subtotal J1 + subtotal J2 + subtotal J3, donde cada subtotal = suma de los 8 parámetros (máx. ' +
+      (CRITERIA.length * EVENT.scaleMax) + ' pts por juez).',
+      '',
+      '**Parámetros evaluados:** ' + CRITERIA.map(function (c) { return c.label; }).join(', ') + '.',
+      ''
+    ];
+    [1, 2, 3].forEach(function (entrada) {
+      var phaseRows = getRowsByEntrada(entrada);
+      if (!phaseRows.length) return;
+      lines.push('## ' + entradaLabel(entrada));
+      lines.push('');
+      phaseRows.forEach(function (row) {
+        lines.push(renderBreakdownMarkdown(row));
+      });
+    });
+    lines.push('## Ranking importado (mejor tanda por competidor)');
+    lines.push('');
+    lines.push('Al pulsar «Cargar Preliminar 1» en la Consola, se usa la tanda con mayor total de cada uno.');
+    lines.push('');
+    getRankingConsolidado().forEach(function (row) {
+      lines.push(renderBreakdownMarkdown(row));
+    });
+    return lines.join('\n');
+  }
+
   /** Mejor tanda por competidor (mayor total de la preliminar). */
   function getRankingConsolidado() {
     var best = {};
@@ -445,6 +563,8 @@
       calificaciones: buildCalificacionesStore(),
       competidores: buildCompetidorList(),
       platformConfig: buildPlatformConfigSnippet(),
+      scoringMethodNote: scoringMethodNote(),
+      breakdownMarkdown: buildBreakdownDocumentMarkdown(),
       exportedAt: new Date().toISOString()
     };
   }
@@ -460,6 +580,12 @@
     resolveInscritoKey: resolveInscritoKey,
     getInscritosList: getInscritosList,
     getEnrichedRows: getEnrichedRows,
+    getRowsByEntrada: getRowsByEntrada,
+    entradaLabel: entradaLabel,
+    scoringMethodNote: scoringMethodNote,
+    renderBreakdownTableHtml: renderBreakdownTableHtml,
+    renderBreakdownMarkdown: renderBreakdownMarkdown,
+    buildBreakdownDocumentMarkdown: buildBreakdownDocumentMarkdown,
     getRankingConsolidado: getRankingConsolidado,
     buildCalificacionesStore: buildCalificacionesStore,
     buildCompetidorList: buildCompetidorList,

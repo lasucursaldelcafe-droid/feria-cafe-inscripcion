@@ -3584,40 +3584,82 @@
       box.innerHTML = '';
       return;
     }
+    var P = window.Preliminar1Results;
     var ranking = kit.ranking || [];
     var rawCount = (kit.rawRows || []).length;
     var inscritosCount = (kit.inscritos || []).length;
-    var rows = ranking.map(function (row) {
+    var methodNote = (P && P.scoringMethodNote) ? P.scoringMethodNote() : (kit.scoringMethodNote || '');
+    var rows = ranking.map(function (row, idx) {
       var label = row.nombreInscrito || row.participante;
       var sub = row.participante !== label
         ? '<span class="jurado-preliminar-planilla">' + escapeHtml(row.participante) + '</span>'
         : '';
-      return '<tr>' +
+      var detailId = 'preliminarDetail' + idx;
+      var breakdown = (P && P.renderBreakdownTableHtml)
+        ? P.renderBreakdownTableHtml(row, { compact: true })
+        : '';
+      return '<tr class="jurado-preliminar-row">' +
         '<td class="jurado-preliminar-rank">' + row.posicion + '</td>' +
         '<td><code class="jurado-preliminar-id">' + escapeHtml(row.competidorId) + '</code></td>' +
         '<td><strong>' + escapeHtml(label) + '</strong>' + sub + '</td>' +
-        '<td class="jurado-preliminar-num">T' + row.entrada + '</td>' +
+        '<td class="jurado-preliminar-num">' + (P && P.entradaLabel ? P.entradaLabel(row.entrada) : ('T' + row.entrada)) + '</td>' +
         '<td class="jurado-preliminar-num">' + row.j1 + '</td>' +
         '<td class="jurado-preliminar-num">' + row.j2 + '</td>' +
         '<td class="jurado-preliminar-num">' + row.j3 + '</td>' +
         '<td class="jurado-preliminar-total"><strong>' + row.total + '</strong></td>' +
-        '</tr>';
+        '<td class="jurado-preliminar-expand">' +
+        '<button type="button" class="jurado-btn-inline" data-preliminar-toggle="' + detailId + '" aria-expanded="false">Ver parámetros</button>' +
+        '</td></tr>' +
+        '<tr id="' + detailId + '" class="jurado-preliminar-detail-row" hidden><td colspan="9">' + breakdown + '</td></tr>';
     }).join('');
+
+    var phaseBlocks = '';
+    if (P && P.getRowsByEntrada) {
+      [1, 2, 3].forEach(function (entrada) {
+        var phaseRows = P.getRowsByEntrada(entrada);
+        if (!phaseRows.length) return;
+        var phaseHtml = phaseRows.map(function (row) {
+          return '<details class="jurado-preliminar-phase-item">' +
+            '<summary><strong>' + escapeHtml(row.participante) + '</strong> · ' + row.j1 + '+' + row.j2 + '+' + row.j3 + ' = ' + row.total + '</summary>' +
+            P.renderBreakdownTableHtml(row) +
+            '</details>';
+        }).join('');
+        phaseBlocks +=
+          '<div class="jurado-preliminar-phase">' +
+          '<h4>' + escapeHtml(P.entradaLabel(entrada)) + ' (' + phaseRows.length + ')</h4>' +
+          phaseHtml + '</div>';
+      });
+    }
+
     box.innerHTML =
       '<div class="jurado-preliminar-card">' +
       '<div class="jurado-preliminar-head">' +
       '<h3>Preliminar 1 — cruzado con inscritos</h3>' +
       '<p class="jurado-hint">' + escapeHtml(kit.event.nombre) + ' · ' + inscritosCount + ' inscritos · ' +
       rawCount + ' tandas · ' + ranking.length + ' en ranking (mejor tanda) · IDs <code>SC-*</code></p>' +
+      '<p class="jurado-hint jurado-preliminar-method">' + escapeHtml(methodNote) + '</p>' +
       '</div>' +
       '<div class="jurado-preliminar-table-wrap">' +
       '<table class="jurado-preliminar-table">' +
       '<thead><tr>' +
-      '<th>#</th><th>ID</th><th>Competidor</th><th>Tanda</th><th>J1</th><th>J2</th><th>J3</th><th>Total</th>' +
+      '<th>#</th><th>ID</th><th>Competidor</th><th>Fase</th><th>J1</th><th>J2</th><th>J3</th><th>Total</th><th></th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table>' +
       '</div>' +
-      '<p class="jurado-hint jurado-preliminar-foot">Importar carga calificaciones con ID real de inscripción (Sheets). Nombres de planilla entre paréntesis cuando difieren.</p>' +
+      (phaseBlocks ? '<div class="jurado-preliminar-phases"><h4>Desglose por fase y parámetro</h4>' + phaseBlocks + '</div>' : '') +
+      '<p class="jurado-hint jurado-preliminar-foot">Importar carga la mejor tanda por competidor. Descarga el JSON para el desglose completo en Markdown.</p>' +
       '</div>';
+
+    box.querySelectorAll('[data-preliminar-toggle]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-preliminar-toggle');
+        var row = document.getElementById(id);
+        if (!row) return;
+        var open = row.hidden;
+        row.hidden = !open;
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        btn.textContent = open ? 'Ocultar' : 'Ver parámetros';
+      });
+    });
   }
 
   function downloadPreliminar1Kit() {
