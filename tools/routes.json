@@ -48,6 +48,7 @@
       "key": "stands",
       "local": "stands.html",
       "hosted": "/stands",
+      "legacySources": ["/stands-reserva", "/stands-reserva-firebase"],
       "sitemap": { "changefreq": "weekly", "priority": "0.8" }
     },
     {
