@@ -5534,17 +5534,40 @@ textarea.has-value {
   --editorial-max: 680px;
   --editorial-bg: #FAF7F2;
   --editorial-surface: #FFFDF9;
-  --editorial-line: rgba(75, 53, 42, 0.1);
+  --editorial-line: rgba(75, 53, 42, 0.14);
   --editorial-ink: #3A2A22;
-  --editorial-muted: rgba(58, 42, 34, 0.68);
+  --editorial-muted: #5C4A42;
+  --editorial-muted-soft: #6E5C54;
   --editorial-accent: #8B5E3C;
+  --editorial-accent-dark: #6F4A2F;
   --editorial-hero-bg: linear-gradient(180deg, #FFFDF9 0%, #F3EDE4 100%);
 }
 
+/* Remapeo de tokens legacy → paleta editorial (una sola voz visual) */
 .page-festival--editorial,
 .page-festival.page-festival--editorial {
+  --text-dark: var(--editorial-ink);
+  --text-body: var(--editorial-ink);
+  --text-muted: var(--editorial-muted);
+  --brown-deep: var(--editorial-ink);
+  --brown-dark: var(--editorial-ink);
+  --coffee-deep: var(--editorial-ink);
+  --coffee-dark: #2a1e18;
+  --brown-warm: var(--editorial-accent);
+  --coffee-warm: var(--editorial-accent);
+  --red-brand: var(--editorial-accent);
+  --red-cta: var(--editorial-ink);
+  --red-hover: #2a1e18;
+  --bg-page: var(--editorial-bg);
+  --cream-light: var(--editorial-bg);
+  --cream-beige: #F3EDE4;
+  --surface-warm: var(--editorial-surface);
+  --surface-card: var(--editorial-surface);
+  --border-coffee: var(--editorial-line);
+  --border-coffee-subtle: var(--editorial-line);
+  --btn-radius: 999px;
   background: var(--editorial-bg);
-  color: var(--editorial-muted);
+  color: var(--editorial-ink);
 }
 
 .page-festival--editorial .site-header,
@@ -5576,6 +5599,10 @@ textarea.has-value {
 .page-festival--editorial .festival-nav__menu a.is-active,
 .page-festival--editorial .festival-nav__menu a:hover {
   color: var(--editorial-ink);
+}
+
+.page-festival--editorial .festival-nav__menu a.is-active {
+  border-bottom-color: var(--editorial-accent);
 }
 
 .page-festival--editorial .bizcard-layout,
@@ -5631,19 +5658,23 @@ textarea.has-value {
 }
 
 .page-festival--editorial .bizcard__title {
+  font-family: var(--font-display);
   font-size: clamp(2rem, 6vw, 2.65rem);
   font-weight: 600;
   color: var(--editorial-ink);
   letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 
 .page-festival--editorial .bizcard__heading {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 3.2vw, 1.45rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
   color: var(--editorial-ink);
   text-align: left;
+  line-height: 1.25;
 }
 
 .page-festival--editorial .bizcard__lead,
@@ -5662,29 +5693,63 @@ textarea.has-value {
 }
 
 .page-festival--editorial .btn-submit,
-.page-festival--editorial .festival-btn-primary {
+.page-festival--editorial .festival-btn-primary,
+.page-festival--editorial .feria-modal__cta,
+.page-festival--editorial .btn-rules,
+.page-festival--editorial .btn-guide,
+.page-festival--editorial .btn-whatsapp,
+.page-festival--editorial .btn-select-all {
   background: var(--editorial-ink);
-  border-color: var(--editorial-ink);
+  border: 2px solid var(--editorial-ink);
   color: var(--cream-pale);
   border-radius: 999px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   min-width: 0;
+  box-shadow: 0 6px 20px rgba(58, 42, 34, 0.14);
 }
 
-.page-festival--editorial .btn-submit:hover,
-.page-festival--editorial .festival-btn-primary:hover {
-  background: #2a1e18;
-  border-color: #2a1e18;
+.page-festival--editorial .btn-submit:hover:not(:disabled),
+.page-festival--editorial .festival-btn-primary:hover,
+.page-festival--editorial .feria-modal__cta:hover,
+.page-festival--editorial .btn-rules:hover,
+.page-festival--editorial .btn-guide:hover,
+.page-festival--editorial .btn-whatsapp:hover,
+.page-festival--editorial .btn-select-all:hover {
+  background: var(--coffee-dark);
+  border-color: var(--coffee-dark);
+  color: var(--cream-pale);
+  box-shadow: 0 8px 24px rgba(58, 42, 34, 0.2);
 }
 
 .page-festival--editorial .btn-secondary,
-.page-festival--editorial .festival-btn-secondary {
-  background: transparent;
+.page-festival--editorial .festival-btn-secondary,
+.page-festival--editorial .feria-modal__dismiss,
+.page-festival--editorial .btn-clear-file {
+  background: var(--editorial-surface);
   color: var(--editorial-ink);
   border: 1.5px solid var(--editorial-line);
   border-radius: 999px;
   min-width: 0;
+  box-shadow: none;
+}
+
+.page-festival--editorial .btn-secondary:hover:not(:disabled),
+.page-festival--editorial .festival-btn-secondary:hover,
+.page-festival--editorial .feria-modal__dismiss:hover,
+.page-festival--editorial .btn-clear-file:hover {
+  background: var(--editorial-bg);
+  border-color: rgba(75, 53, 42, 0.22);
+  color: var(--editorial-ink);
+  box-shadow: none;
+}
+
+.page-festival--editorial .btn-submit:disabled,
+.page-festival--editorial .btn-secondary:disabled {
+  background: #9a8a82;
+  border-color: #9a8a82;
+  color: var(--cream-pale);
+  opacity: 1;
 }
 
 .page-festival--editorial .festival-explore__tabs {
@@ -5823,9 +5888,11 @@ textarea.has-value {
 
 .page-festival--editorial .section-title,
 .page-festival--editorial .section-title--dark {
+  font-family: var(--font-display);
   font-size: clamp(1.35rem, 4vw, 1.75rem);
   font-weight: 600;
   color: var(--editorial-ink);
+  letter-spacing: -0.01em;
 }
 
 .page-festival--editorial .festival-section {
@@ -5894,6 +5961,141 @@ textarea.has-value {
   border: 1px solid var(--editorial-line);
   border-radius: 16px;
   box-shadow: 0 8px 28px rgba(58, 42, 34, 0.05);
+}
+
+/* Tipografía, enlaces, formularios y pie — coherencia editorial */
+.page-festival--editorial a:hover {
+  color: var(--editorial-accent-dark);
+}
+
+.page-festival--editorial .hint a:hover,
+.page-festival--editorial .card-body a:hover,
+.page-festival--editorial .info-box a:hover,
+.page-festival--editorial .section a:hover,
+.page-festival--editorial .festival-back-link a:hover {
+  color: var(--editorial-accent-dark);
+}
+
+.page-festival--editorial .hint,
+.page-festival--editorial .festival-footer__copy,
+.page-festival--editorial .form-panel .hint {
+  color: var(--editorial-muted);
+}
+
+.page-festival--editorial label,
+.page-festival--editorial .info-box,
+.page-festival--editorial .info-box strong,
+.page-festival--editorial .card-body,
+.page-festival--editorial .festival-card h2,
+.page-festival--editorial .festival-card h3 {
+  color: var(--editorial-ink);
+}
+
+.page-festival--editorial label .required {
+  color: var(--editorial-accent);
+}
+
+.page-festival--editorial input[type="text"],
+.page-festival--editorial input[type="email"],
+.page-festival--editorial input[type="tel"],
+.page-festival--editorial input[type="number"],
+.page-festival--editorial select,
+.page-festival--editorial textarea {
+  background: var(--editorial-surface);
+  border-color: var(--editorial-line);
+  color: var(--editorial-ink);
+}
+
+.page-festival--editorial input:focus,
+.page-festival--editorial select:focus,
+.page-festival--editorial textarea:focus,
+.page-festival--editorial input:focus-visible,
+.page-festival--editorial select:focus-visible,
+.page-festival--editorial textarea:focus-visible {
+  border-color: var(--editorial-accent);
+  box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.18);
+}
+
+.page-festival--editorial .info-box {
+  background: var(--editorial-bg);
+  border-color: var(--editorial-line);
+  border-left-color: var(--editorial-accent);
+  color: var(--editorial-ink);
+}
+
+.page-festival--editorial .badge {
+  color: var(--editorial-ink);
+  background: var(--editorial-surface);
+  border-color: var(--editorial-line);
+}
+
+.page-festival--editorial .badge.price {
+  color: var(--cream-pale);
+  background: var(--editorial-ink);
+  border-color: var(--editorial-ink);
+}
+
+.page-festival--editorial .site-hero--coffee .festival-sub-hero__title {
+  font-family: var(--font-display);
+}
+
+.page-festival--editorial .festival-sub-hero__lead,
+.page-festival--editorial .site-hero--coffee .festival-sub-hero__lead {
+  color: var(--editorial-muted);
+}
+
+.page-festival--editorial .festival-section + .festival-section {
+  border-top-color: var(--editorial-line);
+}
+
+.page-festival--editorial .festival-footer {
+  background: var(--editorial-ink);
+  border-top: 4px solid var(--editorial-accent);
+  color: var(--cream-pale);
+}
+
+.page-festival--editorial .festival-footer__nav a,
+.page-festival--editorial .festival-footer .festival-social a {
+  color: rgba(255, 253, 249, 0.92);
+}
+
+.page-festival--editorial .festival-footer__nav a:hover {
+  color: #fff;
+}
+
+.page-festival--editorial .festival-footer__dates {
+  color: rgba(255, 253, 249, 0.82);
+}
+
+.page-festival--editorial .festival-footer__copy {
+  color: rgba(255, 253, 249, 0.68);
+  border-top-color: rgba(255, 253, 249, 0.14);
+}
+
+.page-festival--editorial .festival-event-card,
+.page-festival--editorial .festival-stat strong,
+.page-festival--editorial .festival-why strong {
+  color: var(--editorial-ink);
+}
+
+.page-festival--editorial .festival-explore__cta:hover {
+  color: var(--editorial-accent-dark);
+}
+
+.page-festival--editorial .checkbox-item,
+.page-festival--editorial .choice-item {
+  background: var(--editorial-surface);
+  border: 1px solid var(--editorial-line);
+  color: var(--editorial-ink);
+}
+
+.page-festival--editorial .feria-modal__title {
+  font-family: var(--font-display);
+  color: var(--editorial-ink);
+}
+
+.page-festival--editorial .feria-modal__note {
+  color: var(--editorial-muted);
 }
 
 @media (min-width: 768px) {
