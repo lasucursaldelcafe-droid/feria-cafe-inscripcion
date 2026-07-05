@@ -113,7 +113,8 @@
 
     var comp = data.competidor || {};
     var torneo = data.torneo || {};
-    var cal = data.calificacion;
+    var blocked = data.resultadosPublicados === false;
+    var cal = blocked ? null : data.calificacion;
     var scoring = data.scoring || {};
     var jmax = scoring.jueces || 3;
     var criteria = scoring.criteria && scoring.criteria.length
@@ -134,10 +135,26 @@
       comp.representa ? 'Representa: ' + comp.representa : ''
     ].filter(Boolean).join(' · ');
 
+    var blockedBox = $('resultBlockedBox');
+    var scoresWrap = $('resultScoresWrap');
+    if (blockedBox) blockedBox.hidden = !blocked;
+    if (scoresWrap) scoresWrap.hidden = !!blocked;
+    if (blocked) {
+      var blockedMsg = $('resultBlockedMsg');
+      if (blockedMsg) {
+        blockedMsg.textContent = data.mensajeBloqueo ||
+          'El organizador publicará tus calificaciones al finalizar la ronda.';
+      }
+      $('loginSection').hidden = true;
+      $('resultsSection').hidden = false;
+      $('loadingMsg').hidden = true;
+      return;
+    }
+
     var estadoEl = $('resultEstadoBadge');
     estadoEl.textContent = estadoLabel(torneo.estado);
     estadoEl.className = 'jurado-result-estado ' + estadoClass(torneo.estado);
-    $('resultFaseLabel').textContent = torneo.faseLabel || 'Torneo';
+    $('resultFaseLabel').textContent = (cal && cal.faseLabel) || torneo.faseLabel || 'Torneo';
 
     var total = cal && cal.sumaTotal != null ? cal.sumaTotal + ' pts' : '—';
     $('resultTotalPts').textContent = total;

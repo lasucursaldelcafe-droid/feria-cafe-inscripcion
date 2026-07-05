@@ -2434,6 +2434,38 @@ body.jurado-page--resultados .jurado-shell {
   flex-shrink: 0;
 }
 
+.jurado-publish-panel {
+  margin: 16px 0 18px;
+  padding: 16px 18px;
+  border-radius: var(--jurado-radius-sm);
+  background: rgba(201, 162, 39, 0.08);
+  border: 1px solid rgba(201, 162, 39, 0.28);
+}
+
+.jurado-publish-panel .jurado-btn {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.jurado-result-blocked {
+  text-align: center;
+  padding: 32px 24px 36px;
+  border-color: rgba(201, 162, 39, 0.35);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.08) 0%, rgba(201, 162, 39, 0.05) 100%);
+}
+
+.jurado-result-blocked-icon {
+  font-size: 2rem;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.jurado-result-blocked h2 {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
 .jurado-page-footer {
   margin-top: 32px;
   padding-top: 20px;

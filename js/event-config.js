@@ -307,7 +307,7 @@ window.EVENT_CONFIG = {
     pinOrganizador: 'v60organizador',
     pinJuez: 'v60sensorial',
     jueces: 3,
-    cacheVersion: '20260705jurado23',
+    cacheVersion: '20260705jurado24',
     roles: []
   }
 };

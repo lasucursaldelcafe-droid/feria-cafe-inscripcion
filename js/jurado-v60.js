@@ -891,8 +891,77 @@
       historial: Array.isArray(raw.historial) ? raw.historial.map(function (h) {
         return h && typeof h === 'object' ? Object.assign({}, h) : null;
       }).filter(Boolean) : [],
+      resultadosCompetidor: normalizeResultadosCompetidor(raw.resultadosCompetidor),
       actualizado: raw.actualizado || ''
     };
+  }
+
+  function normalizeResultadosCompetidor(raw) {
+    if (!raw || typeof raw !== 'object') return {};
+    var out = {};
+    Object.keys(raw).forEach(function (id) {
+      var entry = raw[id];
+      if (!entry || typeof entry !== 'object') return;
+      out[id] = {
+        roundKey: String(entry.roundKey || ''),
+        faseLabel: String(entry.faseLabel || ''),
+        publicadoAt: String(entry.publicadoAt || ''),
+        judges: entry.judges && typeof entry.judges === 'object' ? entry.judges : {},
+        notas: String(entry.notas || ''),
+        sumaTotal: entry.sumaTotal != null ? entry.sumaTotal : null,
+        promedio: entry.promedio != null ? entry.promedio : null
+      };
+    });
+    return out;
+  }
+
+  function snapshotCalificacionForPublish(row) {
+    if (!row) return null;
+    return {
+      judges: JSON.parse(JSON.stringify(row.judges || {})),
+      notas: String(row.notas || '').trim(),
+      sumaTotal: row.sumaTotal != null ? row.sumaTotal : null,
+      promedio: row.promedio != null ? row.promedio : null
+    };
+  }
+
+  function clearPublishedResultsForIds(ids) {
+    if (!bracketState || !bracketState.resultadosCompetidor) return;
+    ids.forEach(function (id) {
+      delete bracketState.resultadosCompetidor[id];
+    });
+  }
+
+  function publishResultsToCompetitors() {
+    if (!bracketState) return Promise.reject(new Error('No hay torneo iniciado.'));
+    var activos = getActiveCompetitorIds();
+    if (!activos.length) return Promise.reject(new Error('No hay participantes activos en esta ronda.'));
+
+    if (!bracketState.resultadosCompetidor) bracketState.resultadosCompetidor = {};
+    var roundKey = roundProgressKey();
+    var faseLabel = currentPhaseTitle();
+    var now = new Date().toISOString();
+    var published = 0;
+
+    activos.forEach(function (id) {
+      var row = getRowById(id);
+      var snap = snapshotCalificacionForPublish(row);
+      if (!snap || snap.sumaTotal == null) return;
+      bracketState.resultadosCompetidor[id] = Object.assign({}, snap, {
+        roundKey: roundKey,
+        faseLabel: faseLabel,
+        publicadoAt: now
+      });
+      published++;
+    });
+
+    if (!published) {
+      return Promise.reject(new Error('No hay calificaciones completas para publicar. Espera a que los jueces terminen.'));
+    }
+
+    return saveBracketStore(bracketState).then(function () {
+      return published;
+    });
   }
 
   function defaultBracketState() {
@@ -910,6 +979,7 @@
       grupoIndex: 0,
       clasificadosGrupos: [],
       historial: [],
+      resultadosCompetidor: {},
       actualizado: new Date().toISOString()
     };
   }
@@ -1017,6 +1087,7 @@
     bracketState.grupoIndex = 0;
     bracketState.rondaEnFase = 1;
     bracketState.historial = [];
+    bracketState.resultadosCompetidor = {};
 
     if (plan[0] === 'grupos') {
       bracketState.grupos = buildGroupsFromOrder(shuffled);
@@ -1077,6 +1148,7 @@
       bracketState.activos = bracketState.grupos[nextIndex].ids.slice();
       bracketState.rondaEnFase = 1;
       bracketState.overrides = {};
+      clearPublishedResultsForIds(bracketState.activos);
       return saveBracketStore(bracketState).then(function () {
         return resetScoresForIds(bracketState.activos);
       });
@@ -1092,6 +1164,7 @@
     bracketState.grupos = bracketState.grupos;
     bracketState.rondaEnFase = 1;
     bracketState.overrides = {};
+    clearPublishedResultsForIds(qualified);
 
     return saveBracketStore(bracketState).then(function () {
       return resetScoresForIds(qualified);
@@ -2069,6 +2142,7 @@
         bracketState.eliminados.push(id);
       }
     });
+    clearPublishedResultsForIds(winners);
     return saveBracketStore(bracketState).then(function () {
       return resetScoresForIds(winners);
     });
@@ -2103,6 +2177,7 @@
         bracketState.eliminados.push(id);
       }
     });
+    clearPublishedResultsForIds(winners);
     return saveBracketStore(bracketState).then(function () {
       return resetScoresForIds(winners);
     });
@@ -2554,6 +2629,22 @@
     if (phaseLabel) phaseLabel.textContent = 'Fase actual: ' + currentPhaseTitle() +
       ' · ' + getActiveCompetitorIds().length + ' activo(s)';
 
+    var pubStatus = $('resultadosPublishStatus');
+    if (pubStatus) {
+      var activosPub = getActiveCompetitorIds();
+      var map = (bracketState && bracketState.resultadosCompetidor) ? bracketState.resultadosCompetidor : {};
+      var pubCount = activosPub.filter(function (id) { return !!map[id]; }).length;
+      if (pubCount > 0) {
+        pubStatus.textContent = '✓ Resultados visibles para ' + pubCount + ' competidor(es) en ' + currentPhaseTitle() + '.';
+        pubStatus.className = 'jurado-success';
+        pubStatus.hidden = false;
+      } else {
+        pubStatus.textContent = 'Los competidores no pueden ver sus puntajes hasta que publiques esta ronda.';
+        pubStatus.className = 'jurado-hint';
+        pubStatus.hidden = false;
+      }
+    }
+
     var advanceBtn = $('advanceWinnersBtn');
     if (advanceBtn) {
       if (isPuntajeGeneralMode() && !isGruposPhase()) {
@@ -2643,6 +2734,23 @@
           refreshOrganizer();
         }).catch(function (err) {
           showAdminMsg(err.message || 'Error al reiniciar', true);
+        });
+      });
+    }
+
+    var publishBtn = $('publishResultadosBtn');
+    if (publishBtn) {
+      publishBtn.addEventListener('click', function () {
+        var fase = currentPhaseTitle();
+        if (!confirm('¿Publicar los resultados de «' + fase + '» para que los competidores los vean en el portal?\n\nSolo verán sus puntajes después de esta acción.')) return;
+        publishBtn.disabled = true;
+        publishResultsToCompetitors().then(function (count) {
+          showAdminMsg('✓ Resultados publicados para ' + count + ' competidor(es). Ya pueden consultarlos.');
+          refreshOrganizer();
+        }).catch(function (err) {
+          showAdminMsg(err.message || 'No se pudieron publicar los resultados.', true);
+        }).finally(function () {
+          publishBtn.disabled = false;
         });
       });
     }

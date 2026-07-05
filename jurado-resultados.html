@@ -8,7 +8,7 @@
   <title>Mis resultados — Torneo sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado23">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado24">
 </head>
 <body class="jurado-page jurado-page--resultados">
   <div class="jurado-shell">
@@ -27,7 +27,7 @@
       <div class="jurado-login-hero">
         <div class="jurado-login-icon" aria-hidden="true">☕</div>
         <h2>Ingresa a tus resultados</h2>
-        <p class="jurado-hint">Consulta tu puntaje en tiempo real durante el torneo sensorial.</p>
+        <p class="jurado-hint">Tus calificaciones se muestran solo cuando el organizador las publique al cerrar la ronda.</p>
       </div>
       <div class="jurado-login-steps" role="list">
         <div class="jurado-login-step" role="listitem">
@@ -70,37 +70,46 @@
         </div>
       </div>
 
-      <div class="jurado-card jurado-result-summary">
-        <div class="jurado-result-summary-grid">
-          <div class="jurado-result-stat">
-            <span class="jurado-result-stat-label">Estado</span>
-            <p><span id="resultEstadoBadge" class="jurado-result-estado">—</span></p>
-          </div>
-          <div class="jurado-result-stat">
-            <span class="jurado-result-stat-label">Fase actual</span>
-            <p id="resultFaseLabel" class="jurado-result-fase">—</p>
-          </div>
-          <div class="jurado-result-stat">
-            <span class="jurado-result-stat-label">Puntaje total</span>
-            <p id="resultTotalPts" class="jurado-result-total">—</p>
-            <p id="resultPromedio" class="jurado-result-promedio">—</p>
-          </div>
-        </div>
+      <div id="resultBlockedBox" class="jurado-card jurado-result-blocked" hidden>
+        <div class="jurado-result-blocked-icon" aria-hidden="true">⏳</div>
+        <h2>Resultados aún no disponibles</h2>
+        <p id="resultBlockedMsg" class="jurado-hint">El organizador publicará tus calificaciones al finalizar la ronda.</p>
+        <p class="jurado-meta">Esta página se actualiza sola. Vuelve en unos minutos.</p>
       </div>
 
-      <div class="jurado-card">
-        <div class="jurado-card-head">
-          <h2>Calificación por juez</h2>
-          <p class="jurado-hint">Desglose por criterios sensoriales. Se actualiza automáticamente cada pocos segundos.</p>
+      <div id="resultScoresWrap">
+        <div class="jurado-card jurado-result-summary">
+          <div class="jurado-result-summary-grid">
+            <div class="jurado-result-stat">
+              <span class="jurado-result-stat-label">Estado</span>
+              <p><span id="resultEstadoBadge" class="jurado-result-estado">—</span></p>
+            </div>
+            <div class="jurado-result-stat">
+              <span class="jurado-result-stat-label">Fase</span>
+              <p id="resultFaseLabel" class="jurado-result-fase">—</p>
+            </div>
+            <div class="jurado-result-stat">
+              <span class="jurado-result-stat-label">Puntaje total</span>
+              <p id="resultTotalPts" class="jurado-result-total">—</p>
+              <p id="resultPromedio" class="jurado-result-promedio">—</p>
+            </div>
+          </div>
         </div>
-        <div id="resultJudgesGrid" class="jurado-result-judges-grid"></div>
-      </div>
 
-      <div id="resultNotasBox" class="jurado-card" hidden>
-        <div class="jurado-card-head">
-          <h2>Notas del jurado</h2>
+        <div class="jurado-card">
+          <div class="jurado-card-head">
+            <h2>Calificación por juez</h2>
+            <p class="jurado-hint">Desglose por criterios sensoriales de la ronda publicada.</p>
+          </div>
+          <div id="resultJudgesGrid" class="jurado-result-judges-grid"></div>
         </div>
-        <p id="resultNotasText" class="jurado-result-notas"></p>
+
+        <div id="resultNotasBox" class="jurado-card" hidden>
+          <div class="jurado-card-head">
+            <h2>Notas del jurado</h2>
+          </div>
+          <p id="resultNotasText" class="jurado-result-notas"></p>
+        </div>
       </div>
     </section>
 
@@ -111,14 +120,14 @@
     </footer>
   </div>
 
-  <script src="js/event-config.js?v=20260705jurado23"></script>
-  <script src="js/site-links.js?v=20260705jurado23"></script>
+  <script src="js/event-config.js?v=20260705jurado24"></script>
+  <script src="js/site-links.js?v=20260705jurado24"></script>
   <script>
     window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec'
     };
     if (window.SiteLinks) SiteLinks.applyLinkElements(document);
   </script>
-  <script src="js/jurado-resultados.js?v=20260705jurado23"></script>
+  <script src="js/jurado-resultados.js?v=20260705jurado24"></script>
 </body>
 </html>
