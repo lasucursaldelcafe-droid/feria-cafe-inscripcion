@@ -86,7 +86,11 @@ Depende del **modo de clasificación** configurado en Marca y reglas:
 | **Puntaje general** | Ranking de todos los activos · avanzan los mejores por puntaje total |
 
 - En duelos: empate o falta de puntajes → **Declarar ganador**
-- Tras cerrar ronda: **Avanzar ganadores** o **Clasificar por puntaje** (modo ranking) en **Control**
+- Tras cerrar ronda: **Publicar resultados a competidores** (obligatorio para que vean puntajes) y luego **Avanzar ganadores** o **Clasificar por puntaje** en **Control**
+
+### Portal resultados (competidor)
+
+Los participantes **no ven calificaciones en vivo**. Solo acceden a sus puntajes cuando el organizador pulsa **«Publicar resultados a competidores»** en **Control de ronda**, típicamente al terminar la ronda. Los eliminados conservan la última publicación de su ronda.
 
 ### 4. Puntajes
 
@@ -241,4 +245,4 @@ Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado
 
 ---
 
-*Última actualización: julio 2026 · cache `jurado23`*
+*Última actualización: julio 2026 · cache `jurado24`*

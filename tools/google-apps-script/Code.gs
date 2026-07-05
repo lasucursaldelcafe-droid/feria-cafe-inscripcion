@@ -3565,20 +3565,33 @@ function handleJuradoResultadosLogin_(payload) {
   var platformCfg = getPasaporteConfig_(juradoTenantKey_('jurado_v60_platform', evt));
 
   var scoresRoot = calCfg.data && calCfg.data.scores ? calCfg.data.scores : {};
-  var calRaw = scoresRoot[competidorId] || null;
+  var bracket = bracketCfg.data || null;
+  var resultadosMap = bracket && bracket.resultadosCompetidor && typeof bracket.resultadosCompetidor === 'object'
+    ? bracket.resultadosCompetidor
+    : {};
+  var published = resultadosMap[competidorId] || null;
+
   var calificacion = null;
-  if (calRaw) {
+  var resultadosPublicados = false;
+  var mensajeBloqueo = '';
+
+  if (published) {
+    resultadosPublicados = true;
     calificacion = {
       competidorId: competidorId,
-      judges: calRaw.judges || {},
-      notas: String(calRaw.notas || '').trim(),
-      sumaTotal: calRaw.sumaTotal != null ? calRaw.sumaTotal : null,
-      promedio: calRaw.promedio != null ? calRaw.promedio : null
+      judges: published.judges || {},
+      notas: String(published.notas || '').trim(),
+      sumaTotal: published.sumaTotal != null ? published.sumaTotal : null,
+      promedio: published.promedio != null ? published.promedio : null,
+      faseLabel: String(published.faseLabel || '').trim(),
+      publicadoAt: String(published.publicadoAt || '').trim()
     };
+  } else {
+    mensajeBloqueo = 'El organizador aún no ha publicado los resultados de esta ronda. Vuelve a consultar cuando el torneo lo indique.';
   }
 
-  var bracket = bracketCfg.data || null;
-  var torneo = juradoResultadosTorneoStatus_(bracket, competidorId);
+  var bracketForStatus = bracket;
+  var torneo = juradoResultadosTorneoStatus_(bracketForStatus, competidorId);
   var platform = platformCfg.data || {};
   var scoring = platform.scoring || {};
   var criteria = Array.isArray(scoring.criteria) ? scoring.criteria : [];
@@ -3593,6 +3606,8 @@ function handleJuradoResultadosLogin_(payload) {
     },
     torneo: torneo,
     calificacion: calificacion,
+    resultadosPublicados: resultadosPublicados,
+    mensajeBloqueo: mensajeBloqueo,
     evento: {
       nombre: String(platform.eventName || 'Torneo sensorial').trim(),
       subtitulo: String(platform.eventSubtitle || '').trim(),
