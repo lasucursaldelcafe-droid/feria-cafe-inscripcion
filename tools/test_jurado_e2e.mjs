@@ -47,6 +47,20 @@ async function main() {
   const pageRes = await fetch(SITE + '/jurado/resultados', { redirect: 'follow' });
   console.log(pageRes.ok ? '[OK]' : '[WARN]', 'Página resultados HTTP', pageRes.status, pageRes.ok ? '' : '(tras deploy)');
 
+  const pageTorneo = await fetch(SITE + '/competencia/torneo', { redirect: 'follow' });
+  console.log(pageTorneo.ok ? '[OK]' : '[FAIL]', 'Página inscripción torneo HTTP', pageTorneo.status);
+  if (!pageTorneo.ok) failed++;
+
+  const torneoApi = await getJson(WEB + '?action=competencia_torneo_form&evt=__e2e_missing__');
+  const okTorneoApi = torneoApi && torneoApi.ok === false && String(torneoApi.error || '').length > 0;
+  console.log(okTorneoApi ? '[OK]' : '[FAIL]', 'API competencia_torneo_form responde JSON');
+  if (!okTorneoApi) failed++;
+
+  const health = await getJson(WEB + '?action=health');
+  const okHealth = health && health.ok === true && health.juradoV60Backend === true;
+  console.log(okHealth ? '[OK]' : '[FAIL]', 'Health juradoV60Backend');
+  if (!okHealth) failed++;
+
   const page = await fetch(SITE + '/jurado/juez?pin=v60sensorial&juez=1', { redirect: 'follow' });
   if (page.ok) {
     console.log('[OK]', 'Página jurado HTTP', page.status);

@@ -14,7 +14,11 @@ Plataforma de calificación sensorial en vivo, configurable para otros eventos (
 | **Inscripción evento** | https://la-sucursal-del-cafe.web.app/competencia |
 | **Inscripción torneo (white-label)** | `https://la-sucursal-del-cafe.web.app/competencia/torneo?evt=slug-del-torneo` |
 
-También desde el panel admin: **Competidores** → tarjeta «Enlaces del jurado».
+**Backend Apps Script (producción):**
+
+`https://script.google.com/macros/s/AKfycbzpxE3fFv-mS9hai146Mo-LOWRf3KaRYwyZf_S9wk-iB7X-8Ke09eMx2-KftQQV1yfz/exec`
+
+También desde el panel admin: **Competidores** → tarjeta «Enlaces del jurado» o «Clientes plataforma jurado».
 
 > Si cambias los PIN o el número de jueces en **Configuración**, vuelve a copiar y compartir los enlaces.
 
@@ -48,6 +52,17 @@ El formulario público de inscripción:
 - El cliente configura marca, reglas, criterios y **campos del formulario** en su panel.
 - En la pestaña **Inscripciones** ve el enlace público y la lista de registros en tiempo real.
 - Los competidores del torneo deben tener columna **Evento** = `slug` en el sheet principal (o vacía para incluir todos).
+
+### Flujo rápido — inscripción en línea
+
+1. **Admin** crea el apartado → copia enlace de **config** y de **inscripción**.
+2. El **cliente** abre `/jurado/config?evt=slug&pin=…`.
+3. En **Marca y reglas**: logo, colores, cupo, reglamento y **campos del formulario** → **Guardar**.
+4. En **Inscripciones**: copia el enlace público y compártelo (redes, QR, correo).
+5. Cada registro se guarda en:
+   - Hoja **`Comp. {slug}`** (base del torneo)
+   - Hoja **`Competencia`** (registro global, columna **Evento** = slug)
+6. En el panel **Torneo en vivo**, los inscritos habilitados aparecen para sorteo y calificación.
 
 ---
 
@@ -169,18 +184,37 @@ Personaliza el torneo para vender la plataforma a otros eventos:
 | **Avance por ronda** | Cuántos clasifican (0 = automático según fase) |
 | **Avance automático** | Al completar puntajes de todos los activos, pasa a la siguiente ronda sin pulsar botón |
 | **Criterios sensoriales** | Nombre y descripción; puedes añadir o quitar filas |
-| Datos de inscripción | Para la plantilla exportada: tarifa, cupo, fecha, lugar, correo, WhatsApp, reglamento |
+| **Campos del formulario** | Activa/desactiva campos, etiquetas, obligatoriedad y tipo (texto, email, tel, número, textarea) |
+| **Datos del evento** | Título del formulario, tarifa, cupo, fecha, lugar, contacto y URL del reglamento (visible en el formulario público) |
 
-Pulsa **Guardar configuración**. Se almacena en el servidor (`jurado_v60_platform`) y se aplica al instante en tablas, formularios de juez y enlaces.
+Pulsa **Guardar configuración**. Se almacena en el servidor (`jurado_v60_platform__{slug}`) y se aplica al instante en tablas, formularios de juez, formulario en línea y enlaces.
 
-### 7. Exportar
+### 7. Inscripciones (solo panel Config)
+
+Disponible en `/jurado/config` (no en el panel Torneo en vivo):
+
+| Elemento | Descripción |
+|----------|-------------|
+| **Enlace público** | `https://…/competencia/torneo?evt=slug` — compártelo con competidores |
+| **Copiar enlace** | Portapapeles para WhatsApp, QR o correo |
+| **Tabla de registros** | Lista en tiempo real desde la hoja `Comp. {slug}` |
+| **Actualizar lista** | Refresca sin recargar toda la página |
+
+Requisitos:
+- URL con `?evt=slug` del torneo white-label
+- PIN de organizador válido en la misma URL
+- Backend Apps Script desplegado con APIs `competencia_torneo_*`
+
+### 8. Exportar (opcional)
 
 | Botón | Contenido |
 |-------|-----------|
 | **Descargar config JSON** | Kit completo: marca, criterios, enlaces, fecha de exportación |
-| **Descargar formulario HTML** | Página de inscripción lista para publicar o conectar a tu backend |
+| **Descargar formulario HTML** | Plantilla estática offline (alternativa al formulario en línea) |
 
-El HTML incluye tu logo, colores y campos básicos (nombre, documento, correo, celular, ciudad, representa). Conéctalo a Google Apps Script u otro formulario según tu evento.
+> **Recomendado:** usa el formulario en línea (`/competencia/torneo?evt=…`). El HTML exportado sirve como respaldo o para eventos sin backend conectado.
+
+El HTML incluye logo, colores y campos básicos. El formulario en línea lee la configuración guardada en el servidor y respeta cupo y campos activos.
 
 ---
 
@@ -208,9 +242,13 @@ Por defecto el torneo V60 usa 7 criterios sensoriales (aroma, dulzor, acidez, sa
 
 | Clave `pasaporte_config` | Contenido |
 |--------------------------|-----------|
-| `jurado_v60_calificaciones` | Puntajes por competidor y juez |
-| `jurado_v60_bracket` | Fase, ronda, activos, eliminados, sorteo, grupos, plan de fases, **historial** |
-| `jurado_v60_platform` | Marca, colores, PINs, **scoring** (modo, escala, jueces, criterios), datos de inscripción |
+| `jurado_v60_calificaciones__{slug}` | Puntajes por competidor y juez (por torneo) |
+| `jurado_v60_bracket__{slug}` | Fase, ronda, activos, eliminados, sorteo, grupos, historial, publicación de resultados |
+| `jurado_v60_platform__{slug}` | Marca, colores, PINs, scoring, **formFields**, datos de inscripción |
+| Hoja **`Comp. {slug}`** | Inscripciones en línea del torneo white-label |
+| Hoja **`Competencia`** | Registro global; filtra jurado por columna **Evento** |
+
+Sin `?evt=slug` en la URL se usan las claves globales (`jurado_v60_*` sin sufijo) del festival principal.
 
 Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado** = sí).
 
@@ -222,7 +260,9 @@ Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado
 2. **Móvil para jueces, tablet/PC para organizador** — la UI de juez está optimizada para celular.
 3. **Actualización automática** — el organizador refresca cada 3 s; usa **Actualizar** si necesitas forzar.
 4. **Antes de una nueva ronda** — confirma ganadores en **Torneo**, luego **Avanzar ganadores** en **Control**.
-5. **Otros eventos** — configura **Marca y reglas**, exporta HTML/JSON y usa PINs propios; no hace falta tocar código.
+5. **Otros eventos** — configura **Marca y reglas**, comparte el enlace de **Inscripciones** y usa PINs propios; no hace falta tocar código.
+6. **Cupo** — cuando se llena, el formulario en línea muestra «cupo completo» y deja de aceptar envíos.
+7. **Publicar resultados** — en **Control**, pulsa «Publicar resultados a competidores» al cerrar cada ronda; hasta entonces el portal `/jurado/resultados` no muestra puntajes.
 
 ---
 
@@ -231,11 +271,17 @@ Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado
 | Problema | Qué hacer |
 |----------|-----------|
 | «Falta el PIN» | Usa el enlace completo con `?pin=...` |
-| No aparecen competidores | Revisa hoja Competencia y columna Habilitado |
+| `/competencia/torneo` da 404 | Espera deploy Firebase o relanza workflow **Actualizar todo** / **Deploy Firebase Hosting** |
+| «Torneo no encontrado» en inscripción | Verifica `?evt=slug` correcto y que el cliente fue creado en Admin |
+| «Cupo completo» | Aumenta cupo en Marca y reglas o deshabilita inscripciones antiguas en la hoja |
+| No aparecen inscripciones en la tabla | Pulsa **Actualizar lista**; revisa PIN organizador y slug en la URL |
+| No aparecen competidores en jurado | Revisa hoja Competencia, columna **Habilitado** y **Evento** = slug del torneo |
 | Duelo sin ganador | Espera a que todos los jueces califiquen o usa **Declarar ganador** / edición manual |
 | Modo ranking no avanza | Verifica que todos tengan nota completa; usa **Clasificar por puntaje** en Control |
-| Cambié PIN o jueces y el enlace viejo no funciona | Copia enlaces nuevos desde **Vista general** tras guardar en **Marca y reglas** |
-| Página con datos viejos | Forzar recarga (Ctrl+Shift+R); versión actual en URL: `jurado20` |
+| Competidor no ve resultados | El organizador debe **Publicar resultados a competidores** en Control |
+| Cambié PIN o jueces y el enlace viejo no funciona | Copia enlaces nuevos desde **Vista general** o **Inscripciones** tras guardar |
+| Página con datos viejos | Forzar recarga (Ctrl+Shift+R); versión actual: cache `jurado25` |
+| CI Apps Script falla | Renueva `OAUTH_SCRIPT_TOKEN` en GitHub Secrets y ejecuta `py tools/setup_admin.py` |
 
 ---
 
@@ -244,11 +290,30 @@ Los competidores se leen de la hoja **Competencia** (solo filas con **Habilitado
 | Recurso | Ubicación |
 |---------|-----------|
 | Panel admin | `/admin` → Competidores |
-| Inscripción pública V60 | `/competencia` |
-| Reglamento | `/reglas-v60-championship` |
-| Código panel jurado | `jurado-v60.html`, `js/jurado-v60.js`, `css/jurado-v60.css` |
-| Pruebas E2E | `node tools/test_jurado_e2e.mjs` |
+| Inscripción festival V60 | `/competencia` |
+| Inscripción torneo white-label | `/competencia/torneo?evt=slug` |
+| Reglamento | `/reglas` |
+| Código panel jurado | `jurado-config.html`, `js/jurado-v60.js`, `css/jurado-v60.css` |
+| Formulario público torneo | `competencia-torneo.html`, `js/competencia-torneo.js` |
+| Backend APIs torneo | `Code.gs` → `competencia_torneo_*` |
+| URL canónica backend | `tools/CANONICAL_SHEETS_URL.txt` |
+| Pruebas E2E jurado | `node tools/test_jurado_e2e.mjs` |
+| Verificar backend | `python3 tools/conectar_sheets.py --verificar` |
 
 ---
 
-*Última actualización: julio 2026 · cache `jurado24`*
+## Mantenimiento y deploy
+
+| Acción | Comando / dónde |
+|--------|-----------------|
+| Actualizar URL backend local | `python3 tools/conectar_sheets.py --configurar-url "<URL /exec>"` |
+| Secreto GitHub (CI) | `gh secret set SHEETS_WEB_APP_URL --body "$(cat tools/CANONICAL_SHEETS_URL.txt)"` |
+| Redeploy Apps Script manual | `python3 tools/setup_admin.py` (requiere OAuth en `tools/.env`) |
+| Sincronizar rutas Firebase | `python3 tools/sync_routes.py` |
+| Deploy hosting manual | Workflow **Deploy Firebase Hosting** o **Actualizar todo** en GitHub Actions |
+
+Tras cambiar `Code.gs`, el workflow **Deploy Apps Script** en `main` intenta subir el código. Si falla por `OAUTH_SCRIPT_TOKEN`, haz deploy manual y actualiza el token en GitHub Secrets.
+
+---
+
+*Última actualización: julio 2026 · cache `jurado25` · PR #52*
