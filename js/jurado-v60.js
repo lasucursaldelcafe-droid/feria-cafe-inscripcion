@@ -20,6 +20,7 @@
   var PIN_JUEZ = 'v60sensorial';
   var PIN_ORGANIZADOR = 'v60organizador';
   var CONFIG_KEY = 'jurado_v60_calificaciones';
+  var BRACKET_KEY = 'jurado_v60_bracket';
   var SESSION_KEY = 'lsc_jurado_v60_session';
   var REFRESH_MS = 3000;
 
@@ -31,9 +32,11 @@
   var judgeNum = 0;
   var competidores = [];
   var calificacionesMap = {};
+  var bracketState = null;
   var guardando = false;
   var refreshTimer = null;
   var organizerUiBound = false;
+  var organizerAdminBound = false;
   var selectedRoundNum = 0;
 
   function webAppUrl() {
@@ -122,6 +125,130 @@
       });
       return list;
     });
+  }
+
+  function normalizeBracketState(raw) {
+    if (!raw || !raw.fase) return null;
+    return {
+      fase: raw.fase,
+      rondaEnFase: parseInt(raw.rondaEnFase, 10) || 1,
+      activos: Array.isArray(raw.activos) ? raw.activos.slice() : [],
+      eliminados: Array.isArray(raw.eliminados) ? raw.eliminados.slice() : [],
+      actualizado: raw.actualizado || ''
+    };
+  }
+
+  function defaultBracketState() {
+    return {
+      fase: 'semifinal',
+      rondaEnFase: 1,
+      activos: competidores.map(function (c) { return c.id; }),
+      eliminados: [],
+      actualizado: new Date().toISOString()
+    };
+  }
+
+  function loadBracketStore() {
+    return sheetsGet('pasaporte_config', { key: BRACKET_KEY }).then(function (res) {
+      var normalized = normalizeBracketState(res.data);
+      if (normalized) {
+        bracketState = normalized;
+        if (!bracketState.activos.length && competidores.length) {
+          bracketState.activos = competidores.map(function (c) { return c.id; });
+        }
+        return bracketState;
+      }
+      bracketState = defaultBracketState();
+      return saveBracketStore(bracketState);
+    }).catch(function () {
+      bracketState = defaultBracketState();
+      return bracketState;
+    });
+  }
+
+  function saveBracketStore(state) {
+    state.actualizado = new Date().toISOString();
+    return sheetsPost({
+      action: 'pasaporte_config_save',
+      key: BRACKET_KEY,
+      data: state
+    }).then(function () {
+      bracketState = state;
+      return state;
+    });
+  }
+
+  function resetAllScoresStore() {
+    return sheetsPost({
+      action: 'pasaporte_config_save',
+      key: CONFIG_KEY,
+      data: { scores: {}, actualizado: new Date().toISOString() }
+    }).then(function () {
+      calificacionesMap = {};
+    });
+  }
+
+  function resetScoresForIds(ids) {
+    return sheetsGet('pasaporte_config', { key: CONFIG_KEY }).then(function (res) {
+      var data = res.data || {};
+      if (!data.scores || typeof data.scores !== 'object') data.scores = {};
+      ids.forEach(function (id) {
+        delete data.scores[id];
+        delete calificacionesMap[id];
+      });
+      data.actualizado = new Date().toISOString();
+      return sheetsPost({
+        action: 'pasaporte_config_save',
+        key: CONFIG_KEY,
+        data: data
+      });
+    });
+  }
+
+  function faseLabel(fase) {
+    var map = { clasificatoria: 'Clasificatoria', semifinal: 'Semifinal', final: 'Final' };
+    return map[fase] || fase;
+  }
+
+  function currentPhaseTitle() {
+    if (!bracketState) return 'Ronda 1';
+    return faseLabel(bracketState.fase) + ' · Ronda ' + (bracketState.rondaEnFase || 1);
+  }
+
+  function getActiveCompetitorIds() {
+    if (!bracketState || !bracketState.activos || !bracketState.activos.length) {
+      return competidores.map(function (c) { return c.id; });
+    }
+    return bracketState.activos.filter(function (id) {
+      return competidores.some(function (c) { return c.id === id; });
+    });
+  }
+
+  function eliminateParticipant(id) {
+    if (!bracketState) bracketState = defaultBracketState();
+    bracketState.activos = bracketState.activos.filter(function (x) { return x !== id; });
+    if (bracketState.eliminados.indexOf(id) < 0) bracketState.eliminados.push(id);
+    return saveBracketStore(bracketState);
+  }
+
+  function restoreParticipant(id) {
+    if (!bracketState) bracketState = defaultBracketState();
+    bracketState.eliminados = bracketState.eliminados.filter(function (x) { return x !== id; });
+    if (bracketState.activos.indexOf(id) < 0) bracketState.activos.push(id);
+    return saveBracketStore(bracketState);
+  }
+
+  function showAdminMsg(msg, isError) {
+    var ok = $('organizerAdminMsg');
+    var err = $('organizerAdminError');
+    if (ok) ok.hidden = true;
+    if (err) err.hidden = true;
+    if (isError) {
+      if (err) { err.textContent = msg; err.hidden = false; }
+    } else if (ok) {
+      ok.textContent = msg;
+      ok.hidden = false;
+    }
   }
 
   function saveCalificacionStore(calificacion, judgeKey) {
@@ -254,16 +381,38 @@
     $('pinError').hidden = false;
   }
 
-  function fillCompetidorSelect(selectEl, includeEmpty) {
+  function fillCompetidorSelect(selectEl, includeEmpty, sourceList) {
+    var list = sourceList || competidores;
     selectEl.innerHTML = includeEmpty !== false
       ? '<option value="">— Selecciona competidor —</option>'
       : '';
-    competidores.forEach(function (c) {
+    list.forEach(function (c) {
       var opt = document.createElement('option');
       opt.value = c.id;
       opt.textContent = c.nombre;
       selectEl.appendChild(opt);
     });
+  }
+
+  function competidoresActivos() {
+    var ids = getActiveCompetitorIds();
+    return competidores.filter(function (c) { return ids.indexOf(c.id) >= 0; });
+  }
+
+  function isActiveParticipant(id) {
+    return getActiveCompetitorIds().indexOf(id) >= 0;
+  }
+
+  function renderOrganizerDetailAdminActions(competidorId) {
+    var html = '<div class="jurado-detail-admin">';
+    html += '<button type="button" class="jurado-btn jurado-btn--secondary jurado-btn--small" data-reset-one="' + escapeHtml(competidorId) + '">Reiniciar puntajes</button> ';
+    if (isActiveParticipant(competidorId)) {
+      html += '<button type="button" class="jurado-btn jurado-btn--danger jurado-btn--small" data-eliminar="' + escapeHtml(competidorId) + '">Eliminar de la ronda</button>';
+    } else {
+      html += '<button type="button" class="jurado-btn jurado-btn--secondary jurado-btn--small" data-restaurar="' + escapeHtml(competidorId) + '">Restaurar en la ronda</button>';
+    }
+    html += '</div>';
+    return html;
   }
 
   function competidorMeta(found) {
@@ -484,7 +633,7 @@
     $('headerSubtitle').textContent = 'Califica 7 criterios · escala 1–5';
     $('judgeBadge').textContent = 'Juez ' + judgeNum;
 
-    fillCompetidorSelect($('judgeCompetidorSelect'));
+    fillCompetidorSelect($('judgeCompetidorSelect'), true, competidoresActivos());
     renderJudgeForm(null);
 
     $('judgeSection').hidden = false;
@@ -514,9 +663,187 @@
   }
 
   function renderOrganizerViews(list) {
+    renderOrganizerAdminPanel();
     renderOrganizerBracket();
     renderOrganizerScoresTable();
     renderOrganizerDetail($('organizerCompetidorSelect').value);
+  }
+
+  function renderOrganizerAdminPanel() {
+    if (!bracketState) bracketState = defaultBracketState();
+
+    var faseSel = $('bracketFaseSelect');
+    var rondaSel = $('bracketRondaSelect');
+    var phaseLabel = $('bracketPhaseLabel');
+    if (faseSel) faseSel.value = bracketState.fase || 'semifinal';
+    if (rondaSel) rondaSel.value = String(bracketState.rondaEnFase || 1);
+    if (phaseLabel) phaseLabel.textContent = 'Fase actual: ' + currentPhaseTitle();
+
+    var activosBox = $('bracketActivosList');
+    var elimWrap = $('bracketEliminadosWrap');
+    var elimBox = $('bracketEliminadosList');
+    if (!activosBox) return;
+
+    var activos = getActiveCompetitorIds();
+    if (!activos.length) {
+      activosBox.innerHTML = '<p class="jurado-hint">No hay participantes activos. Restaura alguno desde eliminados.</p>';
+    } else {
+      activosBox.innerHTML = activos.map(function (id) {
+        var c = competidores.find(function (x) { return x.id === id; });
+        return '<div class="jurado-activo-item">' +
+          '<span>' + escapeHtml(c ? c.nombre : id) + '</span>' +
+          '<button type="button" class="jurado-btn-inline jurado-btn-inline--danger" data-eliminar="' + escapeHtml(id) + '">Eliminar</button>' +
+          '</div>';
+      }).join('');
+    }
+
+    var eliminados = (bracketState.eliminados || []).filter(function (id) {
+      return competidores.some(function (c) { return c.id === id; });
+    });
+    if (elimWrap && elimBox) {
+      if (!eliminados.length) {
+        elimWrap.hidden = true;
+        elimBox.innerHTML = '';
+      } else {
+        elimWrap.hidden = false;
+        elimBox.innerHTML = eliminados.map(function (id) {
+          var c = competidores.find(function (x) { return x.id === id; });
+          return '<div class="jurado-activo-item jurado-activo-item--out">' +
+            '<span>' + escapeHtml(c ? c.nombre : id) + '</span>' +
+            '<button type="button" class="jurado-btn-inline" data-restaurar="' + escapeHtml(id) + '">Restaurar</button>' +
+            '</div>';
+        }).join('');
+      }
+    }
+  }
+
+  function bindOrganizerAdminActions() {
+    if (organizerAdminBound) return;
+    organizerAdminBound = true;
+
+    var applyBtn = $('bracketApplyBtn');
+    if (applyBtn) {
+      applyBtn.addEventListener('click', function () {
+        if (!bracketState) bracketState = defaultBracketState();
+        bracketState.fase = $('bracketFaseSelect').value;
+        bracketState.rondaEnFase = parseInt($('bracketRondaSelect').value, 10) || 1;
+        saveBracketStore(bracketState).then(function () {
+          showAdminMsg('Fase aplicada: ' + currentPhaseTitle());
+          refreshOrganizer();
+        }).catch(function (err) {
+          showAdminMsg(err.message || 'Error al guardar fase', true);
+        });
+      });
+    }
+
+    var resetActivos = $('resetActivosScoresBtn');
+    if (resetActivos) {
+      resetActivos.addEventListener('click', function () {
+        if (!confirm('¿Reiniciar puntajes de todos los participantes ACTIVOS en esta ronda?')) return;
+        var ids = getActiveCompetitorIds();
+        resetScoresForIds(ids).then(function () {
+          showAdminMsg('Puntajes reiniciados para ' + ids.length + ' participante(s) activo(s).');
+          refreshOrganizer();
+        }).catch(function (err) {
+          showAdminMsg(err.message || 'Error al reiniciar', true);
+        });
+      });
+    }
+
+    var resetAll = $('resetAllScoresBtn');
+    if (resetAll) {
+      resetAll.addEventListener('click', function () {
+        if (!confirm('¿Reiniciar TODOS los puntajes de TODOS los competidores? Esta acción no se puede deshacer.')) return;
+        resetAllScoresStore().then(function () {
+          showAdminMsg('Todos los puntajes fueron reiniciados.');
+          refreshOrganizer();
+        }).catch(function (err) {
+          showAdminMsg(err.message || 'Error al reiniciar', true);
+        });
+      });
+    }
+
+    var advanceBtn = $('advanceWinnersBtn');
+    if (advanceBtn) {
+      advanceBtn.addEventListener('click', function () {
+        var rounds = buildRoundsStructure();
+        if (!rounds.length) {
+          showAdminMsg('No hay duelos para calcular ganadores.', true);
+          return;
+        }
+        var active = selectedRoundNum || getActiveRoundNum(rounds);
+        var current = rounds.find(function (r) { return r.roundNum === active; }) || rounds[0];
+        var winners = [];
+        var pending = false;
+        current.matches.forEach(function (m) {
+          var r = resolveMatch(m.aId, m.bId);
+          if (r.winnerId) winners.push(r.winnerId);
+          else if (m.bId) pending = true;
+        });
+        if (pending) {
+          showAdminMsg('Aún hay duelos sin ganador (faltan puntajes o hay empate).', true);
+          return;
+        }
+        if (!winners.length) {
+          showAdminMsg('No hay ganadores para avanzar.', true);
+          return;
+        }
+        if (!confirm('¿Avanzar ' + winners.length + ' ganador(es), limpiar sus puntajes y pasar a la siguiente ronda en fase?')) return;
+        var previousActivos = getActiveCompetitorIds();
+        bracketState.activos = winners;
+        bracketState.rondaEnFase = (bracketState.rondaEnFase || 1) + 1;
+        previousActivos.forEach(function (id) {
+          if (winners.indexOf(id) < 0 && bracketState.eliminados.indexOf(id) < 0) {
+            bracketState.eliminados.push(id);
+          }
+        });
+        saveBracketStore(bracketState).then(function () {
+          return resetScoresForIds(winners);
+        }).then(function () {
+          selectedRoundNum = 0;
+          showAdminMsg('Ganadores avanzaron a ' + currentPhaseTitle() + '. Puntajes limpiados para nueva catación.');
+          refreshOrganizer();
+        }).catch(function (err) {
+          showAdminMsg(err.message || 'Error al avanzar', true);
+        });
+      });
+    }
+
+    document.addEventListener('click', function (e) {
+      if (mode !== 'organizer') return;
+      var elim = e.target.closest('[data-eliminar]');
+      if (elim) {
+        var id = elim.getAttribute('data-eliminar');
+        if (!confirm('¿Eliminar a este participante de la ronda actual?')) return;
+        eliminateParticipant(id).then(function () {
+          showAdminMsg('Participante eliminado de la ronda.');
+          refreshOrganizer();
+        }).catch(function (err) {
+          showAdminMsg(err.message || 'Error', true);
+        });
+      }
+      var rest = e.target.closest('[data-restaurar]');
+      if (rest) {
+        var rid = rest.getAttribute('data-restaurar');
+        restoreParticipant(rid).then(function () {
+          showAdminMsg('Participante restaurado.');
+          refreshOrganizer();
+        }).catch(function (err) {
+          showAdminMsg(err.message || 'Error', true);
+        });
+      }
+      var resetOne = e.target.closest('[data-reset-one]');
+      if (resetOne) {
+        var sid = resetOne.getAttribute('data-reset-one');
+        if (!confirm('¿Reiniciar puntajes de este competidor?')) return;
+        resetScoresForIds([sid]).then(function () {
+          showAdminMsg('Puntajes reiniciados.');
+          refreshOrganizer();
+        }).catch(function (err) {
+          showAdminMsg(err.message || 'Error', true);
+        });
+      }
+    });
   }
 
   function getRowById(id) {
@@ -546,7 +873,7 @@
   }
 
   function getParticipantsForRound(roundNum) {
-    if (roundNum === 1) return competidores.map(function (c) { return c.id; });
+    if (roundNum === 1) return getActiveCompetitorIds();
     return getRoundWinners(roundNum - 1);
   }
 
@@ -611,23 +938,30 @@
   }
 
   function roundLabel(roundNum, totalRounds) {
-    if (roundNum === totalRounds && totalRounds > 1) return 'Final';
-    if (roundNum === totalRounds - 1 && totalRounds > 2) return 'Semifinal';
-    return 'Ronda ' + roundNum;
+    if (roundNum === 1) return currentPhaseTitle();
+    if (roundNum === totalRounds && totalRounds > 1) return 'Duelo final';
+    return 'Duelo fase · ' + roundNum;
   }
 
-  function renderMatchCompetitor(row, isWinner, isLoser) {
+  function renderMatchCompetitor(row, isWinner, isLoser, showAdmin) {
     var s = formatJudgeScores(row);
     var total = puntajeTotal(row);
     var cls = 'jurado-duel-player';
     if (isWinner) cls += ' jurado-duel-player--winner';
     if (isLoser) cls += ' jurado-duel-player--loser';
+    var adminHtml = showAdmin
+      ? '<div class="jurado-duel-admin">' +
+        '<button type="button" class="jurado-btn-inline jurado-btn-inline--danger" data-eliminar="' + escapeHtml(row.competidorId) + '">Eliminar</button>' +
+        '<button type="button" class="jurado-btn-inline" data-reset-one="' + escapeHtml(row.competidorId) + '">Reiniciar pts</button>' +
+        '</div>'
+      : '';
     return '<div class="' + cls + '">' +
       '<div class="jurado-duel-name">' + escapeHtml(row.nombre) + (isWinner ? ' <span class="jurado-duel-badge">Pasa</span>' : '') + '</div>' +
       '<div class="jurado-duel-scores">' +
       '<span>J1 ' + s.j1 + '</span><span>J2 ' + s.j2 + '</span><span>J3 ' + s.j3 + '</span>' +
       '</div>' +
       '<div class="jurado-duel-total">' + (total != null ? total + ' pts' : '—') + '</div>' +
+      adminHtml +
       '</div>';
   }
 
@@ -686,10 +1020,10 @@
       var html = '<article class="jurado-duel' + (result.status === 'pending' ? ' jurado-duel--pending' : '') + '">';
       html += '<header class="jurado-duel-head">Duelo ' + m.duelNum + ' · ' + roundLabel(current.roundNum, totalRounds) + '</header>';
       html += '<div class="jurado-duel-body">';
-      html += renderMatchCompetitor(rowA, result.winnerId === m.aId, result.winnerId && result.winnerId !== m.aId);
+      html += renderMatchCompetitor(rowA, result.winnerId === m.aId, result.winnerId && result.winnerId !== m.aId, true);
       if (rowB) {
         html += '<div class="jurado-duel-vs">VS</div>';
-        html += renderMatchCompetitor(rowB, result.winnerId === m.bId, result.winnerId && result.winnerId !== m.bId);
+        html += renderMatchCompetitor(rowB, result.winnerId === m.bId, result.winnerId && result.winnerId !== m.bId, true);
       }
       html += '</div>' + statusHtml + '</article>';
       return html;
@@ -729,7 +1063,9 @@
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    var rows = buildUnifiedOrganizerRows().slice().sort(function (a, b) {
+    var rows = buildUnifiedOrganizerRows().filter(function (row) {
+      return getActiveCompetitorIds().indexOf(row.competidorId) >= 0;
+    }).slice().sort(function (a, b) {
       var ta = puntajeTotal(a) != null ? puntajeTotal(a) : -1;
       var tb = puntajeTotal(b) != null ? puntajeTotal(b) : -1;
       if (tb !== ta) return tb - ta;
@@ -749,7 +1085,14 @@
         '<td class="jurado-td-score jurado-td-judge">' + notaJuezDisplay(row, 2) + '</td>' +
         '<td class="jurado-td-score jurado-td-judge">' + notaJuezDisplay(row, 3) + '</td>' +
         '<td class="jurado-td-total"><strong>' + (total != null ? total : '—') + '</strong></td>' +
-        '<td class="' + estadoCls + '">' + estadoLabel + '</td>';
+        '<td class="' + estadoCls + '">' + estadoLabel + '</td>' +
+        '<td class="jurado-td-actions">' +
+        '<button type="button" class="jurado-btn-inline" data-reset-one="' + escapeHtml(row.competidorId) + '">Reiniciar</button> ' +
+        '<button type="button" class="jurado-btn-inline jurado-btn-inline--danger" data-eliminar="' + escapeHtml(row.competidorId) + '">Eliminar</button>' +
+        '</td>';
+      tr.querySelectorAll('button').forEach(function (btn) {
+        btn.addEventListener('click', function (e) { e.stopPropagation(); });
+      });
       tr.addEventListener('click', function () {
         var sel = $('organizerCompetidorSelect');
         if (sel) {
@@ -830,7 +1173,8 @@
         '<p class="jurado-hint">Sin calificaciones registradas para este competidor.</p>' +
         '<div class="jurado-judges-grid">' +
         renderJudgeDetailCard(1, null) + renderJudgeDetailCard(2, null) + renderJudgeDetailCard(3, null) +
-        '</div>';
+        '</div>' +
+        (mode === 'organizer' ? renderOrganizerDetailAdminActions(competidorId) : '');
       box.hidden = false;
       return;
     }
@@ -884,6 +1228,10 @@
         faltan.map(function (j) { return 'J' + j; }).join(', ') + '</p></div>';
     }
 
+    if (mode === 'organizer') {
+      html += renderOrganizerDetailAdminActions(competidorId);
+    }
+
     box.innerHTML = html;
     box.hidden = false;
   }
@@ -891,10 +1239,10 @@
   function refreshOrganizer() {
     var updated = $('organizerUpdated');
     if (updated) updated.textContent = 'Actualizando…';
-    return loadCalificacionesStore().then(function (list) {
+    return Promise.all([loadBracketStore(), loadCalificacionesStore()]).then(function (results) {
       clearOrganizerError();
-      renderOrganizerViews(list);
-      return list;
+      renderOrganizerViews(results[1]);
+      return results[1];
     });
   }
 
@@ -912,7 +1260,9 @@
     $('organizerSection').hidden = false;
     clearOrganizerError();
 
-    fillCompetidorSelect($('organizerCompetidorSelect'));
+    fillCompetidorSelect($('organizerCompetidorSelect'), true, competidores);
+
+    bindOrganizerAdminActions();
 
     try {
       renderOrganizerViews(calificacionesList());
@@ -992,16 +1342,21 @@
           showPinError('No hay competidores habilitados.');
           return;
         }
+        return loadBracketStore().then(function () {
+          if (!bracketState.activos.length) {
+            bracketState.activos = competidores.map(function (c) { return c.id; });
+          }
 
-        $('loadingMsg').hidden = true;
+          $('loadingMsg').hidden = true;
 
-        if (mode === 'organizer') {
-          showOrganizerUI();
-        } else if (mode === 'judge' && judgeNum) {
-          showJudgeUI();
-        } else {
-          showRolePicker();
-        }
+          if (mode === 'organizer') {
+            showOrganizerUI();
+          } else if (mode === 'judge' && judgeNum) {
+            showJudgeUI();
+          } else {
+            showRolePicker();
+          }
+        });
       })
       .catch(function (err) {
         showPinError(err.message || 'No se pudo cargar el panel.');

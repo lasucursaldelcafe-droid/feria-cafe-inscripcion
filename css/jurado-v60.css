@@ -303,6 +303,118 @@ body.jurado-page {
   font-size: 0.82rem;
 }
 
+.jurado-btn--danger {
+  background: rgba(220, 80, 70, 0.85);
+  color: #fff;
+  border: 1px solid rgba(255, 120, 110, 0.6);
+}
+
+.jurado-btn--danger:hover {
+  background: rgba(200, 60, 55, 0.95);
+}
+
+.jurado-card--admin {
+  border-color: rgba(245, 217, 168, 0.28);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.jurado-admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+
+.jurado-field--btn label {
+  visibility: hidden;
+}
+
+.jurado-phase-label {
+  margin: 0 0 12px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #f5d9a8;
+}
+
+.jurado-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.jurado-admin-subtitle {
+  margin: 16px 0 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.jurado-activos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.jurado-activo-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.86rem;
+}
+
+.jurado-activo-item--out {
+  opacity: 0.72;
+}
+
+.jurado-btn-inline {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8f4ef;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.jurado-btn-inline--danger {
+  border-color: rgba(255, 120, 110, 0.45);
+  background: rgba(220, 80, 70, 0.25);
+  color: #ffc9c4;
+}
+
+.jurado-td-actions {
+  white-space: nowrap;
+}
+
+.jurado-detail-admin {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 560px) {
+  .jurado-admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .jurado-field--btn label {
+    display: none;
+  }
+}
+
 .jurado-judge-list {
   display: flex;
   flex-direction: column;

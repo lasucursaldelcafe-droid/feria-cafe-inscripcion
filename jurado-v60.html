@@ -8,7 +8,7 @@
   <title>Jurado sensorial V60 — La Sucursal del Café</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado10">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado12">
 </head>
 <body class="jurado-page">
   <div class="jurado-shell">
@@ -81,6 +81,51 @@
         <p id="organizerLoadError" class="jurado-error" hidden style="margin-top:8px"></p>
       </div>
 
+      <div class="jurado-card jurado-card--admin">
+        <div class="jurado-card-head">
+          <h2>Control de ronda</h2>
+          <p class="jurado-hint">Configura la fase actual, elimina participantes y reinicia puntajes para una nueva catación.</p>
+        </div>
+        <div class="jurado-admin-grid">
+          <div class="jurado-field">
+            <label for="bracketFaseSelect">Fase</label>
+            <select id="bracketFaseSelect">
+              <option value="clasificatoria">Clasificatoria</option>
+              <option value="semifinal" selected>Semifinal</option>
+              <option value="final">Final</option>
+            </select>
+          </div>
+          <div class="jurado-field">
+            <label for="bracketRondaSelect">Ronda en fase</label>
+            <select id="bracketRondaSelect">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+          <div class="jurado-field jurado-field--btn">
+            <label>&nbsp;</label>
+            <button type="button" id="bracketApplyBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Aplicar fase</button>
+          </div>
+        </div>
+        <p id="bracketPhaseLabel" class="jurado-phase-label"></p>
+        <div class="jurado-admin-actions">
+          <button type="button" id="resetActivosScoresBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Reiniciar puntajes de activos</button>
+          <button type="button" id="resetAllScoresBtn" class="jurado-btn jurado-btn--danger jurado-btn--small">Reiniciar TODOS los puntajes</button>
+          <button type="button" id="advanceWinnersBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Avanzar ganadores + limpiar puntajes</button>
+        </div>
+        <p id="organizerAdminMsg" class="jurado-success" hidden></p>
+        <p id="organizerAdminError" class="jurado-error" hidden></p>
+        <h3 class="jurado-admin-subtitle">Participantes activos en esta ronda</h3>
+        <div id="bracketActivosList" class="jurado-activos-list"></div>
+        <div id="bracketEliminadosWrap" hidden>
+          <h3 class="jurado-admin-subtitle">Eliminados</h3>
+          <div id="bracketEliminadosList" class="jurado-activos-list"></div>
+        </div>
+      </div>
+
       <div class="jurado-card jurado-card--bracket">
         <div class="jurado-card-head">
           <h2>Clasificación por rondas</h2>
@@ -104,6 +149,7 @@
                 <th colspan="3" class="jurado-th-group">Jueces</th>
                 <th>Total</th>
                 <th>Estado</th>
+                <th>Acciones</th>
               </tr>
               <tr class="jurado-subhead">
                 <th></th>
@@ -112,10 +158,11 @@
                 <th class="jurado-th-judge">J3</th>
                 <th></th>
                 <th></th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="organizerRankingBody">
-              <tr><td colspan="6" class="jurado-empty">Cargando…</td></tr>
+              <tr><td colspan="7" class="jurado-empty">Cargando…</td></tr>
             </tbody>
           </table>
         </div>
@@ -144,6 +191,6 @@
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado10"></script>
+  <script src="js/jurado-v60.js?v=20260705jurado12"></script>
 </body>
 </html>
