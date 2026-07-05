@@ -557,6 +557,37 @@ body.jurado-page--organizer .jurado-header-brand {
   gap: 6px;
 }
 
+.jurado-link-step {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #1a120c;
+  background: #f5d9a8;
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin: 0 0 6px;
+}
+
+.jurado-hub-tag--inline {
+  display: inline-block;
+  margin: 0 0 4px 6px;
+  vertical-align: middle;
+}
+
+.jurado-setup-steps {
+  margin: 0 0 14px;
+  padding-left: 1.2rem;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.jurado-setup-steps li + li {
+  margin-top: 4px;
+}
+
 .jurado-btn-inline--open {
   text-decoration: none;
   display: inline-flex;

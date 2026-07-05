@@ -353,7 +353,12 @@ window.EVENT_CONFIG.getEventoActivo = function getEventoActivo() {
   return (key && root[key]) || root.evento2 || root.evento1 || {};
 };
 
-(function initJuradoV60Links() {
+/** @deprecated Los enlaces se sincronizan desde js/site-links.js (SiteLinks.syncJuradoV60Links). */
+(function initJuradoV60LinksLegacy() {
+  if (window.SiteLinks && window.SiteLinks.syncJuradoV60Links) {
+    window.SiteLinks.syncJuradoV60Links();
+    return;
+  }
   var root = window.EVENT_CONFIG;
   if (!root || !root.juradoV60) return;
   var j = root.juradoV60;
