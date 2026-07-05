@@ -8,7 +8,7 @@
   <title>Jurado sensorial V60 — La Sucursal del Café</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260704jurado5">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado6">
 </head>
 <body class="jurado-page">
   <div class="jurado-shell">
@@ -80,10 +80,18 @@
         <p id="organizerUpdated" class="jurado-meta" style="margin-top:8px"></p>
       </div>
 
+      <div class="jurado-card jurado-card--final" id="organizerFinalCard">
+        <div class="jurado-card-head">
+          <h2>Resultado final</h2>
+          <p class="jurado-hint">Clasificación oficial cuando los 3 jueces calificaron al competidor.</p>
+        </div>
+        <div id="organizerFinalSummary" class="jurado-final-summary"></div>
+      </div>
+
       <div class="jurado-card">
         <div class="jurado-card-head">
           <h2>Clasificación en vivo</h2>
-          <p class="jurado-hint">Promedio final cuando los 3 jueces calificaron. ✓ = juez listo.</p>
+          <p class="jurado-hint">Suma y promedio final cuando J1, J2 y J3 están listos (✓).</p>
         </div>
         <div class="jurado-table-wrap">
           <table class="jurado-table jurado-table--ranking" id="organizerRankingTable">
@@ -91,13 +99,15 @@
               <tr>
                 <th>#</th>
                 <th>Competidor</th>
-                <th>Jueces</th>
+                <th>J1</th>
+                <th>J2</th>
+                <th>J3</th>
                 <th>Suma</th>
-                <th>Prom.</th>
+                <th>Prom. final</th>
               </tr>
             </thead>
             <tbody id="organizerRankingBody">
-              <tr><td colspan="5" class="jurado-empty">Sin calificaciones aún</td></tr>
+              <tr><td colspan="7" class="jurado-empty">Sin calificaciones aún</td></tr>
             </tbody>
           </table>
         </div>
@@ -106,11 +116,12 @@
       <div class="jurado-card">
         <div class="jurado-card-head">
           <h2>Detalle por competidor</h2>
+          <p class="jurado-hint">Selecciona un competidor para ver la nota de cada juez y el resultado final.</p>
         </div>
         <div class="jurado-field">
-          <label for="organizerCompetidorSelect">Ver detalle</label>
-          <select id="organizerCompetidorSelect">
-            <option value="">— Todos en tabla arriba —</option>
+          <label for="organizerCompetidorSelect">Competidor</label>
+          <select id="organizerCompetidorSelect" required>
+            <option value="">— Selecciona competidor —</option>
           </select>
         </div>
         <div id="organizerDetail" class="jurado-detail" hidden></div>
@@ -125,6 +136,6 @@
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260704jurado5"></script>
+  <script src="js/jurado-v60.js?v=20260705jurado6"></script>
 </body>
 </html>
