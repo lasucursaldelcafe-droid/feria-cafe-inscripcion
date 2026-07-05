@@ -109,7 +109,7 @@ def write_markdown(inscritos: dict[str, dict], ranking: list[dict], kit: dict) -
         "",
         "**Evento:** V60 Championship — Preliminar 1",
         "**Jueces:** 3 (J1, J2, J3)",
-        "**Parámetros:** Aroma, Sabor, Acidez, Dulzor, Cuerpo, Balance, Limpieza de taza, Impresión general (escala 1–6 cada uno)",
+        "**Parámetros:** Aroma, Sabor, Acidez, Dulzor, Cuerpo, Balance, Limpieza de taza (escala 1–5 cada uno; sin Impresión general)",
         f"**Inscritos cruzados:** {len(inscritos)} de 12 competidores de planilla",
         "",
         "## Cruce planilla ↔ inscripción (Sheets)",

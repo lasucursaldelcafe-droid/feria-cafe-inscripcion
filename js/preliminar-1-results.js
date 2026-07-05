@@ -1,6 +1,6 @@
 /**
  * V60 Championship — Preliminar 1 (planilla real + inscritos Sheets).
- * Cruzado con admin_dashboard · IDs SC-* · 3 jueces · 8 parámetros SCA/WBrC.
+ * Cruzado con admin_dashboard · IDs SC-* · 3 jueces · 7 parámetros SCA (escala 1–5).
  * Regenerar doc: python3 tools/build_preliminar1_from_inscritos.py
  */
 (function (global) {
@@ -13,7 +13,7 @@
     disciplina: 'filtrado',
     jueces: 3,
     scaleMin: 1,
-    scaleMax: 6,
+    scaleMax: 5,
     formato: {
       competidores: 12,
       fases: ['grupos', 'semifinal', 'final'],
@@ -33,8 +33,7 @@
     { key: 'dulzor', label: 'Dulzor' },
     { key: 'cuerpo', label: 'Cuerpo' },
     { key: 'balance', label: 'Balance' },
-    { key: 'limpieza_taza', label: 'Limpieza de taza' },
-    { key: 'impresion_general', label: 'Impresión general' }
+    { key: 'limpieza_taza', label: 'Limpieza de taza' }
   ];
 
   /** Nombre corto en planilla → clave interna */
@@ -277,7 +276,7 @@
     return Math.abs(h);
   }
 
-  /** Reparte el subtotal del juez en 8 criterios (escala 1–6) sumando exactamente `total`. */
+  /** Reparte el subtotal del juez en 7 criterios (escala 1–5) sumando exactamente `total`. */
   function distributeTotal(total, seed) {
     var keys = CRITERIA.map(function (c) { return c.key; });
     var n = keys.length;
@@ -444,9 +443,10 @@
   /** Texto que explica la lógica del puntaje (planilla solo trae subtotales por juez). */
   function scoringMethodNote() {
     return 'La planilla original registra el subtotal de cada juez (J1+J2+J3). ' +
-      'Como no hay nota por parámetro en papel, el sistema reconstruye el desglose en 8 criterios SCA/WBrC ' +
+      'Como no hay nota por parámetro en papel, el sistema reconstruye el desglose en 7 criterios SCA ' +
       '(escala ' + EVENT.scaleMin + '–' + EVENT.scaleMax + ' por criterio) repartiendo cada subtotal de forma ' +
-      'determinística: la suma de los 8 parámetros de un juez coincide exactamente con su columna J1, J2 o J3.';
+      'determinística: la suma de los 7 parámetros de un juez coincide exactamente con su columna J1, J2 o J3. ' +
+      'No se usó «Impresión general» en esta preliminar.';
   }
 
   function buildJudgeBreakdownLines(judgeKey, judgeBlock) {
@@ -523,7 +523,8 @@
       '',
       scoringMethodNote(),
       '',
-      '**Fórmula:** total competidor = subtotal J1 + subtotal J2 + subtotal J3, donde cada subtotal = suma de los 8 parámetros (máx. ' +
+      '**Fórmula:** total competidor = subtotal J1 + subtotal J2 + subtotal J3, donde cada subtotal = suma de los ' +
+      CRITERIA.length + ' parámetros (máx. ' +
       (CRITERIA.length * EVENT.scaleMax) + ' pts por juez).',
       '',
       '**Parámetros evaluados:** ' + CRITERIA.map(function (c) { return c.label; }).join(', ') + '.',
@@ -612,12 +613,12 @@
     return {
       eventName: EVENT.nombre,
       eventId: EVENT.nombre,
-      eventSubtitle: 'Café filtrado V60 · 3 jueces · 8 parámetros SCA',
+      eventSubtitle: 'Café filtrado V60 · 3 jueces · 7 parámetros SCA (1–5)',
       scoring: {
         disciplina: 'filtrado',
         modo: 'puntaje_general',
         scaleMin: 1,
-        scaleMax: 6,
+        scaleMax: 5,
         jueces: 3,
         avancePorRonda: 8,
         autoAvance: true,

@@ -113,6 +113,15 @@ def main() -> int:
     if len(rows) != 21:
         errors.append(f"Esperadas 21 filas RAW, hay {len(rows)}")
 
+    criteria = kit.get("criteria") or []
+    if len(criteria) != 7:
+        errors.append(f"Esperados 7 criterios SCA, hay {len(criteria)}")
+    if any(c.get("key") == "impresion_general" for c in criteria):
+        errors.append("No debe incluir Impresión general en Preliminar 1")
+    event = kit.get("event") or {}
+    if event.get("scaleMax") != 5:
+        errors.append(f"Escala máxima debe ser 5, es {event.get('scaleMax')}")
+
     if errors:
         print(f"\n❌ {len(errors)} error(es):")
         for e in errors:
