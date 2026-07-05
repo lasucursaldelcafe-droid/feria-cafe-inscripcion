@@ -36,13 +36,13 @@
   }
 
   function competitorPhotoHtml(fotoUrl, size, alt) {
-    var url = driveThumbUrl(fotoUrl, size || 160);
+    var thumb = Math.max(64, Math.round((size || 44) * 2));
+    var url = driveThumbUrl(fotoUrl, thumb);
     if (!url) {
       return '<span class="jurado-clasificacion-photo jurado-clasificacion-photo--empty" aria-hidden="true"></span>';
     }
     return '<img class="jurado-clasificacion-photo" src="' + escapeHtml(url) + '" alt="' +
-      escapeHtml(alt || '') + '" loading="lazy" referrerpolicy="no-referrer" width="' +
-      (size || 160) + '" height="' + (size || 160) + '">';
+      escapeHtml(alt || '') + '" loading="lazy" referrerpolicy="no-referrer">';
   }
 
   function posMedalClass(pos) {
@@ -81,7 +81,7 @@
         var name = row.nombreInscrito || row.participante;
         var inSemi = (round.clasificaronSemi || []).indexOf(row.participante) >= 0;
         return '<div class="jurado-grupo-duo ' + cls + (inSemi ? ' jurado-grupo-duo--semi' : '') + '">' +
-          competitorPhotoHtml(row.fotoUrl, 56, name) +
+          competitorPhotoHtml(row.fotoUrl, 44, name) +
           '<div class="jurado-grupo-duo__body">' +
           '<strong>' + escapeHtml(name) + '</strong>' +
           '<span class="jurado-grupo-duo__pts">' + row.total + ' pts</span>' +
@@ -110,7 +110,7 @@
       var name = row.nombreInscrito || row.participante;
       return '<div class="jurado-podium-slot ' + posMedalClass(row.posicion) + '">' +
         '<span class="jurado-podium-pos">' + row.posicion + '°</span>' +
-        competitorPhotoHtml(row.fotoUrl, 64, name) +
+        competitorPhotoHtml(row.fotoUrl, 48, name) +
         '<strong class="jurado-podium-name">' + escapeHtml(name) + '</strong>' +
         '<span class="jurado-podium-meta">' + escapeHtml(row.representa || row.ciudad || '') + '</span>' +
         '<span class="jurado-podium-pts">' + row.total + ' pts</span>' +
@@ -132,7 +132,7 @@
         : '';
       return '<article class="jurado-clasificacion-card ' + posMedalClass(row.posicion) + '">' +
         '<span class="jurado-clasificacion-rank">' + row.posicion + '°</span>' +
-        competitorPhotoHtml(row.fotoUrl, 56, name) +
+        competitorPhotoHtml(row.fotoUrl, 44, name) +
         '<strong class="jurado-clasificacion-name">' + escapeHtml(name) + '</strong>' +
         sub +
         '<span class="jurado-clasificacion-meta">' + escapeHtml(row.representa || '') + '</span>' +
@@ -155,7 +155,7 @@
         var name = row.nombreInscrito || row.participante;
         return '<div class="jurado-phase-chip">' +
           '<span class="jurado-phase-chip-pos">' + (idx + 1) + '</span>' +
-          competitorPhotoHtml(row.fotoUrl, 40, name) +
+          competitorPhotoHtml(row.fotoUrl, 32, name) +
           '<span class="jurado-phase-chip-name">' + escapeHtml(name) + '</span>' +
           '<span class="jurado-phase-chip-pts">' + row.total + '</span>' +
           '</div>';
@@ -324,7 +324,7 @@
     if (edition.podio && edition.podio.length) {
       podioHtml = '<ol class="jurado-history-podio jurado-history-podio--photos">' +
         edition.podio.map(function (p) {
-          var photo = competitorPhotoHtml(p.fotoUrl, 40, p.nombre);
+          var photo = competitorPhotoHtml(p.fotoUrl, 36, p.nombre);
           return '<li class="jurado-history-podio-item ' + posMedalClass(p.posicion) + '">' +
             photo +
             '<span class="jurado-history-podio-pos">' + p.posicion + '°</span> ' +
@@ -397,7 +397,7 @@
       var name = row.nombreInscrito || row.participante;
       return '<tr>' +
         '<td class="jurado-preliminar-rank">' + row.posicion + '</td>' +
-        '<td class="jurado-clasificacion-table-photo">' + competitorPhotoHtml(row.fotoUrl, 40, name) + '</td>' +
+        '<td class="jurado-clasificacion-table-photo">' + competitorPhotoHtml(row.fotoUrl, 32, name) + '</td>' +
         '<td><code class="jurado-preliminar-id">' + escapeHtml(row.competidorId) + '</code></td>' +
         '<td><strong>' + escapeHtml(name) + '</strong>' +
         (row.representa ? '<br><span class="jurado-hint">' + escapeHtml(row.representa) + '</span>' : '') +
