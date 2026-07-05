@@ -19,6 +19,9 @@ var HEADERS_ANALYTICS = [
 var CUPO_MAX_COMPETENCIA = 36;
 /** Evento activo para cupo, duplicados e inscripciones nuevas (Preliminar 2). */
 var ACTIVE_COMPETENCIA_EVENTO = 'V60 Championship — Preliminar 2';
+/** Fecha y sede oficiales — Preliminar 2 */
+var PRELIMINAR2_FECHA = '8 de agosto de 2026';
+var PRELIMINAR2_LUGAR = 'Mas Café, Cali';
 var COMPROBANTE_PREVIEW_MAX = 1000;
 var DRIVE_FOLDER_NAME = 'V60 Championship — Comprobantes';
 var DRIVE_FOTOS_FOLDER_NAME = 'V60 Championship — Fotos participantes';
@@ -2093,7 +2096,7 @@ function buildWaMeUrl_(phone, text) {
 }
 
 function getCompetenciaEventoLabel_(data) {
-  var evento = String((data && data.evento) || 'V60 Championship — Preliminar 2').trim();
+  var evento = String((data && data.evento) || ACTIVE_COMPETENCIA_EVENTO).trim();
   if (/preliminar\s*2/i.test(evento) || /2\.ª/i.test(evento)) {
     return { corto: '2.ª preliminar', tabla: 'Preliminar 2', evento: evento };
   }
@@ -2101,6 +2104,14 @@ function getCompetenciaEventoLabel_(data) {
     return { corto: '1.ª preliminar', tabla: 'Preliminar 1', evento: evento };
   }
   return { corto: '2.ª preliminar', tabla: 'Preliminar 2', evento: evento };
+}
+
+function getCompetenciaEventoFechaLugar_(data) {
+  var evLabel = getCompetenciaEventoLabel_(data);
+  if (evLabel.tabla === 'Preliminar 1') {
+    return 'Edición realizada';
+  }
+  return PRELIMINAR2_FECHA + ' · ' + PRELIMINAR2_LUGAR;
 }
 
 function buildCompetenciaWaOrganizadorUrl_(data) {
@@ -2133,7 +2144,7 @@ function buildCompetenciaEmailPlain_(data) {
     '¡Bienvenido/a al V60 Championship! Recibimos tu inscripción a la ' + evLabel.corto + ' del circuito de café filtrado con V60.',
     '',
     'Número de inscripción: ' + id,
-    evLabel.tabla + ': Por confirmar (te avisaremos fecha y sede)',
+    evLabel.tabla + ': ' + getCompetenciaEventoFechaLugar_(data),
     'Competencia principal: 29 y 30 de agosto de 2026 · Palmetto Plaza, Cali',
     'Pago: $90.000 COP a Nubank @mbl616 (Manuel Barraza)',
     '',
@@ -2191,7 +2202,7 @@ function buildCompetenciaEmailHtml_(data) {
     '<p style="margin:0 0 16px;">¡Bienvenido/a al <strong>V60 Championship</strong>! Recibimos tu inscripción a la <strong>' + escapeHtml_(evLabel.corto) + '</strong> del circuito de café filtrado con V60 (2 preliminares + final 29–30 ago 2026), organizado por La Sucursal del Café.</p>',
     '<table style="width:100%;border-collapse:collapse;margin:0 0 20px;font-size:14px;">',
     '<tr><td style="padding:6px 0;color:#6b5344;width:38%;">Número de inscripción</td><td style="padding:6px 0;"><strong>' + id + '</strong></td></tr>',
-    '<tr><td style="padding:6px 0;color:#6b5344;">' + escapeHtml_(evLabel.tabla) + '</td><td style="padding:6px 0;">Por confirmar (te avisaremos fecha y sede)</td></tr>',
+    '<tr><td style="padding:6px 0;color:#6b5344;">' + escapeHtml_(evLabel.tabla) + '</td><td style="padding:6px 0;">' + escapeHtml_(getCompetenciaEventoFechaLugar_(data)) + '</td></tr>',
     '<tr><td style="padding:6px 0;color:#6b5344;">Competencia principal</td><td style="padding:6px 0;">29 y 30 de agosto de 2026 · Palmetto Plaza, Cali</td></tr>',
     '<tr><td style="padding:6px 0;color:#6b5344;">Pago</td><td style="padding:6px 0;">$90.000 COP · Nubank <strong>@mbl616</strong> (Manuel Barraza)</td></tr>',
     '</table>',
