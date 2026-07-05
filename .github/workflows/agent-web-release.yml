@@ -1,0 +1,117 @@
+# Lanzado por agentes Cloud (tools/agent_release.py) o manualmente.
+# Pipeline: sync rutas → sheets-config → Firebase Hosting → verificación producción.
+
+name: Agent Web Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      expect_css_version:
+        description: "Sufijo ?v= esperado en brand.css (ej. 20260705pergamino3)"
+        required: false
+        default: ""
+      require_editorial:
+        description: "Exigir clase page-festival--editorial en index"
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: agent-web-release
+  cancel-in-progress: false
+
+env:
+  FIREBASE_PROJECT: la-sucursal-del-cafe
+  SITE_BASE: https://la-sucursal-del-cafe.web.app
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sincronizar rutas
+        run: |
+          python3 tools/sync_routes.py
+          python3 tools/sync_routes.py --check
+
+      - name: Generar js/sheets-config.js
+        env:
+          SHEETS_URL: ${{ secrets.SHEETS_WEB_APP_URL }}
+        run: |
+          CANONICAL=""
+          if [ -f tools/CANONICAL_SHEETS_URL.txt ]; then
+            CANONICAL="$(tr -d '\r\n' < tools/CANONICAL_SHEETS_URL.txt)"
+          fi
+          FINAL_URL="${CANONICAL:-$SHEETS_URL}"
+          if [ -n "$FINAL_URL" ]; then
+            printf "window.SHEETS_CONFIG = {\n  WEB_APP_URL: '%s'\n};\n" "$FINAL_URL" > js/sheets-config.js
+          else
+            printf "window.SHEETS_CONFIG = {\n  WEB_APP_URL: ''\n};\n" > js/sheets-config.js
+          fi
+
+      - name: Deploy Firebase Hosting
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "${FIREBASE_SERVICE_ACCOUNT:-}" ]; then
+            echo "::error::Falta secreto FIREBASE_SERVICE_ACCOUNT en GitHub."
+            exit 1
+          fi
+          echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-sa.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json
+          npx -y firebase-tools@latest deploy \
+            --only hosting \
+            --project la-sucursal-del-cafe \
+            --non-interactive
+          rm -f /tmp/firebase-sa.json
+
+      - name: Verificar producción
+        env:
+          EXPECT_CSS: ${{ github.event.inputs.expect_css_version }}
+          REQUIRE_EDITORIAL: ${{ github.event.inputs.require_editorial }}
+        run: |
+          set -euo pipefail
+          FAIL=0
+
+          check_http() {
+            local path="$1"
+            local code
+            code=$(curl -s -o /dev/null -w "%{http_code}" "${SITE_BASE}${path}")
+            echo "$code $path"
+            [ "$code" = "200" ] || FAIL=1
+          }
+
+          for path in / /inscripcion /competencia /el-evento /actividades; do
+            check_http "$path"
+          done
+
+          BODY=$(curl -sL "${SITE_BASE}/" -H "Cache-Control: no-cache")
+          PROD_CSS=$(echo "$BODY" | grep -oE 'brand\.css\?v=[a-zA-Z0-9]+' | head -1 | sed 's/brand.css?v=//' || true)
+
+          if [ -z "$EXPECT_CSS" ] && [ -f index.html ]; then
+            EXPECT_CSS=$(grep -oE 'brand\.css\?v=[a-zA-Z0-9]+' index.html | head -1 | sed 's/brand.css?v=//' || true)
+          fi
+
+          echo "CSS producción: ${PROD_CSS:-?}"
+          echo "CSS esperado:   ${EXPECT_CSS:-(sin comprobar)}"
+
+          if [ -n "$EXPECT_CSS" ] && [ "$PROD_CSS" != "$EXPECT_CSS" ]; then
+            echo "::error::brand.css en producción no coincide (prod=$PROD_CSS esperado=$EXPECT_CSS)"
+            FAIL=1
+          fi
+
+          if [ "${REQUIRE_EDITORIAL}" = "true" ]; then
+            if echo "$BODY" | grep -q 'page-festival--editorial'; then
+              echo "OK tema editorial en index"
+            else
+              echo "::error::Falta page-festival--editorial en producción"
+              FAIL=1
+            fi
+          fi
+
+          if [ "$FAIL" -ne 0 ]; then
+            exit 1
+          fi
+          echo "Verificación producción OK"

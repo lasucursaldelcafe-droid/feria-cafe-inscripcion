@@ -1,6 +1,17 @@
 name: Deploy Firebase Hosting
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.html"
+      - "css/**"
+      - "js/**"
+      - "assets/**"
+      - "firebase.json"
+      - "sitemap.xml"
+      - "robots.txt"
   workflow_dispatch:
 
 env:
