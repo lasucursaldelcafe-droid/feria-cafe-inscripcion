@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/brand.css?v=20260703a">
+  <link rel="stylesheet" href="css/brand.css?v=20260705standslist">
 </head>
 <body class="page-festival page-form" data-festival-page="stands">
   <header class="site-header">
@@ -70,9 +70,9 @@
         </div>
         <form id="standsForm" novalidate>
           <ol id="standsFormSteps" class="stands-map-steps" aria-label="Pasos para reservar tu stand">
-            <li data-step-map><strong>Elige tu plan</strong> — define la zona del mapa.</li>
-            <li data-step-map><strong>Toca un stand verde</strong> — disponible en tu zona.</li>
-            <li><strong>Sube tu logo</strong> — aparecerá en el mapa o directorio al confirmar.</li>
+            <li data-step-map><strong>Elige tu plan</strong> — define la zona del listado.</li>
+            <li data-step-map><strong>Selecciona un stand disponible</strong> — en la lista de tu zona.</li>
+            <li><strong>Sube tu logo</strong> — aparecerá en el directorio al confirmar.</li>
             <li data-step-map data-step-share><strong>Opcional:</strong> indica si compartes el stand con otras marcas.</li>
             <li data-step-aliado hidden><strong>Completa tus datos</strong> — marca, contacto y logo(s).</li>
             <li data-step-aliado hidden><strong>Envía la solicitud</strong> — el equipo validará tu patrocinio.</li>
@@ -89,22 +89,21 @@
               <option value="Aliado Patrocinador">Aliado Patrocinador — visibilidad (a convenir)</option>
               <option value="Quiero asesoría">Aún no sé / Quiero asesoría</option>
             </select>
-            <p id="plan-hint" class="hint">Expositores (Zona Origen o Gran Reserva): elige plan y luego un stand en el mapa. Aliado Patrocinador: solo datos básicos — la negociación ya está cerrada con el equipo.</p>
+            <p id="plan-hint" class="hint">Expositores (Zona Origen o Gran Reserva): elige plan y luego un stand de la lista. Aliado Patrocinador: solo datos básicos — la negociación ya está cerrada con el equipo.</p>
             <span id="plan-error" class="error-msg" role="alert"></span>
           </div>
 
           <div id="aliadoPatrocinadorNotice" class="info-box" role="note" hidden>
             <strong>Aliado / patrocinador</strong>
-            <p style="margin:0.5rem 0 0">No necesitas elegir stand en el mapa. Completa tus datos y logo(s). <strong>Tu solicitud será validada por el equipo — te contactaremos sobre el tipo de patrocinio.</strong></p>
+            <p style="margin:0.5rem 0 0">No necesitas elegir stand en el listado. Completa tus datos y logo(s). <strong>Tu solicitud será validada por el equipo — te contactaremos sobre el tipo de patrocinio.</strong></p>
           </div>
 
           <div id="standsMapSection">
-          <h2 class="section-title">2. Selecciona tu stand en el mapa</h2>
-          <p class="hint" style="margin:0 0 0.75rem">Los stands <span class="stands-map-legend-inline stands-map-legend-inline--free">verdes</span> están disponibles. Los <span class="stands-map-legend-inline stands-map-legend-inline--occupied">rojos/oscuros</span> ya están reservados y no se pueden elegir.</p>
+          <h2 class="section-title">2. Selecciona tu stand</h2>
+          <p class="hint" style="margin:0 0 0.75rem">Los stands <strong>disponibles</strong> puedes reservarlos. Los <strong>ocupados</strong> ya tienen expositor asignado.</p>
           <p id="standsMapStatus" class="stands-map-status" aria-live="polite"></p>
-          <div id="standsMapRoot" class="stands-map-root" aria-label="Mapa de stands"></div>
-          <div id="standsMapLegend" class="stands-map-legend"></div>
-          <div id="standsMapTooltip" class="stands-map-tooltip" role="tooltip" hidden></div>
+          <div id="standsMapRoot" class="stands-list-root" aria-label="Listado de stands"></div>
+          <div id="standsMapLegend" class="stands-list-legend"></div>
           <p id="standsMapFeedback" class="stands-map-feedback" aria-live="assertive"></p>
           <input type="hidden" id="standId" name="standId" value="">
           <p class="stands-map-selection">
@@ -203,7 +202,7 @@
               accept="image/jpeg,image/png,image/webp"
               aria-describedby="logo-hint logo-error logoPreview"
             >
-            <p id="logo-hint" class="hint">Sube el logo de tu marca. JPG, PNG o WebP · máx. 5 MB. En expositores aparece en el mapa; en aliados/patrocinadores en el directorio público.</p>
+            <p id="logo-hint" class="hint">Sube el logo de tu marca. JPG, PNG o WebP · máx. 5 MB. Aparecerá en el directorio público de marcas al confirmar.</p>
             <div id="logoPreview" class="comprobante-preview" aria-live="polite"></div>
             <span id="logo-error" class="error-msg" role="alert"></span>
           </div>
@@ -215,7 +214,7 @@
               <input type="checkbox" id="comparteStand" name="comparteStand" aria-controls="marcasCompartidasWrap" aria-expanded="false">
               <span>Sí, compartiré el stand con otra(s) marca(s) en la misma posición</span>
             </label>
-            <p class="hint">Si varias marcas ocupan el mismo stand físico, indícalas aquí. Cada una puede tener logo propio y todos aparecerán juntos en el mapa.</p>
+            <p class="hint">Si varias marcas ocupan el mismo stand físico, indícalas aquí. Cada una puede tener logo propio.</p>
             <div id="marcasCompartidasWrap" class="marcas-compartidas-wrap" hidden>
               <p class="hint marcas-compartidas-intro">Añade entre 1 y 3 marcas adicionales (nombre obligatorio, logo opcional).</p>
               <div id="marcasCompartidasSlots" class="marcas-compartidas-slots"></div>
@@ -412,7 +411,7 @@
   <script src="js/seo-structured-data.js"></script>
   <script src="js/sheets-config.js"></script>
   <script src="js/form-submit.js"></script>
-  <script src="js/stands-map.js?v=20260621b"></script>
+  <script src="js/stands-map.js?v=20260705standslist"></script>
   <script src="js/terms-disclosure.js"></script>
   <script src="js/site-chrome.js?v=20260703global"></script>
   <script src="js/festival-nav.js?v=20260703global"></script>
@@ -720,7 +719,7 @@
           if (!result.ok) {
             if (result.standOcupado) {
               var fb = document.getElementById("standsMapFeedback");
-              if (fb) fb.textContent = result.error || "Ese stand acaba de ser reservado por otro expositor. Elige otro stand disponible en el mapa.";
+              if (fb) fb.textContent = result.error || "Ese stand acaba de ser reservado por otro expositor. Elige otro stand disponible.";
               standsMap.refresh();
               validateStandSelection();
               return;
@@ -741,9 +740,9 @@
           var standLine = entry.standId ? " Stand reservado: <strong>" + entry.standId + "</strong>." : "";
           var mapLine = entry.standId ? " Tu logo" +
             (entry.comparteStand && entry.marcasAdicionales && entry.marcasAdicionales.length
-              ? "s y los de las marcas compartidas aparecen"
-              : " aparece") +
-            " ya en el mapa de stands." : "";
+              ? "s y los de las marcas compartidas quedaron registrados"
+              : " quedó registrado") +
+            " en tu solicitud." : "";
           var aliadoLine = isAliadoSuccess
             ? " <strong>Tu solicitud será validada por el equipo — te contactaremos sobre el tipo de patrocinio.</strong>"
             : "";
@@ -813,7 +812,7 @@
             btnSubmit.disabled = false;
             btnSubmit.textContent = "Enviar solicitud de stand";
             var fb = document.getElementById("standsMapFeedback");
-            if (fb) fb.textContent = "El stand " + standId + " ya no está disponible. Elige otro stand verde en el mapa.";
+            if (fb) fb.textContent = "El stand " + standId + " ya no está disponible. Elige otro stand de la lista.";
             validateStandSelection();
             return;
           }

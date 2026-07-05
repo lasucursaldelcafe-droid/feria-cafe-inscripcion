@@ -5396,10 +5396,98 @@ textarea.has-value {
   max-width: min(760px, 100%);
 }
 
-.stands-map-root {
+.stands-map-root,
+.stands-list-root {
   width: 100%;
   max-width: 100%;
   overflow: hidden;
+}
+
+.stands-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: min(420px, 55vh);
+  overflow-y: auto;
+}
+
+.stands-list__item[hidden] {
+  display: none;
+}
+
+.stands-list__btn {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  gap: 10px 14px;
+  align-items: center;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(75, 53, 42, 0.14);
+  background: #fff;
+  color: var(--coffee-deep, #3d281c);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.stands-list__btn:hover:not(:disabled) {
+  border-color: rgba(201, 162, 39, 0.55);
+  background: #fffdf8;
+}
+
+.stands-list__item--selected .stands-list__btn {
+  border-color: #c9a227;
+  background: #fff9eb;
+  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.22);
+}
+
+.stands-list__item--occupied .stands-list__btn {
+  opacity: 0.72;
+  cursor: not-allowed;
+  background: #f5f0ea;
+}
+
+.stands-list__item--disabled:not(.stands-list__item--occupied) .stands-list__btn {
+  opacity: 0.55;
+}
+
+.stands-list__id {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.stands-list__zone {
+  font-size: 0.82rem;
+  color: rgba(61, 40, 28, 0.72);
+}
+
+.stands-list__status {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: right;
+  color: #2d7a46;
+}
+
+.stands-list__item--occupied .stands-list__status {
+  color: #8b3a34;
+}
+
+.stands-list__item--selected .stands-list__status {
+  color: #9a7b1a;
+}
+
+.stands-list-legend {
+  margin: 0 0 10px;
+}
+
+.stands-list-legend__count {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(61, 40, 28, 0.75);
 }
 
 .festival-section-premios {
