@@ -37,7 +37,10 @@
   var refreshTimer = null;
   var organizerUiBound = false;
   var organizerAdminBound = false;
+  var organizerManualBound = false;
   var selectedRoundNum = 0;
+  var manualEditCompetidorId = '';
+  var manualEditDirty = false;
 
   function webAppUrl() {
     var cfg = window.SHEETS_CONFIG || {};
@@ -134,6 +137,7 @@
       rondaEnFase: parseInt(raw.rondaEnFase, 10) || 1,
       activos: Array.isArray(raw.activos) ? raw.activos.slice() : [],
       eliminados: Array.isArray(raw.eliminados) ? raw.eliminados.slice() : [],
+      overrides: raw.overrides && typeof raw.overrides === 'object' ? Object.assign({}, raw.overrides) : {},
       actualizado: raw.actualizado || ''
     };
   }
@@ -144,6 +148,7 @@
       rondaEnFase: 1,
       activos: competidores.map(function (c) { return c.id; }),
       eliminados: [],
+      overrides: {},
       actualizado: new Date().toISOString()
     };
   }
@@ -289,6 +294,57 @@
     });
   }
 
+  function saveOrganizerFullCalificacion(calificacion) {
+    return sheetsGet('pasaporte_config', { key: CONFIG_KEY }).then(function (res) {
+      var data = res.data || {};
+      if (!data.scores || typeof data.scores !== 'object') data.scores = {};
+
+      var existing = normalizeCalificacion(data.scores[calificacion.competidorId], calificacion.competidorId) || {
+        competidorId: calificacion.competidorId,
+        nombre: calificacion.nombre,
+        judges: {},
+        notasPorJuez: {}
+      };
+      existing.nombre = calificacion.nombre || existing.nombre;
+      existing.judges = existing.judges || {};
+      existing.notasPorJuez = existing.notasPorJuez || {};
+
+      for (var j = 1; j <= 3; j++) {
+        var key = 'j' + j;
+        if (calificacion.judges && calificacion.judges[key] && calificacion.judges[key].scores) {
+          var sub = judgeSubtotal(calificacion.judges[key].scores);
+          if (sub != null) {
+            existing.judges[key] = {
+              scores: calificacion.judges[key].scores,
+              subtotal: sub,
+              actualizado: new Date().toISOString(),
+              manual: true
+            };
+          } else {
+            delete existing.judges[key];
+          }
+        } else {
+          delete existing.judges[key];
+        }
+      }
+
+      var t = computeTotals(existing.judges);
+      existing.sumaTotal = t.sumaTotal;
+      existing.promedio = t.promedio;
+      existing.actualizado = new Date().toISOString();
+      data.scores[calificacion.competidorId] = existing;
+      data.actualizado = new Date().toISOString();
+      return sheetsPost({
+        action: 'pasaporte_config_save',
+        key: CONFIG_KEY,
+        data: data
+      }).then(function () {
+        calificacionesMap[existing.competidorId] = existing;
+        return existing;
+      });
+    });
+  }
+
   function judgeSubtotal(scores) {
     if (!scores) return null;
     var sub = 0;
@@ -405,6 +461,7 @@
 
   function renderOrganizerDetailAdminActions(competidorId) {
     var html = '<div class="jurado-detail-admin">';
+    html += '<button type="button" class="jurado-btn jurado-btn--secondary jurado-btn--small" data-edit-scores="' + escapeHtml(competidorId) + '">Editar puntajes</button> ';
     html += '<button type="button" class="jurado-btn jurado-btn--secondary jurado-btn--small" data-reset-one="' + escapeHtml(competidorId) + '">Reiniciar puntajes</button> ';
     if (isActiveParticipant(competidorId)) {
       html += '<button type="button" class="jurado-btn jurado-btn--danger jurado-btn--small" data-eliminar="' + escapeHtml(competidorId) + '">Eliminar de la ronda</button>';
@@ -629,6 +686,7 @@
 
   function showJudgeUI() {
     hideAll();
+    document.body.classList.remove('jurado-page--organizer');
     $('headerTitle').textContent = 'Juez ' + judgeNum;
     $('headerSubtitle').textContent = 'Califica 7 criterios · escala 1–5';
     $('judgeBadge').textContent = 'Juez ' + judgeNum;
@@ -666,7 +724,12 @@
     renderOrganizerAdminPanel();
     renderOrganizerBracket();
     renderOrganizerScoresTable();
-    renderOrganizerDetail($('organizerCompetidorSelect').value);
+    var detailId = $('organizerCompetidorSelect') ? $('organizerCompetidorSelect').value : '';
+    if (!(manualEditDirty && detailId && detailId === manualEditCompetidorId)) {
+      renderOrganizerDetail(detailId);
+    }
+    if (detailId) renderOrganizerManualEdit(detailId);
+    else hideOrganizerManualEdit();
   }
 
   function renderOrganizerAdminPanel() {
@@ -776,7 +839,7 @@
         var winners = [];
         var pending = false;
         current.matches.forEach(function (m) {
-          var r = resolveMatch(m.aId, m.bId);
+          var r = resolveMatch(m.aId, m.bId, current.roundNum, m.duelNum);
           if (r.winnerId) winners.push(r.winnerId);
           else if (m.bId) pending = true;
         });
@@ -838,12 +901,52 @@
         if (!confirm('¿Reiniciar puntajes de este competidor?')) return;
         resetScoresForIds([sid]).then(function () {
           showAdminMsg('Puntajes reiniciados.');
+          manualEditDirty = false;
           refreshOrganizer();
         }).catch(function (err) {
           showAdminMsg(err.message || 'Error', true);
         });
       }
+      var forceWin = e.target.closest('[data-forzar-gana]');
+      if (forceWin) {
+        var winnerId = forceWin.getAttribute('data-forzar-gana');
+        var roundNum = parseInt(forceWin.getAttribute('data-round'), 10);
+        var duelNum = parseInt(forceWin.getAttribute('data-duel'), 10);
+        if (!confirm('¿Declarar a este competidor como ganador del duelo?')) return;
+        forceDuelWinner(roundNum, duelNum, winnerId).then(function () {
+          showAdminMsg('Ganador declarado manualmente.');
+          refreshOrganizer();
+        }).catch(function (err) {
+          showAdminMsg(err.message || 'Error', true);
+        });
+      }
+      var editBtn = e.target.closest('[data-edit-scores]');
+      if (editBtn) {
+        var editId = editBtn.getAttribute('data-edit-scores');
+        var sel = $('organizerCompetidorSelect');
+        if (sel) sel.value = editId;
+        manualEditDirty = false;
+        renderOrganizerManualEdit(editId);
+        var card = $('organizerManualCard');
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     });
+  }
+
+  function matchOverrideKey(roundNum, duelNum) {
+    return 'r' + roundNum + '-d' + duelNum;
+  }
+
+  function forceDuelWinner(roundNum, duelNum, winnerId) {
+    if (!bracketState) bracketState = defaultBracketState();
+    if (!bracketState.overrides) bracketState.overrides = {};
+    bracketState.overrides[matchOverrideKey(roundNum, duelNum)] = winnerId;
+    return saveBracketStore(bracketState);
+  }
+
+  function getForcedWinner(roundNum, duelNum) {
+    if (!bracketState || !bracketState.overrides) return null;
+    return bracketState.overrides[matchOverrideKey(roundNum, duelNum)] || null;
   }
 
   function getRowById(id) {
@@ -877,7 +980,18 @@
     return getRoundWinners(roundNum - 1);
   }
 
-  function resolveMatch(aId, bId) {
+  function resolveMatch(aId, bId, roundNum, duelNum) {
+    var forced = roundNum && duelNum ? getForcedWinner(roundNum, duelNum) : null;
+    if (forced && (forced === aId || forced === bId)) {
+      var rowAf = getRowById(aId);
+      var rowBf = bId ? getRowById(bId) : null;
+      return {
+        winnerId: forced,
+        scoreA: puntajeTotal(rowAf),
+        scoreB: rowBf ? puntajeTotal(rowBf) : null,
+        status: 'forced'
+      };
+    }
     var rowA = getRowById(aId);
     var rowB = bId ? getRowById(bId) : null;
     var scoreA = puntajeTotal(rowA);
@@ -899,7 +1013,7 @@
     for (var i = 0; i < participants.length; i += 2) {
       var aId = participants[i];
       var bId = participants[i + 1] || null;
-      var match = resolveMatch(aId, bId);
+      var match = resolveMatch(aId, bId, roundNum, Math.floor(i / 2) + 1);
       if (match.winnerId) winners.push(match.winnerId);
     }
     return winners;
@@ -930,7 +1044,7 @@
     for (var i = 0; i < rounds.length; i++) {
       var pending = rounds[i].matches.some(function (m) {
         if (!m.bId) return false;
-        return resolveMatch(m.aId, m.bId).status === 'pending';
+        return resolveMatch(m.aId, m.bId, rounds[i].roundNum, m.duelNum).status === 'pending';
       });
       if (pending) return rounds[i].roundNum;
     }
@@ -943,18 +1057,252 @@
     return 'Duelo fase · ' + roundNum;
   }
 
-  function renderMatchCompetitor(row, isWinner, isLoser, showAdmin) {
+  function roundIsComplete(round) {
+    return round.matches.every(function (m) {
+      return !!resolveMatch(m.aId, m.bId, round.roundNum, m.duelNum).winnerId;
+    });
+  }
+
+  function renderRoundSummaryPanel(round, totalRounds) {
+    var summary = $('organizerRoundSummary');
+    if (!summary) return;
+
+    var participantIds = getParticipantsForRound(round.roundNum);
+    var participants = participantIds.map(getRowById).sort(function (a, b) {
+      var ta = puntajeTotal(a) != null ? puntajeTotal(a) : -1;
+      var tb = puntajeTotal(b) != null ? puntajeTotal(b) : -1;
+      if (tb !== ta) return tb - ta;
+      return (a.nombre || '').localeCompare(b.nombre || '', 'es');
+    });
+
+    var winners = getRoundWinners(round.roundNum);
+    var winnerRows = winners.map(getRowById);
+    var loserRows = participants.filter(function (p) {
+      return winners.indexOf(p.competidorId) < 0;
+    });
+    var complete = roundIsComplete(round);
+    var label = roundLabel(round.roundNum, totalRounds);
+
+    var html = '<div class="jurado-round-panel">';
+    html += '<header class="jurado-round-panel-head"><h3>' + escapeHtml(label) + '</h3>';
+    html += '<span class="jurado-round-panel-meta">' + participants.length + ' en competencia';
+    if (complete) html += ' · ' + winners.length + ' clasifican por mayor puntaje';
+    html += '</span></header>';
+
+    html += '<div class="jurado-round-panel-grid">';
+    html += '<section class="jurado-round-col"><h4>Ranking de la ronda</h4><ol class="jurado-round-rank">';
+    participants.forEach(function (p, idx) {
+      var t = puntajeTotal(p);
+      var passes = complete && winners.indexOf(p.competidorId) >= 0;
+      html += '<li class="jurado-round-rank-item' + (passes ? ' jurado-round-rank-item--pass' : '') + '">';
+      html += '<span class="jurado-round-rank-pos">' + (idx + 1) + '</span>';
+      html += '<span class="jurado-round-rank-name">' + escapeHtml(p.nombre) + '</span>';
+      html += '<span class="jurado-round-rank-score">' + (t != null ? t + ' pts' : '—') + '</span>';
+      if (passes) html += '<span class="jurado-duel-badge">Pasa</span>';
+      html += '</li>';
+    });
+    html += '</ol></section>';
+
+    if (complete && winners.length) {
+      html += '<section class="jurado-round-col jurado-round-col--pass"><h4>Clasifican (' + winners.length + ')</h4><ul class="jurado-round-pass-list">';
+      winnerRows.forEach(function (p) {
+        var t = puntajeTotal(p);
+        html += '<li><strong>' + escapeHtml(p.nombre) + '</strong>' + (t != null ? ' · ' + t + ' pts' : '') + '</li>';
+      });
+      html += '</ul></section>';
+      if (loserRows.length) {
+        html += '<section class="jurado-round-col jurado-round-col--out"><h4>Quedan fuera (' + loserRows.length + ')</h4><ul class="jurado-round-out-list">';
+        loserRows.forEach(function (p) {
+          var t = puntajeTotal(p);
+          html += '<li>' + escapeHtml(p.nombre) + (t != null ? ' · ' + t + ' pts' : '') + '</li>';
+        });
+        html += '</ul></section>';
+      }
+    } else {
+      html += '<section class="jurado-round-col jurado-round-col--pending"><h4>Pendiente</h4>';
+      html += '<p class="jurado-hint">En cada duelo pasa quien tenga mayor puntaje total (J1+J2+J3). Puedes editar puntajes manualmente o declarar ganador en empates.</p></section>';
+    }
+
+    html += '</div></div>';
+    summary.innerHTML = html;
+    summary.hidden = false;
+  }
+
+  function buildManualScoreSelect(critKey, judgeNum, value) {
+    var html = '<select class="jurado-manual-select" data-manual-judge="' + judgeNum + '" data-manual-crit="' + critKey + '">';
+    html += '<option value="">—</option>';
+    for (var n = 1; n <= 5; n++) {
+      html += '<option value="' + n + '"' + (String(value) === String(n) ? ' selected' : '') + '>' + n + '</option>';
+    }
+    html += '</select>';
+    return html;
+  }
+
+  function hideOrganizerManualEdit() {
+    var card = $('organizerManualCard');
+    if (card) card.hidden = true;
+    manualEditCompetidorId = '';
+    manualEditDirty = false;
+  }
+
+  function recalcManualSubtotals() {
+    for (var j = 1; j <= 3; j++) {
+      var scores = {};
+      var complete = true;
+      CRITERIA.forEach(function (crit) {
+        var sel = document.querySelector('.jurado-manual-select[data-manual-judge="' + j + '"][data-manual-crit="' + crit.key + '"]');
+        var v = sel ? parseInt(sel.value, 10) : NaN;
+        if (isNaN(v) || v < 1 || v > 5) complete = false;
+        else scores[crit.key] = v;
+      });
+      var el = $('manualSubJ' + j);
+      if (el) el.textContent = complete ? String(judgeSubtotal(scores)) : '—';
+    }
+    var saveBtn = $('organizerManualSaveBtn');
+    if (saveBtn) saveBtn.disabled = guardando || !manualEditCompetidorId;
+  }
+
+  function readManualFormJudges() {
+    var judges = {};
+    for (var j = 1; j <= 3; j++) {
+      var scores = {};
+      var complete = true;
+      CRITERIA.forEach(function (crit) {
+        var sel = document.querySelector('.jurado-manual-select[data-manual-judge="' + j + '"][data-manual-crit="' + crit.key + '"]');
+        if (!sel || sel.value === '') {
+          complete = false;
+          return;
+        }
+        var v = parseInt(sel.value, 10);
+        if (isNaN(v) || v < 1 || v > 5) complete = false;
+        else scores[crit.key] = v;
+      });
+      var sub = judgeSubtotal(scores);
+      if (complete && sub != null) {
+        judges['j' + j] = { scores: scores, subtotal: sub };
+      }
+    }
+    return judges;
+  }
+
+  function renderOrganizerManualEdit(competidorId) {
+    var card = $('organizerManualCard');
+    var form = $('organizerManualForm');
+    var target = $('organizerManualTarget');
+    if (!card || !form || !competidorId) {
+      hideOrganizerManualEdit();
+      return;
+    }
+
+    manualEditCompetidorId = competidorId;
+    var found = competidores.find(function (c) { return c.id === competidorId; });
+    var cal = calificacionesMap[competidorId];
+    var nombre = found ? found.nombre : (cal ? cal.nombre : competidorId);
+    if (target) target.textContent = 'Competidor: ' + nombre;
+    card.hidden = false;
+
+    if (!manualEditDirty) {
+      var html = '';
+      for (var j = 1; j <= 3; j++) {
+        var judgeKey = 'j' + j;
+        var judge = cal && cal.judges ? cal.judges[judgeKey] : null;
+        var scores = judge && judge.scores ? judge.scores : {};
+        var sub = judge && judge.subtotal != null ? judge.subtotal : '—';
+        html += '<details class="jurado-manual-judge" open>';
+        html += '<summary>Juez ' + j + ' · subtotal <strong id="manualSubJ' + j + '">' + sub + '</strong> / 35</summary>';
+        html += '<div class="jurado-manual-grid">';
+        CRITERIA.forEach(function (crit) {
+          html += '<label class="jurado-manual-field"><span>' + escapeHtml(crit.label) + '</span>';
+          html += buildManualScoreSelect(crit.key, j, scores[crit.key]);
+          html += '</label>';
+        });
+        html += '</div></details>';
+      }
+      form.innerHTML = html;
+    }
+
+    recalcManualSubtotals();
+  }
+
+  function onOrganizerManualSave() {
+    if (guardando || !manualEditCompetidorId) return;
+    var found = competidores.find(function (c) { return c.id === manualEditCompetidorId; });
+    if (!found) return;
+
+    var judges = readManualFormJudges();
+    var errEl = $('organizerManualError');
+    var okEl = $('organizerManualSuccess');
+    if (errEl) errEl.hidden = true;
+    if (okEl) okEl.hidden = true;
+
+    if (!Object.keys(judges).length) {
+      if (errEl) {
+        errEl.textContent = 'Completa los 7 criterios (1–5) de al menos un juez para guardar.';
+        errEl.hidden = false;
+      }
+      return;
+    }
+
+    guardando = true;
+    $('organizerManualSaveBtn').disabled = true;
+    $('organizerManualSaveBtn').textContent = 'Guardando…';
+
+    saveOrganizerFullCalificacion({
+      competidorId: manualEditCompetidorId,
+      nombre: found.nombre,
+      judges: judges
+    }).then(function (saved) {
+      calificacionesMap[saved.competidorId] = saved;
+      manualEditDirty = false;
+      if (okEl) {
+        okEl.textContent = '✓ Puntajes guardados' + (saved.sumaTotal != null ? ' · Total ' + saved.sumaTotal + ' pts' : '');
+        okEl.hidden = false;
+      }
+      renderOrganizerDetail(manualEditCompetidorId);
+      renderOrganizerBracket();
+      renderOrganizerScoresTable();
+      renderOrganizerManualEdit(manualEditCompetidorId);
+    }).catch(function (err) {
+      if (errEl) {
+        errEl.textContent = err.message || 'No se pudo guardar.';
+        errEl.hidden = false;
+      }
+    }).finally(function () {
+      guardando = false;
+      $('organizerManualSaveBtn').textContent = 'Guardar puntajes manuales';
+      recalcManualSubtotals();
+    });
+  }
+
+  function bindOrganizerManualEdit() {
+    if (organizerManualBound) return;
+    organizerManualBound = true;
+    document.addEventListener('change', function (e) {
+      if (!e.target.classList || !e.target.classList.contains('jurado-manual-select')) return;
+      manualEditDirty = true;
+      recalcManualSubtotals();
+    });
+    var saveBtn = $('organizerManualSaveBtn');
+    if (saveBtn) saveBtn.addEventListener('click', onOrganizerManualSave);
+  }
+
+  function renderMatchCompetitor(row, isWinner, isLoser, showAdmin, roundNum, duelNum, result) {
     var s = formatJudgeScores(row);
     var total = puntajeTotal(row);
     var cls = 'jurado-duel-player';
     if (isWinner) cls += ' jurado-duel-player--winner';
     if (isLoser) cls += ' jurado-duel-player--loser';
-    var adminHtml = showAdmin
-      ? '<div class="jurado-duel-admin">' +
-        '<button type="button" class="jurado-btn-inline jurado-btn-inline--danger" data-eliminar="' + escapeHtml(row.competidorId) + '">Eliminar</button>' +
-        '<button type="button" class="jurado-btn-inline" data-reset-one="' + escapeHtml(row.competidorId) + '">Reiniciar pts</button>' +
-        '</div>'
-      : '';
+    var adminHtml = '';
+    if (showAdmin) {
+      adminHtml = '<div class="jurado-duel-admin">' +
+        '<button type="button" class="jurado-btn-inline" data-edit-scores="' + escapeHtml(row.competidorId) + '">Editar pts</button>' +
+        '<button type="button" class="jurado-btn-inline" data-reset-one="' + escapeHtml(row.competidorId) + '">Reiniciar</button>';
+      if (roundNum && duelNum && result && (result.status === 'tie' || result.status === 'pending') && !isWinner) {
+        adminHtml += '<button type="button" class="jurado-btn-inline jurado-btn-inline--win" data-forzar-gana="' + escapeHtml(row.competidorId) + '" data-round="' + roundNum + '" data-duel="' + duelNum + '">Declarar ganador</button>';
+      }
+      adminHtml += '<button type="button" class="jurado-btn-inline jurado-btn-inline--danger" data-eliminar="' + escapeHtml(row.competidorId) + '">Eliminar</button>' +
+        '</div>';
+    }
     return '<div class="' + cls + '">' +
       '<div class="jurado-duel-name">' + escapeHtml(row.nombre) + (isWinner ? ' <span class="jurado-duel-badge">Pasa</span>' : '') + '</div>' +
       '<div class="jurado-duel-scores">' +
@@ -969,6 +1317,7 @@
     var nav = $('organizerRoundsNav');
     var box = $('organizerBracket');
     var champ = $('organizerChampionStrip');
+    var summary = $('organizerRoundSummary');
     if (!nav || !box) return;
 
     var rounds = buildRoundsStructure();
@@ -976,6 +1325,7 @@
       nav.innerHTML = '';
       box.innerHTML = '<p class="jurado-hint">Se necesitan al menos 2 competidores para armar rondas.</p>';
       if (champ) champ.hidden = true;
+      if (summary) { summary.hidden = true; summary.innerHTML = ''; }
       return;
     }
 
@@ -986,7 +1336,7 @@
       var label = roundLabel(r.roundNum, totalRounds);
       var isActive = r.roundNum === activeRound;
       var pending = r.matches.some(function (m) {
-        return m.bId && resolveMatch(m.aId, m.bId).status === 'pending';
+        return m.bId && resolveMatch(m.aId, m.bId, r.roundNum, m.duelNum).status === 'pending';
       });
       return '<button type="button" class="jurado-round-tab' + (isActive ? ' jurado-round-tab--active' : '') +
         (pending ? ' jurado-round-tab--live' : '') + '" data-round="' + r.roundNum + '">' + label + '</button>';
@@ -1002,28 +1352,32 @@
     var current = rounds.find(function (r) { return r.roundNum === activeRound; });
     if (!current) current = rounds[0];
 
+    renderRoundSummaryPanel(current, totalRounds);
+
     box.innerHTML = current.matches.map(function (m) {
       var rowA = getRowById(m.aId);
       var rowB = m.bId ? getRowById(m.bId) : null;
-      var result = resolveMatch(m.aId, m.bId);
+      var result = resolveMatch(m.aId, m.bId, current.roundNum, m.duelNum);
       var statusHtml = '';
       if (result.status === 'bye') {
         statusHtml = '<p class="jurado-duel-status jurado-duel-status--bye">Pasa directo (sin rival en este duelo)</p>';
+      } else if (result.status === 'forced') {
+        statusHtml = '<p class="jurado-duel-status jurado-duel-status--done">Ganador declarado por organizador</p>';
       } else if (result.status === 'pending') {
         statusHtml = '<p class="jurado-duel-status jurado-duel-status--pending">Esperando puntaje total de ambos (3 jueces)</p>';
       } else if (result.status === 'tie') {
-        statusHtml = '<p class="jurado-duel-status jurado-duel-status--tie">Empate · ' + result.scoreA + ' = ' + result.scoreB + ' · define el organizador</p>';
+        statusHtml = '<p class="jurado-duel-status jurado-duel-status--tie">Empate · ' + result.scoreA + ' = ' + result.scoreB + ' · declara ganador abajo</p>';
       } else {
         statusHtml = '<p class="jurado-duel-status jurado-duel-status--done">Gana mayor puntaje total</p>';
       }
 
-      var html = '<article class="jurado-duel' + (result.status === 'pending' ? ' jurado-duel--pending' : '') + '">';
+      var html = '<article class="jurado-duel' + (result.status === 'pending' || result.status === 'tie' ? ' jurado-duel--pending' : '') + '">';
       html += '<header class="jurado-duel-head">Duelo ' + m.duelNum + ' · ' + roundLabel(current.roundNum, totalRounds) + '</header>';
       html += '<div class="jurado-duel-body">';
-      html += renderMatchCompetitor(rowA, result.winnerId === m.aId, result.winnerId && result.winnerId !== m.aId, true);
+      html += renderMatchCompetitor(rowA, result.winnerId === m.aId, result.winnerId && result.winnerId !== m.aId, true, current.roundNum, m.duelNum, result);
       if (rowB) {
         html += '<div class="jurado-duel-vs">VS</div>';
-        html += renderMatchCompetitor(rowB, result.winnerId === m.bId, result.winnerId && result.winnerId !== m.bId, true);
+        html += renderMatchCompetitor(rowB, result.winnerId === m.bId, result.winnerId && result.winnerId !== m.bId, true, current.roundNum, m.duelNum, result);
       }
       html += '</div>' + statusHtml + '</article>';
       return html;
@@ -1032,7 +1386,7 @@
     if (champ) {
       var finalists = getRoundWinners(totalRounds);
       if (finalists.length === 1 && rounds[totalRounds - 1].matches.every(function (m) {
-        return !m.bId || resolveMatch(m.aId, m.bId).winnerId;
+        return !m.bId || resolveMatch(m.aId, m.bId, totalRounds, m.duelNum).winnerId;
       })) {
         var winner = getRowById(finalists[0]);
         var wt = puntajeTotal(winner);
@@ -1087,6 +1441,7 @@
         '<td class="jurado-td-total"><strong>' + (total != null ? total : '—') + '</strong></td>' +
         '<td class="' + estadoCls + '">' + estadoLabel + '</td>' +
         '<td class="jurado-td-actions">' +
+        '<button type="button" class="jurado-btn-inline" data-edit-scores="' + escapeHtml(row.competidorId) + '">Editar</button> ' +
         '<button type="button" class="jurado-btn-inline" data-reset-one="' + escapeHtml(row.competidorId) + '">Reiniciar</button> ' +
         '<button type="button" class="jurado-btn-inline jurado-btn-inline--danger" data-eliminar="' + escapeHtml(row.competidorId) + '">Eliminar</button>' +
         '</td>';
@@ -1254,8 +1609,9 @@
 
   function showOrganizerUI() {
     hideAll();
+    document.body.classList.add('jurado-page--organizer');
     $('headerTitle').textContent = 'Panel jurado V60';
-    $('headerSubtitle').textContent = 'Duelos por rondas · pasa el mayor puntaje total';
+    $('headerSubtitle').textContent = 'Paneles por ronda · edición manual de puntajes';
 
     $('organizerSection').hidden = false;
     clearOrganizerError();
@@ -1263,6 +1619,7 @@
     fillCompetidorSelect($('organizerCompetidorSelect'), true, competidores);
 
     bindOrganizerAdminActions();
+    bindOrganizerManualEdit();
 
     try {
       renderOrganizerViews(calificacionesList());
@@ -1277,7 +1634,9 @@
     if (!organizerUiBound) {
       organizerUiBound = true;
       $('organizerCompetidorSelect').addEventListener('change', function () {
+        manualEditDirty = false;
         renderOrganizerDetail(this.value);
+        renderOrganizerManualEdit(this.value);
       });
       $('organizerRefreshBtn').addEventListener('click', function () {
         refreshOrganizer().catch(function (err) {
