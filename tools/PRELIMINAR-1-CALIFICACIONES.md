@@ -5,6 +5,18 @@
 **Parámetros:** Aroma, Sabor, Acidez, Dulzor, Cuerpo, Balance, Limpieza de taza, Impresión general (escala 1–6 cada uno)
 **Inscritos cruzados:** 12 de 12 competidores de planilla
 
+## Formato de la competencia
+
+12 competidores en **6 rondas de grupos** (2 por ronda, orden alfabético por nombre). A **semifinal** pasaron los mejores puntajes de cada ronda (6 competidores). La **final** reunió a los 3 mejores de semifinal. El **podio oficial** (1°, 2° y 3°) se definió por el puntaje total en la final.
+
+### Podio oficial (final)
+
+| Puesto | Competidor | Total final |
+|---:|---|---:|
+| 1° | Santiago Colorado | **82** |
+| 2° | José Alejandro Useche | **79** |
+| 3° | Jessica combita | **68** |
+
 ## Cruce planilla ↔ inscripción (Sheets)
 
 | Planilla | ID inscrito | Nombre completo | Ciudad | Representa | Habilitado |

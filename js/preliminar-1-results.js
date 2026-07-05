@@ -13,7 +13,17 @@
     disciplina: 'filtrado',
     jueces: 3,
     scaleMin: 1,
-    scaleMax: 6
+    scaleMax: 6,
+    formato: {
+      competidores: 12,
+      fases: ['grupos', 'semifinal', 'final'],
+      gruposPorRonda: 2,
+      ordenGrupos: 'alfabetico_nombre',
+      rondasGrupos: 6,
+      semifinalistas: 6,
+      finalistas: 3,
+      podioDesde: 'final'
+    }
   };
 
   var CRITERIA = [
@@ -358,10 +368,77 @@
   }
 
   function entradaLabel(entrada) {
-    if (entrada === 1) return 'Clasificatoria';
+    if (entrada === 1) return 'Grupos';
     if (entrada === 2) return 'Semifinal';
     if (entrada === 3) return 'Final';
     return 'Tanda ' + entrada;
+  }
+
+  function formatDescription() {
+    return '12 competidores en 6 rondas de grupos (2 por ronda, orden alfabético por nombre). ' +
+      'A semifinal pasaron los mejores puntajes de cada ronda. ' +
+      'La final reunió a los 3 mejores de semifinal. ' +
+      'El podio oficial (1°, 2° y 3°) se definió por el puntaje total en la final.';
+  }
+
+  function getSemifinalistasSet() {
+    var set = {};
+    getRowsByEntrada(2).forEach(function (row) {
+      set[row.participante] = true;
+    });
+    return set;
+  }
+
+  /** 6 rondas de grupos: parejas en orden alfabético por nombre (planilla). */
+  function getGruposRondas() {
+    var phase1 = getRowsByEntrada(1);
+    var byName = {};
+    phase1.forEach(function (row) {
+      byName[row.participante] = row;
+    });
+    var names = phase1.map(function (r) { return r.participante; })
+      .sort(function (a, b) { return a.localeCompare(b, 'es'); });
+    var semiSet = getSemifinalistasSet();
+    var rounds = [];
+    for (var i = 0; i < names.length; i += 2) {
+      var rowA = byName[names[i]] || null;
+      var rowB = names[i + 1] ? (byName[names[i + 1]] || null) : null;
+      var mejorEnRonda = null;
+      if (rowA && rowB) {
+        if (rowA.total > rowB.total) mejorEnRonda = rowA.participante;
+        else if (rowB.total > rowA.total) mejorEnRonda = rowB.participante;
+        else mejorEnRonda = rowA.participante;
+      } else if (rowA) {
+        mejorEnRonda = rowA.participante;
+      }
+      rounds.push({
+        ronda: rounds.length + 1,
+        participanteA: rowA,
+        participanteB: rowB,
+        mejorPuntajeRonda: mejorEnRonda,
+        clasificaronSemi: [rowA, rowB].filter(Boolean).filter(function (r) {
+          return !!semiSet[r.participante];
+        }).map(function (r) { return r.participante; })
+      });
+    }
+    return rounds;
+  }
+
+  /** Podio oficial: puntajes de la final (entrada 3), ordenados por total. */
+  function getPodioFinal() {
+    return getRowsByEntrada(3)
+      .slice()
+      .sort(function (a, b) {
+        if (b.total !== a.total) return b.total - a.total;
+        return a.participante.localeCompare(b.participante, 'es');
+      })
+      .map(function (row, idx) {
+        return Object.assign({}, row, {
+          posicion: idx + 1,
+          podioOficial: true,
+          fasePodio: 'final'
+        });
+      });
   }
 
   /** Texto que explica la lógica del puntaje (planilla solo trae subtotales por juez). */
@@ -438,6 +515,10 @@
 
   function buildBreakdownDocumentMarkdown() {
     var lines = [
+      '## Formato de la competencia',
+      '',
+      formatDescription(),
+      '',
       '## Cómo se calcula el puntaje',
       '',
       scoringMethodNote(),
@@ -560,6 +641,10 @@
       crosswalk: PLANILLA_TO_KEY,
       rawRows: getEnrichedRows(),
       ranking: getRankingConsolidado(),
+      rankingGeneral: getRankingConsolidado(),
+      podioFinal: getPodioFinal(),
+      gruposRondas: getGruposRondas(),
+      formatDescription: formatDescription(),
       calificaciones: buildCalificacionesStore(),
       competidores: buildCompetidorList(),
       platformConfig: buildPlatformConfigSnippet(),
@@ -587,6 +672,9 @@
     renderBreakdownMarkdown: renderBreakdownMarkdown,
     buildBreakdownDocumentMarkdown: buildBreakdownDocumentMarkdown,
     getRankingConsolidado: getRankingConsolidado,
+    getPodioFinal: getPodioFinal,
+    getGruposRondas: getGruposRondas,
+    formatDescription: formatDescription,
     buildCalificacionesStore: buildCalificacionesStore,
     buildCompetidorList: buildCompetidorList,
     buildPlatformConfigSnippet: buildPlatformConfigSnippet,

@@ -63,14 +63,47 @@
   }
 
   function phaseLabel(entrada) {
-    if (entrada === 1) return 'Clasificatoria';
+    if (global.Preliminar1Results && global.Preliminar1Results.entradaLabel) {
+      return global.Preliminar1Results.entradaLabel(entrada);
+    }
+    if (entrada === 1) return 'Grupos';
     if (entrada === 2) return 'Semifinal';
     if (entrada === 3) return 'Final';
     return 'Tanda ' + entrada;
   }
 
+  function renderGruposRondas(edition) {
+    var rounds = edition.gruposRondas || [];
+    if (!rounds.length) return '';
+    var cards = rounds.map(function (round) {
+      function chip(row, cls) {
+        if (!row) return '';
+        var name = row.nombreInscrito || row.participante;
+        var inSemi = (round.clasificaronSemi || []).indexOf(row.participante) >= 0;
+        return '<div class="jurado-grupo-duo ' + cls + (inSemi ? ' jurado-grupo-duo--semi' : '') + '">' +
+          competitorPhotoHtml(row.fotoUrl, 56, name) +
+          '<div class="jurado-grupo-duo__body">' +
+          '<strong>' + escapeHtml(name) + '</strong>' +
+          '<span class="jurado-grupo-duo__pts">' + row.total + ' pts</span>' +
+          (inSemi ? '<span class="jurado-grupo-duo__badge">→ Semi</span>' : '') +
+          '</div></div>';
+      }
+      return '<article class="jurado-grupo-ronda">' +
+        '<h4 class="jurado-grupo-ronda__title">Ronda ' + round.ronda + '</h4>' +
+        '<div class="jurado-grupo-ronda__duo">' +
+        chip(round.participanteA, 'jurado-grupo-duo--a') +
+        '<span class="jurado-grupo-ronda__vs">vs</span>' +
+        chip(round.participanteB, 'jurado-grupo-duo--b') +
+        '</div></article>';
+    }).join('');
+    return '<section class="jurado-clasificacion-section">' +
+      '<h3 class="jurado-clasificacion-title">Grupos — rondas de 2</h3>' +
+      '<p class="jurado-hint">12 competidores · orden alfabético por nombre · a semifinal los mejores puntajes de cada ronda.</p>' +
+      '<div class="jurado-grupos-rondas">' + cards + '</div></section>';
+  }
+
   function renderPodiumMap(edition) {
-    var top = (edition.ranking || []).slice(0, 3);
+    var top = edition.podioFinal || edition.podio || (edition.ranking || []).slice(0, 3);
     if (!top.length) return '';
     var order = top.length >= 3 ? [top[1], top[0], top[2]] : top;
     var cards = order.map(function (row) {
@@ -84,7 +117,8 @@
         '</div>';
     }).join('');
     return '<section class="jurado-clasificacion-section">' +
-      '<h3 class="jurado-clasificacion-title">Podio</h3>' +
+      '<h3 class="jurado-clasificacion-title">Podio oficial</h3>' +
+      '<p class="jurado-hint">1°, 2° y 3° por puntaje en la final.</p>' +
       '<div class="jurado-podium-map">' + cards + '</div></section>';
   }
 
@@ -109,7 +143,7 @@
     }).join('');
     return '<section class="jurado-clasificacion-section">' +
       '<h3 class="jurado-clasificacion-title">Mapa de clasificación</h3>' +
-      '<p class="jurado-hint">Ranking final por mejor tanda · fotos de inscripción · totales de planilla.</p>' +
+      '<p class="jurado-hint">Ranking por mejor tanda de cada competidor · podio oficial = final.</p>' +
       '<div class="jurado-clasificacion-grid">' + cards + '</div></section>';
   }
 
@@ -162,6 +196,7 @@
     if (!global.Preliminar1Results) return null;
     var kit = global.Preliminar1Results.exportKit();
     var ranking = kit.ranking || [];
+    var podioFinal = kit.podioFinal || [];
     return {
       id: 'preliminar-1',
       slug: 'preliminar-1',
@@ -174,7 +209,9 @@
       jueces: kit.event.jueces || 3,
       competidores: ranking.length,
       tandas: (kit.rawRows || []).length,
-      podio: ranking.slice(0, 3).map(function (r) {
+      formatDescription: kit.formatDescription || '',
+      gruposRondas: kit.gruposRondas || [],
+      podio: podioFinal.map(function (r) {
         return {
           posicion: r.posicion,
           nombre: r.nombreInscrito || r.participante,
@@ -182,9 +219,11 @@
           id: r.competidorId,
           fotoUrl: r.fotoUrl || '',
           representa: r.representa || '',
-          ciudad: r.ciudad || ''
+          ciudad: r.ciudad || '',
+          fase: 'final'
         };
       }),
+      podioFinal: podioFinal,
       ranking: ranking,
       rawRows: kit.rawRows || [],
       inscritos: kit.inscritos || [],
@@ -339,6 +378,9 @@
       '<h2>' + escapeHtml(edition.nombre) + '</h2>' +
       '<p class="jurado-hint">' + escapeHtml(edition.fecha) + ' · ' + escapeHtml(edition.sede) + ' · ' +
       escapeHtml(edition.ciudad) + '</p>' +
+      (edition.formatDescription
+        ? '<p class="jurado-history-format">' + escapeHtml(edition.formatDescription) + '</p>'
+        : '') +
       '</header>';
 
     if (!edition.hasResults || !edition.ranking || !edition.ranking.length) {
@@ -347,6 +389,7 @@
     }
 
     html += renderPodiumMap(edition);
+    html += renderGruposRondas(edition);
     html += renderClassificationGrid(edition);
     html += renderPhaseLanes(edition);
 
