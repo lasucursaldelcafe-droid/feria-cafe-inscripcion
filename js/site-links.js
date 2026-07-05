@@ -15,6 +15,7 @@
     stands: 'stands.html',
     feria: 'inscripcion.html',
     competencia: 'competencia.html',
+    competenciaTorneo: 'competencia-torneo.html',
     reglas: 'reglas-v60-championship.html',
     reglasPdf: 'assets/reglas-v60-championship.pdf',
     comoFunciona: 'como-funciona-evento.html',
@@ -46,6 +47,7 @@
     stands: '/stands',
     feria: '/inscripcion',
     competencia: '/competencia',
+    competenciaTorneo: '/competencia/torneo',
     reglas: '/reglas',
     reglasPdf: '/assets/reglas-v60-championship.pdf',
     comoFunciona: '/como-funciona',
@@ -98,65 +100,6 @@
     return base + '/' + path;
   }
 
-  function juradoJudgeCount() {
-    var cfg = global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60;
-    var n = cfg && cfg.jueces != null ? parseInt(cfg.jueces, 10) : 3;
-    if (isNaN(n) || n < 1) n = 1;
-    if (n > 5) n = 5;
-    return n;
-  }
-
-  function buildJuradoUrls(opts) {
-    opts = opts || {};
-    var cfg = global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60;
-    var pinOrg = opts.pinOrganizador || (cfg && cfg.pinOrganizador) || 'v60organizador';
-    var pinJuez = opts.pinJuez || (cfg && cfg.pinJuez) || 'v60sensorial';
-    var jueces = opts.jueces != null ? opts.jueces : juradoJudgeCount();
-    jueces = Math.max(1, Math.min(5, parseInt(jueces, 10) || 3));
-    var hub = opts.hubBase || absUrl('juradoV60');
-    var orgBase = opts.organizadorBase || absUrl('juradoOrganizador');
-    var cfgBase = opts.configBase || absUrl('juradoConfig');
-    var juezBase = opts.juezBase || absUrl('juradoJuez');
-    var evt = opts.evt ? String(opts.evt).trim() : '';
-    function withEvt(url) {
-      if (!evt) return url;
-      return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'evt=' + encodeURIComponent(evt);
-    }
-    var urls = {
-      hub: withEvt(hub),
-      config: withEvt(cfgBase + '?pin=' + encodeURIComponent(pinOrg)),
-      organizador: withEvt(orgBase + '?pin=' + encodeURIComponent(pinOrg)),
-      resultados: withEvt(absUrl('juradoResultados')),
-      competencia: absUrl('competencia')
-    };
-    for (var j = 1; j <= jueces; j++) {
-      urls['juez' + j] = withEvt(juezBase + '?pin=' + encodeURIComponent(pinJuez) + '&juez=' + j);
-    }
-    return urls;
-  }
-
-  function juradoUrl(role) {
-    if (global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60 && global.EVENT_CONFIG.juradoV60.links) {
-      var links = global.EVENT_CONFIG.juradoV60.links;
-      if (role === 'organizador') return links.organizador;
-      if (role === 'config') return links.config;
-      if (role === 'resultados') return links.resultados;
-      if (role === 'hub') return links.hub;
-      var n = parseInt(role, 10);
-      if (n >= 1 && links['juez' + n]) return links['juez' + n];
-    }
-    var built = buildJuradoUrls();
-    if (role === 'organizador') return built.organizador;
-    if (role === 'config') return built.config;
-    if (role === 'resultados') return built.resultados;
-    if (role === 'hub') return built.hub;
-    return built['juez' + parseInt(role, 10)] || built.organizador;
-  }
-
-  function allJuradoUrls() {
-    return buildJuradoUrls();
-  }
-
   function applyLinkElements(root) {
     (root || document).querySelectorAll('[data-link]').forEach(function (el) {
       var key = resolveKey(el.getAttribute('data-link'));
@@ -171,10 +114,6 @@
   global.SiteLinks = {
     href: href,
     absUrl: absUrl,
-    juradoUrl: juradoUrl,
-    allJuradoUrls: allJuradoUrls,
-    buildJuradoUrls: buildJuradoUrls,
-    juradoJudgeCount: juradoJudgeCount,
     apply: applyLinkElements,
     LOCAL: LOCAL,
     HOSTED: HOSTED

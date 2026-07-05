@@ -2414,6 +2414,8 @@
     }
     root.innerHTML = instances.slice().reverse().map(function (inst) {
       var cfgUrl = buildJuradoTenantConfigUrl(inst.slug, inst.pinOrganizador);
+      var site = String((global.EVENT_CONFIG && global.EVENT_CONFIG.siteUrl) || global.location.origin).replace(/\/$/, '');
+      var inscUrl = inst.inscripcionUrl || (site + '/competencia/torneo?evt=' + encodeURIComponent(inst.slug));
       var urls = global.SiteLinks && global.SiteLinks.buildJuradoUrls
         ? global.SiteLinks.buildJuradoUrls({
           evt: inst.slug,
@@ -2433,8 +2435,11 @@
         '</div>' +
         '<p class="admin-jurado-client-config"><span class="admin-table-meta">Configuración (envía esto al cliente):</span><br>' +
         '<a href="' + escapeHtml(cfgUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(cfgUrl) + '</a></p>' +
+        (inscUrl ? '<p class="admin-jurado-client-config"><span class="admin-table-meta">Inscripción en línea:</span><br>' +
+        '<a href="' + escapeHtml(inscUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(inscUrl) + '</a></p>' : '') +
         '<div class="admin-jurado-link-actions">' +
         '<button type="button" class="admin-btn admin-btn--secondary admin-btn--small" data-admin-copy-link="' + escapeHtml(cfgUrl) + '">Copiar enlace config</button>' +
+        (inscUrl ? '<button type="button" class="admin-btn admin-btn--secondary admin-btn--small" data-admin-copy-link="' + escapeHtml(inscUrl) + '">Copiar inscripción</button>' : '') +
         (urls.organizador ? '<a class="admin-btn admin-btn--secondary admin-btn--small" href="' + escapeHtml(urls.organizador) + '" target="_blank" rel="noopener noreferrer">Torneo</a>' : '') +
         (urls.resultados ? '<a class="admin-btn admin-btn--secondary admin-btn--small" href="' + escapeHtml(urls.resultados) + '" target="_blank" rel="noopener noreferrer">Resultados</a>' : '') +
         '</div>' +
@@ -2473,8 +2478,10 @@
         if (!data || data.ok === false) throw new Error((data && data.error) || 'No se pudo crear el apartado.');
         var inst = data.instance;
         var cfgUrl = buildJuradoTenantConfigUrl(inst.slug, inst.pinOrganizador);
+        var inscUrl = data.inscripcionUrl || inst.inscripcionUrl || '';
         if (msg) {
-          msg.textContent = 'Apartado creado. Enlace de configuración para el cliente: ' + cfgUrl;
+          msg.textContent = 'Apartado creado. Config: ' + cfgUrl +
+            (inscUrl ? ' · Inscripción: ' + inscUrl : '');
           msg.hidden = false;
         }
         form.reset();

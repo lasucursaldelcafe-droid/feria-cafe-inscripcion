@@ -108,6 +108,16 @@
         "type": 301
       },
       {
+        "source": "/competencia/torneo/",
+        "destination": "/competencia/torneo",
+        "type": 301
+      },
+      {
+        "source": "/competencia-torneo.html",
+        "destination": "/competencia/torneo",
+        "type": 301
+      },
+      {
         "source": "/reglas/",
         "destination": "/reglas",
         "type": 301
@@ -319,6 +329,10 @@
       {
         "source": "/competencia",
         "destination": "/competencia.html"
+      },
+      {
+        "source": "/competencia/torneo",
+        "destination": "/competencia-torneo.html"
       },
       {
         "source": "/reglas",

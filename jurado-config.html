@@ -8,7 +8,7 @@
   <title>Configuración — Jurado sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado24">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado25">
 </head>
 <body class="jurado-page" data-jurado-page="config">
   <div class="jurado-shell">
@@ -99,6 +99,7 @@
         <button type="button" class="jurado-dash-tab" data-dash-tab="puntajes">Puntajes</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="control">Control</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="config">Marca y reglas</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="inscripciones">Inscripciones</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="export">Exportar</button>
       </nav>
 
@@ -393,7 +394,11 @@
             <div id="criteriaEditorList" class="jurado-criteria-editor"></div>
             <button type="button" id="addCriterionBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">+ Añadir criterio</button>
 
-            <h3 class="jurado-admin-subtitle">Datos de inscripción (para exportar)</h3>
+            <h3 class="jurado-admin-subtitle">Campos del formulario en línea</h3>
+            <p class="jurado-hint">Activa, renombra y marca obligatorios los campos que verán los competidores al inscribirse.</p>
+            <div id="formFieldsEditorList" class="jurado-form-fields-editor"></div>
+
+            <h3 class="jurado-admin-subtitle">Datos del evento (formulario público)</h3>
             <div class="jurado-config-grid">
               <div class="jurado-field">
                 <label for="cfgRegTitle">Título inscripción</label>
@@ -439,6 +444,36 @@
         </div>
       </div>
 
+      <!-- Tab: Inscripciones en línea -->
+      <div class="jurado-dash-pane" data-dash-pane="inscripciones" hidden>
+        <div class="jurado-card jurado-card--inscripciones">
+          <div class="jurado-card-head">
+            <h2>Inscripciones en línea</h2>
+            <p class="jurado-hint" id="inscripcionPublicHint">Formulario público de este torneo. Los registros se guardan en la hoja del evento.</p>
+          </div>
+          <div class="jurado-inscripcion-url-box">
+            <label class="jurado-meta" for="inscripcionPublicUrl">Enlace público</label>
+            <p id="inscripcionPublicUrl" class="jurado-inscripcion-url">—</p>
+            <div class="jurado-admin-actions">
+              <button type="button" id="inscripcionCopyBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Copiar enlace</button>
+              <a id="inscripcionOpenLink" class="jurado-btn jurado-btn--secondary jurado-btn--small" href="#" target="_blank" rel="noopener noreferrer">Abrir formulario</a>
+              <button type="button" id="inscripcionesRefreshBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Actualizar lista</button>
+            </div>
+          </div>
+          <p id="inscripcionesMeta" class="jurado-meta"></p>
+          <div class="jurado-table-wrap">
+            <table class="jurado-table jurado-table--inscripciones" id="inscripcionesTable">
+              <thead id="inscripcionesTableHead">
+                <tr><th>Cargando…</th></tr>
+              </thead>
+              <tbody id="inscripcionesTableBody">
+                <tr><td class="jurado-empty">Cargando inscripciones…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- Tab: Exportar -->
       <div class="jurado-dash-pane" data-dash-pane="export" hidden>
         <div class="jurado-card jurado-card--export">
@@ -459,12 +494,12 @@
     <p id="loadingMsg" class="jurado-loading">Cargando…</p>
   </div>
 
-  <script src="js/event-config.js?v=20260705jurado24"></script>
+  <script src="js/event-config.js?v=20260705jurado25"></script>
   <script>
     window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
-      WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec'
+      WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzpxE3fFv-mS9hai146Mo-LOWRf3KaRYwyZf_S9wk-iB7X-8Ke09eMx2-KftQQV1yfz/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado24"></script>
+  <script src="js/jurado-v60.js?v=20260705jurado25"></script>
 </body>
 </html>
