@@ -16,12 +16,12 @@ window.EVENT_CONFIG = {
     email: 'lasucursaldelcafe@gmail.com'
   },
   festival: {
-    slogan: 'Café que conecta',
+    slogan: 'Bienvenido al festival',
     lema: 'La Sucursal es de los cafeteros',
     instagram: '@lasucursal.delcafe',
     instagramUrl: 'https://www.instagram.com/lasucursal.delcafe/',
     heroLead:
-      'Café especial en Palmetto Plaza: cata, talleres y comunidad. Entrada gratis.',
+      'La riqueza del café especial de Cali, en tus manos. Cata, talleres y comunidad — entrada gratis.',
     mensaje:
       'Dos días en Cali para probar, aprender y conectar. Entrada sin costo; registro opcional con premios.',
     mensajeEvento:

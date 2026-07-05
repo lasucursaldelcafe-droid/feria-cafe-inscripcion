@@ -6,7 +6,17 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CACHE = "20260705pergamino6"
+CACHE = "20260705tropicalia1"
+
+FONT_LINK = (
+    "https://fonts.googleapis.com/css2?"
+    "family=Karla:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&"
+    "family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,300&"
+    "display=swap"
+)
+OLD_FONT = re.compile(
+    r'<link href="https://fonts\.googleapis\.com/css2\?family=Inter[^"]+" rel="stylesheet">'
+)
 
 REPLACEMENTS = [
     (re.compile(r"brand\.css\?v=[^\"']+"), f"brand.css?v={CACHE}"),
@@ -68,6 +78,10 @@ def main() -> None:
         }:
             continue
         original = text
+        text = OLD_FONT.sub(
+            f'<link href="{FONT_LINK}" rel="stylesheet">',
+            text,
+        )
         for pattern, repl in REPLACEMENTS:
             text = pattern.sub(repl, text)
         text = inject_pasaporte_nav(text)
