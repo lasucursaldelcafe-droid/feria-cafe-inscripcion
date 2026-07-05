@@ -33,6 +33,7 @@
   var calificacionesMap = {};
   var guardando = false;
   var refreshTimer = null;
+  var organizerUiBound = false;
 
   function webAppUrl() {
     var cfg = window.SHEETS_CONFIG || {};
@@ -67,7 +68,7 @@
       }
     });
     var sep = url.indexOf('?') >= 0 ? '&' : '?';
-    return fetch(url + sep + qs, { method: 'GET', mode: 'cors', cache: 'no-store' })
+    return fetch(url + sep + qs, { method: 'GET', mode: 'cors', cache: 'no-store', redirect: 'follow' })
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (!data || data.ok === false) throw new Error((data && data.error) || 'Error del servidor.');
@@ -80,7 +81,8 @@
       method: 'POST',
       mode: 'cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
+      redirect: 'follow'
     }).then(function (res) { return res.json(); })
       .then(function (data) {
         if (!data || data.ok === false) throw new Error((data && data.error) || 'Error al guardar.');
@@ -457,7 +459,27 @@
     });
   }
 
-  /* ——— Vista organizador ——— */
+  function calificacionesList() {
+    return Object.keys(calificacionesMap).map(function (id) { return calificacionesMap[id]; });
+  }
+
+  function showOrganizerError(msg) {
+    var el = $('organizerLoadError');
+    if (!el) return;
+    el.textContent = msg || 'Error al cargar el panel.';
+    el.hidden = false;
+  }
+
+  function clearOrganizerError() {
+    var el = $('organizerLoadError');
+    if (el) el.hidden = true;
+  }
+
+  function renderOrganizerViews(list) {
+    renderOrganizerFinalSummary(list);
+    renderOrganizerRanking(list);
+    renderOrganizerDetail($('organizerCompetidorSelect').value);
+  }
   function sortOrganizerRows(list) {
     return list.slice().sort(function (a, b) {
       var pa = a.promedio != null ? a.promedio : -1;
@@ -516,6 +538,7 @@
 
   function renderOrganizerRanking(list) {
     var tbody = $('organizerRankingBody');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
     var withAny = list.filter(function (r) {
@@ -544,7 +567,8 @@
       tbody.appendChild(tr);
     });
 
-    $('organizerUpdated').textContent = 'Última actualización: ' + new Date().toLocaleTimeString('es-CO');
+    var updated = $('organizerUpdated');
+    if (updated) updated.textContent = 'Última actualización: ' + new Date().toLocaleTimeString('es-CO');
   }
 
   function judgeSubtotalDisplay(cal, j) {
@@ -651,10 +675,9 @@
 
   function refreshOrganizer() {
     return loadCalificacionesStore().then(function (list) {
-      renderOrganizerFinalSummary(list);
-      renderOrganizerRanking(list);
-      var sel = $('organizerCompetidorSelect').value;
-      renderOrganizerDetail(sel);
+      clearOrganizerError();
+      renderOrganizerViews(list);
+      return list;
     });
   }
 
@@ -669,20 +692,32 @@
     $('headerTitle').textContent = 'Panel jurado V60';
     $('headerSubtitle').textContent = 'Vista organizador · clasificación en vivo';
 
+    $('organizerSection').hidden = false;
+    clearOrganizerError();
+
     fillCompetidorSelect($('organizerCompetidorSelect'));
 
-    refreshOrganizer().then(function () {
-      $('organizerSection').hidden = false;
+    try {
+      renderOrganizerViews(calificacionesList());
+    } catch (err) {
+      showOrganizerError(err.message || 'Error al mostrar el panel.');
+    }
+
+    refreshOrganizer().catch(function (err) {
+      showOrganizerError(err.message || 'No se pudieron actualizar las calificaciones.');
     });
 
-    $('organizerCompetidorSelect').addEventListener('change', function () {
-      renderOrganizerDetail(this.value);
-    });
-    $('organizerRefreshBtn').addEventListener('click', function () {
-      refreshOrganizer().catch(function (err) {
-        alert(err.message || 'Error al actualizar');
+    if (!organizerUiBound) {
+      organizerUiBound = true;
+      $('organizerCompetidorSelect').addEventListener('change', function () {
+        renderOrganizerDetail(this.value);
       });
-    });
+      $('organizerRefreshBtn').addEventListener('click', function () {
+        refreshOrganizer().catch(function (err) {
+          showOrganizerError(err.message || 'Error al actualizar');
+        });
+      });
+    }
 
     if (refreshTimer) clearInterval(refreshTimer);
     refreshTimer = setInterval(function () {
@@ -691,8 +726,9 @@
   }
 
   function resolvePin(value) {
-    var p = String(value || '').trim();
-    if (p === PIN_ORGANIZADOR || p === PIN_JUEZ) return p;
+    var p = String(value || '').trim().toLowerCase();
+    if (p === PIN_ORGANIZADOR) return PIN_ORGANIZADOR;
+    if (p === PIN_JUEZ) return PIN_JUEZ;
     return '';
   }
 

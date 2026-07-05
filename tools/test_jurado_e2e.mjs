@@ -35,6 +35,10 @@ async function postJson(body) {
 async function main() {
   let failed = 0;
 
+  const pageOrg = await fetch(SITE + '/jurado-v60?pin=v60organizador', { redirect: 'follow' });
+  console.log(pageOrg.ok ? '[OK]' : '[FAIL]', 'Página organizador HTTP', pageOrg.status);
+  if (!pageOrg.ok) failed++;
+
   const page = await fetch(SITE + '/jurado-v60?pin=v60sensorial', { redirect: 'follow' });
   console.log(page.ok ? '[OK]' : '[FAIL]', 'Página jurado HTTP', page.status);
   if (!page.ok) failed++;
