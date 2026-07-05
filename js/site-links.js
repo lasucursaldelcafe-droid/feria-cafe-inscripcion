@@ -117,15 +117,20 @@
     var orgBase = opts.organizadorBase || absUrl('juradoOrganizador');
     var cfgBase = opts.configBase || absUrl('juradoConfig');
     var juezBase = opts.juezBase || absUrl('juradoJuez');
+    var evt = opts.evt ? String(opts.evt).trim() : '';
+    function withEvt(url) {
+      if (!evt) return url;
+      return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'evt=' + encodeURIComponent(evt);
+    }
     var urls = {
-      hub: hub,
-      config: cfgBase + '?pin=' + encodeURIComponent(pinOrg),
-      organizador: orgBase + '?pin=' + encodeURIComponent(pinOrg),
-      resultados: absUrl('juradoResultados'),
+      hub: withEvt(hub),
+      config: withEvt(cfgBase + '?pin=' + encodeURIComponent(pinOrg)),
+      organizador: withEvt(orgBase + '?pin=' + encodeURIComponent(pinOrg)),
+      resultados: withEvt(absUrl('juradoResultados')),
       competencia: absUrl('competencia')
     };
     for (var j = 1; j <= jueces; j++) {
-      urls['juez' + j] = juezBase + '?pin=' + encodeURIComponent(pinJuez) + '&juez=' + j;
+      urls['juez' + j] = withEvt(juezBase + '?pin=' + encodeURIComponent(pinJuez) + '&juez=' + j);
     }
     return urls;
   }

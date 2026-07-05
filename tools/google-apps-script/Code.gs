@@ -167,6 +167,9 @@ function doGet(e) {
   if (params.action === 'jurado_calificaciones') {
     return jsonResponse(handleJuradoCalificacionesGet_(params.pin || '', params.competidorId || ''));
   }
+  if (params.action === 'jurado_instances') {
+    return jsonResponse(listJuradoInstances_());
+  }
   return jsonResponse({
     ok: true,
     message: 'API de inscripciones — La Sucursal del Café',
@@ -250,6 +253,9 @@ function doPost(e) {
     }
     if (action === 'pasaporte_config_save') {
       return jsonResponse(savePasaporteConfig_(payload));
+    }
+    if (action === 'jurado_instance_create') {
+      return jsonResponse(handleJuradoInstanceCreate_(payload));
     }
     if (action === 'jurado_resultados_login') {
       return jsonResponse(handleJuradoResultadosLogin_(payload));
@@ -3536,6 +3542,7 @@ function juradoResultadosTorneoStatus_(bracket, competidorId) {
 function handleJuradoResultadosLogin_(payload) {
   var nombre = String(payload.nombre || '').trim();
   var documento = String(payload.documento || '').trim();
+  var evt = String(payload.evt || '').trim();
   if (!nombre || !documento) {
     return { ok: false, error: 'Ingresa tu nombre y número de documento (cédula).' };
   }
@@ -3545,10 +3552,17 @@ function handleJuradoResultadosLogin_(payload) {
     return { ok: false, error: 'No encontramos un inscrito habilitado con ese nombre y documento.' };
   }
 
+  if (evt) {
+    var eventoRow = String(row['Evento'] || '').trim();
+    if (eventoRow && eventoRow !== evt) {
+      return { ok: false, error: 'Este inscrito no pertenece a este torneo.' };
+    }
+  }
+
   var competidorId = String(row['ID'] || '').trim();
-  var calCfg = getPasaporteConfig_('jurado_v60_calificaciones');
-  var bracketCfg = getPasaporteConfig_('jurado_v60_bracket');
-  var platformCfg = getPasaporteConfig_('jurado_v60_platform');
+  var calCfg = getPasaporteConfig_(juradoTenantKey_('jurado_v60_calificaciones', evt));
+  var bracketCfg = getPasaporteConfig_(juradoTenantKey_('jurado_v60_bracket', evt));
+  var platformCfg = getPasaporteConfig_(juradoTenantKey_('jurado_v60_platform', evt));
 
   var scoresRoot = calCfg.data && calCfg.data.scores ? calCfg.data.scores : {};
   var calRaw = scoresRoot[competidorId] || null;
@@ -3599,4 +3613,128 @@ function handleJuradoResultadosLogin_(payload) {
       }).filter(function (c) { return c.label; })
     }
   };
+}
+
+var JURADO_INSTANCES_KEY = 'jurado_v60_instances';
+
+function juradoSlugFromName_(name) {
+  var base = String(name || 'evento')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'evento';
+  return base.slice(0, 40);
+}
+
+function generateJuradoPin_() {
+  var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  var out = '';
+  for (var i = 0; i < 12; i++) {
+    out += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return out;
+}
+
+function juradoTenantKey_(base, slug) {
+  slug = String(slug || '').trim();
+  if (!slug) return base;
+  return base + '__' + slug;
+}
+
+function listJuradoInstances_() {
+  var cfg = getPasaporteConfig_(JURADO_INSTANCES_KEY);
+  var instances = cfg.data && Array.isArray(cfg.data.instances) ? cfg.data.instances : [];
+  return { ok: true, instances: instances };
+}
+
+function defaultJuradoPlatformForTenant_(instance) {
+  var slug = instance.slug;
+  var now = new Date().toISOString();
+  return {
+    eventName: instance.eventName,
+    eventSubtitle: 'Calificación sensorial en vivo',
+    organizerName: instance.clientName,
+    tenantSlug: slug,
+    eventId: slug,
+    clientName: instance.clientName,
+    logoUrl: '',
+    accentColor: '#c9a227',
+    primaryColor: '#3d281c',
+    pinOrganizador: instance.pinOrganizador,
+    pinJuez: instance.pinJuez,
+    registration: {
+      title: 'Inscripción competencia',
+      fee: '',
+      cupo: 32,
+      fecha: 'Por confirmar',
+      hora: '',
+      lugar: 'Por confirmar',
+      contactEmail: instance.contactEmail || '',
+      whatsapp: '',
+      reglamentoUrl: ''
+    },
+    scoring: {
+      modo: 'duelos',
+      scaleMin: 1,
+      scaleMax: 5,
+      jueces: 3,
+      avancePorRonda: 0,
+      autoAvance: true,
+      criteria: juradoCriteriaApiList_().map(function (c) {
+        return { key: c.key, label: c.label, desc: '' };
+      })
+    },
+    actualizado: now
+  };
+}
+
+function handleJuradoInstanceCreate_(payload) {
+  var clientName = String(payload.clientName || '').trim();
+  var eventName = String(payload.eventName || '').trim();
+  var contactEmail = String(payload.contactEmail || '').trim();
+  if (!clientName) return { ok: false, error: 'Nombre del cliente requerido.' };
+  if (!eventName) eventName = clientName + ' — Torneo sensorial';
+
+  var listRes = listJuradoInstances_();
+  var instances = listRes.instances || [];
+  var baseSlug = juradoSlugFromName_(clientName);
+  var slug = baseSlug;
+  var n = 2;
+  while (instances.some(function (i) { return i.slug === slug; })) {
+    slug = baseSlug + '-' + n;
+    n++;
+  }
+
+  var pinOrg = generateJuradoPin_();
+  var pinJuez = generateJuradoPin_();
+  var now = new Date().toISOString();
+  var instance = {
+    slug: slug,
+    clientName: clientName,
+    eventName: eventName,
+    contactEmail: contactEmail,
+    pinOrganizador: pinOrg,
+    pinJuez: pinJuez,
+    status: 'active',
+    createdAt: now
+  };
+  instances.push(instance);
+  savePasaporteConfig_({ key: JURADO_INSTANCES_KEY, data: { instances: instances } });
+
+  var platform = defaultJuradoPlatformForTenant_(instance);
+  savePasaporteConfig_({
+    key: juradoTenantKey_('jurado_v60_platform', slug),
+    data: platform
+  });
+  savePasaporteConfig_({
+    key: juradoTenantKey_('jurado_v60_calificaciones', slug),
+    data: { scores: {} }
+  });
+  savePasaporteConfig_({
+    key: juradoTenantKey_('jurado_v60_bracket', slug),
+    data: null
+  });
+
+  return { ok: true, instance: instance };
 }

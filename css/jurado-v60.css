@@ -2085,3 +2085,13 @@ body.jurado-page--organizer .jurado-header-brand {
   white-space: pre-wrap;
   color: #f0e6c8;
 }
+
+.jurado-card--tenant-welcome {
+  border-color: rgba(201, 162, 39, 0.45);
+  margin-bottom: 12px;
+}
+
+.jurado-card--tenant-welcome code {
+  font-size: 0.85em;
+  color: var(--jurado-accent, #c9a227);
+}

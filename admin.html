@@ -227,6 +227,33 @@
           <div id="adminJuradoLinksRoot" class="admin-jurado-links"></div>
         </div>
 
+        <div class="admin-card" id="adminJuradoClientsCard" data-admin-fold-open="true">
+          <h4 class="admin-card__title">Clientes plataforma jurado (white-label)</h4>
+          <p class="admin-table-meta">Crea un apartado por cliente y comparte el enlace de configuración. Cada torneo tiene datos, PINs y puntajes aislados.</p>
+          <form id="adminJuradoClientForm" class="admin-form admin-form--inline" onsubmit="return false">
+            <div class="admin-form-grid">
+              <label class="admin-field">
+                <span>Nombre del cliente</span>
+                <input type="text" id="adminJuradoClientName" required maxlength="120" placeholder="Festival del Café">
+              </label>
+              <label class="admin-field">
+                <span>Nombre del torneo</span>
+                <input type="text" id="adminJuradoEventName" maxlength="120" placeholder="V60 Championship 2026">
+              </label>
+              <label class="admin-field">
+                <span>Email contacto (opcional)</span>
+                <input type="email" id="adminJuradoClientEmail" maxlength="160" placeholder="cliente@ejemplo.com">
+              </label>
+            </div>
+            <div class="admin-form-actions">
+              <button type="submit" class="admin-btn admin-btn--primary" id="adminJuradoClientSubmit">Crear apartado y enlace</button>
+            </div>
+          </form>
+          <p id="adminJuradoClientMsg" class="admin-success" hidden></p>
+          <p id="adminJuradoClientError" class="admin-error" hidden></p>
+          <div id="adminJuradoClientsList" class="admin-jurado-clients"></div>
+        </div>
+
         <div class="admin-card admin-competidor-dashboard" id="competidorDashboardPanel">
           <div class="admin-card__head">
             <div>

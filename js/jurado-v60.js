@@ -22,6 +22,7 @@
   var CONFIG_KEY = 'jurado_v60_calificaciones';
   var BRACKET_KEY = 'jurado_v60_bracket';
   var PLATFORM_KEY = 'jurado_v60_platform';
+  var tenantSlug = '';
   var SESSION_KEY = 'lsc_jurado_v60_session';
   var REFRESH_MS = 3000;
 
@@ -49,6 +50,28 @@
   var autoAdvancing = false;
   var autoAdvanceCooldownUntil = 0;
   var PAGE_MODE = (document.body && document.body.getAttribute('data-jurado-page')) || 'all';
+
+  function storageKey(base) {
+    if (!tenantSlug) return base;
+    return base + '__' + tenantSlug;
+  }
+
+  function initTenantFromUrl() {
+    var params = getParams();
+    var raw = String(params.get('evt') || '').trim().toLowerCase();
+    if (raw && /^[a-z0-9][a-z0-9-]{0,48}$/.test(raw)) tenantSlug = raw;
+    else tenantSlug = '';
+  }
+
+  function tenantQueryString() {
+    return tenantSlug ? ('evt=' + encodeURIComponent(tenantSlug)) : '';
+  }
+
+  function appendTenantToUrl(url) {
+    var q = tenantQueryString();
+    if (!q) return url;
+    return url + (url.indexOf('?') >= 0 ? '&' : '?') + q;
+  }
 
   function getAllowedDashTabs() {
     var map = {
@@ -84,9 +107,9 @@
       resultados: 'jurado-resultados.html'
     };
     if (isLocal && localFiles[pageKey]) {
-      return localFiles[pageKey] + (extraQuery || '');
+      return appendTenantToUrl(localFiles[pageKey] + (extraQuery || ''));
     }
-    return site + path + (extraQuery || '');
+    return appendTenantToUrl(site + path + (extraQuery || ''));
   }
 
   function applyPageModeUI() {
@@ -125,6 +148,19 @@
       existingCfg.innerHTML = 'Paneles: <a href="' + escapeHtml(orgUrl) + '">Torneo en vivo</a> · ' +
         '<a href="' + escapeHtml(juradoPageUrl('resultados')) + '">Resultados competidores</a> · ' +
         '<a href="' + escapeHtml(juradoPageUrl('hub')) + '">Índice jurado</a>';
+      if (tenantSlug) {
+        var welcome = $('tenantSetupBanner');
+        if (!welcome) {
+          welcome = document.createElement('div');
+          welcome.id = 'tenantSetupBanner';
+          welcome.className = 'jurado-card jurado-card--tenant-welcome';
+          nav.parentNode.insertBefore(welcome, nav);
+        }
+        welcome.innerHTML = '<h2>Configura tu torneo</h2>' +
+          '<p class="jurado-hint">Personaliza marca, reglas, criterios y PINs. Al guardar, comparte los enlaces de la pestaña <strong>Exportar</strong> con tu equipo.</p>' +
+          '<p class="jurado-meta">ID del torneo: <code>' + escapeHtml(tenantSlug) + '</code></p>';
+        welcome.hidden = false;
+      }
     }
   }
 
@@ -198,6 +234,9 @@
       primaryColor: '#3d281c',
       pinOrganizador: j.pinOrganizador || PIN_ORGANIZADOR,
       pinJuez: j.pinJuez || PIN_JUEZ,
+      tenantSlug: String(raw.tenantSlug || raw.eventId || tenantSlug || '').trim(),
+      eventId: String(raw.eventId || raw.tenantSlug || tenantSlug || '').trim(),
+      clientName: String(raw.clientName || '').trim(),
       registration: {
         title: 'Inscripción competencia',
         fee: torneo.precio || '$90.000 COP',
@@ -657,7 +696,7 @@
   }
 
   function loadPlatformConfig() {
-    return sheetsGet('pasaporte_config', { key: PLATFORM_KEY }).then(function (res) {
+    return sheetsGet('pasaporte_config', { key: storageKey(PLATFORM_KEY) }).then(function (res) {
       platformConfig = normalizePlatformConfig(res.data);
       applyPlatformBranding();
       return platformConfig;
@@ -669,10 +708,14 @@
   }
 
   function savePlatformConfig(cfg) {
+    if (tenantSlug) {
+      cfg.tenantSlug = tenantSlug;
+      cfg.eventId = tenantSlug;
+    }
     cfg.actualizado = new Date().toISOString();
     return sheetsPost({
       action: 'pasaporte_config_save',
-      key: PLATFORM_KEY,
+      key: storageKey(PLATFORM_KEY),
       data: cfg
     }).then(function () {
       platformConfig = normalizePlatformConfig(cfg);
@@ -786,8 +829,14 @@
 
   function loadCompetidores() {
     return sheetsGet('admin_dashboard', {}).then(function (data) {
+      var eventFilter = tenantSlug || (platformConfig && (platformConfig.eventId || platformConfig.tenantSlug)) || '';
       return (data.allCompetencia || [])
         .filter(function (row) { return isHabilitado(row.Habilitado); })
+        .filter(function (row) {
+          if (!eventFilter) return true;
+          var ev = String(row.Evento || '').trim();
+          return !ev || ev === eventFilter;
+        })
         .map(function (row) {
           return {
             id: String(row.ID || '').trim(),
@@ -802,7 +851,7 @@
   }
 
   function loadCalificacionesStore() {
-    return sheetsGet('pasaporte_config', { key: CONFIG_KEY }).then(function (res) {
+    return sheetsGet('pasaporte_config', { key: storageKey(CONFIG_KEY) }).then(function (res) {
       var data = res.data || {};
       var scores = data.scores && typeof data.scores === 'object' ? data.scores : {};
       var list = Object.keys(scores).map(function (id) {
@@ -1155,7 +1204,7 @@
   }
 
   function loadBracketStore() {
-    return sheetsGet('pasaporte_config', { key: BRACKET_KEY }).then(function (res) {
+    return sheetsGet('pasaporte_config', { key: storageKey(BRACKET_KEY) }).then(function (res) {
       var normalized = normalizeBracketState(res.data);
       if (normalized) {
         bracketState = normalized;
@@ -1179,7 +1228,7 @@
     state.actualizado = new Date().toISOString();
     return sheetsPost({
       action: 'pasaporte_config_save',
-      key: BRACKET_KEY,
+      key: storageKey(BRACKET_KEY),
       data: state
     }).then(function () {
       bracketState = state;
@@ -1190,7 +1239,7 @@
   function resetAllScoresStore() {
     return sheetsPost({
       action: 'pasaporte_config_save',
-      key: CONFIG_KEY,
+      key: storageKey(CONFIG_KEY),
       data: { scores: {}, actualizado: new Date().toISOString() }
     }).then(function () {
       calificacionesMap = {};
@@ -1198,7 +1247,7 @@
   }
 
   function resetScoresForIds(ids) {
-    return sheetsGet('pasaporte_config', { key: CONFIG_KEY }).then(function (res) {
+    return sheetsGet('pasaporte_config', { key: storageKey(CONFIG_KEY) }).then(function (res) {
       var data = res.data || {};
       if (!data.scores || typeof data.scores !== 'object') data.scores = {};
       ids.forEach(function (id) {
@@ -1208,7 +1257,7 @@
       data.actualizado = new Date().toISOString();
       return sheetsPost({
         action: 'pasaporte_config_save',
-        key: CONFIG_KEY,
+        key: storageKey(CONFIG_KEY),
         data: data
       });
     });
@@ -1266,7 +1315,7 @@
 
   function saveCalificacionStore(calificacion, judgeKey) {
     var jKey = judgeKey || ('j' + judgeNum);
-    return sheetsGet('pasaporte_config', { key: CONFIG_KEY }).then(function (res) {
+    return sheetsGet('pasaporte_config', { key: storageKey(CONFIG_KEY) }).then(function (res) {
       var data = res.data || {};
       if (!data.scores || typeof data.scores !== 'object') data.scores = {};
 
@@ -1296,14 +1345,14 @@
       data.actualizado = new Date().toISOString();
       return sheetsPost({
         action: 'pasaporte_config_save',
-        key: CONFIG_KEY,
+        key: storageKey(CONFIG_KEY),
         data: data
       }).then(function () { return existing; });
     });
   }
 
   function saveOrganizerFullCalificacion(calificacion) {
-    return sheetsGet('pasaporte_config', { key: CONFIG_KEY }).then(function (res) {
+    return sheetsGet('pasaporte_config', { key: storageKey(CONFIG_KEY) }).then(function (res) {
       var data = res.data || {};
       if (!data.scores || typeof data.scores !== 'object') data.scores = {};
 
@@ -1339,7 +1388,7 @@
       data.actualizado = new Date().toISOString();
       return sheetsPost({
         action: 'pasaporte_config_save',
-        key: CONFIG_KEY,
+        key: storageKey(CONFIG_KEY),
         data: data
       }).then(function () {
         calificacionesMap[existing.competidorId] = existing;
@@ -2422,15 +2471,23 @@
   }
 
   function getJuradoShareUrls() {
+    if (window.SiteLinks && window.SiteLinks.buildJuradoUrls) {
+      return window.SiteLinks.buildJuradoUrls({
+        evt: tenantSlug || undefined,
+        pinOrganizador: pinOrganizadorEffective(),
+        pinJuez: pinJuezEffective(),
+        jueces: getJudgeCount()
+      });
+    }
     var base = String(window.location.origin || 'https://la-sucursal-del-cafe.web.app').replace(/\/$/, '');
     var path = (window.EVENT_CONFIG && window.EVENT_CONFIG.juradoV60 && window.EVENT_CONFIG.juradoV60.path) || '/jurado-v60';
     var pinOrg = pinOrganizadorEffective();
     var pinJ = pinJuezEffective();
     var urls = {
-      organizador: base + path + '?pin=' + encodeURIComponent(pinOrg)
+      organizador: appendTenantToUrl(base + path + '?pin=' + encodeURIComponent(pinOrg))
     };
     for (var j = 1; j <= getJudgeCount(); j++) {
-      urls['juez' + j] = base + path + '?pin=' + encodeURIComponent(pinJ) + '&juez=' + j;
+      urls['juez' + j] = appendTenantToUrl(base + path + '?pin=' + encodeURIComponent(pinJ) + '&juez=' + j);
     }
     return urls;
   }
@@ -3592,6 +3649,8 @@
   }
 
   function init() {
+    initTenantFromUrl();
+
     if (PAGE_MODE === 'hub') {
       $('loadingMsg').hidden = false;
       return loadPlatformConfig().then(function () {

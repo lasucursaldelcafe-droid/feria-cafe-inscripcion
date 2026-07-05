@@ -6,12 +6,20 @@
 
   var SESSION_KEY = 'lsc_jurado_resultados_session';
   var REFRESH_MS = 8000;
+  var tenantSlug = '';
 
   var refreshTimer = null;
   var currentData = null;
 
   function $(id) {
     return document.getElementById(id);
+  }
+
+  function initTenantFromUrl() {
+    try {
+      var raw = String(new URLSearchParams(window.location.search).get('evt') || '').trim().toLowerCase();
+      if (raw && /^[a-z0-9][a-z0-9-]{0,48}$/.test(raw)) tenantSlug = raw;
+    } catch (e) { tenantSlug = ''; }
   }
 
   function webAppUrl() {
@@ -193,7 +201,8 @@
     return sheetsPost({
       action: 'jurado_resultados_login',
       nombre: nombre,
-      documento: documento
+      documento: documento,
+      evt: tenantSlug || undefined
     }).then(function (data) {
       if (!data || data.ok === false) {
         throw new Error((data && data.error) || 'No se pudo validar el acceso.');
@@ -246,6 +255,7 @@
   }
 
   function init() {
+    initTenantFromUrl();
     bindEvents();
     var sess = readSession();
     if (sess && sess.nombre && sess.documento) {

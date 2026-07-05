@@ -27,6 +27,24 @@ Solo ve **sus** puntajes, estado en el torneo y desglose por juez.
 
 ---
 
+## Vender la plataforma (white-label)
+
+En **Admin → Competidores → Clientes plataforma jurado**:
+
+1. Ingresa nombre del cliente y del torneo.
+2. Pulsa **Crear apartado y enlace**.
+3. Copia el **enlace de configuración** y envíaselo al cliente.
+
+El enlace tiene forma:
+
+`https://…/jurado/config?evt=slug-del-cliente&pin=…`
+
+- Cada cliente tiene **datos aislados** (config, puntajes, bracket).
+- El cliente configura marca, reglas y criterios en su panel.
+- Los competidores del torneo deben tener columna **Evento** = `slug` en el sheet (o vacía para incluir todos).
+
+---
+
 ## Roles
 
 ### Organizador
