@@ -2,24 +2,58 @@
 
 :root {
   --jurado-accent: #c9a227;
+  --jurado-accent-light: #e8c547;
   --jurado-primary: #3d281c;
+  --jurado-primary-deep: #1f1410;
   --jurado-accent-soft: rgba(201, 162, 39, 0.18);
-  --jurado-glass: rgba(0, 0, 0, 0.32);
-  --jurado-border: rgba(255, 255, 255, 0.1);
+  --jurado-glass: rgba(255, 255, 255, 0.06);
+  --jurado-border: rgba(255, 255, 255, 0.12);
+  --jurado-text: #f8f4ef;
+  --jurado-text-muted: rgba(255, 255, 255, 0.72);
+  --jurado-radius-sm: 10px;
+  --jurado-radius: 16px;
+  --jurado-radius-lg: 20px;
+  --jurado-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  --jurado-shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.18);
+  --jurado-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body.jurado-page {
   margin: 0;
   min-height: 100dvh;
-  background: linear-gradient(165deg, #1f1410 0%, var(--jurado-primary) 45%, #5d3a1a 100%);
-  font-family: 'Inter', system-ui, sans-serif;
-  color: #f8f4ef;
+  background-color: var(--jurado-primary-deep);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201, 162, 39, 0.14), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(93, 58, 26, 0.45), transparent 50%),
+    linear-gradient(168deg, #1a110d 0%, var(--jurado-primary) 42%, #4a2f18 100%);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--jurado-text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.jurado-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  z-index: 0;
 }
 
 .jurado-shell {
+  position: relative;
+  z-index: 1;
   max-width: 760px;
   margin: 0 auto;
-  padding: 20px 16px 48px;
+  padding: 24px 18px 56px;
 }
 
 body.jurado-page--organizer .jurado-shell {
@@ -28,7 +62,7 @@ body.jurado-page--organizer .jurado-shell {
 
 .jurado-header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 28px;
   position: relative;
 }
 
@@ -36,7 +70,20 @@ body.jurado-page--organizer .jurado-shell {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+}
+
+.jurado-header-brand img,
+.jurado-header img {
+  display: block;
+  margin: 0 auto;
+  height: auto;
+  max-height: 56px;
+  width: auto;
+  padding: 10px 14px;
+  border-radius: var(--jurado-radius-sm);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: var(--jurado-shadow-soft);
 }
 
 body.jurado-page--organizer .jurado-header-brand {
@@ -86,43 +133,64 @@ body.jurado-page--organizer .jurado-header-brand {
   50% { opacity: 0.5; transform: scale(0.85); }
 }
 
-.jurado-header img {
-  display: block;
-  margin: 0 auto 12px;
-  height: auto;
-}
-
 .jurado-header h1 {
-  margin: 0 0 6px;
-  font-size: 1.35rem;
+  margin: 0 0 8px;
+  font-size: clamp(1.35rem, 4vw, 1.65rem);
   font-weight: 700;
   font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .jurado-header p {
   margin: 0;
-  font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.92rem;
+  color: var(--jurado-text-muted);
+  line-height: 1.5;
+  max-width: 36ch;
+  margin-inline: auto;
 }
 
 .jurado-card {
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 16px;
-  padding: 18px 16px;
-  margin-bottom: 16px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.04) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--jurado-border);
+  border-radius: var(--jurado-radius);
+  padding: 22px 20px;
+  margin-bottom: 18px;
+  box-shadow: var(--jurado-shadow-soft);
 }
 
 .jurado-card-head h2 {
-  margin: 0 0 6px;
-  font-size: 1.05rem;
+  margin: 0 0 8px;
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .jurado-hint {
-  margin: 0 0 14px;
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.45;
+  margin: 0 0 16px;
+  font-size: 0.88rem;
+  color: var(--jurado-text-muted);
+  line-height: 1.55;
+}
+
+.jurado-hint a,
+.jurado-meta a,
+.jurado-cross-links a {
+  color: var(--jurado-accent-light);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(232, 197, 71, 0.35);
+  transition: color 0.2s var(--jurado-ease), border-color 0.2s var(--jurado-ease);
+}
+
+.jurado-hint a:hover,
+.jurado-meta a:hover,
+.jurado-cross-links a:hover {
+  color: #fff;
+  border-bottom-color: var(--jurado-accent-light);
 }
 
 .jurado-field {
@@ -142,19 +210,30 @@ body.jurado-page--organizer .jurado-header-brand {
 .jurado-field input[type="url"],
 .jurado-field input[type="email"],
 .jurado-field input[type="number"],
+.jurado-field input[type="password"],
 .jurado-config-form input[type="text"],
 .jurado-config-form input[type="url"],
 .jurado-config-form input[type="email"],
 .jurado-config-form input[type="number"] {
   width: 100%;
   box-sizing: border-box;
-  padding: 11px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.96);
+  padding: 13px 14px;
+  border-radius: var(--jurado-radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.97);
   color: #2a1a12;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  transition: border-color 0.2s var(--jurado-ease), box-shadow 0.2s var(--jurado-ease);
+}
+
+.jurado-field input:focus,
+.jurado-field select:focus,
+.jurado-field textarea:focus,
+.jurado-config-form input:focus {
+  outline: none;
+  border-color: var(--jurado-accent);
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.25);
 }
 
 .jurado-meta {
@@ -262,15 +341,31 @@ body.jurado-page--organizer .jurado-header-brand {
 
 .jurado-btn {
   width: 100%;
-  padding: 14px 16px;
+  padding: 14px 18px;
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--jurado-accent), #e8c547);
+  border-radius: var(--jurado-radius-sm);
+  background: linear-gradient(135deg, var(--jurado-accent) 0%, var(--jurado-accent-light) 100%);
   color: #2a1a12;
   font: inherit;
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 4px 14px rgba(201, 162, 39, 0.35);
+  transition: transform 0.15s var(--jurado-ease), box-shadow 0.2s var(--jurado-ease), opacity 0.2s;
+}
+
+.jurado-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(201, 162, 39, 0.45);
+}
+
+.jurado-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.jurado-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 .jurado-btn:disabled {
@@ -300,8 +395,25 @@ body.jurado-page--organizer .jurado-header-brand {
 
 .jurado-loading {
   text-align: center;
-  padding: 40px 16px;
-  color: rgba(255, 255, 255, 0.8);
+  padding: 48px 16px;
+  color: var(--jurado-text-muted);
+  font-size: 0.95rem;
+}
+
+.jurado-loading::before {
+  content: '';
+  display: block;
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 14px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--jurado-accent);
+  border-radius: 50%;
+  animation: jurado-spin 0.75s linear infinite;
+}
+
+@keyframes jurado-spin {
+  to { transform: rotate(360deg); }
 }
 
 .jurado-empty {
@@ -368,9 +480,15 @@ body.jurado-page--organizer .jurado-header-brand {
 }
 
 .jurado-btn--secondary {
-  background: rgba(255, 255, 255, 0.12);
-  color: #f8f4ef;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--jurado-text);
+  border: 1px solid var(--jurado-border);
+  box-shadow: none;
+}
+
+.jurado-btn--secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: none;
 }
 
 .jurado-btn--small {
@@ -1969,129 +2087,372 @@ body.jurado-page--organizer .jurado-header-brand {
 
 /* ——— Índice / hub ——— */
 
+body.jurado-page[data-jurado-page="hub"] .jurado-shell {
+  max-width: 920px;
+}
+
+.jurado-card--hub {
+  padding: 28px 24px;
+}
+
 .jurado-hub-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
 }
 
 .jurado-hub-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
+  gap: 10px;
+  padding: 20px 18px;
+  border-radius: var(--jurado-radius);
+  border: 1px solid var(--jurado-border);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
   color: inherit;
   text-decoration: none;
-  transition: border-color 0.15s, background 0.15s;
+  transition: transform 0.2s var(--jurado-ease), border-color 0.2s var(--jurado-ease),
+    box-shadow 0.2s var(--jurado-ease), background 0.2s var(--jurado-ease);
+  box-shadow: var(--jurado-shadow-soft);
 }
 
 .jurado-hub-card:hover {
-  border-color: var(--jurado-accent, #c9a227);
-  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-3px);
+  border-color: rgba(201, 162, 39, 0.55);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.12) 0%, rgba(201, 162, 39, 0.08) 100%);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+}
+
+.jurado-hub-card strong {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.jurado-hub-card .jurado-hint {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
 }
 
 .jurado-hub-tag {
-  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--jurado-accent, #c9a227);
+  letter-spacing: 0.08em;
+  color: var(--jurado-accent-light);
+  background: rgba(201, 162, 39, 0.15);
+  border: 1px solid rgba(201, 162, 39, 0.3);
 }
 
-.jurado-cross-links a {
-  color: var(--jurado-accent, #c9a227);
+.jurado-cross-links {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: var(--jurado-radius-sm);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--jurado-border);
 }
 
 /* ——— Portal resultados competidor ——— */
 
+body.jurado-page--resultados .jurado-shell {
+  max-width: 640px;
+}
+
+.jurado-card--login {
+  padding: 28px 24px 32px;
+  border-color: rgba(201, 162, 39, 0.28);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.1) 0%, rgba(201, 162, 39, 0.06) 100%);
+}
+
+.jurado-login-hero {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.jurado-login-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 14px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.25), rgba(201, 162, 39, 0.08));
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.jurado-card--login h2 {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.jurado-login-steps {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.jurado-login-step {
+  flex: 1;
+  min-width: 120px;
+  padding: 10px 12px;
+  border-radius: var(--jurado-radius-sm);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--jurado-border);
+  font-size: 0.78rem;
+  color: var(--jurado-text-muted);
+  line-height: 1.4;
+}
+
+.jurado-login-step strong {
+  display: block;
+  color: var(--jurado-text);
+  font-size: 0.82rem;
+  margin-bottom: 2px;
+}
+
 .jurado-login-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-width: 420px;
+  gap: 16px;
+}
+
+.jurado-login-footer {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--jurado-border);
+  text-align: center;
+}
+
+.jurado-result-summary {
+  padding: 0;
+  overflow: hidden;
 }
 
 .jurado-result-summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+
+@media (max-width: 520px) {
+  .jurado-result-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.jurado-result-stat {
+  padding: 20px 18px;
+  border-right: 1px solid var(--jurado-border);
+  border-bottom: 1px solid var(--jurado-border);
+}
+
+.jurado-result-summary-grid .jurado-result-stat:last-child {
+  border-right: none;
+}
+
+@media (max-width: 520px) {
+  .jurado-result-stat {
+    border-right: none;
+  }
+  .jurado-result-summary-grid .jurado-result-stat:last-child {
+    border-bottom: none;
+  }
+}
+
+.jurado-result-stat-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--jurado-text-muted);
+  margin-bottom: 8px;
 }
 
 .jurado-result-estado {
-  display: inline-block;
-  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
   border-radius: 999px;
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 600;
 }
 
 .jurado-result-estado--activo {
-  background: rgba(80, 180, 100, 0.2);
-  color: #9ee0a8;
+  background: rgba(72, 160, 92, 0.22);
+  color: #a8e8b4;
+  border: 1px solid rgba(120, 200, 130, 0.35);
 }
 
 .jurado-result-estado--out {
-  background: rgba(220, 90, 90, 0.2);
-  color: #f5a5a5;
+  background: rgba(200, 80, 80, 0.2);
+  color: #f5b0b0;
+  border: 1px solid rgba(220, 100, 100, 0.35);
 }
 
 .jurado-result-estado--pending {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
   color: #e8dcc8;
+  border: 1px solid var(--jurado-border);
+}
+
+.jurado-result-fase {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
 }
 
 .jurado-result-total {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--jurado-accent, #c9a227);
+  margin: 0;
+  font-size: 1.85rem;
+  font-weight: 800;
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--jurado-accent-light);
+  line-height: 1.1;
+}
+
+.jurado-result-promedio {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: var(--jurado-text-muted);
 }
 
 .jurado-result-judges-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
 }
 
 .jurado-result-judge-card {
-  padding: 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.15);
+  padding: 18px 16px;
+  border-radius: var(--jurado-radius);
+  border: 1px solid var(--jurado-border);
+  background: rgba(0, 0, 0, 0.18);
+  transition: border-color 0.2s var(--jurado-ease);
+}
+
+.jurado-result-judge-card h3 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .jurado-result-judge-card--done {
-  border-color: rgba(80, 180, 100, 0.35);
+  border-color: rgba(80, 180, 100, 0.4);
+  background: linear-gradient(160deg, rgba(80, 180, 100, 0.08) 0%, rgba(0, 0, 0, 0.15) 100%);
+}
+
+.jurado-result-judge-card--pending {
+  opacity: 0.85;
+}
+
+.jurado-result-judge-badge {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(80, 180, 100, 0.22);
+  color: #a8e8b4;
+  border: 1px solid rgba(120, 200, 130, 0.3);
+}
+
+.jurado-result-judge-badge--pending {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--jurado-text-muted);
+  border-color: var(--jurado-border);
+}
+
+.jurado-result-subtotal {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  color: var(--jurado-text-muted);
+}
+
+.jurado-result-subtotal strong {
+  color: var(--jurado-accent-light);
+  font-size: 1.1rem;
 }
 
 .jurado-result-criteria {
   list-style: none;
-  margin: 10px 0 0;
+  margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .jurado-result-criteria li {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  font-size: 0.88rem;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.86rem;
+}
+
+.jurado-result-criteria li strong {
+  font-size: 0.95rem;
+  color: var(--jurado-accent-light);
+  font-weight: 700;
 }
 
 .jurado-result-notas {
   white-space: pre-wrap;
   color: #f0e6c8;
+  line-height: 1.55;
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: var(--jurado-radius-sm);
+  background: rgba(0, 0, 0, 0.2);
+  border-left: 3px solid var(--jurado-accent);
+}
+
+.jurado-toolbar-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.jurado-page-footer {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--jurado-border);
+  text-align: center;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .jurado-card--tenant-welcome {
   border-color: rgba(201, 162, 39, 0.45);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
 }
 
 .jurado-card--tenant-welcome code {
   font-size: 0.85em;
-  color: var(--jurado-accent, #c9a227);
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--jurado-accent-light);
 }

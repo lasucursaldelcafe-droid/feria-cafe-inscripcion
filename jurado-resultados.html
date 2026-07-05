@@ -8,7 +8,7 @@
   <title>Mis resultados — Torneo sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado22">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado23">
 </head>
 <body class="jurado-page jurado-page--resultados">
   <div class="jurado-shell">
@@ -24,8 +24,21 @@
     </header>
 
     <section id="loginSection" class="jurado-card jurado-card--login">
-      <h2>Ingresa a tus resultados</h2>
-      <p class="jurado-hint">Usa el mismo <strong>nombre</strong> del formulario de inscripción. La clave es tu <strong>número de cédula</strong> (documento de identidad).</p>
+      <div class="jurado-login-hero">
+        <div class="jurado-login-icon" aria-hidden="true">☕</div>
+        <h2>Ingresa a tus resultados</h2>
+        <p class="jurado-hint">Consulta tu puntaje en tiempo real durante el torneo sensorial.</p>
+      </div>
+      <div class="jurado-login-steps" role="list">
+        <div class="jurado-login-step" role="listitem">
+          <strong>1. Tu nombre</strong>
+          Exactamente como aparece en tu inscripción
+        </div>
+        <div class="jurado-login-step" role="listitem">
+          <strong>2. Tu cédula</strong>
+          Número de documento de identidad
+        </div>
+      </div>
       <form id="resultadosLoginForm" class="jurado-login-form" autocomplete="on">
         <div class="jurado-field">
           <label for="loginNombre">Nombre completo</label>
@@ -38,9 +51,9 @@
         <p id="loginError" class="jurado-error" hidden></p>
         <button type="submit" class="jurado-btn">Ver mis resultados</button>
       </form>
-      <p class="jurado-meta" style="margin-top:12px">
-        ¿Aún no te inscribes? <a href="competencia.html" data-link="competencia">Ir al formulario de inscripción</a>
-      </p>
+      <div class="jurado-login-footer">
+        <p class="jurado-meta">¿Aún no te inscribes? <a href="competencia.html" data-link="competencia">Ir al formulario de inscripción</a></p>
+      </div>
     </section>
 
     <section id="resultsSection" hidden>
@@ -59,18 +72,18 @@
 
       <div class="jurado-card jurado-result-summary">
         <div class="jurado-result-summary-grid">
-          <div>
-            <span class="jurado-meta">Estado</span>
+          <div class="jurado-result-stat">
+            <span class="jurado-result-stat-label">Estado</span>
             <p><span id="resultEstadoBadge" class="jurado-result-estado">—</span></p>
           </div>
-          <div>
-            <span class="jurado-meta">Fase actual</span>
-            <p id="resultFaseLabel"><strong>—</strong></p>
+          <div class="jurado-result-stat">
+            <span class="jurado-result-stat-label">Fase actual</span>
+            <p id="resultFaseLabel" class="jurado-result-fase">—</p>
           </div>
-          <div>
-            <span class="jurado-meta">Puntaje total</span>
+          <div class="jurado-result-stat">
+            <span class="jurado-result-stat-label">Puntaje total</span>
             <p id="resultTotalPts" class="jurado-result-total">—</p>
-            <p id="resultPromedio" class="jurado-hint">—</p>
+            <p id="resultPromedio" class="jurado-result-promedio">—</p>
           </div>
         </div>
       </div>
@@ -78,7 +91,7 @@
       <div class="jurado-card">
         <div class="jurado-card-head">
           <h2>Calificación por juez</h2>
-          <p class="jurado-hint">Desglose por criterios sensoriales. Se actualiza automáticamente.</p>
+          <p class="jurado-hint">Desglose por criterios sensoriales. Se actualiza automáticamente cada pocos segundos.</p>
         </div>
         <div id="resultJudgesGrid" class="jurado-result-judges-grid"></div>
       </div>
@@ -91,17 +104,21 @@
       </div>
     </section>
 
-    <p id="loadingMsg" class="jurado-loading" hidden>Cargando…</p>
+    <p id="loadingMsg" class="jurado-loading" hidden>Cargando tus resultados…</p>
+
+    <footer class="jurado-page-footer">
+      Plataforma de jurado sensorial · datos protegidos con tu documento de identidad
+    </footer>
   </div>
 
-  <script src="js/event-config.js?v=20260705jurado22"></script>
-  <script src="js/site-links.js?v=20260705jurado22"></script>
+  <script src="js/event-config.js?v=20260705jurado23"></script>
+  <script src="js/site-links.js?v=20260705jurado23"></script>
   <script>
     window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec'
     };
     if (window.SiteLinks) SiteLinks.applyLinkElements(document);
   </script>
-  <script src="js/jurado-resultados.js?v=20260705jurado22"></script>
+  <script src="js/jurado-resultados.js?v=20260705jurado23"></script>
 </body>
 </html>
