@@ -83,6 +83,26 @@
         "type": 301
       },
       {
+        "source": "/stands-reserva",
+        "destination": "/stands",
+        "type": 301
+      },
+      {
+        "source": "/stands-reserva/",
+        "destination": "/stands",
+        "type": 301
+      },
+      {
+        "source": "/stands-reserva-firebase",
+        "destination": "/stands",
+        "type": 301
+      },
+      {
+        "source": "/stands-reserva-firebase/",
+        "destination": "/stands",
+        "type": 301
+      },
+      {
         "source": "/stands.html",
         "destination": "/stands",
         "type": 301

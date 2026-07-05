@@ -26,10 +26,24 @@
       .toUpperCase();
   }
 
+  function resolveImageUrl(image) {
+    var src = String(image || '').trim();
+    if (!src) return '';
+    if (/^https?:\/\//i.test(src)) return src;
+    var cfg = global.EVENT_CONFIG || {};
+    var base = String(cfg.siteUrl || '').replace(/\/$/, '');
+    if (!base && global.location) {
+      base = global.location.origin;
+    }
+    if (src.charAt(0) === '/') return base + src;
+    return base ? base + '/' + src : src;
+  }
+
   function renderCard(sponsor) {
     var name = escapeHtml(sponsor.name || '');
     var handle = sponsor.instagramHandle ? escapeHtml(sponsor.instagramHandle) : '';
     var url = sponsor.instagramUrl || '';
+    var imageUrl = resolveImageUrl(sponsor.image);
     var alt = escapeHtml(sponsor.imageAlt || sponsor.name || 'Patrocinador');
     var badge = sponsor.badge ? escapeHtml(sponsor.badge) : '';
     var tagline = sponsor.tagline ? escapeHtml(sponsor.tagline) : '';
@@ -37,10 +51,10 @@
     var classes = 'festival-sponsor-card' + (sponsor.featured ? ' festival-sponsor-card--featured' : '');
     var avatar;
 
-    if (sponsor.image) {
+    if (imageUrl) {
       avatar =
         '<img class="festival-sponsor-card__avatar" src="' +
-        escapeHtml(sponsor.image) +
+        escapeHtml(imageUrl) +
         '" alt="' +
         alt +
         '" width="72" height="72" loading="lazy" decoding="async">';

@@ -293,20 +293,22 @@ window.EVENT_CONFIG = {
       name: 'Purist',
       instagramUrl: 'https://www.instagram.com/purist.cafe/',
       instagramHandle: '@purist.cafe',
-      image: 'assets/sponsors/purist.webp',
+      image: '/assets/sponsors/purist.webp',
       imageAlt: 'Purist — café de especialidad y pan masa madre'
     },
     {
       name: 'Palmetto Plaza',
       instagramUrl: 'https://www.instagram.com/palmettoplaza/',
       instagramHandle: '@palmettoplaza',
-      image: 'assets/sponsors/palmetto-plaza.png',
+      image: '/assets/sponsors/palmetto-plaza.png',
       imageAlt: 'Palmetto Plaza — centro comercial, sede del evento'
     },
     {
       name: 'Ghost Specialty Coffee',
       instagramUrl: 'https://www.instagram.com/ghost_specialty_coffee/',
       instagramHandle: '@ghost_specialty_coffee',
+      image: '/assets/sponsors/ghost-specialty-coffee.svg',
+      imageAlt: 'Ghost Specialty Coffee',
       badge: 'Café invitado',
       featured: true,
       tagline: 'Café especial con identidad propia',
@@ -316,16 +318,22 @@ window.EVENT_CONFIG = {
       name: 'Medium Café',
       instagramUrl: 'https://www.instagram.com/medium_cafe/',
       instagramHandle: '@medium_cafe',
+      image: '/assets/sponsors/medium-cafe.svg',
+      imageAlt: 'Medium Café',
       badge: 'Coffee Shop',
       featured: true,
       tagline: 'Café de especialidad para descubrir en feria',
       description: 'Espacio para vivir café, conversación y producto local; una vitrina ideal para visitantes que quieren llevarse una experiencia de la feria.'
     },
     {
-      name: 'Elixir Café'
+      name: 'Elixir Café',
+      image: '/assets/sponsors/elixir-cafe.svg',
+      imageAlt: 'Elixir Café'
     },
     {
-      name: 'Black Coffee Design & Souvenirs'
+      name: 'Black Coffee Design & Souvenirs',
+      image: '/assets/sponsors/black-coffee-design.svg',
+      imageAlt: 'Black Coffee Design & Souvenirs'
     }
   ],
   /** Panel jurado sensorial V60 — enlaces con PIN (no indexados públicamente). */

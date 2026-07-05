@@ -52,8 +52,8 @@ HOSTING_ROUTES: list[tuple[str, str, bool]] = [
     ("/panel-fidelizacion", "Panel fidelización", True),
     ("/expositor", "Panel expositor", True),
     ("/mi-stand", "Alias mi-stand", True),
-    ("/stands-reserva", "Stands reserva (legacy)", False),
-    ("/stands-reserva-firebase", "Stands reserva Firebase", False),
+    ("/stands-reserva", "Stands reserva (legacy → /stands)", True),
+    ("/stands-reserva-firebase", "Stands reserva Firebase → /stands", True),
 ]
 
 CRITICAL_ASSETS = [
@@ -67,6 +67,9 @@ CRITICAL_ASSETS = [
     "/js/admin-dashboard.js",
     "/js/fidelizacion-common.js",
     "/assets/logo-la-sucursal-del-cafe.png",
+    "/assets/sponsors/purist.webp",
+    "/assets/sponsors/palmetto-plaza.png",
+    "/assets/sponsors/marca-placeholder.svg",
     "/assets/reglas-v60-championship.pdf",
     "/assets/stands-map-placeholder.svg",
 ]
