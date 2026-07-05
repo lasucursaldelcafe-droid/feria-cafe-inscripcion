@@ -311,20 +311,15 @@
 
       for (var j = 1; j <= 3; j++) {
         var key = 'j' + j;
-        if (calificacion.judges && calificacion.judges[key] && calificacion.judges[key].scores) {
-          var sub = judgeSubtotal(calificacion.judges[key].scores);
-          if (sub != null) {
-            existing.judges[key] = {
-              scores: calificacion.judges[key].scores,
-              subtotal: sub,
-              actualizado: new Date().toISOString(),
-              manual: true
-            };
-          } else {
-            delete existing.judges[key];
-          }
-        } else {
-          delete existing.judges[key];
+        if (!calificacion.judges || !calificacion.judges[key] || !calificacion.judges[key].scores) continue;
+        var sub = judgeSubtotal(calificacion.judges[key].scores);
+        if (sub != null) {
+          existing.judges[key] = {
+            scores: calificacion.judges[key].scores,
+            subtotal: sub,
+            actualizado: new Date().toISOString(),
+            manual: true
+          };
         }
       }
 
@@ -890,32 +885,31 @@
     var advanceBtn = $('advanceWinnersBtn');
     if (advanceBtn) {
       advanceBtn.addEventListener('click', function () {
-        var rounds = buildRoundsStructure();
-        if (!rounds.length) {
-          showAdminMsg('No hay duelos para calcular ganadores.', true);
+        var current = buildCurrentDuelRound();
+        if (!current || current.matches.length < 1) {
+          showAdminMsg('No hay duelos en esta ronda.', true);
           return;
         }
-        var active = selectedRoundNum || getActiveRoundNum(rounds);
-        var current = rounds.find(function (r) { return r.roundNum === active; }) || rounds[0];
         var winners = [];
         var pending = false;
         current.matches.forEach(function (m) {
-          var r = resolveMatch(m.aId, m.bId, current.roundNum, m.duelNum);
+          var r = resolveMatch(m.aId, m.bId, 1, m.duelNum);
           if (r.winnerId) winners.push(r.winnerId);
           else if (m.bId) pending = true;
         });
         if (pending) {
-          showAdminMsg('Aún hay duelos sin ganador (faltan puntajes o hay empate).', true);
+          showAdminMsg('Aún hay duelos sin ganador (faltan puntajes, empate o declara ganador).', true);
           return;
         }
         if (!winners.length) {
           showAdminMsg('No hay ganadores para avanzar.', true);
           return;
         }
-        if (!confirm('¿Avanzar ' + winners.length + ' ganador(es), limpiar sus puntajes y pasar a la siguiente ronda en fase?')) return;
+        if (!confirm('¿Avanzar ' + winners.length + ' ganador(es) a la siguiente ronda, limpiar puntajes y eliminar perdedores?')) return;
         var previousActivos = getActiveCompetitorIds();
         bracketState.activos = winners;
         bracketState.rondaEnFase = (bracketState.rondaEnFase || 1) + 1;
+        bracketState.overrides = {};
         previousActivos.forEach(function (id) {
           if (winners.indexOf(id) < 0 && bracketState.eliminados.indexOf(id) < 0) {
             bracketState.eliminados.push(id);
@@ -925,7 +919,7 @@
           return resetScoresForIds(winners);
         }).then(function () {
           selectedRoundNum = 0;
-          showAdminMsg('Ganadores avanzaron a ' + currentPhaseTitle() + '. Puntajes limpiados para nueva catación.');
+          showAdminMsg('Avanzaron a ' + currentPhaseTitle() + '. Puntajes limpiados para nueva catación.');
           refreshOrganizer();
         }).catch(function (err) {
           showAdminMsg(err.message || 'Error al avanzar', true);
@@ -1054,6 +1048,36 @@
     return getRoundWinners(roundNum - 1);
   }
 
+  /** Solo la ronda en curso (activos actuales en duelos de 2). */
+  function buildCurrentDuelRound() {
+    var participants = getActiveCompetitorIds();
+    if (participants.length < 1) return null;
+    var matches = [];
+    for (var i = 0; i < participants.length; i += 2) {
+      matches.push({
+        duelNum: Math.floor(i / 2) + 1,
+        aId: participants[i],
+        bId: participants[i + 1] || null
+      });
+    }
+    return {
+      roundNum: 1,
+      phaseTitle: currentPhaseTitle(),
+      matches: matches
+    };
+  }
+
+  function getCurrentDuelWinners() {
+    var current = buildCurrentDuelRound();
+    if (!current) return [];
+    var winners = [];
+    current.matches.forEach(function (m) {
+      var r = resolveMatch(m.aId, m.bId, 1, m.duelNum);
+      if (r.winnerId) winners.push(r.winnerId);
+    });
+    return winners;
+  }
+
   function resolveMatch(aId, bId, roundNum, duelNum) {
     var forced = roundNum && duelNum ? getForcedWinner(roundNum, duelNum) : null;
     if (forced && (forced === aId || forced === bId)) {
@@ -1133,15 +1157,19 @@
 
   function roundIsComplete(round) {
     return round.matches.every(function (m) {
-      return !!resolveMatch(m.aId, m.bId, round.roundNum, m.duelNum).winnerId;
+      return !!resolveMatch(m.aId, m.bId, 1, m.duelNum).winnerId;
     });
   }
 
-  function renderRoundSummaryPanel(round, totalRounds) {
+  function renderRoundSummaryPanel(round) {
     var summary = $('organizerRoundSummary');
-    if (!summary) return;
+    if (!summary || !round) return;
 
-    var participantIds = getParticipantsForRound(round.roundNum);
+    var participantIds = round.matches.reduce(function (acc, m) {
+      acc.push(m.aId);
+      if (m.bId) acc.push(m.bId);
+      return acc;
+    }, []);
     var participants = participantIds.map(getRowById).sort(function (a, b) {
       var ta = puntajeTotal(a) != null ? puntajeTotal(a) : -1;
       var tb = puntajeTotal(b) != null ? puntajeTotal(b) : -1;
@@ -1149,13 +1177,13 @@
       return (a.nombre || '').localeCompare(b.nombre || '', 'es');
     });
 
-    var winners = getRoundWinners(round.roundNum);
+    var winners = getCurrentDuelWinners();
     var winnerRows = winners.map(getRowById);
     var loserRows = participants.filter(function (p) {
       return winners.indexOf(p.competidorId) < 0;
     });
     var complete = roundIsComplete(round);
-    var label = roundLabel(round.roundNum, totalRounds);
+    var label = round.phaseTitle || currentPhaseTitle();
 
     var html = '<div class="jurado-round-panel">';
     html += '<header class="jurado-round-panel-head"><h3>' + escapeHtml(label) + '</h3>';
@@ -1394,44 +1422,23 @@
     var summary = $('organizerRoundSummary');
     if (!nav || !box) return;
 
-    var rounds = buildRoundsStructure();
-    if (!rounds.length) {
+    var current = buildCurrentDuelRound();
+    if (!current || current.matches.length < 1) {
       nav.innerHTML = '';
-      box.innerHTML = '<p class="jurado-hint">Se necesitan al menos 2 competidores para armar rondas.</p>';
+      box.innerHTML = '<p class="jurado-hint">Agrega al menos 2 participantes activos para armar duelos en ' + escapeHtml(currentPhaseTitle()) + '.</p>';
       if (champ) champ.hidden = true;
       if (summary) { summary.hidden = true; summary.innerHTML = ''; }
       return;
     }
 
-    var activeRound = selectedRoundNum || getActiveRoundNum(rounds);
-    var totalRounds = rounds.length;
+    nav.innerHTML = '<span class="jurado-round-tab jurado-round-tab--active">' + escapeHtml(current.phaseTitle) + '</span>';
 
-    nav.innerHTML = rounds.map(function (r) {
-      var label = roundLabel(r.roundNum, totalRounds);
-      var isActive = r.roundNum === activeRound;
-      var pending = r.matches.some(function (m) {
-        return m.bId && resolveMatch(m.aId, m.bId, r.roundNum, m.duelNum).status === 'pending';
-      });
-      return '<button type="button" class="jurado-round-tab' + (isActive ? ' jurado-round-tab--active' : '') +
-        (pending ? ' jurado-round-tab--live' : '') + '" data-round="' + r.roundNum + '">' + label + '</button>';
-    }).join('');
-
-    nav.querySelectorAll('.jurado-round-tab').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        selectedRoundNum = parseInt(btn.dataset.round, 10);
-        renderOrganizerBracket();
-      });
-    });
-
-    var current = rounds.find(function (r) { return r.roundNum === activeRound; });
-    if (!current) current = rounds[0];
-
-    renderRoundSummaryPanel(current, totalRounds);
+    renderRoundSummaryPanel(current);
 
     box.innerHTML = current.matches.map(function (m) {
       var rowA = getRowById(m.aId);
       var rowB = m.bId ? getRowById(m.bId) : null;
-      var result = resolveMatch(m.aId, m.bId, current.roundNum, m.duelNum);
+      var result = resolveMatch(m.aId, m.bId, 1, m.duelNum);
       var statusHtml = '';
       if (result.status === 'bye') {
         statusHtml = '<p class="jurado-duel-status jurado-duel-status--bye">Pasa directo (sin rival en este duelo)</p>';
@@ -1446,30 +1453,37 @@
       }
 
       var html = '<article class="jurado-duel' + (result.status === 'pending' || result.status === 'tie' ? ' jurado-duel--pending' : '') + '">';
-      html += '<header class="jurado-duel-head">Duelo ' + m.duelNum + ' · ' + roundLabel(current.roundNum, totalRounds) + '</header>';
+      html += '<header class="jurado-duel-head">Duelo ' + m.duelNum + ' · ' + escapeHtml(current.phaseTitle) + '</header>';
       html += '<div class="jurado-duel-body">';
-      html += renderMatchCompetitor(rowA, result.winnerId === m.aId, result.winnerId && result.winnerId !== m.aId, true, current.roundNum, m.duelNum, result);
+      html += renderMatchCompetitor(rowA, result.winnerId === m.aId, result.winnerId && result.winnerId !== m.aId, true, 1, m.duelNum, result);
       if (rowB) {
         html += '<div class="jurado-duel-vs">VS</div>';
-        html += renderMatchCompetitor(rowB, result.winnerId === m.bId, result.winnerId && result.winnerId !== m.bId, true, current.roundNum, m.duelNum, result);
+        html += renderMatchCompetitor(rowB, result.winnerId === m.bId, result.winnerId && result.winnerId !== m.bId, true, 1, m.duelNum, result);
       }
       html += '</div>' + statusHtml + '</article>';
       return html;
     }).join('');
 
     if (champ) {
-      var finalists = getRoundWinners(totalRounds);
-      if (finalists.length === 1 && rounds[totalRounds - 1].matches.every(function (m) {
-        return !m.bId || resolveMatch(m.aId, m.bId, totalRounds, m.duelNum).winnerId;
-      })) {
-        var winner = getRowById(finalists[0]);
+      var activos = getActiveCompetitorIds();
+      if (activos.length === 1) {
+        var winner = getRowById(activos[0]);
         var wt = puntajeTotal(winner);
-        champ.innerHTML = '🏆 <strong>Clasificado: ' + escapeHtml(winner.nombre) + '</strong>' +
+        champ.innerHTML = '🏆 <strong>Clasificado en ' + escapeHtml(currentPhaseTitle()) + ': ' + escapeHtml(winner.nombre) + '</strong>' +
           (wt != null ? ' · ' + wt + ' pts' : '');
         champ.hidden = false;
       } else {
-        champ.hidden = true;
-        champ.innerHTML = '';
+        var allDone = current.matches.every(function (m) {
+          return resolveMatch(m.aId, m.bId, 1, m.duelNum).winnerId;
+        });
+        if (allDone && getCurrentDuelWinners().length === 1 && activos.length <= 2) {
+          var w = getRowById(getCurrentDuelWinners()[0]);
+          champ.innerHTML = '🏆 <strong>Pasa: ' + escapeHtml(w.nombre) + '</strong> — usa «Avanzar ganadores» para la siguiente ronda';
+          champ.hidden = false;
+        } else {
+          champ.hidden = true;
+          champ.innerHTML = '';
+        }
       }
     }
   }
