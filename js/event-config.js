@@ -299,13 +299,9 @@ window.EVENT_CONFIG = {
     path: '/jurado-v60',
     pinOrganizador: 'v60organizador',
     pinJuez: 'v60sensorial',
-    cacheVersion: '20260705jurado17',
-    roles: [
-      { id: 'organizador', label: 'Organizador', desc: 'Panel general, rondas y edición manual' },
-      { id: 'juez1', label: 'Juez 1', desc: 'Calificación móvil · columna J1' },
-      { id: 'juez2', label: 'Juez 2', desc: 'Calificación móvil · columna J2' },
-      { id: 'juez3', label: 'Juez 3', desc: 'Calificación móvil · columna J3' }
-    ]
+    jueces: 3,
+    cacheVersion: '20260705jurado20',
+    roles: []
   }
 };
 
@@ -314,16 +310,26 @@ window.EVENT_CONFIG = {
   if (!root || !root.juradoV60) return;
   var j = root.juradoV60;
   var base = String(root.siteUrl || '').replace(/\/$/, '') + j.path;
-  function link(role, num) {
-    if (role === 'organizador') return base + '?pin=' + encodeURIComponent(j.pinOrganizador);
-    var url = base + '?pin=' + encodeURIComponent(j.pinJuez);
-    if (num >= 1 && num <= 3) url += '&juez=' + num;
-    return url;
+  var jueces = Math.max(1, Math.min(5, parseInt(j.jueces, 10) || 3));
+
+  function linkOrganizador() {
+    return base + '?pin=' + encodeURIComponent(j.pinOrganizador);
   }
-  j.links = {
-    organizador: link('organizador'),
-    juez1: link('juez', 1),
-    juez2: link('juez', 2),
-    juez3: link('juez', 3)
-  };
+
+  function linkJuez(num) {
+    return base + '?pin=' + encodeURIComponent(j.pinJuez) + '&juez=' + num;
+  }
+
+  j.links = { organizador: linkOrganizador() };
+  j.roles = [
+    { id: 'organizador', label: 'Organizador', desc: 'Panel general, rondas y edición manual' }
+  ];
+  for (var n = 1; n <= jueces; n++) {
+    j.links['juez' + n] = linkJuez(n);
+    j.roles.push({
+      id: 'juez' + n,
+      label: 'Juez ' + n,
+      desc: 'Calificación móvil · columna J' + n
+    });
+  }
 })();

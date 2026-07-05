@@ -8,7 +8,7 @@
   <title>Jurado sensorial — Torneo en vivo</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado17">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado20">
 </head>
 <body class="jurado-page">
   <div class="jurado-shell">
@@ -18,7 +18,7 @@
         <div class="jurado-header-text">
           <p class="jurado-header-kicker" id="headerKicker">Torneo sensorial</p>
           <h1 id="headerTitle">Jurado en vivo</h1>
-          <p id="headerSubtitle">Calificación 1–5 · 7 criterios</p>
+          <p id="headerSubtitle">Calificación sensorial en vivo</p>
         </div>
       </div>
       <div class="jurado-live-pill" id="livePill" hidden>
@@ -34,7 +34,7 @@
 
     <section id="roleSection" class="jurado-card" hidden>
       <h2>¿Quién eres?</h2>
-      <p class="jurado-hint">Cada juez abre su enlace desde el celular. El organizador ve el panel general.</p>
+      <p class="jurado-hint" id="roleSectionHint">Cada juez abre su enlace desde el celular. El organizador ve el panel general.</p>
       <div class="jurado-role-grid" id="roleGrid"></div>
     </section>
 
@@ -60,13 +60,13 @@
       <div class="jurado-card">
         <div class="jurado-card-head">
           <h2>Tu calificación</h2>
-          <p class="jurado-hint">Escala 1 (bajo) a 5 (excelente). Solo llenas tu columna como juez.</p>
+          <p class="jurado-hint" id="judgeScaleHint">Escala y criterios según configuración del torneo.</p>
         </div>
         <div id="judgeScoresList" class="jurado-judge-list"></div>
         <div class="jurado-total-box jurado-total-box--accent" style="margin-top:14px">
           <span class="jurado-total-label">Tu subtotal</span>
           <strong id="judgeSubtotal" class="jurado-total-value">—</strong>
-          <span class="jurado-total-hint">Máx. 35 pts (7 criterios × 5)</span>
+          <span class="jurado-total-hint" id="judgeMaxHint">Máx. — pts</span>
         </div>
         <div class="jurado-field" style="margin-top:14px">
           <label for="judgeNotasInput">Notas (opcional)</label>
@@ -85,6 +85,7 @@
           <div>
             <strong id="dashboardEventName">Panel del torneo</strong>
             <p id="organizerUpdated" class="jurado-meta" style="margin:4px 0 0"></p>
+            <p id="dashboardScoringChip" class="jurado-scoring-chip" hidden></p>
           </div>
           <button type="button" id="organizerRefreshBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Actualizar</button>
         </div>
@@ -93,10 +94,11 @@
 
       <nav class="jurado-dash-nav" id="dashboardNav" aria-label="Secciones del panel">
         <button type="button" class="jurado-dash-tab jurado-dash-tab--active" data-dash-tab="vista">Vista general</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="recorrido">Recorrido</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="torneo">Torneo</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="puntajes">Puntajes</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="control">Control</button>
-        <button type="button" class="jurado-dash-tab" data-dash-tab="config">Marca</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="config">Marca y reglas</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="export">Exportar</button>
       </nav>
 
@@ -104,10 +106,18 @@
       <div class="jurado-dash-pane jurado-dash-pane--active" data-dash-pane="vista">
         <div class="jurado-stats-row" id="organizerStatsRow"></div>
 
+        <div class="jurado-card jurado-card--journey-mini" id="journeySummaryCard">
+          <div class="jurado-card-head">
+            <h2>Progreso del torneo</h2>
+            <button type="button" class="jurado-btn jurado-btn--secondary jurado-btn--small" id="gotoRecorridoBtn">Ver recorrido completo</button>
+          </div>
+          <div id="journeySummaryMini" class="jurado-journey-mini"></div>
+        </div>
+
         <div class="jurado-card jurado-card--fifa">
           <div class="jurado-card-head jurado-card-head--fifa">
             <h2>Clasificación en vivo</h2>
-            <p class="jurado-hint">Tabla por puntaje total · estilo torneo · se actualiza cada 3 s</p>
+            <p class="jurado-hint" id="fifaModeHint">Tabla por puntaje total · estilo torneo · se actualiza cada 3 s</p>
           </div>
           <div class="jurado-fifa-wrap">
             <table class="jurado-fifa-table" id="fifaStandingsTable">
@@ -140,12 +150,25 @@
         </div>
       </div>
 
+      <!-- Tab: Recorrido del torneo -->
+      <div class="jurado-dash-pane" data-dash-pane="recorrido" hidden>
+        <div class="jurado-card jurado-card--journey">
+          <div class="jurado-card-head">
+            <h2>Recorrido del torneo</h2>
+            <p class="jurado-hint">Grupos, historial de cada ronda y avance automático cuando todos los puntajes están listos.</p>
+          </div>
+          <div id="tournamentJourneyPanel" class="jurado-journey-panel">
+            <p class="jurado-hint">Cargando recorrido…</p>
+          </div>
+        </div>
+      </div>
+
       <!-- Tab: Torneo -->
       <div class="jurado-dash-pane" data-dash-pane="torneo" hidden>
         <div class="jurado-card jurado-card--bracket">
           <div class="jurado-card-head">
             <h2>Clasificación por rondas</h2>
-            <p class="jurado-hint">Duelos de 2 competidores · pasa quien tenga mayor <strong>puntaje total</strong> (J1 + J2 + J3).</p>
+            <p class="jurado-hint" id="torneoModeHint">Duelos de 2 competidores · pasa quien tenga mayor <strong>puntaje total</strong>.</p>
           </div>
           <div id="organizerChampionStrip" class="jurado-leader-strip" hidden></div>
           <div id="organizerRoundsNav" class="jurado-rounds-nav"></div>
@@ -159,7 +182,7 @@
         <div class="jurado-card jurado-card--scores">
           <div class="jurado-card-head">
             <h2>Puntajes por competidor</h2>
-            <p class="jurado-hint">J1, J2 y J3 · puntaje total cuando los 3 jueces calificaron.</p>
+            <p class="jurado-hint" id="puntajesModeHint">Puntajes por juez · total cuando todos calificaron.</p>
           </div>
           <div class="jurado-table-wrap">
             <table class="jurado-table jurado-table--ranking jurado-table--unified" id="organizerRankingTable">
@@ -191,7 +214,7 @@
         <div class="jurado-card jurado-card--manual" id="organizerManualCard" hidden>
           <div class="jurado-card-head">
             <h2>Edición manual de puntajes</h2>
-            <p class="jurado-hint">Corrige o ingresa las notas de J1, J2 y J3 (escala 1–5 por criterio).</p>
+            <p class="jurado-hint" id="manualModeHint">Corrige o ingresa las notas de cada juez según la escala configurada.</p>
           </div>
           <p id="organizerManualTarget" class="jurado-phase-label"></p>
           <div id="organizerManualForm" class="jurado-manual-form"></div>
@@ -236,7 +259,7 @@
         <div class="jurado-card jurado-card--admin">
           <div class="jurado-card-head">
             <h2>Control de ronda</h2>
-            <p class="jurado-hint">Fase actual, eliminados y reinicio de puntajes.</p>
+            <p class="jurado-hint" id="controlModeHint">Fase actual, eliminados y reinicio de puntajes.</p>
           </div>
           <div class="jurado-admin-grid">
             <div class="jurado-field">
@@ -288,7 +311,7 @@
         <div class="jurado-card jurado-card--config">
           <div class="jurado-card-head">
             <h2>Personaliza tu torneo</h2>
-            <p class="jurado-hint">Nombre, logo y colores para vender la plataforma a otros eventos. Los cambios se guardan en el servidor.</p>
+            <p class="jurado-hint">Marca, reglas de calificación y criterios sensoriales. Los cambios se guardan en el servidor.</p>
           </div>
           <form id="platformConfigForm" class="jurado-config-form" onsubmit="return false">
             <div class="jurado-config-preview" id="configPreview">
@@ -296,6 +319,7 @@
               <div>
                 <strong id="configPreviewName">Mi torneo</strong>
                 <span id="configPreviewSub">Subtítulo del evento</span>
+                <span id="configPreviewScoring" class="jurado-config-preview-scoring"></span>
               </div>
             </div>
             <div class="jurado-config-grid">
@@ -332,6 +356,43 @@
                 <input type="text" id="cfgPinJuez" maxlength="40" placeholder="v60sensorial">
               </div>
             </div>
+
+            <h3 class="jurado-admin-subtitle">Calificación y criterios</h3>
+            <p class="jurado-hint">Define escala, modo de clasificación y los criterios sensoriales del torneo.</p>
+            <div class="jurado-config-grid">
+              <div class="jurado-field">
+                <label for="cfgScoringModo">Modo de clasificación</label>
+                <select id="cfgScoringModo">
+                  <option value="duelos">Duelos 1v1 (mayor puntaje)</option>
+                  <option value="puntaje_general">Puntaje general (ranking)</option>
+                </select>
+              </div>
+              <div class="jurado-field">
+                <label for="cfgJueces">Número de jueces</label>
+                <input type="number" id="cfgJueces" min="1" max="5" value="3">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgScaleMin">Valor mínimo</label>
+                <input type="number" id="cfgScaleMin" min="0" max="99" value="1">
+              </div>
+              <div class="jurado-field">
+                <label for="cfgScaleMax">Valor máximo</label>
+                <input type="number" id="cfgScaleMax" min="1" max="100" value="5">
+              </div>
+              <div class="jurado-field jurado-field--full">
+                <label for="cfgAvanceRonda">Avance por ronda (0 = automático)</label>
+                <input type="number" id="cfgAvanceRonda" min="0" max="99" value="0" placeholder="Ej. 8 para octavos fijos">
+              </div>
+              <div class="jurado-field jurado-field--full jurado-field--checkbox">
+                <label class="jurado-checkbox-label">
+                  <input type="checkbox" id="cfgAutoAvance" checked>
+                  Avance automático al completar puntajes de la ronda
+                </label>
+              </div>
+            </div>
+            <div id="criteriaEditorList" class="jurado-criteria-editor"></div>
+            <button type="button" id="addCriterionBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">+ Añadir criterio</button>
+
             <h3 class="jurado-admin-subtitle">Datos de inscripción (para exportar)</h3>
             <div class="jurado-config-grid">
               <div class="jurado-field">
@@ -398,12 +459,12 @@
     <p id="loadingMsg" class="jurado-loading">Cargando…</p>
   </div>
 
-  <script src="js/event-config.js?v=20260705jurado17"></script>
+  <script src="js/event-config.js?v=20260705jurado20"></script>
   <script>
     window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxYz-qUCyXqrcroEzE9-1DRNarXmA9-lYeF5PCJ2pPmwQOpV3pmpuhbW4dog8p9w5ig/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado17"></script>
+  <script src="js/jurado-v60.js?v=20260705jurado20"></script>
 </body>
 </html>

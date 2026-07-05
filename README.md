@@ -18,7 +18,7 @@ Sitio del festival de café especial: páginas informativas + formularios de ins
 | QR inscripción | https://la-sucursal-del-cafe.web.app/qr |
 | Alias festival | https://la-sucursal-del-cafe.web.app/festival |
 | Panel admin (interno) | https://la-sucursal-del-cafe.web.app/admin |
-| Jurado V60 (interno) | https://la-sucursal-del-cafe.web.app/jurado-v60?pin=v60organizador |
+| Jurado V60 (interno) | https://la-sucursal-del-cafe.web.app/jurado-v60?pin=v60organizador — duelos o ranking, criterios configurables |
 
 ### Contacto y redes
 
@@ -29,7 +29,7 @@ Sitio del festival de café especial: páginas informativas + formularios de ins
 | Correo | mailto:lasucursaldelcafe@gmail.com |
 | Apps Script (formularios) | Ver `js/sheets-config.js` → `WEB_APP_URL` |
 
-Checklist operativo: [`CHECKLIST.md`](CHECKLIST.md) · Panel admin: [`tools/ADMIN-DASHBOARD.md`](tools/ADMIN-DASHBOARD.md)
+Checklist operativo: [`CHECKLIST.md`](CHECKLIST.md) · Panel admin: [`tools/ADMIN-DASHBOARD.md`](tools/ADMIN-DASHBOARD.md) · Jurado V60: [`tools/JURADO-V60-INSTRUCCIONES.md`](tools/JURADO-V60-INSTRUCCIONES.md)
 
 ## Estructura del sitio
 

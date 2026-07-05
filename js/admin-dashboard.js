@@ -2322,27 +2322,55 @@
     }
   }
 
-  function renderAdminJuradoLinks() {
+  function fetchJuradoPlatformConfig() {
+    var requestUrl = buildAdminUrl('pasaporte_config', { key: 'jurado_v60_platform' });
+    if (!requestUrl) return Promise.resolve(null);
+    return fetchJson(requestUrl).then(function (data) {
+      return data.ok && data.data ? data.data : null;
+    });
+  }
+
+  function juradoScoringSummary(platformCfg) {
+    var sc = platformCfg && platformCfg.scoring;
+    if (!sc) return 'Duelos 1v1 · 3 jueces · escala 1–5';
+    var modo = sc.modo === 'puntaje_general' ? 'Puntaje general' : 'Duelos 1v1';
+    var jueces = sc.jueces || 3;
+    var scale = (sc.scaleMin != null ? sc.scaleMin : 1) + '–' + (sc.scaleMax != null ? sc.scaleMax : 5);
+    var crit = Array.isArray(sc.criteria) ? sc.criteria.length : 7;
+    return modo + ' · ' + jueces + ' juez' + (jueces === 1 ? '' : 'es') + ' · escala ' + scale + ' · ' + crit + ' criterios';
+  }
+
+  function renderAdminJuradoLinks(platformCfg) {
     var root = document.getElementById('adminJuradoLinksRoot');
     var orgQuick = document.getElementById('adminJuradoOrganizadorLink');
+    var meta = document.getElementById('adminJuradoLinksMeta');
     if (!root) return;
 
-    var urls = null;
-    if (global.SiteLinks && global.SiteLinks.allJuradoUrls) {
-      urls = global.SiteLinks.allJuradoUrls();
-    } else if (global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60 && global.EVENT_CONFIG.juradoV60.links) {
-      urls = global.EVENT_CONFIG.juradoV60.links;
+    var sc = platformCfg && platformCfg.scoring;
+    var jueces = sc && sc.jueces ? sc.jueces : (global.SiteLinks && global.SiteLinks.juradoJudgeCount
+      ? global.SiteLinks.juradoJudgeCount() : 3);
+    var pinOrg = (platformCfg && platformCfg.pinOrganizador) ||
+      (global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60 && global.EVENT_CONFIG.juradoV60.pinOrganizador) ||
+      'v60organizador';
+    var pinJuez = (platformCfg && platformCfg.pinJuez) ||
+      (global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60 && global.EVENT_CONFIG.juradoV60.pinJuez) ||
+      'v60sensorial';
+
+    var urls = global.SiteLinks && global.SiteLinks.buildJuradoUrls
+      ? global.SiteLinks.buildJuradoUrls({ pinOrganizador: pinOrg, pinJuez: pinJuez, jueces: jueces })
+      : (global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60 && global.EVENT_CONFIG.juradoV60.links) || {};
+
+    if (orgQuick && urls.organizador) orgQuick.href = urls.organizador;
+
+    if (meta) {
+      meta.textContent = juradoScoringSummary(platformCfg) +
+        '. Enlaces según config del servidor; edítala en el panel organizador → Marca y reglas.';
     }
-    if (!urls) return;
 
-    if (orgQuick) orgQuick.href = urls.organizador;
-
-    var roles = [
-      { key: 'organizador', label: 'Organizador' },
-      { key: 'juez1', label: 'Juez 1' },
-      { key: 'juez2', label: 'Juez 2' },
-      { key: 'juez3', label: 'Juez 3' }
-    ];
+    var roles = [{ key: 'organizador', label: 'Organizador' }];
+    for (var j = 1; j <= jueces; j++) {
+      roles.push({ key: 'juez' + j, label: 'Juez ' + j });
+    }
 
     root.innerHTML = roles.map(function (role) {
       var url = urls[role.key] || '#';
@@ -2384,7 +2412,9 @@
     bindAdminCreateVisitanteForm();
     bindAdminMarcaLogoPreview();
     bindAdminJuradoLinkCopy();
-    renderAdminJuradoLinks();
+    fetchJuradoPlatformConfig().then(renderAdminJuradoLinks).catch(function () {
+      renderAdminJuradoLinks(null);
+    });
     restoreAdminTabFromStorage();
     syncAdminTabUi();
     syncMarcaPlanFromTab();

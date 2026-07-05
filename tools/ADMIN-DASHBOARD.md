@@ -23,9 +23,9 @@ Panel en vivo para calificación del torneo. No enlazado desde el sitio público
 | Rol | URL |
 |-----|-----|
 | Organizador | https://la-sucursal-del-cafe.web.app/jurado-v60?pin=v60organizador |
-| Juez 1–3 | `…/jurado-v60?pin=v60sensorial&juez=1` (2, 3) |
+| Juez N | `…/jurado-v60?pin=v60sensorial&juez=N` (N = 1…cantidad configurada en **Marca y reglas**) |
 
-**Guía completa:** [`tools/JURADO-V60-INSTRUCCIONES.md`](JURADO-V60-INSTRUCCIONES.md) — dashboard, torneo por duelos, marca white-label y exportación del kit de inscripción.
+**Guía completa:** [`tools/JURADO-V60-INSTRUCCIONES.md`](JURADO-V60-INSTRUCCIONES.md) — duelos o puntaje general, criterios configurables, sorteo automático y exportación del kit.
 
 
 | Entorno | URL |
