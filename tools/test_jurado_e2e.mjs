@@ -35,13 +35,26 @@ async function postJson(body) {
 async function main() {
   let failed = 0;
 
-  const pageOrg = await fetch(SITE + '/jurado-v60?pin=v60organizador', { redirect: 'follow' });
-  console.log(pageOrg.ok ? '[OK]' : '[FAIL]', 'Página organizador HTTP', pageOrg.status);
-  if (!pageOrg.ok) failed++;
+  const pageOrg = await fetch(SITE + '/jurado/organizador?pin=v60organizador', { redirect: 'follow' });
+  if (pageOrg.ok) {
+    console.log('[OK]', 'Página organizador HTTP', pageOrg.status);
+  } else {
+    const legacyOrg = await fetch(SITE + '/jurado-v60?pin=v60organizador', { redirect: 'follow' });
+    console.log(legacyOrg.ok ? '[OK]' : '[FAIL]', 'Página organizador (legacy) HTTP', legacyOrg.status);
+    if (!legacyOrg.ok) failed++;
+  }
 
-  const page = await fetch(SITE + '/jurado-v60?pin=v60sensorial', { redirect: 'follow' });
-  console.log(page.ok ? '[OK]' : '[FAIL]', 'Página jurado HTTP', page.status);
-  if (!page.ok) failed++;
+  const pageRes = await fetch(SITE + '/jurado/resultados', { redirect: 'follow' });
+  console.log(pageRes.ok ? '[OK]' : '[WARN]', 'Página resultados HTTP', pageRes.status, pageRes.ok ? '' : '(tras deploy)');
+
+  const page = await fetch(SITE + '/jurado/juez?pin=v60sensorial&juez=1', { redirect: 'follow' });
+  if (page.ok) {
+    console.log('[OK]', 'Página jurado HTTP', page.status);
+  } else {
+    const legacyJ = await fetch(SITE + '/jurado-v60?pin=v60sensorial&juez=1', { redirect: 'follow' });
+    console.log(legacyJ.ok ? '[OK]' : '[FAIL]', 'Página jurado (legacy) HTTP', legacyJ.status);
+    if (!legacyJ.ok) failed++;
+  }
 
   const dash = await getJson(WEB + '?action=admin_dashboard');
   const comps = (dash.allCompetencia || []).filter((r) => {

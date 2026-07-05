@@ -100,6 +100,31 @@
   }
 }
 
+.admin-jurado-clients {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.admin-jurado-client-row {
+  padding: 1rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.admin-jurado-client-config a {
+  word-break: break-all;
+}
+
+.admin-jurado-client-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
 .admin-highlight-target {
   animation: adminHighlightTarget 1.35s ease;
 }

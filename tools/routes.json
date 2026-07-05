@@ -151,6 +151,30 @@
       "sitemap": false
     },
     {
+      "key": "juradoOrganizador",
+      "local": "jurado-organizador.html",
+      "hosted": "/jurado/organizador",
+      "sitemap": false
+    },
+    {
+      "key": "juradoConfig",
+      "local": "jurado-config.html",
+      "hosted": "/jurado/config",
+      "sitemap": false
+    },
+    {
+      "key": "juradoJuez",
+      "local": "jurado-juez.html",
+      "hosted": "/jurado/juez",
+      "sitemap": false
+    },
+    {
+      "key": "juradoResultados",
+      "local": "jurado-resultados.html",
+      "hosted": "/jurado/resultados",
+      "sitemap": false
+    },
+    {
       "key": "panelFidelizacion",
       "local": "dashboard-fidelizacion.html",
       "hosted": "/panel-fidelizacion",

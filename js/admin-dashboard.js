@@ -2364,10 +2364,15 @@
 
     if (meta) {
       meta.textContent = juradoScoringSummary(platformCfg) +
-        '. Enlaces según config del servidor; edítala en el panel organizador → Marca y reglas.';
+        '. Paneles separados: config, torneo, resultados (nombre + cédula) y jurados.';
     }
 
-    var roles = [{ key: 'organizador', label: 'Organizador' }];
+    var roles = [
+      { key: 'hub', label: 'Índice jurado' },
+      { key: 'config', label: 'Configuración' },
+      { key: 'organizador', label: 'Torneo en vivo' },
+      { key: 'resultados', label: 'Resultados competidor' }
+    ];
     for (var j = 1; j <= jueces; j++) {
       roles.push({ key: 'juez' + j, label: 'Juez ' + j });
     }
@@ -2382,6 +2387,105 @@
         '<a class="admin-btn admin-btn--secondary admin-btn--small" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">Abrir</a>' +
         '</div></div>';
     }).join('');
+  }
+
+  function buildJuradoTenantConfigUrl(slug, pinOrg) {
+    var site = String((global.EVENT_CONFIG && global.EVENT_CONFIG.siteUrl) || global.location.origin).replace(/\/$/, '');
+    var path = (global.SiteLinks && global.SiteLinks.HOSTED && global.SiteLinks.HOSTED.juradoConfig) ||
+      '/jurado/config';
+    return site + path + '?evt=' + encodeURIComponent(slug) + '&pin=' + encodeURIComponent(pinOrg);
+  }
+
+  function fetchJuradoInstances() {
+    return fetch(buildAdminUrl('jurado_instances'), { cache: 'no-store', redirect: 'follow' })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (!data || data.ok === false) throw new Error((data && data.error) || 'No se pudieron cargar clientes.');
+        return data.instances || [];
+      });
+  }
+
+  function renderJuradoClientsList(instances) {
+    var root = document.getElementById('adminJuradoClientsList');
+    if (!root) return;
+    if (!instances.length) {
+      root.innerHTML = '<p class="admin-table-meta">Aún no hay clientes. Crea el primer apartado arriba.</p>';
+      return;
+    }
+    root.innerHTML = instances.slice().reverse().map(function (inst) {
+      var cfgUrl = buildJuradoTenantConfigUrl(inst.slug, inst.pinOrganizador);
+      var urls = global.SiteLinks && global.SiteLinks.buildJuradoUrls
+        ? global.SiteLinks.buildJuradoUrls({
+          evt: inst.slug,
+          pinOrganizador: inst.pinOrganizador,
+          pinJuez: inst.pinJuez,
+          jueces: 3
+        })
+        : {};
+      var created = '';
+      try {
+        created = new Date(inst.createdAt).toLocaleString('es-CO', { dateStyle: 'short' });
+      } catch (e) { created = inst.createdAt || ''; }
+      return '<article class="admin-jurado-client-row">' +
+        '<div class="admin-jurado-client-head">' +
+        '<strong>' + escapeHtml(inst.clientName) + '</strong>' +
+        '<span class="admin-table-meta">' + escapeHtml(inst.eventName) + ' · ' + escapeHtml(inst.slug) + '</span>' +
+        '</div>' +
+        '<p class="admin-jurado-client-config"><span class="admin-table-meta">Configuración (envía esto al cliente):</span><br>' +
+        '<a href="' + escapeHtml(cfgUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(cfgUrl) + '</a></p>' +
+        '<div class="admin-jurado-link-actions">' +
+        '<button type="button" class="admin-btn admin-btn--secondary admin-btn--small" data-admin-copy-link="' + escapeHtml(cfgUrl) + '">Copiar enlace config</button>' +
+        (urls.organizador ? '<a class="admin-btn admin-btn--secondary admin-btn--small" href="' + escapeHtml(urls.organizador) + '" target="_blank" rel="noopener noreferrer">Torneo</a>' : '') +
+        (urls.resultados ? '<a class="admin-btn admin-btn--secondary admin-btn--small" href="' + escapeHtml(urls.resultados) + '" target="_blank" rel="noopener noreferrer">Resultados</a>' : '') +
+        '</div>' +
+        '<p class="admin-table-meta">Creado ' + escapeHtml(created) +
+        (inst.contactEmail ? ' · ' + escapeHtml(inst.contactEmail) : '') + '</p>' +
+        '</article>';
+    }).join('');
+  }
+
+  function refreshJuradoClientsCard() {
+    return fetchJuradoInstances().then(renderJuradoClientsList).catch(function (err) {
+      var root = document.getElementById('adminJuradoClientsList');
+      if (root) root.innerHTML = '<p class="admin-error">' + escapeHtml(err.message || 'Error al cargar clientes') + '</p>';
+    });
+  }
+
+  function bindJuradoClientsForm() {
+    var form = document.getElementById('adminJuradoClientForm');
+    if (!form || form.dataset.bound === '1') return;
+    form.dataset.bound = '1';
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var msg = document.getElementById('adminJuradoClientMsg');
+      var err = document.getElementById('adminJuradoClientError');
+      if (msg) msg.hidden = true;
+      if (err) err.hidden = true;
+      var clientName = (document.getElementById('adminJuradoClientName') || {}).value || '';
+      var eventName = (document.getElementById('adminJuradoEventName') || {}).value || '';
+      var contactEmail = (document.getElementById('adminJuradoClientEmail') || {}).value || '';
+      postAdminAction({
+        action: 'jurado_instance_create',
+        clientName: clientName.trim(),
+        eventName: eventName.trim(),
+        contactEmail: contactEmail.trim()
+      }).then(function (data) {
+        if (!data || data.ok === false) throw new Error((data && data.error) || 'No se pudo crear el apartado.');
+        var inst = data.instance;
+        var cfgUrl = buildJuradoTenantConfigUrl(inst.slug, inst.pinOrganizador);
+        if (msg) {
+          msg.textContent = 'Apartado creado. Enlace de configuración para el cliente: ' + cfgUrl;
+          msg.hidden = false;
+        }
+        form.reset();
+        return refreshJuradoClientsCard();
+      }).catch(function (error) {
+        if (err) {
+          err.textContent = error.message || 'Error al crear apartado';
+          err.hidden = false;
+        }
+      });
+    });
   }
 
   function bindAdminJuradoLinkCopy() {
@@ -2412,9 +2516,11 @@
     bindAdminCreateVisitanteForm();
     bindAdminMarcaLogoPreview();
     bindAdminJuradoLinkCopy();
+    bindJuradoClientsForm();
     fetchJuradoPlatformConfig().then(renderAdminJuradoLinks).catch(function () {
       renderAdminJuradoLinks(null);
     });
+    refreshJuradoClientsCard();
     restoreAdminTabFromStorage();
     syncAdminTabUi();
     syncMarcaPlanFromTab();
