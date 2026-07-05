@@ -6,9 +6,9 @@ Panel interno unificado para **administrar** inscripciones, stands, sitio web y 
 
 | Sección | Función |
 | ------- | ------- |
-| Resumen | KPIs y accesos rápidos |
+| Resumen | KPIs, **competencia activa (Preliminar 2)** y accesos rápidos |
 | Analíticas | Tráfico, top páginas, export CSV |
-| Competidores | Alta manual V60 + listado |
+| Competidores | Alta manual V60 + **Preliminar 2** + jurado por competencia + listado |
 | Stands / ventas | Crear marca/stand + expositores/aliados/patrocinadores |
 | Visitantes feria | Registro manual + opción crear pasaporte |
 | Sitio web | Directorio `/marcas` y patrocinadores competencia |
@@ -18,12 +18,13 @@ Panel interno unificado para **administrar** inscripciones, stands, sitio web y 
 
 ## Jurado sensorial V60 (interno)
 
-Panel en vivo para calificación del torneo. No enlazado desde el sitio público.
+Panel en vivo para calificación del torneo. **Los jueces, PINs y criterios se configuran por competencia** en `/jurado/config` (no es global del sitio). En Admin → Resumen y Competidores aparece la edición activa (**Preliminar 2**: 8 ago 2026 · Mas Café, Cali).
 
 | Rol | URL |
 |-----|-----|
-| Organizador | https://la-sucursal-del-cafe.web.app/jurado-v60?pin=v60organizador |
-| Juez N | `…/jurado-v60?pin=v60sensorial&juez=N` (N = 1…cantidad configurada en **Marca y reglas**) |
+| Configuración (por competencia) | https://la-sucursal-del-cafe.web.app/jurado/config?pin=v60organizador |
+| Organizador (torneo en vivo) | https://la-sucursal-del-cafe.web.app/jurado/organizador?pin=v60organizador |
+| Juez N | `…/jurado/juez?pin=v60sensorial&juez=N` (N = 1…cantidad configurada en **Configuración** de esa competencia) |
 
 **Guía completa:** [`tools/JURADO-V60-INSTRUCCIONES.md`](JURADO-V60-INSTRUCCIONES.md) — duelos o puntaje general, criterios configurables, sorteo automático y exportación del kit.
 

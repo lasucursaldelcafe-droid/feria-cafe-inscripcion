@@ -22,6 +22,18 @@ También desde el panel admin: **Competidores** → tarjeta «Enlaces del jurado
 
 > Si cambias los PIN o el número de jueces en **Configuración**, vuelve a copiar y compartir los enlaces.
 
+### Jurado por competencia (importante)
+
+Los **jueces, PINs, criterios y modo de torneo** no son globales del sitio: se configuran **en cada competencia** desde `/jurado/config`.
+
+| Contexto | Dónde se configura el jurado |
+|----------|------------------------------|
+| **Preliminar 2 (festival V60)** | `/jurado/config?pin=v60organizador` — ver también Admin → Resumen / Competidores |
+| **Otra preliminar o la final** | Misma URL de config; cada edición puede tener jueces y criterios distintos |
+| **Torneo white-label** | `/jurado/config?evt=slug&pin=…` — un jurado independiente por cliente |
+
+En el **panel admin** (Competidores) aparece la edición activa (Preliminar 2) y los enlaces generados para esa competencia.
+
 ### Portal resultados (competidor)
 
 Cada inscrito ingresa con:

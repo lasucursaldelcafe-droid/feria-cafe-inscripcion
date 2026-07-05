@@ -8,7 +8,7 @@
   <title>Configuración — Jurado sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado27">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado28">
 </head>
 <body class="jurado-page jurado-page--setup" data-jurado-page="config">
   <div class="jurado-shell">
@@ -84,7 +84,7 @@
         <div class="jurado-setup-wizard__intro">
           <p class="jurado-setup-wizard__kicker">Panel del organizador</p>
           <h2 class="jurado-setup-wizard__title">Configura tu competencia</h2>
-          <p class="jurado-setup-wizard__lead">Marca, reglas, jurado, inscripción y enlaces — todo desde aquí. Al guardar, los links se generan solos.</p>
+          <p class="jurado-setup-wizard__lead">Marca, reglas, jurado, inscripción y enlaces — todo desde aquí, <strong>para esta competencia</strong>. Cada torneo (preliminar, final o cliente white-label) tiene su propia configuración de jueces, PINs y criterios. Al guardar, los links se generan solos.</p>
           <p id="setupWizardMeta" class="jurado-meta" hidden></p>
         </div>
         <nav id="setupStepper" class="jurado-setup-stepper" aria-label="Pasos de configuración"></nav>
@@ -320,7 +320,7 @@
         <div class="jurado-card jurado-card--config">
           <div class="jurado-card-head">
             <h2>1. Torneo, marca y reglas</h2>
-            <p class="jurado-hint">Define cómo se ve tu evento y cómo califica el jurado.</p>
+            <p class="jurado-hint">Define cómo se ve tu evento y cómo califica el jurado de <strong>esta competencia</strong> (cada torneo configura sus propios jueces y criterios).</p>
           </div>
           <form id="platformConfigForm" class="jurado-config-form" onsubmit="return false">
 
@@ -373,7 +373,7 @@
                 <span class="jurado-config-block__icon" aria-hidden="true">⚖️</span>
                 <div>
                   <h3 id="cfgBlockScoring">Tipo de torneo y jurado</h3>
-                  <p class="jurado-hint">Modo de clasificación, escala y criterios sensoriales.</p>
+                  <p class="jurado-hint">Modo de clasificación, número de jueces, escala y criterios — aplican solo a <strong>esta competencia</strong>.</p>
                 </div>
               </div>
               <div class="jurado-field">
@@ -559,6 +559,6 @@
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzpxE3fFv-mS9hai146Mo-LOWRf3KaRYwyZf_S9wk-iB7X-8Ke09eMx2-KftQQV1yfz/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado27"></script>
+  <script src="js/jurado-v60.js?v=20260705jurado28"></script>
 </body>
 </html>
