@@ -3357,9 +3357,28 @@ body.jurado-page--resultados .jurado-shell {
   border: 1px solid rgba(201, 162, 39, 0.28);
 }
 
-.jurado-publish-panel .jurado-btn {
+.jurado-publish-panel--prominent {
+  margin: 0;
+}
+
+.jurado-card--publish {
+  border-color: rgba(201, 162, 39, 0.35);
+}
+
+.jurado-publish-panel .jurado-btn,
+.jurado-btn--publish {
   width: 100%;
   margin-top: 12px;
+}
+
+.jurado-btn--publish {
+  background: linear-gradient(135deg, #c9a227 0%, #a8841a 100%);
+  color: #1a1208;
+  font-weight: 700;
+}
+
+.jurado-btn--publish:hover:not(:disabled) {
+  filter: brightness(1.05);
 }
 
 .jurado-result-blocked {
