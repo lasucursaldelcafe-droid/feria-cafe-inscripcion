@@ -39,6 +39,30 @@
       .toUpperCase();
   }
 
+  function driveImageUrl(url, size) {
+    var raw = String(url || '').trim();
+    if (!raw) return '';
+    var match =
+      raw.match(/\/file\/d\/([^/]+)/) ||
+      raw.match(/[?&]id=([^&]+)/) ||
+      raw.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+      return (
+        'https://drive.google.com/thumbnail?id=' +
+        encodeURIComponent(match[1]) +
+        '&sz=w' +
+        (size || 400)
+      );
+    }
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return raw;
+  }
+
+  function resolveLogoUrl(logo) {
+    if (!logo || !logo.url) return '';
+    return driveImageUrl(logo.url, 320);
+  }
+
   function tipoLabel(tipo) {
     var key = String(tipo || '').trim().toLowerCase();
     return TIPO_LABELS[key] || (tipo ? escapeHtml(tipo) : 'Marca');
@@ -69,16 +93,19 @@
 
     if (logo && logo.url) {
       avatar =
-        '<img class="festival-sponsor-card__avatar" src="' +
-        escapeHtml(logo.url) +
+        '<div class="festival-sponsor-card__logo-wrap">' +
+        '<img class="festival-sponsor-card__avatar festival-sponsor-card__avatar--logo" src="' +
+        escapeHtml(resolveLogoUrl(logo)) +
         '" alt="' +
         alt +
-        '" width="72" height="72" loading="lazy">';
+        '" width="128" height="88" loading="lazy" decoding="async">' +
+        '</div>';
     } else {
       avatar =
+        '<div class="festival-sponsor-card__logo-wrap">' +
         '<span class="festival-sponsor-card__avatar festival-sponsor-card__avatar--placeholder" aria-hidden="true">' +
         escapeHtml(initials(participante.marca)) +
-        '</span>';
+        '</span></div>';
     }
 
     var badge =
@@ -146,6 +173,21 @@
     if (el) el.hidden = !show;
   }
 
+  function bindAvatarFallbacks(root) {
+    if (!root) return;
+    root.querySelectorAll('img.festival-sponsor-card__avatar--logo').forEach(function (img) {
+      img.addEventListener('error', function onAvatarError() {
+        img.removeEventListener('error', onAvatarError);
+        var span = document.createElement('span');
+        span.className =
+          'festival-sponsor-card__avatar festival-sponsor-card__avatar--placeholder';
+        span.setAttribute('aria-hidden', 'true');
+        span.textContent = initials(img.getAttribute('alt') || '');
+        img.replaceWith(span);
+      });
+    });
+  }
+
   function renderList(participantes) {
     var grid = document.querySelector('[data-participantes-grid]');
     if (!grid) return;
@@ -159,6 +201,7 @@
 
     setEmptyVisible(false);
     grid.innerHTML = participantes.map(renderCard).join('');
+    bindAvatarFallbacks(grid);
     setStatus(participantes.length + ' marca' + (participantes.length === 1 ? '' : 's') + ' en el directorio.');
   }
 
