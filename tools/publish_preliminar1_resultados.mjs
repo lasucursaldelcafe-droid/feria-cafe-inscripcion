@@ -14,7 +14,7 @@ const ROOT = join(__dirname, '..');
 const WEB =
   process.env.SHEETS_WEB_APP_URL ||
   (readFileSync(join(ROOT, 'tools/CANONICAL_SHEETS_URL.txt'), 'utf8').trim()) ||
-  'https://script.google.com/macros/s/AKfycbwLK8QmiIx5Ud9T1Mao4jTOPwh7htB7S62NpSiwHQVrG-4Xs-cAMBKxtYTvTH4LiapC/exec';
+  'https://script.google.com/macros/s/AKfycbx3A5yW7yzwSibXKmNQpvmJ8wUyW_ZpPFX0QOncK2ZATMjhOJTELb8BRzWUabwbXHzV/exec';
 
 const EVT = String(process.env.JURADO_EVT || '').trim();
 const CAL_KEY = EVT ? `jurado_v60_calificaciones__${EVT}` : 'jurado_v60_calificaciones';
