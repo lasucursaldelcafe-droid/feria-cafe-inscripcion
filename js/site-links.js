@@ -35,7 +35,8 @@
     juradoJuez: 'jurado-juez.html',
     juradoResultados: 'jurado-resultados.html',
     juradoHistorial: 'jurado-historial.html',
-    panelFidelizacion: 'dashboard-fidelizacion.html'
+    panelFidelizacion: 'dashboard-fidelizacion.html',
+    pasaporteDemo: 'pasaporte-demo.html'
   };
 
   var HOSTED = {
@@ -68,7 +69,8 @@
     juradoJuez: '/jurado/juez',
     juradoResultados: '/jurado/resultados',
     juradoHistorial: '/jurado/historial',
-    panelFidelizacion: '/panel-fidelizacion'
+    panelFidelizacion: '/panel-fidelizacion',
+    pasaporteDemo: '/pasaporte-demo'
   };
 
   /** Alias legibles (p. ej. data-link="como-funciona"). */

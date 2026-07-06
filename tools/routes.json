@@ -191,6 +191,13 @@
       "key": "panelFidelizacion",
       "local": "dashboard-fidelizacion.html",
       "hosted": "/panel-fidelizacion",
+      "legacySources": ["/dashboard-fidelizacion"],
+      "sitemap": false
+    },
+    {
+      "key": "pasaporteDemo",
+      "local": "pasaporte-demo.html",
+      "hosted": "/pasaporte-demo",
       "sitemap": false
     }
   ],

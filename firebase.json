@@ -321,6 +321,26 @@
         "source": "/dashboard-fidelizacion.html",
         "destination": "/panel-fidelizacion",
         "type": 301
+      },
+      {
+        "source": "/dashboard-fidelizacion",
+        "destination": "/panel-fidelizacion",
+        "type": 301
+      },
+      {
+        "source": "/dashboard-fidelizacion/",
+        "destination": "/panel-fidelizacion",
+        "type": 301
+      },
+      {
+        "source": "/pasaporte-demo/",
+        "destination": "/pasaporte-demo",
+        "type": 301
+      },
+      {
+        "source": "/pasaporte-demo.html",
+        "destination": "/pasaporte-demo",
+        "type": 301
       }
     ],
     "rewrites": [
@@ -435,6 +455,10 @@
       {
         "source": "/panel-fidelizacion",
         "destination": "/dashboard-fidelizacion.html"
+      },
+      {
+        "source": "/pasaporte-demo",
+        "destination": "/pasaporte-demo.html"
       },
       {
         "source": "/manifest-pasaporte.webmanifest",
