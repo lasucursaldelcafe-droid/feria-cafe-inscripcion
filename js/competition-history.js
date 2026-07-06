@@ -122,31 +122,6 @@
       '<div class="jurado-podium-map">' + cards + '</div></section>';
   }
 
-  function renderClassificationGrid(edition) {
-    var ranking = edition.ranking || [];
-    if (!ranking.length) return '';
-    var cards = ranking.map(function (row) {
-      var name = row.nombreInscrito || row.participante;
-      var sub = row.participante !== name
-        ? '<span class="jurado-clasificacion-planilla">' + escapeHtml(row.participante) + '</span>'
-        : '';
-      return '<article class="jurado-clasificacion-card ' + posMedalClass(row.posicion) + '">' +
-        '<span class="jurado-clasificacion-rank">' + row.posicion + '°</span>' +
-        competitorPhotoHtml(row.fotoUrl, 44, name) +
-        '<strong class="jurado-clasificacion-name">' + escapeHtml(name) + '</strong>' +
-        sub +
-        '<span class="jurado-clasificacion-meta">' + escapeHtml(row.representa || '') + '</span>' +
-        '<span class="jurado-clasificacion-scores">J1 ' + row.j1 + ' · J2 ' + row.j2 + ' · J3 ' + row.j3 + '</span>' +
-        '<span class="jurado-clasificacion-total">' + row.total + ' pts</span>' +
-        '<span class="jurado-clasificacion-phase">' + escapeHtml(phaseLabel(row.entrada)) + '</span>' +
-        '</article>';
-    }).join('');
-    return '<section class="jurado-clasificacion-section">' +
-      '<h3 class="jurado-clasificacion-title">Mapa de clasificación</h3>' +
-      '<p class="jurado-hint">Ranking por mejor tanda de cada competidor · podio oficial = final.</p>' +
-      '<div class="jurado-clasificacion-grid">' + cards + '</div></section>';
-  }
-
   function renderPhaseLanes(edition) {
     var phases = [1, 2, 3].map(function (entrada) {
       var rows = getPhaseRows(edition, entrada);
@@ -391,33 +366,7 @@
 
     html += renderPodiumMap(edition);
     html += renderGruposRondas(edition);
-    html += renderClassificationGrid(edition);
     html += renderPhaseLanes(edition);
-
-    var rows = edition.ranking.map(function (row) {
-      var name = row.nombreInscrito || row.participante;
-      return '<tr>' +
-        '<td class="jurado-preliminar-rank">' + row.posicion + '</td>' +
-        '<td class="jurado-clasificacion-table-photo">' + competitorPhotoHtml(row.fotoUrl, 32, name) + '</td>' +
-        '<td><code class="jurado-preliminar-id">' + escapeHtml(row.competidorId) + '</code></td>' +
-        '<td><strong>' + escapeHtml(name) + '</strong>' +
-        (row.representa ? '<br><span class="jurado-hint">' + escapeHtml(row.representa) + '</span>' : '') +
-        '</td>' +
-        '<td class="jurado-preliminar-num">' + escapeHtml(phaseLabel(row.entrada)) + '</td>' +
-        '<td class="jurado-preliminar-num">' + row.j1 + '</td>' +
-        '<td class="jurado-preliminar-num">' + row.j2 + '</td>' +
-        '<td class="jurado-preliminar-num">' + row.j3 + '</td>' +
-        '<td class="jurado-preliminar-total"><strong>' + row.total + '</strong></td>' +
-        '</tr>';
-    }).join('');
-
-    html +=
-      '<section class="jurado-clasificacion-section">' +
-      '<h3 class="jurado-clasificacion-title">Tabla de resultados</h3>' +
-      '<div class="jurado-preliminar-table-wrap">' +
-      '<table class="jurado-preliminar-table">' +
-      '<thead><tr><th>#</th><th>Foto</th><th>ID</th><th>Competidor</th><th>Fase</th><th>J1</th><th>J2</th><th>J3</th><th>Total</th></tr></thead>' +
-      '<tbody>' + rows + '</tbody></table></div></section>';
 
     html += renderBreakdownSection(edition);
 
@@ -459,7 +408,6 @@
     renderEditionSummaryCard: renderEditionSummaryCard,
     renderEditionDetail: renderEditionDetail,
     renderPodiumMap: renderPodiumMap,
-    renderClassificationGrid: renderClassificationGrid,
     renderPhaseLanes: renderPhaseLanes,
     downloadEditionKit: downloadEditionKit
   };
