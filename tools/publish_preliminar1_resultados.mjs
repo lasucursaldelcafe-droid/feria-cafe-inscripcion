@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Carga calificaciones de Preliminar 1 y las publica en el portal de resultados competidores.
- * Usa pasaporte_config (jurado_v60_calificaciones + jurado_v60_bracket).
+ * Publica TODAS las tandas por competidor (grupos, semifinal, final) en rounds[].
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -21,14 +21,14 @@ const CAL_KEY = EVT ? `jurado_v60_calificaciones__${EVT}` : 'jurado_v60_califica
 const BRACKET_KEY = EVT ? `jurado_v60_bracket__${EVT}` : 'jurado_v60_bracket';
 const PLATFORM_KEY = EVT ? `jurado_v60_platform__${EVT}` : 'jurado_v60_platform';
 
-function loadKit() {
+function loadPreliminar1() {
   const js = readFileSync(join(ROOT, 'js/preliminar-1-results.js'), 'utf8');
   const ctx = { window: {}, globalThis: {} };
   ctx.globalThis = ctx.window;
   vm.runInNewContext(js, ctx);
   const P = ctx.window.Preliminar1Results;
   if (!P || !P.exportKit) throw new Error('No se pudo cargar Preliminar1Results');
-  return P.exportKit();
+  return P;
 }
 
 async function postJson(body) {
@@ -56,30 +56,68 @@ async function getConfig(key) {
   return data.ok && data.data && typeof data.data === 'object' ? data.data : {};
 }
 
-function buildPublishedMap(scores, now) {
-  const faseLabel = 'Preliminar 1 — archivo oficial';
-  const roundKey = 'preliminar-1|archivo';
+function cloneRound(round, now) {
+  return {
+    judges: JSON.parse(JSON.stringify(round.judges || {})),
+    notasPorJuez: JSON.parse(JSON.stringify(round.notasPorJuez || { j1: '', j2: '', j3: '' })),
+    notas: String(round.notas || '').trim(),
+    sumaTotal: round.sumaTotal,
+    promedio: round.promedio != null ? round.promedio : null,
+    roundKey: String(round.roundKey || '').trim(),
+    faseLabel: String(round.faseLabel || '').trim(),
+    publicadoAt: round.publicadoAt || now,
+    meta: round.meta ? JSON.parse(JSON.stringify(round.meta)) : undefined
+  };
+}
+
+function buildPublishedMap(P, scores, now) {
   const out = {};
   let published = 0;
+  let totalRounds = 0;
+
   Object.keys(scores).forEach(function (id) {
     const row = scores[id];
     if (!row || row.sumaTotal == null) return;
-    out[id] = {
-      judges: JSON.parse(JSON.stringify(row.judges || {})),
-      notas: String(row.notas || '').trim(),
-      sumaTotal: row.sumaTotal,
-      promedio: row.promedio != null ? row.promedio : null,
-      roundKey: roundKey,
-      faseLabel: faseLabel,
-      publicadoAt: now
-    };
+
+    const doc = row.meta && row.meta.documento ? row.meta.documento : null;
+    const nombre = row.nombre || '';
+    let rounds = P.getRoundsForCompetidor(id, doc, nombre) || [];
+
+    if (!rounds.length) {
+      rounds = [{
+        judges: row.judges || {},
+        notasPorJuez: row.notasPorJuez || { j1: '', j2: '', j3: '' },
+        notas: String(row.notas || '').trim(),
+        sumaTotal: row.sumaTotal,
+        promedio: row.promedio != null ? row.promedio : null,
+        roundKey: 'preliminar-1|archivo',
+        faseLabel: 'Preliminar 1 — archivo oficial',
+        publicadoAt: now
+      }];
+    }
+
+    const normalized = rounds
+      .filter(function (r) { return r && r.sumaTotal != null; })
+      .map(function (r) { return cloneRound(r, now); })
+      .sort(function (a, b) {
+        const ea = a.meta && a.meta.entrada != null ? a.meta.entrada : 99;
+        const eb = b.meta && b.meta.entrada != null ? b.meta.entrada : 99;
+        return ea - eb;
+      });
+
+    if (!normalized.length) return;
+
+    out[id] = { rounds: normalized };
     published++;
+    totalRounds += normalized.length;
   });
-  return { map: out, published: published, faseLabel: faseLabel };
+
+  return { map: out, published: published, totalRounds: totalRounds };
 }
 
 async function main() {
-  const kit = loadKit();
+  const P = loadPreliminar1();
+  const kit = P.exportKit();
   const scores = kit.calificaciones && kit.calificaciones.scores ? kit.calificaciones.scores : {};
   const ids = Object.keys(scores);
   if (!ids.length) {
@@ -99,7 +137,8 @@ async function main() {
     at: now,
     evento: (kit.event && kit.event.nombre) || 'Preliminar 1',
     count: ids.length,
-    source: 'publish_preliminar1_resultados.mjs'
+    source: 'publish_preliminar1_resultados.mjs',
+    allRounds: true
   };
 
   const calSave = await postJson({
@@ -113,19 +152,26 @@ async function main() {
   }
   console.log('[OK] Calificaciones guardadas:', ids.length);
 
-  const published = buildPublishedMap(scores, now);
+  const published = buildPublishedMap(P, scores, now);
   const existingBracket = await getConfig(BRACKET_KEY);
   const bracketData = Object.assign({}, existingBracket, {
     fase: 'final',
     rondaEnFase: 1,
-    activos: ids.slice(),
+    activos: [],
     eliminados: Array.isArray(existingBracket.eliminados) ? existingBracket.eliminados : [],
+    finalizado: true,
+    edicionEstado: 'realizada',
     resultadosCompetidor: Object.assign(
       {},
       existingBracket.resultadosCompetidor || {},
       published.map
     ),
-    preliminar1Archivo: { at: now, published: published.published, faseLabel: published.faseLabel },
+    preliminar1Archivo: {
+      at: now,
+      published: published.published,
+      totalRounds: published.totalRounds,
+      allRounds: true
+    },
     actualizado: now
   });
 
@@ -138,7 +184,7 @@ async function main() {
     console.error('[FAIL] bracket:', bracketSave.error || bracketSave);
     process.exit(3);
   }
-  console.log('[OK] Resultados publicados para competidores:', published.published);
+  console.log('[OK] Resultados publicados:', published.published, 'competidores,', published.totalRounds, 'rondas');
 
   if (kit.platformConfig) {
     const platformSave = await postJson({
@@ -149,17 +195,16 @@ async function main() {
     if (platformSave.ok) console.log('[OK] Plataforma/branding actualizado');
   }
 
-  const sample = ids[0];
-  const login = await postJson({
+  const jessica = await postJson({
     action: 'jurado_resultados_login',
-    nombre: scores[sample].nombre || 'test',
-    documento: '0000000000',
+    nombre: 'Jessica',
+    documento: '1018509921',
     evt: EVT || undefined
   });
-  if (login.ok && login.resultadosPublicados) {
-    console.log('[OK] Portal resultados responde con puntajes publicados (muestra ID', sample + ')');
-  } else if (login.ok && !login.resultadosPublicados) {
-    console.log('[WARN] Login OK pero sin publicar para muestra — verifica nombre/documento en Sheets');
+  if (jessica.ok && jessica.resultadosPublicados && Array.isArray(jessica.rondas)) {
+    console.log('[OK] Jessica ve', jessica.rondas.length, 'rondas en API');
+  } else {
+    console.log('[WARN] Jessica:', jessica.error || jessica.mensajeBloqueo || 'sin publicar');
   }
 
   const andreina = await postJson({
@@ -168,8 +213,8 @@ async function main() {
     documento: '1026308764',
     evt: EVT || undefined
   });
-  if (andreina.ok && andreina.resultadosPublicados && andreina.calificacion) {
-    console.log('[OK] Andreina ve resultados — total:', andreina.calificacion.sumaTotal);
+  if (andreina.ok && andreina.resultadosPublicados && Array.isArray(andreina.rondas)) {
+    console.log('[OK] Andreina ve', andreina.rondas.length, 'rondas — última:', andreina.calificacion && andreina.calificacion.sumaTotal);
   } else {
     console.log('[WARN] Andreina:', andreina.error || andreina.mensajeBloqueo || 'sin publicar');
   }

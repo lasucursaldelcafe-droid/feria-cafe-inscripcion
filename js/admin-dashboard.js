@@ -2532,6 +2532,46 @@
     return postAdminAction({ action: 'jurado_publish_resultados', evt: '' });
   }
 
+  function buildPreliminar1ResultadosAllRounds_(scores, now) {
+    var P = global.Preliminar1Results;
+    var out = {};
+    Object.keys(scores || {}).forEach(function (id) {
+      var row = scores[id];
+      if (!row || row.sumaTotal == null) return;
+      var rounds = (P && P.getRoundsForCompetidor)
+        ? (P.getRoundsForCompetidor(id, null, row.nombre) || [])
+        : [];
+      if (!rounds.length) {
+        rounds = [{
+          judges: row.judges || {},
+          notasPorJuez: row.notasPorJuez || {},
+          notas: String(row.notas || '').trim(),
+          sumaTotal: row.sumaTotal,
+          promedio: row.promedio != null ? row.promedio : null,
+          roundKey: 'preliminar-1|archivo',
+          faseLabel: 'Preliminar 1 — archivo oficial',
+          publicadoAt: now
+        }];
+      }
+      out[id] = {
+        rounds: rounds.map(function (r) {
+          return {
+            judges: JSON.parse(JSON.stringify(r.judges || {})),
+            notasPorJuez: JSON.parse(JSON.stringify(r.notasPorJuez || { j1: '', j2: '', j3: '' })),
+            notas: String(r.notas || '').trim(),
+            sumaTotal: r.sumaTotal,
+            promedio: r.promedio != null ? r.promedio : null,
+            roundKey: r.roundKey,
+            faseLabel: r.faseLabel,
+            publicadoAt: r.publicadoAt || now,
+            meta: r.meta ? JSON.parse(JSON.stringify(r.meta)) : undefined
+          };
+        })
+      };
+    });
+    return out;
+  }
+
   function publishPreliminar1Archive() {
     if (!global.Preliminar1Results || !global.Preliminar1Results.exportKit) {
       return Promise.reject(new Error('Kit Preliminar 1 no disponible en esta página.'));
@@ -2541,37 +2581,28 @@
     if (!scores || !Object.keys(scores).length) {
       return Promise.reject(new Error('El kit de Preliminar 1 no tiene calificaciones.'));
     }
+    var now = new Date().toISOString();
+    var resultadosCompetidor = buildPreliminar1ResultadosAllRounds_(scores, now);
     return postAdminAction({
       action: 'jurado_import_preliminar1',
       evt: '',
       scores: scores,
+      resultadosCompetidor: resultadosCompetidor,
       evento: kit.event && kit.event.nombre ? kit.event.nombre : 'Preliminar 1',
       platform: kit.platformConfig || null
     }).then(function (data) {
       if (data && data.ok) return data;
-      return publishPreliminar1ArchiveFallback_(kit, scores);
+      return publishPreliminar1ArchiveFallback_(kit, scores, resultadosCompetidor);
     }).catch(function () {
-      return publishPreliminar1ArchiveFallback_(kit, scores);
+      return publishPreliminar1ArchiveFallback_(kit, scores, resultadosCompetidor);
     });
   }
 
-  function publishPreliminar1ArchiveFallback_(kit, scores) {
+  function publishPreliminar1ArchiveFallback_(kit, scores, resultadosCompetidor) {
     var ids = Object.keys(scores).filter(function (id) { return scores[id] && scores[id].sumaTotal != null; });
     var now = new Date().toISOString();
-    var faseLabel = 'Preliminar 1 — archivo oficial';
-    var resultadosCompetidor = {};
-    ids.forEach(function (id) {
-      var row = scores[id];
-      resultadosCompetidor[id] = {
-        judges: JSON.parse(JSON.stringify(row.judges || {})),
-        notas: String(row.notas || '').trim(),
-        sumaTotal: row.sumaTotal,
-        promedio: row.promedio != null ? row.promedio : null,
-        roundKey: 'preliminar-1|archivo',
-        faseLabel: faseLabel,
-        publicadoAt: now
-      };
-    });
+    var faseLabel = 'Preliminar 1 — todas las tandas';
+    var resultados = resultadosCompetidor || buildPreliminar1ResultadosAllRounds_(scores, now);
     return fetchJuradoPasaporteConfig('jurado_v60_calificaciones').then(function (existingCal) {
       var calData = Object.assign({}, existingCal || {});
       calData.scores = Object.assign({}, calData.scores || {}, scores);
@@ -2592,14 +2623,16 @@
       var bracketData = Object.assign({}, existingBracket || {}, {
         fase: 'final',
         rondaEnFase: 1,
-        activos: ids.slice(),
+        activos: [],
+        finalizado: true,
+        edicionEstado: 'realizada',
         eliminados: (existingBracket && existingBracket.eliminados) || [],
         resultadosCompetidor: Object.assign(
           {},
           (existingBracket && existingBracket.resultadosCompetidor) || {},
-          resultadosCompetidor
+          resultados
         ),
-        preliminar1Archivo: { at: now, published: ids.length, faseLabel: faseLabel },
+        preliminar1Archivo: { at: now, published: ids.length, allRounds: true, faseLabel: faseLabel },
         actualizado: now
       });
       return postAdminAction({

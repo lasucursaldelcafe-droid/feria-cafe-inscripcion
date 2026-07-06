@@ -3897,8 +3897,42 @@ function handleJuradoImportPreliminar1_(payload) {
     bracket.resultadosCompetidor = {};
   }
 
+  var payloadResultados = (payload && payload.resultadosCompetidor && typeof payload.resultadosCompetidor === 'object')
+    ? payload.resultadosCompetidor
+    : null;
+  var totalRounds = 0;
+
   ids.forEach(function (id) {
     var row = scores[id];
+    var prev = bracket.resultadosCompetidor[id] || {};
+
+    if (payloadResultados && payloadResultados[id]) {
+      var entry = payloadResultados[id];
+      if (Array.isArray(entry.rounds) && entry.rounds.length) {
+        entry.rounds.forEach(function (rnd) {
+          if (!rnd || rnd.sumaTotal == null) return;
+          var notasPorJuez = rnd.notasPorJuez && typeof rnd.notasPorJuez === 'object'
+            ? JSON.parse(JSON.stringify(rnd.notasPorJuez))
+            : {};
+          var newRound = {
+            judges: JSON.parse(JSON.stringify(rnd.judges || {})),
+            notasPorJuez: notasPorJuez,
+            notas: String(rnd.notas || juradoAggregateNotasPorJuez_(rnd) || '').trim(),
+            sumaTotal: rnd.sumaTotal,
+            promedio: rnd.promedio != null ? rnd.promedio : null,
+            roundKey: String(rnd.roundKey || roundKey).trim(),
+            faseLabel: String(rnd.faseLabel || faseLabel).trim(),
+            publicadoAt: rnd.publicadoAt || now,
+            meta: rnd.meta && typeof rnd.meta === 'object' ? JSON.parse(JSON.stringify(rnd.meta)) : undefined
+          };
+          prev = juradoUpsertCompetidorRound_(prev, newRound);
+          totalRounds++;
+        });
+        bracket.resultadosCompetidor[id] = prev;
+        return;
+      }
+    }
+
     var notasPorJuez = row.notasPorJuez && typeof row.notasPorJuez === 'object'
       ? JSON.parse(JSON.stringify(row.notasPorJuez))
       : {};
@@ -3912,8 +3946,8 @@ function handleJuradoImportPreliminar1_(payload) {
       faseLabel: faseLabel,
       publicadoAt: now
     };
-    var prev = bracket.resultadosCompetidor[id] || {};
     bracket.resultadosCompetidor[id] = juradoUpsertCompetidorRound_(prev, newRound);
+    totalRounds++;
   });
 
   bracket.fase = 'final';
@@ -3922,7 +3956,7 @@ function handleJuradoImportPreliminar1_(payload) {
   bracket.eliminados = Array.isArray(bracket.eliminados) ? bracket.eliminados : [];
   bracket.finalizado = true;
   bracket.edicionEstado = 'realizada';
-  bracket.preliminar1Archivo = { at: now, published: ids.length, faseLabel: faseLabel };
+  bracket.preliminar1Archivo = { at: now, published: ids.length, totalRounds: totalRounds, allRounds: !!payloadResultados, faseLabel: faseLabel };
   bracket.actualizado = now;
   savePasaporteConfig_({ key: bracketKey, data: bracket });
 

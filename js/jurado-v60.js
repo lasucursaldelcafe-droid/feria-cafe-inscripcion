@@ -4249,6 +4249,50 @@
     }
   }
 
+  function buildPreliminar1ResultadosCompetidor(scoresById, now) {
+    var P = global.Preliminar1Results;
+    var out = {};
+    var ids = Object.keys(scoresById || {}).filter(function (id) {
+      return scoresById[id] && scoresById[id].sumaTotal != null;
+    });
+    ids.forEach(function (id) {
+      var row = scoresById[id];
+      var rounds = [];
+      if (P && P.getRoundsForCompetidor) {
+        var doc = row.meta && row.meta.documento ? row.meta.documento : null;
+        rounds = P.getRoundsForCompetidor(id, doc, row.nombre) || [];
+      }
+      if (!rounds.length) {
+        rounds = [{
+          judges: JSON.parse(JSON.stringify(row.judges || {})),
+          notasPorJuez: row.notasPorJuez || { j1: '', j2: '', j3: '' },
+          notas: String(row.notas || '').trim(),
+          sumaTotal: row.sumaTotal,
+          promedio: row.promedio != null ? row.promedio : null,
+          roundKey: 'preliminar-1|archivo',
+          faseLabel: 'Preliminar 1 — archivo oficial',
+          publicadoAt: now
+        }];
+      }
+      out[id] = {
+        rounds: rounds.map(function (r) {
+          return {
+            judges: JSON.parse(JSON.stringify(r.judges || {})),
+            notasPorJuez: JSON.parse(JSON.stringify(r.notasPorJuez || { j1: '', j2: '', j3: '' })),
+            notas: String(r.notas || '').trim(),
+            sumaTotal: r.sumaTotal,
+            promedio: r.promedio != null ? r.promedio : null,
+            roundKey: r.roundKey,
+            faseLabel: r.faseLabel,
+            publicadoAt: r.publicadoAt || now,
+            meta: r.meta ? JSON.parse(JSON.stringify(r.meta)) : undefined
+          };
+        })
+      };
+    });
+    return out;
+  }
+
   function publishPreliminar1ScoresToPortal(scoresById, meta) {
     var ids = Object.keys(scoresById || {}).filter(function (id) {
       return scoresById[id] && scoresById[id].sumaTotal != null;
@@ -4257,25 +4301,12 @@
       return Promise.reject(new Error('No hay puntajes válidos para publicar en el portal.'));
     }
     var now = new Date().toISOString();
-    var faseLabel = 'Preliminar 1 — archivo oficial';
-    var roundKey = 'preliminar-1|archivo';
-    var resultadosCompetidor = {};
-    ids.forEach(function (id) {
-      var row = scoresById[id];
-      resultadosCompetidor[id] = {
-        judges: JSON.parse(JSON.stringify(row.judges || {})),
-        notas: String(row.notas || '').trim(),
-        sumaTotal: row.sumaTotal,
-        promedio: row.promedio != null ? row.promedio : null,
-        roundKey: roundKey,
-        faseLabel: faseLabel,
-        publicadoAt: now
-      };
-    });
+    var resultadosCompetidor = buildPreliminar1ResultadosCompetidor(scoresById, now);
     return sheetsPost({
       action: 'jurado_import_preliminar1',
       evt: tenantSlug || '',
       scores: scoresById,
+      resultadosCompetidor: resultadosCompetidor,
       evento: (meta && meta.evento) || 'V60 Championship — Preliminar 1',
       platform: (meta && meta.platform) || null
     }).then(function (data) {
@@ -4287,7 +4318,9 @@
       return loadBracketStore().then(function () {
         bracketState.fase = 'final';
         bracketState.rondaEnFase = 1;
-        bracketState.activos = ids.slice();
+        bracketState.activos = [];
+        bracketState.finalizado = true;
+        bracketState.edicionEstado = 'realizada';
         bracketState.resultadosCompetidor = Object.assign(
           {},
           bracketState.resultadosCompetidor || {},
@@ -4296,7 +4329,8 @@
         bracketState.preliminar1Archivo = {
           at: now,
           published: ids.length,
-          faseLabel: faseLabel
+          allRounds: true,
+          faseLabel: 'Preliminar 1 — todas las tandas'
         };
         return saveBracketStore(bracketState).then(function () {
           return { published: ids.length };
