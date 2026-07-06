@@ -2572,6 +2572,7 @@
     if (portalLink && global.SiteLinks && global.SiteLinks.buildJuradoUrls) {
       var urls = global.SiteLinks.buildJuradoUrls({});
       if (urls.resultados) portalLink.href = urls.resultados;
+      portalLink.textContent = 'Resultados competidor';
     }
     if (!btn || btn.getAttribute('data-bound') === '1') return;
     btn.setAttribute('data-bound', '1');
@@ -2633,7 +2634,10 @@
       ? global.SiteLinks.buildJuradoUrls({ pinOrganizador: pinOrg, pinJuez: pinJuez, jueces: jueces })
       : (global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60 && global.EVENT_CONFIG.juradoV60.links) || {};
 
-    if (orgQuick && urls.organizador) orgQuick.href = urls.organizador;
+    if (orgQuick && urls.organizador) {
+      orgQuick.href = urls.organizador;
+      orgQuick.textContent = 'Torneo en vivo';
+    }
 
     if (meta) {
       meta.textContent = juradoScoringSummary(platformCfg) +

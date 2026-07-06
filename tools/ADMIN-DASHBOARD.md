@@ -22,8 +22,11 @@ Panel en vivo para calificación del torneo. No enlazado desde el sitio público
 
 | Rol | URL |
 |-----|-----|
-| Organizador | https://la-sucursal-del-cafe.web.app/jurado-v60?pin=v60organizador |
-| Juez N | `…/jurado-v60?pin=v60sensorial&juez=N` (N = 1…cantidad configurada en **Marca y reglas**) |
+| Consola principal | https://la-sucursal-del-cafe.web.app/jurado-v60 |
+| Configuración | https://la-sucursal-del-cafe.web.app/jurado/config?pin=v60organizador |
+| Torneo en vivo | https://la-sucursal-del-cafe.web.app/jurado/organizador?pin=v60organizador |
+| Resultados competidor | https://la-sucursal-del-cafe.web.app/jurado/resultados |
+| Juez N | `…/jurado/juez?pin=v60sensorial&juez=N` (N = 1…cantidad configurada en **Marca y reglas**) |
 
 **Guía completa:** [`tools/JURADO-V60-INSTRUCCIONES.md`](JURADO-V60-INSTRUCCIONES.md) — duelos o puntaje general, criterios configurables, sorteo automático y exportación del kit.
 
