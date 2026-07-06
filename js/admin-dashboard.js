@@ -352,7 +352,6 @@
 
   var MARCA_PLAN_BY_TAB = {
     expositores: 'Zona Origen',
-    aliados: 'Aliado Patrocinador',
     patrocinadores: 'Zona Gran Reserva'
   };
 
@@ -364,10 +363,17 @@
   function inferStandSection(row) {
     var tipo = String(row['Tipo participante'] || '').trim().toLowerCase();
     var plan = String(row['Plan stand'] || '').trim();
-    if (tipo === 'aliado' || plan === 'Aliado Patrocinador') return 'aliados';
-    if (tipo === 'patrocinador' || plan === 'Zona Gran Reserva') return 'patrocinadores';
+    if (tipo === 'patrocinador' || tipo === 'aliado' || plan === 'Zona Gran Reserva' || plan === 'Aliado Patrocinador') {
+      return 'patrocinadores';
+    }
     if (tipo === 'expositor' || plan === 'Zona Origen') return 'expositores';
     return 'expositores';
+  }
+
+  function formatTipoDisplay(row) {
+    if (inferStandSection(row) === 'patrocinadores') return 'Patrocinador';
+    if (inferStandSection(row) === 'expositores') return 'Expositor';
+    return String(row['Tipo participante'] || '—').trim() || '—';
   }
 
   function filterStandsBySection(rows, section) {
@@ -386,6 +392,7 @@
   function restoreAdminTabFromStorage() {
     try {
       var tab = sessionStorage.getItem(ADMIN_TAB_KEY);
+      if (tab === 'aliados') tab = 'patrocinadores';
       if (tab && MARCA_PLAN_BY_TAB[tab]) activeAdminTab = tab;
     } catch (e) { /* ignore */ }
   }
@@ -473,8 +480,7 @@
   }
 
   function tipoFromPlan(plan) {
-    if (plan === 'Aliado Patrocinador') return 'aliado';
-    if (plan === 'Zona Gran Reserva') return 'patrocinador';
+    if (plan === 'Zona Gran Reserva' || plan === 'Aliado Patrocinador') return 'patrocinador';
     return 'expositor';
   }
 
@@ -675,9 +681,40 @@
   function driveThumb(url, size) {
     var raw = String(url || '').trim();
     if (!raw) return '';
-    var match = raw.match(/\/file\/d\/([^/]+)/) || raw.match(/[?&]id=([^&]+)/);
-    if (match) return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(match[1]) + '&sz=w' + (size || 1200);
+    var match =
+      raw.match(/\/file\/d\/([^/]+)/) ||
+      raw.match(/[?&]id=([^&]+)/) ||
+      raw.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+      return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(match[1]) + '&sz=w' + (size || 200);
+    }
     return raw;
+  }
+
+  function resolveAdminImageUrl(image) {
+    var src = String(image || '').trim();
+    if (!src) return '';
+    var thumb = driveThumb(src, 240);
+    if (thumb !== src) return thumb;
+    if (/^https?:\/\//i.test(src)) return src;
+    var cfg = global.EVENT_CONFIG || {};
+    var base = String(cfg.siteUrl || '').replace(/\/$/, '');
+    if (!base && global.location) base = global.location.origin;
+    if (src.charAt(0) === '/') return base + src;
+    return base ? base + '/' + src : src;
+  }
+
+  function adminLogoCell(logoUrl, alt) {
+    var src = resolveAdminImageUrl(logoUrl);
+    if (!src) {
+      return '<span class="admin-table__logo-empty" aria-hidden="true">—</span>';
+    }
+    return (
+      '<div class="admin-table__logo-frame">' +
+      '<img class="admin-table__logo-thumb" src="' + escapeHtml(src) + '" alt="' +
+      escapeHtml(alt || 'Logo') + '" loading="lazy" decoding="async">' +
+      '</div>'
+    );
   }
 
   function driveFileId(url) {
@@ -1641,14 +1678,17 @@
       var sectionRows = filterStandsBySection(standsRows, activeAdminTab);
       var sectionLabels = {
         expositores: 'Stands / expositores (Zona Origen)',
-        aliados: 'Aliados (Aliado Patrocinador)',
-        patrocinadores: 'Patrocinadores (Zona Gran Reserva)'
+        patrocinadores: 'Patrocinadores (Zona Gran Reserva y aliados históricos)'
       };
-      panelStands.innerHTML = '<div class="admin-tab-panel" role="tabpanel">' +
-        renderManageableTable(sectionRows, data.standsColumns || DEFAULT_STANDS_COLS, {
+      var tableHtml = activeAdminTab === 'patrocinadores'
+        ? renderPatrocinadoresStandsTable(sectionRows, {
+          metaText: sectionRows.length + ' patrocinadores — ' + (sectionLabels.patrocinadores || activeAdminTab)
+        })
+        : renderManageableTable(sectionRows, data.standsColumns || DEFAULT_STANDS_COLS, {
           dataset: 'stands',
           metaText: sectionRows.length + ' registros — ' + (sectionLabels[activeAdminTab] || activeAdminTab)
-        }) + '</div>';
+        });
+      panelStands.innerHTML = '<div class="admin-tab-panel" role="tabpanel">' + tableHtml + '</div>';
     }
 
     var directorio = document.getElementById('tableDirectorio');
@@ -1809,7 +1849,7 @@
     }
 
     var html = '<div class="admin-table-wrap"><table class="admin-table admin-table--directorio"><thead><tr>';
-    html += '<th>Marca</th><th>Tipo</th><th>Stand</th><th>Red social</th><th>Habilitado</th><th>Visible en /marcas</th>';
+    html += '<th>Logo</th><th>Marca</th><th>Tipo</th><th>Stand</th><th>Red social</th><th>Habilitado</th><th>Visible en /marcas</th>';
     html += '</tr></thead><tbody>';
 
     rows.forEach(function (row) {
@@ -1818,14 +1858,18 @@
       var habilitado = isHabilitadoValue(row['Habilitado']);
       var redUrl = row['Red social enlace'] || '';
       var redSocial = row['Red social preferida'] || '';
+      var marca = row['Marca o negocio'] || '';
+      var logoUrl = row['Logo enlace Drive'] || '';
       html += '<tr data-stand-id="' + escapeHtml(id) + '">';
-      html += '<td>' + escapeHtml(row['Marca o negocio'] || '');
+      html += '<td>' + adminLogoCell(logoUrl, marca) + '</td>';
+      html += '<td>' + escapeHtml(marca);
       if (id && global.SiteLinks) {
         html += ' <a class="admin-table__link" href="' + escapeHtml(global.SiteLinks.absUrl('marcas') + '/' + encodeURIComponent(id)) +
           '" target="_blank" rel="noopener">Ver perfil</a>';
       }
       html += '</td>';
-      html += '<td>' + escapeHtml(row['Tipo participante'] || '') + '</td>';
+      html += '<td><span class="admin-badge admin-badge--tipo admin-badge--tipo-' +
+        escapeHtml(formatTipoDisplay(row).toLowerCase()) + '">' + escapeHtml(formatTipoDisplay(row)) + '</span></td>';
       html += '<td>' + escapeHtml(row['Stand ID'] || '—') + '</td>';
       html += '<td>';
       if (redUrl && redUrl.indexOf('http') === 0) {
@@ -1850,7 +1894,61 @@
     });
 
     html += '</tbody></table></div>';
-    html += '<p class="admin-table-meta">Habilitado controla mapa y conteos públicos. Visible controla solo el directorio /marcas.</p>';
+    html += '<p class="admin-table-meta">Habilitado controla mapa y conteos públicos. Visible controla solo el directorio /marcas. Los registros históricos «aliado» se muestran como patrocinador.</p>';
+    return html;
+  }
+
+  function renderPatrocinadoresStandsTable(rows, options) {
+    options = options || {};
+    var meta = options.metaText ? '<p class="admin-table-meta">' + escapeHtml(options.metaText) + '</p>' : '';
+    if (!rows || !rows.length) {
+      return meta + '<p class="admin-empty">Sin patrocinadores registrados todavía.</p>';
+    }
+
+    var html = meta + '<div class="admin-table-wrap"><table class="admin-table admin-table--patrocinadores-stands"><thead><tr>';
+    html += '<th>Logo</th><th>Marca</th><th>Plan</th><th>Ciudad</th><th>Contacto</th><th>Red social</th><th>Estado</th><th>Acción</th>';
+    html += '</tr></thead><tbody>';
+
+    rows.forEach(function (row) {
+      var id = row['ID'] || '';
+      var enabled = isHabilitadoValue(row['Habilitado']);
+      var marca = row['Marca o negocio'] || '';
+      var logoUrl = row['Logo enlace Drive'] || '';
+      var redUrl = row['Red social enlace'] || '';
+      var redSocial = row['Red social preferida'] || '';
+      html += '<tr data-record-id="' + escapeHtml(id) + '" data-dataset="stands">';
+      html += '<td>' + adminLogoCell(logoUrl, marca) + '</td>';
+      html += '<td><strong>' + escapeHtml(marca) + '</strong>';
+      if (id && global.SiteLinks) {
+        html += '<br><a class="admin-table__link" href="' +
+          escapeHtml(global.SiteLinks.absUrl('marcas') + '/' + encodeURIComponent(id)) +
+          '" target="_blank" rel="noopener">Ver en /marcas</a>';
+      }
+      html += '</td>';
+      html += '<td>' + escapeHtml(row['Plan stand'] || '—') + '</td>';
+      html += '<td>' + escapeHtml(row['Ciudad'] || '—') + '</td>';
+      html += '<td>' + escapeHtml(row['Persona contacto'] || '—') +
+        (row['Correo'] ? '<br><span class="admin-table-meta">' + escapeHtml(row['Correo']) + '</span>' : '') +
+        '</td>';
+      html += '<td>';
+      if (redUrl && redUrl.indexOf('http') === 0) {
+        html += '<a href="' + escapeHtml(redUrl) + '" target="_blank" rel="noopener">' +
+          escapeHtml(redSocial || 'Ver') + '</a>';
+      } else {
+        html += escapeHtml(redSocial || '—');
+      }
+      html += '</td>';
+      html += '<td>' + renderStatusBadge(enabled) + '</td>';
+      html += '<td><button type="button" class="admin-btn admin-btn--sm ' +
+        (enabled ? 'admin-btn--danger' : 'admin-btn--success') +
+        ' admin-toggle-status-btn" data-record-id="' + escapeHtml(id) +
+        '" data-dataset="stands" data-enabled="' + (enabled ? '0' : '1') + '">' +
+        (enabled ? 'Deshabilitar' : 'Habilitar') + '</button></td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    html += '<p class="admin-table-meta">Patrocinadores publicables en /marcas. Usa el formulario superior para registrar uno nuevo con logo en Drive.</p>';
     return html;
   }
 
@@ -1901,16 +1999,9 @@
       var enabled = isHabilitadoValue(row['Habilitado']);
       var logo = row['Logo enlace'] || '';
       var redUrl = row['Red social enlace'] || '';
+      var nombre = row['Nombre'] || '';
       html += '<tr data-patrocinador-id="' + escapeHtml(id) + '">';
-      html += '<td>';
-      if (logo && logo.indexOf('http') === 0) {
-        html += '<img class="admin-table__logo-thumb" src="' + escapeHtml(logo) + '" alt="" loading="lazy">';
-      } else if (logo) {
-        html += '<span class="admin-table-meta">' + escapeHtml(logo) + '</span>';
-      } else {
-        html += '—';
-      }
-      html += '</td>';
+      html += '<td>' + adminLogoCell(logo, nombre) + '</td>';
       html += '<td>' + escapeHtml(row['Nombre'] || '') + '</td>';
       html += '<td>' + escapeHtml(row['Instagram handle'] || '—') + '</td>';
       html += '<td>';
