@@ -1714,3 +1714,55 @@
 .page-festival--bizcard-ready .site-hero {
   display: none;
 }
+
+.admin-form-subtitle {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--admin-text-muted, #5c5348);
+}
+
+.admin-comp-showcase-checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 0.35rem 0.75rem;
+  max-height: 14rem;
+  overflow: auto;
+  padding: 0.65rem;
+  border: 1px solid var(--admin-border, #e8e0d4);
+  border-radius: 0.65rem;
+  background: var(--admin-surface-2, #faf8f5);
+}
+
+.admin-comp-showcase-check {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.admin-comp-showcase-carrusel__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.admin-comp-showcase-preview {
+  margin-top: 1rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--admin-border, #e8e0d4);
+}
+
+.admin-comp-showcase-preview .comp-showcase {
+  border-radius: 0;
+}
+
+.admin-comp-showcase-podio-row {
+  margin-bottom: 0.25rem;
+}
+

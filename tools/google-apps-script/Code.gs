@@ -165,6 +165,9 @@ function doGet(e) {
   if (params.action === 'patrocinadores_competencia_publico') {
     return jsonResponse(getPatrocinadoresCompetenciaPublico_());
   }
+  if (params.action === 'competencia_resumen_publico') {
+    return jsonResponse(getCompetenciaHomeShowcasePublic_());
+  }
   if (params.action === 'pasaporte_get') {
     return jsonResponse(getPasaporteCliente_(params.id || ''));
   }
@@ -284,6 +287,9 @@ function doPost(e) {
     }
     if (action === 'pasaporte_config_save') {
       return jsonResponse(savePasaporteConfig_(payload));
+    }
+    if (action === 'admin_save_competencia_resumen') {
+      return jsonResponse(handleAdminSaveCompetenciaResumen_(payload));
     }
     if (action === 'jurado_instance_create') {
       return jsonResponse(handleJuradoInstanceCreate_(payload));
@@ -3386,6 +3392,146 @@ function handlePasaporteEscaneo_(payload) {
     puntosTotales: txResult.puntos,
     nivel: txResult.nivel
   };
+}
+
+var COMPETENCIA_HOME_SHOWCASE_KEY = 'competencia_home_showcase';
+
+function getDefaultCompetenciaHomeShowcase_() {
+  return {
+    enabled: true,
+    titulo: 'V60 Championship',
+    subtitulo: 'Preliminar 1 — Resultados oficiales',
+    descripcion: '12 baristas en duelos 1v1. Conoce al podio y a quienes disputaron la final en Cali.',
+    badge: 'Reto V60',
+    edicionEvento: 'V60 Championship — Preliminar 1',
+    mostrarPodio: true,
+    mostrarCarrusel: true,
+    carruselIds: [],
+    podio: [],
+    ctaLabel: 'Inscripción V60',
+    ctaHref: 'competencia.html',
+    resultadosLabel: 'Ver resultados',
+    resultadosHref: 'jurado/resultados'
+  };
+}
+
+function competidorShowcaseFromRow_(row) {
+  if (!row || !isHabilitadoCompetenciaRow_(row)) return null;
+  var id = String(row['ID'] || '').trim();
+  if (!id) return null;
+  return {
+    id: id,
+    nombre: String(row['Nombre'] || '').trim(),
+    ciudad: String(row['Ciudad'] || '').trim(),
+    representa: String(row['Representa'] || '').trim(),
+    rol: String(row['Rol'] || '').trim(),
+    evento: String(row['Evento'] || '').trim(),
+    fotoUrl: String(row['Foto participante enlace Drive'] || '').trim()
+  };
+}
+
+function getCompetenciaHomeShowcasePublic_() {
+  var cfgWrap = getPasaporteConfig_(COMPETENCIA_HOME_SHOWCASE_KEY);
+  var cfg = cfgWrap.data && typeof cfgWrap.data === 'object'
+    ? cfgWrap.data
+    : getDefaultCompetenciaHomeShowcase_();
+  if (cfg.enabled === false) {
+    return { ok: true, enabled: false };
+  }
+  var allRows = readAllSheetRows_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA, true);
+  var byId = {};
+  var byEvento = [];
+  var edicion = String(cfg.edicionEvento || '').trim();
+  allRows.forEach(function (row) {
+    var item = competidorShowcaseFromRow_(row);
+    if (!item) return;
+    byId[item.id] = item;
+    if (!edicion || isSameCompetenciaEvento_(row['Evento'], edicion)) {
+      byEvento.push(item);
+    }
+  });
+  var carruselIds = Array.isArray(cfg.carruselIds) ? cfg.carruselIds : [];
+  var carrusel = [];
+  if (carruselIds.length) {
+    carruselIds.forEach(function (cid) {
+      var id = String(cid || '').trim();
+      if (id && byId[id]) carrusel.push(byId[id]);
+    });
+  } else {
+    carrusel = byEvento.slice();
+  }
+  var podioConfig = Array.isArray(cfg.podio) ? cfg.podio : [];
+  var podio = [];
+  podioConfig.forEach(function (slot) {
+    if (!slot || typeof slot !== 'object') return;
+    var pos = parseInt(slot.posicion, 10);
+    var cid = String(slot.competidorId || slot.id || '').trim();
+    if (!pos || !cid || !byId[cid]) return;
+    var enriched = {
+      id: byId[cid].id,
+      nombre: byId[cid].nombre,
+      ciudad: byId[cid].ciudad,
+      representa: byId[cid].representa,
+      rol: byId[cid].rol,
+      evento: byId[cid].evento,
+      fotoUrl: byId[cid].fotoUrl,
+      posicion: pos,
+      puntos: slot.puntos != null ? slot.puntos : (slot.total != null ? slot.total : null)
+    };
+    podio.push(enriched);
+  });
+  podio.sort(function (a, b) { return a.posicion - b.posicion; });
+  return {
+    ok: true,
+    enabled: true,
+    titulo: String(cfg.titulo || '').trim() || 'V60 Championship',
+    subtitulo: String(cfg.subtitulo || '').trim(),
+    descripcion: String(cfg.descripcion || '').trim(),
+    badge: String(cfg.badge || '').trim(),
+    edicionEvento: edicion,
+    mostrarPodio: cfg.mostrarPodio !== false,
+    mostrarCarrusel: cfg.mostrarCarrusel !== false,
+    carrusel: carrusel,
+    podio: podio,
+    ctaLabel: String(cfg.ctaLabel || '').trim() || 'Inscripción V60',
+    ctaHref: String(cfg.ctaHref || '').trim() || 'competencia.html',
+    resultadosLabel: String(cfg.resultadosLabel || '').trim() || 'Ver resultados',
+    resultadosHref: String(cfg.resultadosHref || '').trim() || 'jurado/resultados'
+  };
+}
+
+function handleAdminSaveCompetenciaResumen_(payload) {
+  var access = assertAdminAccess_(payload.idToken || '');
+  if (!access.ok) {
+    return { ok: false, error: access.error };
+  }
+  var data = payload.data && typeof payload.data === 'object' ? payload.data : payload;
+  var cfg = {
+    enabled: data.enabled !== false,
+    titulo: String(data.titulo || '').trim(),
+    subtitulo: String(data.subtitulo || '').trim(),
+    descripcion: String(data.descripcion || '').trim(),
+    badge: String(data.badge || '').trim(),
+    edicionEvento: String(data.edicionEvento || '').trim(),
+    mostrarPodio: data.mostrarPodio !== false,
+    mostrarCarrusel: data.mostrarCarrusel !== false,
+    carruselIds: Array.isArray(data.carruselIds) ? data.carruselIds.map(function (id) {
+      return String(id || '').trim();
+    }).filter(Boolean) : [],
+    podio: Array.isArray(data.podio) ? data.podio.map(function (slot) {
+      return {
+        posicion: parseInt(slot.posicion, 10) || 0,
+        competidorId: String(slot.competidorId || slot.id || '').trim(),
+        puntos: slot.puntos != null ? slot.puntos : (slot.total != null ? slot.total : null)
+      };
+    }).filter(function (slot) { return slot.posicion && slot.competidorId; }) : [],
+    ctaLabel: String(data.ctaLabel || '').trim(),
+    ctaHref: String(data.ctaHref || '').trim(),
+    resultadosLabel: String(data.resultadosLabel || '').trim(),
+    resultadosHref: String(data.resultadosHref || '').trim()
+  };
+  savePasaporteConfig_({ key: COMPETENCIA_HOME_SHOWCASE_KEY, data: cfg });
+  return { ok: true, key: COMPETENCIA_HOME_SHOWCASE_KEY };
 }
 
 function getPasaporteConfig_(key) {
