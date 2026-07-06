@@ -9,7 +9,7 @@
   <title>Mis resultados — Torneo sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260706rondas">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260706picker">
 </head>
 <body class="jurado-page jurado-page--resultados">
   <div class="jurado-shell">
@@ -81,7 +81,7 @@
       <div id="resultScoresWrap">
         <p id="resultRoundsCount" class="jurado-meta jurado-result-rounds-count" hidden></p>
 
-        <div id="resultRoundsTabs" class="jurado-result-rounds-tabs" hidden role="tablist" aria-label="Rondas"></div>
+        <div id="resultRoundsPicker" class="jurado-result-rounds-picker" hidden role="tablist" aria-label="Elegir ronda"></div>
 
         <div class="jurado-card jurado-result-summary">
           <div class="jurado-result-summary-grid">
@@ -102,7 +102,7 @@
           </div>
         </div>
 
-        <div id="resultAllRoundsWrap" class="jurado-result-all-rounds"></div>
+        <div id="resultRoundDetailWrap" class="jurado-result-round-detail"></div>
       </div>
     </section>
 
@@ -121,8 +121,8 @@
     };
     if (window.SiteLinks) SiteLinks.applyLinkElements(document);
   </script>
-  <script src="js/jurado-standards.js?v=20260706rondas"></script>
-  <script src="js/preliminar-1-results.js?v=20260706rondas"></script>
-  <script src="js/jurado-resultados.js?v=20260706rondas"></script>
+  <script src="js/jurado-standards.js?v=20260706picker"></script>
+  <script src="js/preliminar-1-results.js?v=20260706picker"></script>
+  <script src="js/jurado-resultados.js?v=20260706picker"></script>
 </body>
 </html>
