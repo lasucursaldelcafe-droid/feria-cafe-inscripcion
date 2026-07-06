@@ -7,9 +7,9 @@
   --coffee-warm: #BB5E3C;
   --green-accent: #5F7F4E;
   --cream: #E9E6DD;
-  --cream-light: #faf6f0;
-  --cream-beige: #f5ebe0;
-  --cream-pale: #fffdf9;
+  --cream-light: #ede4d8;
+  --cream-beige: #f0e4d6;
+  --cream-pale: #ebe3d6;
   --red-cta: #C1272D;
   --red-hover: #a82026;
 
@@ -24,11 +24,11 @@
   --blue-accent: var(--coffee-deep);
 
   /* Superficies (~60% crema) */
-  --bg-page: var(--cream-light);
+  --bg-page: var(--cream-beige);
   --cream-alt: var(--cream-beige);
   --cream-dark: #D9D4C8;
   --cream-muted: #F0EBE3;
-  --surface-card: #fff;
+  --surface-card: var(--cream-beige);
   --surface-cream: var(--cream);
   --surface-warm: var(--cream-pale);
   --surface-beige: var(--cream-beige);
@@ -38,7 +38,7 @@
   --text-dark: var(--coffee-deep);
   --text-body: rgba(75, 53, 42, 0.85);
   --text-muted: rgba(75, 53, 42, 0.65);
-  --text-on-dark: var(--cream-pale);
+  --text-on-dark: #fffdf9;
   --text-on-dark-muted: rgba(255, 253, 249, 0.82);
 
   /* Acentos y estados */
@@ -204,7 +204,7 @@ textarea {
 .site-hero {
   position: relative;
   background:
-    linear-gradient(180deg, #fffdf9 0%, var(--cream) 45%, var(--cream-muted) 100%);
+    linear-gradient(180deg, var(--cream-beige) 0%, var(--cream) 45%, var(--cream-muted) 100%);
   border-bottom: 1px solid rgba(93, 58, 26, 0.08);
   overflow: hidden;
 }
@@ -2387,12 +2387,12 @@ body.page-rules {
 }
 
 .festival-section--light {
-  background: var(--cream-light);
+  background: var(--cream-beige);
   color: var(--text-body);
 }
 
 .festival-section--cream {
-  background: var(--cream-pale);
+  background: var(--cream);
   color: var(--text-body);
 }
 
@@ -3395,7 +3395,7 @@ a.festival-sponsor-card__link:focus-visible {
 
 .site-hero--sub {
   padding-bottom: 0;
-  background: linear-gradient(180deg, var(--cream-pale) 0%, var(--surface-cream) 100%);
+  background: linear-gradient(165deg, var(--cream-beige) 0%, var(--cream) 55%, #ddd2c4 100%);
   min-height: auto;
   border-bottom: 1px solid var(--border-coffee-subtle);
 }
@@ -3558,26 +3558,41 @@ a.festival-sponsor-card__link:focus-visible {
   user-select: none;
 }
 
-/* —— Festival: subpáginas crema + barra café —— */
+/* —— Festival: subpáginas café crema (menos blanco) —— */
 
 .page-festival .site-hero--festival,
-.page-festival .site-hero--sub {
-  background: linear-gradient(180deg, var(--cream-pale) 0%, var(--surface-cream) 100%);
-  border-bottom: 1px solid var(--border-coffee);
-}
-
+.page-festival .site-hero--sub,
 .page-festival .site-hero--coffee {
-  background: var(--gradient-hero-coffee);
-  border-bottom: none;
+  background: linear-gradient(165deg, var(--cream-beige) 0%, var(--cream) 52%, #ddd2c4 100%);
+  border-bottom: 1px solid rgba(93, 58, 26, 0.12);
+  color: var(--text-body);
 }
 
 .page-festival .site-hero--festival::before,
-.page-festival .site-hero--sub::before {
-  display: none;
-}
-
+.page-festival .site-hero--sub::before,
 .page-festival .site-hero--coffee::before {
   display: block;
+  background:
+    radial-gradient(ellipse at 18% 28%, rgba(187, 94, 60, 0.14) 0%, transparent 44%),
+    radial-gradient(ellipse at 82% 72%, rgba(93, 58, 26, 0.1) 0%, transparent 42%);
+}
+
+.page-festival .site-hero--coffee .festival-kicker,
+.page-festival .site-hero--festival .festival-kicker,
+.page-festival .site-hero--sub .festival-kicker {
+  color: var(--brown-warm);
+}
+
+.page-festival .site-hero--coffee .festival-sub-hero__title,
+.page-festival .site-hero--festival .festival-sub-hero__title,
+.page-festival .site-hero--sub .festival-sub-hero__title {
+  color: var(--brown-deep);
+}
+
+.page-festival .site-hero--coffee .festival-sub-hero__lead,
+.page-festival .site-hero--festival .festival-sub-hero__lead,
+.page-festival .site-hero--sub .festival-sub-hero__lead {
+  color: var(--text-muted);
 }
 
 .page-festival .section-title {
@@ -5023,7 +5038,7 @@ textarea.has-value {
 /* —— Home tarjeta de presentación (bizcard) —— */
 
 .page-festival--bizcard {
-  background: var(--cream-muted);
+  background: var(--cream);
   min-height: 100vh;
 }
 
@@ -5062,8 +5077,8 @@ textarea.has-value {
 }
 
 .bizcard {
-  background: var(--cream-pale);
-  border: 1px solid rgba(93, 58, 26, 0.1);
+  background: linear-gradient(165deg, var(--cream-beige) 0%, var(--cream) 100%);
+  border: 1px solid rgba(93, 58, 26, 0.12);
   border-radius: 18px;
   box-shadow: 0 8px 28px rgba(75, 53, 42, 0.06);
   overflow: hidden;
@@ -5214,7 +5229,7 @@ textarea.has-value {
 
 .festival-explore--bizcard .festival-explore__panel {
   background: var(--cream);
-  border-color: rgba(93, 58, 26, 0.08);
+  border-color: rgba(93, 58, 26, 0.1);
 }
 
 .festival-quick-links--bizcard {
