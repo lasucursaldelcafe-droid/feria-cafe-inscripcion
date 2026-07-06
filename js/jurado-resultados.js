@@ -1,6 +1,6 @@
 /**
  * Portal de resultados — competidor ingresa con nombre + documento (cédula).
- * Muestra todas las rondas publicadas con observaciones según estándar V60.
+ * Muestra rondas publicadas con selector compacto (lista/pestañas) y detalle bajo demanda.
  */
 (function () {
   'use strict';
@@ -219,21 +219,45 @@
     return !!(g && g.subtotal != null);
   }
 
-  function renderRoundTabs(rondas) {
-    var tabs = $('resultRoundsTabs');
-    if (!tabs) return;
-    if (!rondas.length) {
-      tabs.innerHTML = '';
-      tabs.hidden = true;
+  function roundShortLabel(r, idx) {
+    var entrada = r.meta && r.meta.entrada;
+    if (entrada === 1) return 'Grupos';
+    if (entrada === 2) return 'Semifinal';
+    if (entrada === 3) return 'Final';
+    var label = String(r.faseLabel || ('Ronda ' + (idx + 1))).trim();
+    return label.replace(/^Preliminar\s*1\s*[—-]\s*/i, '') || label;
+  }
+
+  function renderRoundPicker(rondas) {
+    var picker = $('resultRoundsPicker');
+    if (!picker) return;
+    if (!rondas.length || rondas.length <= 1) {
+      picker.innerHTML = '';
+      picker.hidden = true;
       return;
     }
-    tabs.hidden = rondas.length <= 1;
-    tabs.innerHTML = rondas.map(function (r, idx) {
-      var label = r.faseLabel || ('Ronda ' + (idx + 1));
-      var pts = r.sumaTotal != null ? ' · ' + r.sumaTotal + ' pts' : '';
-      return '<a class="jurado-result-round-tab" href="#result-round-' + idx + '">' +
-        escapeHtml(label) + '<span class="jurado-result-round-tab-pts">' + escapeHtml(pts) + '</span></a>';
+    if (selectedRoundIdx < 0 || selectedRoundIdx >= rondas.length) {
+      selectedRoundIdx = rondas.length - 1;
+    }
+    picker.hidden = false;
+    picker.innerHTML = rondas.map(function (r, idx) {
+      var short = roundShortLabel(r, idx);
+      var pts = r.sumaTotal != null ? r.sumaTotal + ' pts' : '—';
+      var active = idx === selectedRoundIdx ? ' jurado-result-round-pick--active' : '';
+      return '<button type="button" class="jurado-result-round-pick' + active + '" role="tab"' +
+        ' aria-selected="' + (idx === selectedRoundIdx ? 'true' : 'false') + '"' +
+        ' data-round-idx="' + idx + '">' +
+        '<span class="jurado-result-round-pick-label">' + escapeHtml(short) + '</span>' +
+        '<span class="jurado-result-round-pick-pts">' + escapeHtml(pts) + '</span>' +
+        '</button>';
     }).join('');
+
+    picker.querySelectorAll('[data-round-idx]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        selectedRoundIdx = parseInt(btn.getAttribute('data-round-idx'), 10) || 0;
+        if (currentData) renderResults(currentData);
+      });
+    });
   }
 
   function renderCriteriaTable(round, criteria, scoring) {
@@ -273,54 +297,40 @@
     return html;
   }
 
-  function renderRoundBlock(round, idx, criteria, scoring) {
+  function renderRoundDetail(round, criteria, scoring) {
+    var wrap = $('resultRoundDetailWrap');
+    if (!wrap) return;
+    if (!round) {
+      wrap.innerHTML = '<p class="jurado-hint">Aún no hay calificaciones publicadas.</p>';
+      return;
+    }
     var std = getStandards();
-    var label = round.faseLabel || ('Ronda ' + (idx + 1));
-    var total = round.sumaTotal != null ? round.sumaTotal + ' pts' : '—';
-    var promedio = round.promedio != null ? 'Promedio jueces: ' + round.promedio : '';
     var summaryHtml = '';
     if (std && std.roundSummaryObservation) {
-      summaryHtml = '<div class="jurado-result-round-summary">' +
+      summaryHtml = '<div class="jurado-card jurado-result-round-summary">' +
         '<h3>Resumen según estándar V60</h3><p>' +
         escapeHtml(std.roundSummaryObservation(round, criteria, scoring.scaleMin, scoring.scaleMax)) +
         '</p></div>';
     }
     var notas = round.notas ? String(round.notas).trim() : '';
     var notasHtml = notas
-      ? '<div class="jurado-result-round-notas"><strong>Notas del jurado:</strong> ' + escapeHtml(notas) + '</div>'
+      ? '<div class="jurado-card"><div class="jurado-card-head"><h3>Notas del jurado</h3></div>' +
+        '<p class="jurado-result-notas">' + escapeHtml(notas) + '</p></div>'
       : '';
 
-    return '<article class="jurado-result-round-block" id="result-round-' + idx + '">' +
-      '<header class="jurado-result-round-block-head">' +
-      '<div><h2>' + escapeHtml(label) + '</h2>' +
-      (promedio ? '<p class="jurado-meta">' + escapeHtml(promedio) + '</p>' : '') +
-      '</div>' +
-      '<p class="jurado-result-round-block-total">' + escapeHtml(total) + '</p>' +
-      '</header>' +
+    wrap.innerHTML =
       summaryHtml +
-      '<div class="jurado-card jurado-result-round-inner">' +
-      '<div class="jurado-card-head"><h3>Calificación por parámetro</h3>' +
+      '<div class="jurado-card">' +
+      '<div class="jurado-card-head"><h2>Calificación por parámetro</h2>' +
       '<p class="jurado-hint">Desglose según estándares sensoriales V60 (escala 1–5).</p></div>' +
       renderCriteriaTable(round, criteria, scoring) +
       '</div>' +
-      '<div class="jurado-card jurado-result-round-inner">' +
-      '<div class="jurado-card-head"><h3>Calificación por juez</h3></div>' +
+      '<div class="jurado-card">' +
+      '<div class="jurado-card-head"><h2>Calificación por juez</h2>' +
+      '<p class="jurado-hint">Subtotales y observaciones de cada juez en esta ronda.</p></div>' +
       '<div class="jurado-result-judges-grid">' + renderJudgesCards(round, criteria, scoring) + '</div>' +
       '</div>' +
-      notasHtml +
-      '</article>';
-  }
-
-  function renderAllRounds(rondas, criteria, scoring) {
-    var wrap = $('resultAllRoundsWrap');
-    if (!wrap) return;
-    if (!rondas.length) {
-      wrap.innerHTML = '<p class="jurado-hint">Aún no hay calificaciones publicadas.</p>';
-      return;
-    }
-    wrap.innerHTML = rondas.map(function (r, idx) {
-      return renderRoundBlock(r, idx, criteria, scoring);
-    }).join('');
+      notasHtml;
   }
 
   function renderJudgesCards(round, criteria, scoring) {
@@ -368,7 +378,10 @@
     var scoring = data.scoring || {};
     var criteria = getCriteria(scoring);
     var rondas = mergeRondas(data);
-    var cal = blocked ? null : (rondas[rondas.length - 1] || null);
+    if (selectedRoundIdx < 0 || selectedRoundIdx >= rondas.length) {
+      selectedRoundIdx = rondas.length ? rondas.length - 1 : -1;
+    }
+    var cal = blocked ? null : (rondas[selectedRoundIdx >= 0 ? selectedRoundIdx : rondas.length - 1] || null);
 
     $('resultCompetidorNombre').textContent = comp.nombre || '—';
     $('resultCompetidorMeta').textContent = [
@@ -396,9 +409,9 @@
     var detalle = torneo.detalle || null;
     estadoEl.textContent = estadoLabel(torneo.estado, detalle);
     estadoEl.className = 'jurado-result-estado ' + estadoClass(torneo.estado, detalle);
-    $('resultFaseLabel').textContent = rondas.length > 1
-      ? 'Última ronda: ' + ((cal && cal.faseLabel) || torneo.faseLabel || 'Torneo')
-      : ((cal && cal.faseLabel) || torneo.faseLabel || 'Torneo');
+    $('resultFaseLabel').textContent = cal
+      ? (cal.faseLabel || torneo.faseLabel || 'Torneo')
+      : (torneo.faseLabel || 'Torneo');
 
     var edicionMeta = $('resultEdicionMeta');
     if (edicionMeta) {
@@ -413,18 +426,18 @@
     $('resultTotalPts').textContent = total;
     var promedioEl = $('resultPromedio');
     if (promedioEl) {
-      promedioEl.textContent = rondas.length > 1
-        ? rondas.length + ' rondas con calificación publicada'
-        : (cal && cal.promedio != null ? 'Promedio jueces: ' + cal.promedio : 'Aún sin puntaje completo');
+      promedioEl.textContent = cal && cal.promedio != null
+        ? 'Promedio jueces: ' + cal.promedio
+        : (rondas.length > 1 ? 'Elige una ronda arriba para ver el detalle' : 'Aún sin puntaje completo');
     }
 
-    renderRoundTabs(rondas);
-    renderAllRounds(rondas, criteria, scoring);
+    renderRoundPicker(rondas);
+    renderRoundDetail(cal, criteria, scoring);
 
     var roundsCount = $('resultRoundsCount');
     if (roundsCount) {
       roundsCount.textContent = rondas.length > 1
-        ? 'Historial completo: ' + rondas.length + ' rondas'
+        ? rondas.length + ' rondas — selecciona una para ver parámetros y jueces'
         : '';
       roundsCount.hidden = rondas.length <= 1;
     }

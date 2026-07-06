@@ -3442,21 +3442,24 @@ body.jurado-page--resultados .jurado-shell {
   color: var(--jurado-accent-light);
 }
 
-.jurado-result-rounds-tabs {
-  display: flex;
-  flex-wrap: wrap;
+.jurado-result-rounds-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
   gap: 8px;
   margin-bottom: 14px;
 }
 
-.jurado-result-round-tab {
-  flex: 1 1 auto;
-  min-width: 120px;
+.jurado-result-round-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   padding: 10px 12px;
   border: 1px solid var(--jurado-border);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
   color: rgba(255, 255, 255, 0.85);
+  font: inherit;
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
@@ -3464,27 +3467,50 @@ body.jurado-page--resultados .jurado-shell {
   transition: border-color 0.15s, background 0.15s;
 }
 
-.jurado-result-round-tab:hover {
+.jurado-result-round-pick:hover {
   border-color: rgba(201, 162, 39, 0.45);
 }
 
-.jurado-result-round-tab--active {
+.jurado-result-round-pick--active {
   border-color: var(--jurado-accent);
   background: rgba(201, 162, 39, 0.12);
   color: #fff;
 }
 
-.jurado-result-round-tab-pts {
-  display: block;
-  font-weight: 500;
-  font-size: 0.75rem;
-  opacity: 0.75;
-  margin-top: 2px;
+.jurado-result-round-pick-label {
+  line-height: 1.25;
 }
 
-.jurado-result-round-summary {
-  border-color: rgba(201, 162, 39, 0.3);
+.jurado-result-round-pick-pts {
+  font-weight: 500;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.jurado-result-round-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.jurado-result-round-detail .jurado-result-round-summary {
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 162, 39, 0.3);
   background: rgba(201, 162, 39, 0.06);
+}
+
+@media (max-width: 520px) {
+  .jurado-result-rounds-picker {
+    grid-template-columns: 1fr;
+  }
+
+  .jurado-result-round-pick {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
 }
 
 .jurado-result-round-summary h3 {
