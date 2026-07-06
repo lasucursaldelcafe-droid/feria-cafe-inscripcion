@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -52,8 +53,15 @@ HOSTING_ROUTES: list[tuple[str, str, bool]] = [
     ("/panel-fidelizacion", "Panel fidelización", True),
     ("/expositor", "Panel expositor", True),
     ("/mi-stand", "Alias mi-stand", True),
-    ("/stands-reserva", "Stands reserva (legacy)", False),
-    ("/stands-reserva-firebase", "Stands reserva Firebase", False),
+    ("/stands-reserva", "Stands reserva (legacy → /stands)", True),
+    ("/stands-reserva-firebase", "Stands reserva Firebase → /stands", True),
+    ("/jurado-v60", "Consola principal jurado", True),
+    ("/jurado/config", "Jurado configuración", True),
+    ("/jurado/organizador", "Jurado organizador", True),
+    ("/jurado/juez", "Jurado juez", True),
+    ("/jurado/resultados", "Jurado resultados", True),
+    ("/jurado/historial", "Jurado historial", True),
+    ("/competencia/torneo", "Inscripción torneo tenant", True),
 ]
 
 CRITICAL_ASSETS = [
@@ -67,6 +75,13 @@ CRITICAL_ASSETS = [
     "/js/admin-dashboard.js",
     "/js/fidelizacion-common.js",
     "/assets/logo-la-sucursal-del-cafe.png",
+    "/assets/sponsors/purist.webp",
+    "/assets/sponsors/palmetto-plaza.png",
+    "/assets/sponsors/marca-placeholder.svg",
+    "/assets/sponsors/ghost-specialty-coffee.svg",
+    "/assets/sponsors/medium-cafe.svg",
+    "/assets/sponsors/elixir-cafe.svg",
+    "/assets/sponsors/black-coffee-design.svg",
     "/assets/reglas-v60-championship.pdf",
     "/assets/stands-map-placeholder.svg",
 ]
@@ -316,7 +331,7 @@ def check_apps_script(report: VerificationReport, web_url: str) -> None:
 def check_forms_pages(report: VerificationReport) -> None:
     pages: list[tuple[str, list[str]]] = [
         ("/inscripcion", ["form-submit.js", "sheets-config.js"]),
-        ("/competencia", ["form-submit.js", "sheets-config.js"]),
+        ("/competencia", ["form-submit.js", "sheets-config.js", "jurado-v60.css"]),
         ("/admin", ["admin-dashboard.js", "sheets-config.js", "fidelizacion-sheets.js"]),
         ("/stands", ["stands-map.js"]),
         ("/marcas", ["participantes-directory.js"]),
@@ -325,6 +340,11 @@ def check_forms_pages(report: VerificationReport) -> None:
         ("/pasaporte", ["fidelizacion-sheets.js", "fidelizacion-common.js", "pasaporte-pwa.js"]),
         ("/registro-fidelizacion", ["fidelizacion-sheets.js", "fidelizacion-common.js"]),
         ("/escanear-pasaporte", ["fidelizacion-sheets.js", "fidelizacion-common.js"]),
+        ("/jurado-v60", ["jurado-v60.js", "Consola principal"]),
+        ("/jurado/config", ["jurado-v60.js", '<base href="/">']),
+        ("/jurado/organizador", ["jurado-v60.js", '<base href="/">']),
+        ("/jurado/historial", ["competition-history.js", "Historial de competencias"]),
+        ("/competencia/torneo", ["competencia-torneo.js", '<base href="/">']),
     ]
     for path, tokens in pages:
         status, html = http_text(SITE_BASE + path)
@@ -433,6 +453,32 @@ def check_repo_integrity(report: VerificationReport) -> None:
             detail="presente" if path.is_file() else "FALTA",
             remediation=f"Crear o restaurar {dest}",
         )
+
+    sync = subprocess.run(
+        [sys.executable, str(TOOLS_DIR / "sync_routes.py"), "--check"],
+        cwd=PROJECT_ROOT,
+        capture_output=True,
+        text=True,
+    )
+    add(
+        report,
+        id="repo:sync_routes",
+        category="repo",
+        passed=sync.returncode == 0,
+        detail="rutas sincronizadas" if sync.returncode == 0 else "site-links/firebase/sitemap desactualizados",
+        remediation="python3 tools/sync_routes.py",
+    )
+
+    site_links = PROJECT_ROOT / "js" / "site-links.js"
+    jurado_ok = site_links.is_file() and "buildJuradoUrls" in site_links.read_text(encoding="utf-8")
+    add(
+        report,
+        id="repo:site_links_jurado",
+        category="repo",
+        passed=jurado_ok,
+        detail="extensión jurado presente" if jurado_ok else "falta buildJuradoUrls en site-links.js",
+        remediation="python3 tools/sync_routes.py (incluye tools/site-links-jurado.snippet.js)",
+    )
 
 
 def check_local_env(report: VerificationReport) -> None:

@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CACHE = "20260705tropicalia1"
+CACHE = "20260705assets1"
 
 FONT_LINK = (
     "https://fonts.googleapis.com/css2?"
@@ -38,6 +38,8 @@ PASAPORTE_NAV = (
 
 SKIP = {
     "admin.html",
+    "competencia.html",
+    "competencia-torneo.html",
     "jurado-config.html",
     "jurado-juez.html",
     "jurado-organizador.html",

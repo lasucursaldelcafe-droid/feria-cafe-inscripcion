@@ -20,6 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ROUTES_PATH = ROOT / "tools" / "routes.json"
 SITE_LINKS_PATH = ROOT / "js" / "site-links.js"
+SITE_LINKS_JURADO_SNIPPET = ROOT / "tools" / "site-links-jurado.snippet.js"
 FIREBASE_PATH = ROOT / "firebase.json"
 SITEMAP_PATH = ROOT / "sitemap.xml"
 
@@ -50,6 +51,9 @@ def generate_site_links(config: dict) -> str:
     local = {r["key"]: r["local"] for r in routes}
     hosted = {r["key"]: r["hosted"] for r in routes}
     aliases = config.get("aliases", {})
+    jurado_snippet = ""
+    if SITE_LINKS_JURADO_SNIPPET.is_file():
+        jurado_snippet = SITE_LINKS_JURADO_SNIPPET.read_text(encoding="utf-8").rstrip() + "\n\n"
 
     lines = [
         "/**",
@@ -98,6 +102,7 @@ def generate_site_links(config: dict) -> str:
         "    return base + '/' + path;",
         "  }",
         "",
+        *jurado_snippet.splitlines(),
         "  function applyLinkElements(root) {",
         "    (root || document).querySelectorAll('[data-link]').forEach(function (el) {",
         "      var key = resolveKey(el.getAttribute('data-link'));",
@@ -113,9 +118,14 @@ def generate_site_links(config: dict) -> str:
         "    href: href,",
         "    absUrl: absUrl,",
         "    apply: applyLinkElements,",
+        "    buildJuradoUrls: buildJuradoUrls,",
+        "    juradoJudgeCount: juradoJudgeCount,",
+        "    syncJuradoV60Links: syncJuradoV60LinksFromConfig,",
         "    LOCAL: LOCAL,",
         "    HOSTED: HOSTED",
         "  };",
+        "",
+        "  syncJuradoV60LinksFromConfig();",
         "",
         "  function initLinks() {",
         "    applyLinkElements(document);",

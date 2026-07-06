@@ -34,6 +34,7 @@
     juradoConfig: 'jurado-config.html',
     juradoJuez: 'jurado-juez.html',
     juradoResultados: 'jurado-resultados.html',
+    juradoHistorial: 'jurado-historial.html',
     panelFidelizacion: 'dashboard-fidelizacion.html'
   };
 
@@ -66,6 +67,7 @@
     juradoConfig: '/jurado/config',
     juradoJuez: '/jurado/juez',
     juradoResultados: '/jurado/resultados',
+    juradoHistorial: '/jurado/historial',
     panelFidelizacion: '/panel-fidelizacion'
   };
 
@@ -128,7 +130,9 @@
     var evt = opts.evt ? String(opts.evt).trim().toLowerCase() : '';
     var pinOrg = String(opts.pinOrganizador || j.pinOrganizador || 'v60organizador').trim();
     var pinJuez = String(opts.pinJuez || j.pinJuez || 'v60sensorial').trim();
-    var jueces = Math.max(1, Math.min(5, parseInt(opts.jueces, 10) || j.jueces || 3));
+    var jueces = opts.jueces != null
+      ? Math.max(0, Math.min(5, parseInt(opts.jueces, 10) || 0))
+      : Math.max(1, Math.min(5, parseInt(j.jueces, 10) || 3));
     var local = isLocalDev();
     var site = String(ev.siteUrl || global.location.origin).replace(/\/$/, '');
 
@@ -146,6 +150,7 @@
       config: pageUrl('juradoConfig', 'jurado-config.html', Object.assign({}, commonEvt, { pin: pinOrg })),
       organizador: pageUrl('juradoOrganizador', 'jurado-organizador.html', Object.assign({}, commonEvt, { pin: pinOrg })),
       resultados: pageUrl('juradoResultados', 'jurado-resultados.html', commonEvt),
+      historial: pageUrl('juradoHistorial', 'jurado-historial.html', commonEvt),
       competencia: evt
         ? pageUrl('competenciaTorneo', 'competencia-torneo.html', { evt: evt })
         : pageUrl('competencia', 'competencia.html', {}),
@@ -180,10 +185,11 @@
     });
     j.links = urls;
     j.roles = [
-      { id: 'hub', label: 'Índice jurado', desc: 'Mapa de todos los paneles' },
+      { id: 'hub', label: 'Consola principal', desc: 'Mapa de todos los paneles del torneo' },
       { id: 'config', label: 'Configuración', desc: 'Marca, reglas, criterios y formulario' },
       { id: 'organizador', label: 'Torneo en vivo', desc: 'Rondas, puntajes y control' },
       { id: 'resultados', label: 'Resultados', desc: 'Portal competidor (nombre + cédula)' },
+      { id: 'historial', label: 'Historial', desc: 'Ediciones anteriores y rankings archivados' },
       { id: 'inscripcion', label: 'Inscripción', desc: 'Formulario público de competidores' }
     ];
     for (var n = 1; n <= juradoJudgeCount(); n++) {

@@ -2,13 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <title>Torneo en vivo — Jurado sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado24">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260707compact2">
 </head>
 <body class="jurado-page" data-jurado-page="organizador">
   <div class="jurado-shell">
@@ -98,6 +99,7 @@
         <button type="button" class="jurado-dash-tab" data-dash-tab="torneo">Torneo</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="puntajes">Puntajes</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="control">Control</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="historial">Historial</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="config">Marca y reglas</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="export">Exportar</button>
       </nav>
@@ -119,6 +121,7 @@
             <h2>Clasificación en vivo</h2>
             <p class="jurado-hint" id="fifaModeHint">Tabla por puntaje total · estilo torneo · se actualiza cada 3 s</p>
           </div>
+          <div id="fifaPanelBrand" class="jurado-panel-brand" hidden></div>
           <div class="jurado-fifa-wrap">
             <table class="jurado-fifa-table" id="fifaStandingsTable">
               <thead>
@@ -463,12 +466,14 @@
     <p id="loadingMsg" class="jurado-loading">Cargando…</p>
   </div>
 
-  <script src="js/event-config.js?v=20260705jurado24"></script>
+  <script src="js/preliminar-1-results.js?v=20260706prelim1"></script>
+  <script src="js/competition-history.js?v=20260707judge1"></script>
+  <script src="js/event-config.js?v=20260705jurado29"></script>
   <script>
     window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxEVH5x6x8xj5vBFlwbkQjkEtpVNnfBoaeOwRDSk9FbF9K9_vuQFfwNBR9Kghtn2i6u/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado24"></script>
+  <script src="js/jurado-v60.js?v=20260708evalsync1"></script>
 </body>
 </html>

@@ -48,6 +48,7 @@
       "key": "stands",
       "local": "stands.html",
       "hosted": "/stands",
+      "legacySources": ["/stands-reserva", "/stands-reserva-firebase"],
       "sitemap": { "changefreq": "weekly", "priority": "0.8" }
     },
     {
@@ -178,6 +179,12 @@
       "key": "juradoResultados",
       "local": "jurado-resultados.html",
       "hosted": "/jurado/resultados",
+      "sitemap": false
+    },
+    {
+      "key": "juradoHistorial",
+      "local": "jurado-historial.html",
+      "hosted": "/jurado/historial",
       "sitemap": false
     },
     {

@@ -88,6 +88,26 @@
         "type": 301
       },
       {
+        "source": "/stands-reserva",
+        "destination": "/stands",
+        "type": 301
+      },
+      {
+        "source": "/stands-reserva/",
+        "destination": "/stands",
+        "type": 301
+      },
+      {
+        "source": "/stands-reserva-firebase",
+        "destination": "/stands",
+        "type": 301
+      },
+      {
+        "source": "/stands-reserva-firebase/",
+        "destination": "/stands",
+        "type": 301
+      },
+      {
         "source": "/inscripcion/",
         "destination": "/inscripcion",
         "type": 301
@@ -283,6 +303,16 @@
         "type": 301
       },
       {
+        "source": "/jurado/historial/",
+        "destination": "/jurado/historial",
+        "type": 301
+      },
+      {
+        "source": "/jurado-historial.html",
+        "destination": "/jurado/historial",
+        "type": 301
+      },
+      {
         "source": "/panel-fidelizacion/",
         "destination": "/panel-fidelizacion",
         "type": 301
@@ -397,6 +427,10 @@
       {
         "source": "/jurado/resultados",
         "destination": "/jurado-resultados.html"
+      },
+      {
+        "source": "/jurado/historial",
+        "destination": "/jurado-historial.html"
       },
       {
         "source": "/panel-fidelizacion",

@@ -293,20 +293,22 @@ window.EVENT_CONFIG = {
       name: 'Purist',
       instagramUrl: 'https://www.instagram.com/purist.cafe/',
       instagramHandle: '@purist.cafe',
-      image: 'assets/sponsors/purist.webp',
+      image: '/assets/sponsors/purist.webp',
       imageAlt: 'Purist — café de especialidad y pan masa madre'
     },
     {
       name: 'Palmetto Plaza',
       instagramUrl: 'https://www.instagram.com/palmettoplaza/',
       instagramHandle: '@palmettoplaza',
-      image: 'assets/sponsors/palmetto-plaza.png',
+      image: '/assets/sponsors/palmetto-plaza.png',
       imageAlt: 'Palmetto Plaza — centro comercial, sede del evento'
     },
     {
       name: 'Ghost Specialty Coffee',
       instagramUrl: 'https://www.instagram.com/ghost_specialty_coffee/',
       instagramHandle: '@ghost_specialty_coffee',
+      image: '/assets/sponsors/ghost-specialty-coffee.svg',
+      imageAlt: 'Ghost Specialty Coffee',
       badge: 'Café invitado',
       featured: true,
       tagline: 'Café especial con identidad propia',
@@ -316,16 +318,22 @@ window.EVENT_CONFIG = {
       name: 'Medium Café',
       instagramUrl: 'https://www.instagram.com/medium_cafe/',
       instagramHandle: '@medium_cafe',
+      image: '/assets/sponsors/medium-cafe.svg',
+      imageAlt: 'Medium Café',
       badge: 'Coffee Shop',
       featured: true,
       tagline: 'Café de especialidad para descubrir en feria',
       description: 'Espacio para vivir café, conversación y producto local; una vitrina ideal para visitantes que quieren llevarse una experiencia de la feria.'
     },
     {
-      name: 'Elixir Café'
+      name: 'Elixir Café',
+      image: '/assets/sponsors/elixir-cafe.svg',
+      imageAlt: 'Elixir Café'
     },
     {
-      name: 'Black Coffee Design & Souvenirs'
+      name: 'Black Coffee Design & Souvenirs',
+      image: '/assets/sponsors/black-coffee-design.svg',
+      imageAlt: 'Black Coffee Design & Souvenirs'
     }
   ],
   /** Panel jurado sensorial V60 — enlaces con PIN (no indexados públicamente). */
@@ -336,7 +344,8 @@ window.EVENT_CONFIG = {
       organizador: '/jurado/organizador',
       config: '/jurado/config',
       juez: '/jurado/juez',
-      resultados: '/jurado/resultados'
+      resultados: '/jurado/resultados',
+      historial: '/jurado/historial'
     },
     pinOrganizador: 'v60organizador',
     pinJuez: 'v60sensorial',
@@ -375,6 +384,7 @@ window.EVENT_CONFIG.getEventoActivo = function getEventoActivo() {
   var pathCfg = paths.config || '/jurado/config';
   var pathJuez = paths.juez || '/jurado/juez';
   var pathRes = paths.resultados || '/jurado/resultados';
+  var pathHist = paths.historial || '/jurado/historial';
   var jueces = Math.max(1, Math.min(5, parseInt(j.jueces, 10) || 3));
 
   function q(pin) {
@@ -386,10 +396,11 @@ window.EVENT_CONFIG.getEventoActivo = function getEventoActivo() {
     config: site + pathCfg + q(j.pinOrganizador),
     organizador: site + pathOrg + q(j.pinOrganizador),
     resultados: site + pathRes,
+    historial: site + pathHist,
     competencia: site + '/competencia'
   };
   j.roles = [
-    { id: 'hub', label: 'Índice jurado', desc: 'Enlaces a todos los paneles' },
+    { id: 'hub', label: 'Consola principal', desc: 'Enlaces a todos los paneles del torneo' },
     { id: 'config', label: 'Configuración', desc: 'Marca, reglas y criterios' },
     { id: 'organizador', label: 'Torneo en vivo', desc: 'Vista general, rondas y control' },
     { id: 'resultados', label: 'Resultados', desc: 'Portal competidor (nombre + cédula)' }

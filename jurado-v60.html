@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-  <title>Índice — Jurado sensorial</title>
+  <title>Consola principal — Jurado sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260705jurado24">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260707compact2">
 </head>
 <body class="jurado-page" data-jurado-page="hub">
   <div class="jurado-shell">
@@ -17,7 +17,7 @@
         <img id="headerLogo" src="assets/logo-la-sucursal-del-cafe.png" alt="Evento" width="120" height="48">
         <div class="jurado-header-text">
           <p class="jurado-header-kicker" id="headerKicker">Torneo sensorial</p>
-          <h1 id="headerTitle">Jurado en vivo</h1>
+          <h1 id="headerTitle">Consola principal</h1>
           <p id="headerSubtitle">Calificación sensorial en vivo</p>
         </div>
       </div>
@@ -28,10 +28,16 @@
 
     <section id="hubSection" class="jurado-card jurado-card--hub" hidden>
       <div class="jurado-card-head">
-        <h2>Paneles del torneo</h2>
-        <p class="jurado-hint">Cada rol tiene su propia página: configuración, torneo en vivo, resultados para competidores y enlaces de jurados.</p>
+        <h2>Consola principal</h2>
+        <p class="jurado-hint">Elige el torneo y luego comparte cada enlace. Los jurados dependen del torneo creado y de cuántos jueces configuraste en ese torneo.</p>
       </div>
+      <div id="hubTournamentPicker" class="jurado-hub-picker" hidden>
+        <h3 class="jurado-admin-subtitle">Selecciona el torneo</h3>
+        <div id="hubTournamentList" class="jurado-hub-tournament-list"></div>
+      </div>
+      <div id="hubTournamentActive" class="jurado-hub-active" hidden></div>
       <div id="hubLinksGrid" class="jurado-hub-grid"></div>
+      <div id="hubHistorialPreview" class="jurado-hub-history"></div>
     </section>
 
     <section id="pinSection" class="jurado-card" hidden>
@@ -106,6 +112,7 @@
         <button type="button" class="jurado-dash-tab" data-dash-tab="torneo">Torneo</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="puntajes">Puntajes</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="control">Control</button>
+        <button type="button" class="jurado-dash-tab" data-dash-tab="historial">Historial</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="config">Marca y reglas</button>
         <button type="button" class="jurado-dash-tab" data-dash-tab="export">Exportar</button>
       </nav>
@@ -369,15 +376,37 @@
               </div>
             </div>
 
+            <h3 class="jurado-admin-subtitle">Disciplina del torneo</h3>
+            <p class="jurado-hint">Plantillas WBrC, WCTC, WLAC, WCRC y WAC. Al elegir una disciplina se ajustan criterios, escala y modo de clasificación.</p>
+            <div class="jurado-config-grid">
+              <div class="jurado-field jurado-field--full">
+                <label for="cfgDisciplina">Tipo de competencia</label>
+                <select id="cfgDisciplina">
+                  <option value="filtrado">Filtrado / Brewers (WBrC)</option>
+                  <option value="catacion">Catación / Cup Tasters (WCTC)</option>
+                  <option value="arte_latte">Arte latte (WLAC)</option>
+                  <option value="tostion">Tostión (WCRC)</option>
+                  <option value="aeropress">Aeropress (WAC)</option>
+                  <option value="personalizado">Personalizado</option>
+                </select>
+              </div>
+              <div class="jurado-field">
+                <label for="cfgCompetidoresEsperados">Competidores esperados</label>
+                <input type="number" id="cfgCompetidoresEsperados" min="2" max="128" value="16" placeholder="16">
+              </div>
+            </div>
+            <div id="cfgTournamentRecommendations" class="jurado-tournament-recommendations" aria-live="polite"></div>
+
             <h3 class="jurado-admin-subtitle">Calificación y criterios</h3>
             <p class="jurado-hint">Define escala, modo de clasificación y los criterios sensoriales del torneo.</p>
             <div class="jurado-config-grid">
               <div class="jurado-field">
                 <label for="cfgScoringModo">Modo de clasificación</label>
                 <select id="cfgScoringModo">
-                  <option value="duelos">Duelos 1v1 (mayor puntaje)</option>
-                  <option value="puntaje_general">Puntaje general (ranking)</option>
+                  <option value="duelos">Duelos 1v1 — eliminatoria (WBrC, WAC, WLAC)</option>
+                  <option value="puntaje_general">Puntaje general — ranking (WCTC, WCRC)</option>
                 </select>
+                <p class="jurado-field-hint" id="cfgScoringModoHint"></p>
               </div>
               <div class="jurado-field">
                 <label for="cfgJueces">Número de jueces</label>
@@ -404,6 +433,13 @@
             </div>
             <div id="criteriaEditorList" class="jurado-criteria-editor"></div>
             <button type="button" id="addCriterionBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">+ Añadir criterio</button>
+
+            <div class="jurado-field jurado-field--full jurado-field--checkbox">
+              <label class="jurado-checkbox-label">
+                <input type="checkbox" id="cfgMostrarFotos" checked>
+                Mostrar foto del competidor en el panel de calificación
+              </label>
+            </div>
 
             <h3 class="jurado-admin-subtitle">Datos de inscripción (para exportar)</h3>
             <div class="jurado-config-grid">
@@ -471,12 +507,16 @@
     <p id="loadingMsg" class="jurado-loading">Cargando…</p>
   </div>
 
-  <script src="js/event-config.js?v=20260705jurado24"></script>
+  <script src="js/preliminar-1-results.js?v=20260707scale5"></script>
+  <script src="js/competition-history.js?v=20260707compact2"></script>
+  <script src="js/site-links.js?v=20260708presets1"></script>
+  <script src="js/tournament-presets.js?v=20260708presets1"></script>
+  <script src="js/event-config.js?v=20260705jurado29"></script>
   <script>
     window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxEVH5x6x8xj5vBFlwbkQjkEtpVNnfBoaeOwRDSk9FbF9K9_vuQFfwNBR9Kghtn2i6u/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260705jurado24"></script>
+  <script src="js/jurado-v60.js?v=20260708evalsync1"></script>
 </body>
 </html>
