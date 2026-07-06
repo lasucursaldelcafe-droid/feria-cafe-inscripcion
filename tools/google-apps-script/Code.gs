@@ -290,6 +290,9 @@ function doPost(e) {
     if (action === 'jurado_juez_profile_save') {
       return jsonResponse(handleJuradoJuezProfileSave_(payload));
     }
+    if (action === 'jurado_publish_resultados') {
+      return jsonResponse(handleJuradoPublishResultados_(payload));
+    }
     if (action === 'expositor_update_profile') {
       return jsonResponse(handleExpositorUpdateProfile_(payload));
     }
@@ -3680,6 +3683,91 @@ function juradoBracketPhaseLabel_(fase, rondaEnFase) {
   var r = parseInt(rondaEnFase, 10) || 1;
   if (fase === 'grupos' && r > 1) return base + ' · ronda ' + r;
   return base;
+}
+
+function juradoActiveCompetitorIds_(bracket, evt) {
+  if (bracket && Array.isArray(bracket.activos) && bracket.activos.length) {
+    return bracket.activos.map(function (id) { return String(id || '').trim(); }).filter(Boolean);
+  }
+  var rows = readAllSheetRows_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA, true)
+    .map(sanitizeCompetenciaRow_);
+  var targetEvento = ACTIVE_COMPETENCIA_EVENTO;
+  if (evt) {
+    var platformCfg = getPasaporteConfig_(juradoTenantKey_('jurado_v60_platform', evt));
+    var platform = platformCfg.data || {};
+    targetEvento = String(platform.eventId || platform.eventName || evt).trim() || evt;
+  }
+  return rows.filter(function (row) {
+    if (!isHabilitadoCompetenciaRow_(row)) return false;
+    return isSameCompetenciaEvento_(row['Evento'], targetEvento);
+  }).map(function (row) { return String(row['ID'] || '').trim(); }).filter(Boolean);
+}
+
+function isHabilitadoCompetenciaRow_(row) {
+  var val = String((row && row['Habilitado']) || '').trim().toLowerCase();
+  if (!val) return true;
+  return val === 'sí' || val === 'si' || val === 'yes' || val === 'true' || val === '1';
+}
+
+function handleJuradoPublishResultados_(payload) {
+  var evt = String((payload && payload.evt) || '').trim();
+  var bracketCfg = getPasaporteConfig_(juradoTenantKey_('jurado_v60_bracket', evt));
+  var calCfg = getPasaporteConfig_(juradoTenantKey_('jurado_v60_calificaciones', evt));
+  var bracket = bracketCfg.data && typeof bracketCfg.data === 'object' ? bracketCfg.data : {};
+  var scoresMap = calCfg.data && calCfg.data.scores && typeof calCfg.data.scores === 'object'
+    ? calCfg.data.scores
+    : {};
+
+  var activos = juradoActiveCompetitorIds_(bracket, evt);
+  if (!activos.length) {
+    return { ok: false, error: 'No hay participantes activos en esta ronda.' };
+  }
+
+  if (!bracket.resultadosCompetidor || typeof bracket.resultadosCompetidor !== 'object') {
+    bracket.resultadosCompetidor = {};
+  }
+
+  var fase = String(bracket.fase || 'semifinal').trim();
+  var ronda = parseInt(bracket.rondaEnFase, 10) || 1;
+  var faseLabel = juradoBracketPhaseLabel_(fase, ronda);
+  var roundKey = fase + '|' + ronda;
+  var now = new Date().toISOString();
+  var published = 0;
+
+  activos.forEach(function (id) {
+    var row = scoresMap[id];
+    if (!row || row.sumaTotal == null) return;
+    bracket.resultadosCompetidor[id] = {
+      judges: JSON.parse(JSON.stringify(row.judges || {})),
+      notas: String(row.notas || '').trim(),
+      sumaTotal: row.sumaTotal,
+      promedio: row.promedio != null ? row.promedio : null,
+      roundKey: roundKey,
+      faseLabel: faseLabel,
+      publicadoAt: now
+    };
+    published++;
+  });
+
+  if (!published) {
+    return {
+      ok: false,
+      error: 'No hay calificaciones completas para publicar. Espera a que los jueces terminen.'
+    };
+  }
+
+  bracket.actualizado = now;
+  savePasaporteConfig_({
+    key: juradoTenantKey_('jurado_v60_bracket', evt),
+    data: bracket
+  });
+
+  return {
+    ok: true,
+    published: published,
+    faseLabel: faseLabel,
+    roundKey: roundKey
+  };
 }
 
 function juradoResultadosTorneoStatus_(bracket, competidorId) {

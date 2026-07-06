@@ -2249,6 +2249,7 @@
 
     renderAdminTabPanels(data);
     syncCompetenciaEditionUi();
+    syncAdminJuradoPublishUi();
 
     var updated = document.getElementById('dashboardUpdated');
     if (updated && data.generatedAt) {
@@ -2447,6 +2448,87 @@
     if (!requestUrl) return Promise.resolve(null);
     return fetchJson(requestUrl).then(function (data) {
       return data.ok && data.data ? data.data : null;
+    });
+  }
+
+  function fetchJuradoPasaporteConfig(key) {
+    var requestUrl = buildAdminUrl('pasaporte_config', { key: key });
+    if (!requestUrl) return Promise.resolve(null);
+    return fetchJson(requestUrl).then(function (data) {
+      return data.ok && data.data ? data.data : null;
+    });
+  }
+
+  function publishJuradoResultados() {
+    return postAdminAction({ action: 'jurado_publish_resultados', evt: '' });
+  }
+
+  function syncAdminJuradoPublishUi() {
+    var meta = document.getElementById('adminJuradoPublishMeta');
+    if (!meta) return;
+    Promise.all([
+      fetchJuradoPasaporteConfig('jurado_v60_bracket'),
+      fetchJuradoPasaporteConfig('jurado_v60_calificaciones')
+    ]).then(function (results) {
+      var bracket = results[0] || {};
+      var cal = results[1] || {};
+      var activos = Array.isArray(bracket.activos) && bracket.activos.length
+        ? bracket.activos
+        : pickCompetenciaRows(lastDashboardData || {}).map(function (row) { return row['ID']; }).filter(Boolean);
+      var map = bracket.resultadosCompetidor && typeof bracket.resultadosCompetidor === 'object'
+        ? bracket.resultadosCompetidor
+        : {};
+      var scores = cal.scores && typeof cal.scores === 'object' ? cal.scores : {};
+      var pubCount = activos.filter(function (id) { return !!map[id]; }).length;
+      var readyCount = activos.filter(function (id) {
+        return scores[id] && scores[id].sumaTotal != null;
+      }).length;
+      if (pubCount > 0) {
+        meta.textContent = '✓ ' + pubCount + ' competidor(es) ya pueden ver sus puntajes en el portal. ' +
+          readyCount + ' con calificación completa en la ronda actual.';
+      } else {
+        meta.textContent = readyCount
+          ? readyCount + ' competidor(es) listos para publicar. Los puntajes no son visibles hasta que pulses el botón.'
+          : 'Aún no hay calificaciones completas para publicar en esta ronda.';
+      }
+    }).catch(function () {
+      meta.textContent = 'Los competidores no ven sus puntajes en el portal hasta que publiques la ronda actual.';
+    });
+  }
+
+  function bindAdminJuradoPublish() {
+    var btn = document.getElementById('adminJuradoPublishBtn');
+    var resultEl = document.getElementById('adminJuradoPublishResult');
+    var portalLink = document.getElementById('adminJuradoResultadosLink');
+    if (portalLink && global.SiteLinks && global.SiteLinks.buildJuradoUrls) {
+      var urls = global.SiteLinks.buildJuradoUrls({});
+      if (urls.resultados) portalLink.href = urls.resultados;
+    }
+    if (!btn || btn.getAttribute('data-bound') === '1') return;
+    btn.setAttribute('data-bound', '1');
+    btn.addEventListener('click', function () {
+      if (!confirm('¿Publicar los resultados de la ronda actual para que los competidores los vean en el portal?\n\nSolo verán sus puntajes después de esta acción.')) return;
+      btn.disabled = true;
+      btn.textContent = 'Publicando…';
+      if (resultEl) resultEl.hidden = true;
+      publishJuradoResultados().then(function (data) {
+        if (!data || !data.ok) {
+          showError((data && data.error) || 'No se pudieron publicar los resultados.');
+          return;
+        }
+        showError('');
+        if (resultEl) {
+          resultEl.innerHTML = '<p><strong>✓ Publicados:</strong> ' + formatNumber(data.published || 0) +
+            ' competidor(es)' + (data.faseLabel ? ' · ' + escapeHtml(data.faseLabel) : '') + '</p>';
+          resultEl.hidden = false;
+        }
+        syncAdminJuradoPublishUi();
+      }).catch(function (err) {
+        showError(err.message || 'Error al publicar resultados.');
+      }).finally(function () {
+        btn.disabled = false;
+        btn.textContent = 'Publicar resultados a competidores';
+      });
     });
   }
 
@@ -2654,6 +2736,7 @@
     bindPatrocinadorCompetenciaForm();
     bindAdminCreateMarcaForm();
     bindCompetenciaEditionSelector();
+    bindAdminJuradoPublish();
     bindAdminCreateCompetidorForm();
     bindCompetidorEditorForm();
     mountCompetidorPngLayoutEditor();
