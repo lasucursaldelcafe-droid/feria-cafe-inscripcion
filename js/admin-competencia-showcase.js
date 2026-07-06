@@ -49,8 +49,8 @@
     return {
       enabled: true,
       titulo: 'V60 Championship',
-      subtitulo: 'Preliminar 1 — Resultados oficiales',
-      descripcion: '12 baristas en duelos 1v1. Conoce al podio y a quienes disputaron la final en Cali.',
+      subtitulo: 'Primera Preliminar — Resultados oficiales',
+      descripcion: '12 baristas en duelos 1v1. Conoce al podio y a quienes disputaron la final en la primera preliminar del circuito.',
       badge: 'Reto V60',
       edicionEvento: 'V60 Championship — Preliminar 1',
       mostrarPodio: true,
@@ -261,7 +261,7 @@
       cfg.podio = podioFromPreliminar1();
       cfg.carruselIds = carruselIdsFromPreliminar1();
       cfg.edicionEvento = 'V60 Championship — Preliminar 1';
-      cfg.subtitulo = 'Preliminar 1 — Resultados oficiales';
+      cfg.subtitulo = 'Primera Preliminar — Resultados oficiales';
       fillForm(cfg, global.AdminCompetenciaShowcase.lastRows || []);
       showResult('Datos de Preliminar 1 cargados en el formulario (guarda para publicar).', true);
     });

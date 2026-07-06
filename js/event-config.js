@@ -294,7 +294,7 @@ window.EVENT_CONFIG = {
     titular: 'Manuel Barraza'
   },
   proximosEventos: [
-    { num: 1, label: 'Preliminar 1', estado: 'Realizada', fecha: 'Edición cerrada', sede: '—' },
+    { num: 1, label: 'Primera Preliminar', estado: 'Realizada', fecha: 'Edición cerrada', sede: '—' },
     { num: 2, label: 'Preliminar 2', estado: 'Inscripción abierta', fecha: '8 de agosto de 2026 · 3:30 p. m.', sede: 'Mas Café, Cali' },
     {
       num: 3,

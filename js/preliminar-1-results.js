@@ -144,7 +144,7 @@
       ciudad: 'Cali',
       representa: 'Purist café',
       habilitado: 'Sí',
-      fotoUrl: 'https://drive.google.com/file/d/1Wohlim0taSLCBFsLR1W8rcD-n1XhTFfB/view?usp=drivesdk',
+      fotoUrl: 'https://drive.google.com/file/d/1wmcv83izC7vy-dpsXbkZAfeuIv-4NJEH/view?usp=drive_link',
       correo: 'josealejandro.usechemahecha@gmail.com',
       documento: '1006072215'
     },
@@ -765,8 +765,8 @@
           (ins && doc && String(ins.documento || '').replace(/\D/g, '') === doc)) {
         return {
           estado: 'podio',
-          estadoLabel: pr.posicion === 1 ? 'Campeón Preliminar 1' :
-            (pr.posicion + '° lugar Preliminar 1'),
+          estadoLabel: pr.posicion === 1 ? 'Campeón Primera Preliminar' :
+            (pr.posicion + '° lugar Primera Preliminar'),
           posicion: pr.posicion,
           faseAlcanzada: 'final',
           edicion: EVENT.nombre,
@@ -788,7 +788,7 @@
     if (maxEntrada >= 3) {
       return {
         estado: 'finalista',
-        estadoLabel: 'Finalista Preliminar 1',
+        estadoLabel: 'Finalista Primera Preliminar',
         faseAlcanzada: 'final',
         edicion: EVENT.nombre,
         edicionEstado: 'realizada',
@@ -798,7 +798,7 @@
     if (maxEntrada >= 2) {
       return {
         estado: 'semifinalista',
-        estadoLabel: 'Semifinalista Preliminar 1',
+        estadoLabel: 'Semifinalista Primera Preliminar',
         faseAlcanzada: 'semifinal',
         edicion: EVENT.nombre,
         edicionEstado: 'realizada',

@@ -3400,8 +3400,8 @@ function getDefaultCompetenciaHomeShowcase_() {
   return {
     enabled: true,
     titulo: 'V60 Championship',
-    subtitulo: 'Preliminar 1 — Resultados oficiales',
-    descripcion: '12 baristas en duelos 1v1. Conoce al podio y a quienes disputaron la final en Cali.',
+    subtitulo: 'Primera Preliminar — Resultados oficiales',
+    descripcion: '12 baristas en duelos 1v1. Conoce al podio y a quienes disputaron la final en la primera preliminar del circuito.',
     badge: 'Reto V60',
     edicionEvento: 'V60 Championship — Preliminar 1',
     mostrarPodio: true,
