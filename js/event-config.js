@@ -238,8 +238,10 @@ window.EVENT_CONFIG = {
   },
   evento2: {
     estado: 'activa',
-    eventoId: 'V60 Championship — Preliminar 2',
-    nombre: 'V60 Championship — Preliminar 2',
+    eventoId: 'V60 Championship — Competencia 2',
+    nombre: 'V60 Championship — Competencia 2',
+    /** Slug del torneo en Sheets (hoja Comp. competencia-2) — cupo independiente. */
+    torneoSlug: 'competencia-2',
     preliminar: '2.ª de 2 preliminares',
     clasificatoria: '2.ª de 2 preliminares',
     fecha: '8 de agosto de 2026',
@@ -269,7 +271,7 @@ window.EVENT_CONFIG = {
   },
   proximosEventos: [
     { num: 1, label: 'Preliminar 1', estado: 'Realizada', fecha: 'Edición cerrada', sede: '—' },
-    { num: 2, label: 'Preliminar 2', estado: 'Inscripción abierta', fecha: '8 de agosto de 2026 · 3:30 p. m.', sede: 'Mas Café, Cali' },
+    { num: 2, label: 'Competencia 2', estado: 'Inscripción abierta', fecha: '8 de agosto de 2026 · 3:30 p. m.', sede: 'Mas Café, Cali' },
     {
       num: 3,
       label: 'Competencia principal',

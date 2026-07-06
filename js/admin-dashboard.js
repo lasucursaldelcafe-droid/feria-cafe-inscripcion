@@ -101,6 +101,7 @@
   function competenciaEventKey(val) {
     var s = String(val || '').trim();
     if (!s) return '';
+    if (/competencia\s*2/i.test(s)) return 'V60 Championship — Competencia 2';
     if (/preliminar\s*2/i.test(s) || /evento\s*2/i.test(s) || /2\.ª/i.test(s)) return 'V60 Championship — Preliminar 2';
     if (/preliminar\s*1/i.test(s) || /evento\s*1/i.test(s) || /1\.ª/i.test(s)) return 'V60 Championship — Preliminar 1';
     if (s === 'V60 Championship') return 'V60 Championship — Preliminar 1';
@@ -109,7 +110,7 @@
 
   function getCompetenciaEditionLabel(editionKey) {
     if (editionKey === 'evento1') return 'Preliminar 1';
-    if (editionKey === 'evento2') return 'Preliminar 2';
+    if (editionKey === 'evento2') return 'Competencia 2';
     if (editionKey === 'all') return 'Todas las ediciones';
     return editionKey || 'Preliminar 2';
   }

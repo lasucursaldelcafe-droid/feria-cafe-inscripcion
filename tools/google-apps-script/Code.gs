@@ -23,8 +23,10 @@ var HEADERS_RESULTADOS_ACCESOS = [
 ];
 var RESULTADOS_ACCESO_NOTIFY_COOLDOWN_MS = 30 * 60 * 1000;
 var CUPO_MAX_COMPETENCIA = 36;
-/** Evento activo para cupo, duplicados e inscripciones nuevas (Preliminar 2). */
-var ACTIVE_COMPETENCIA_EVENTO = 'V60 Championship — Preliminar 2';
+/** Evento activo para inscripciones nuevas (Competencia 2 — hoja/torneo independiente). */
+var ACTIVE_COMPETENCIA_EVENTO = 'V60 Championship — Competencia 2';
+/** Slug white-label en Sheets (hoja «Comp. competencia-2») — cupo en 0 sin borrar Preliminar 2 histórica. */
+var COMPETENCIA_INSCRIPCION_SLUG = 'competencia-2';
 /** Fecha y sede oficiales — Preliminar 2 */
 var PRELIMINAR2_FECHA = '8 de agosto de 2026';
 var PRELIMINAR2_HORA = '3:30 p. m.';
@@ -123,14 +125,19 @@ var PASAPORTE_ESCANER_PATH = '/escanear-pasaporte';
 function doGet(e) {
   var params = e && e.parameter ? e.parameter : {};
   if (params.action === 'cupo') {
-    var count = getCompetenciaCount_();
+    var cupoState = getCompetenciaInscripcionCupoState_();
+    var count = cupoState.count;
+    var max = cupoState.max;
     return jsonResponse({
       ok: true,
       formType: 'competencia',
       count: count,
-      max: CUPO_MAX_COMPETENCIA,
-      disponibles: Math.max(0, CUPO_MAX_COMPETENCIA - count),
-      completo: count >= CUPO_MAX_COMPETENCIA
+      max: max,
+      disponibles: Math.max(0, max - count),
+      completo: count >= max,
+      evt: cupoState.slug || '',
+      evento: ACTIVE_COMPETENCIA_EVENTO,
+      source: cupoState.source || 'main'
     });
   }
   if (params.action === 'stands_map') {
@@ -450,6 +457,7 @@ function normalizeCompetenciaEvento_(evento) {
 function extractCompetenciaPreliminarKey_(evento) {
   var s = normalizeCompetenciaEvento_(evento);
   if (!s) return '';
+  if (/competencia\s*2/i.test(s)) return 'V60 Championship — Competencia 2';
   if (/preliminar\s*2/i.test(s) || /evento\s*2/i.test(s) || /2\.ª/i.test(s)) return 'V60 Championship — Preliminar 2';
   if (/preliminar\s*1/i.test(s) || /evento\s*1/i.test(s) || /1\.ª/i.test(s)) return 'V60 Championship — Preliminar 1';
   if (s === 'V60 Championship') return 'V60 Championship — Preliminar 1';
@@ -1251,8 +1259,15 @@ function handleAdminCreateCompetitor_(payload) {
 
   var forzarCupo = payload.forzarCupo === true || payload.forzarCupo === 'true' || payload.forzarCupo === 1;
   var eventoTarget = payload.evento || ACTIVE_COMPETENCIA_EVENTO;
-  if (!forzarCupo && getCompetenciaCount_(eventoTarget) >= CUPO_MAX_COMPETENCIA) {
-    return { ok: false, error: 'Cupo completo para esta preliminar. Marca "Forzar si cupo lleno" para agregar igual.' };
+  if (!forzarCupo) {
+    var cupoState = getCompetenciaInscripcionCupoState_();
+    if (isSameCompetenciaEvento_(eventoTarget, ACTIVE_COMPETENCIA_EVENTO)) {
+      if (cupoState.count >= cupoState.max) {
+        return { ok: false, error: 'Cupo completo para esta preliminar. Marca "Forzar si cupo lleno" para agregar igual.' };
+      }
+    } else if (getCompetenciaCount_(eventoTarget) >= CUPO_MAX_COMPETENCIA) {
+      return { ok: false, error: 'Cupo completo para esta preliminar. Marca "Forzar si cupo lleno" para agregar igual.' };
+    }
   }
 
   var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
@@ -1927,12 +1942,16 @@ function appendListaEspera_(data) {
 }
 
 function appendCompetencia_(data) {
-  if (getCompetenciaCount_() >= CUPO_MAX_COMPETENCIA) {
+  var cupoState = getCompetenciaInscripcionCupoState_();
+  if (cupoState.count >= cupoState.max) {
     throw new Error('Cupo completo. No hay cupos disponibles para V60 Championship.');
   }
 
+  var evento = normalizeCompetenciaEvento_(data.evento || ACTIVE_COMPETENCIA_EVENTO) || ACTIVE_COMPETENCIA_EVENTO;
+  data.evento = evento;
+
   var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
-  if (findDuplicateCompetenciaInEvent_(sheet, HEADERS_COMPETENCIA, data.correo, data.documento, data.evento || ACTIVE_COMPETENCIA_EVENTO)) {
+  if (findDuplicateCompetenciaInEvent_(sheet, HEADERS_COMPETENCIA, data.correo, data.documento, evento)) {
     throw new Error('Ya existe una inscripción de competencia con este correo o documento para esta preliminar.');
   }
 
@@ -1948,7 +1967,7 @@ function appendCompetencia_(data) {
   var compRow = joinRowParts_([
     data.fecha || new Date().toISOString(),
     data.id || '',
-    data.evento || 'V60 Championship — Preliminar 2',
+    data.evento || ACTIVE_COMPETENCIA_EVENTO,
     data.valorInscripcion || '',
     data.nombre || '',
     data.documento || '',
@@ -1988,6 +2007,10 @@ function appendCompetencia_(data) {
     ''
   ]);
   sheet.appendRow(compRow);
+
+  if (cupoState.slug) {
+    mirrorCompetenciaInscripcionToTorneo_(cupoState.slug, data);
+  }
 
   sendConfirmationEmail_('competencia', data);
   sendOrganizerNotificationEmail_('competencia', data);
@@ -2820,7 +2843,8 @@ function handleAdminDashboard_(idToken) {
   }
 
   var feriaCount = getSheetRowCount_(SHEET_FERIA, HEADERS_FERIA);
-  var competenciaCount = getCompetenciaCount_();
+  var cupoState = getCompetenciaInscripcionCupoState_();
+  var competenciaCount = cupoState.count;
   var standsCount = getSheetRowCount_(SHEET_STANDS, HEADERS_STANDS);
   var listaCount = getSheetRowCount_(SHEET_LISTA_ESPERA, HEADERS_LISTA_ESPERA);
   var analytics = getAnalyticsStats_();
@@ -2854,13 +2878,16 @@ function handleAdminDashboard_(idToken) {
       listaEspera: listaCount,
       competenciaCupo: {
         count: competenciaCount,
-        max: CUPO_MAX_COMPETENCIA,
-        disponibles: Math.max(0, CUPO_MAX_COMPETENCIA - competenciaCount),
-        completo: competenciaCount >= CUPO_MAX_COMPETENCIA
+        max: cupoState.max,
+        disponibles: Math.max(0, cupoState.max - competenciaCount),
+        completo: competenciaCount >= cupoState.max,
+        evt: cupoState.slug || '',
+        evento: ACTIVE_COMPETENCIA_EVENTO
       },
       competenciaPorEdicion: {
         preliminar1: getCompetenciaCount_('V60 Championship — Preliminar 1'),
-        preliminar2: getCompetenciaCount_('V60 Championship — Preliminar 2')
+        preliminar2: getCompetenciaCount_('V60 Championship — Preliminar 2'),
+        competencia2: getCompetenciaCount_('V60 Championship — Competencia 2')
       },
       feriaPageViewsToday: analytics.feriaPageToday,
       competenciaPageViewsToday: analytics.competenciaPageToday,
@@ -4567,6 +4594,57 @@ function getCompetenciaTorneoCount_(slug) {
   return lastRow > 1 ? lastRow - 1 : 0;
 }
 
+/** Cupo activo: prioriza hoja del torneo white-label (Comp. competencia-2) si existe en Sheets. */
+function getCompetenciaInscripcionCupoState_() {
+  var slug = String(COMPETENCIA_INSCRIPCION_SLUG || '').trim().toLowerCase();
+  var max = CUPO_MAX_COMPETENCIA;
+  if (slug && getJuradoTenantPlatform_(slug)) {
+    var platform = getJuradoTenantPlatform_(slug);
+    var reg = platform.registration || {};
+    max = parseInt(reg.cupo, 10) || CUPO_MAX_COMPETENCIA;
+    return {
+      count: getCompetenciaTorneoCount_(slug),
+      max: max,
+      slug: slug,
+      source: 'torneo'
+    };
+  }
+  return {
+    count: getCompetenciaCount_(ACTIVE_COMPETENCIA_EVENTO),
+    max: max,
+    slug: '',
+    source: 'main'
+  };
+}
+
+/** Réplica resumida en hoja del torneo para jurado / cupo independiente. */
+function mirrorCompetenciaInscripcionToTorneo_(slug, data) {
+  slug = String(slug || '').trim().toLowerCase();
+  if (!slug || !getJuradoTenantPlatform_(slug)) return;
+  var tenantSheet = ensureCompetenciaEventoSheet_(slug);
+  var correo = normalizeEmail_(data.correo || '');
+  var documento = String(data.documento || '').trim();
+  if (findDuplicateInSheet_(tenantSheet, HEADERS_COMP_EVENTO, correo, documento)) return;
+  tenantSheet.appendRow([
+    data.fecha || new Date().toISOString(),
+    data.id || '',
+    data.nombre || '',
+    documento,
+    String(data.edad || '').trim(),
+    String(data.celular || '').trim(),
+    correo,
+    String(data.ciudad || '').trim(),
+    String(data.representa || '').trim(),
+    String(data.rol || '').trim(),
+    String(data.experiencia || '').trim(),
+    String(data.observaciones || '').trim(),
+    'Sí',
+    'Sí',
+    'Sí',
+    'Inscripción web /competencia'
+  ]);
+}
+
 function readCompetenciaTorneoRows_(slug, onlyHabilitado) {
   var sheet = ensureCompetenciaEventoSheet_(slug);
   var lastRow = sheet.getLastRow();
@@ -4838,7 +4916,7 @@ function defaultJuradoPlatformForTenant_(instance, disciplina) {
     registration: {
       title: 'Inscripción competencia',
       fee: '',
-      cupo: 32,
+      cupo: 36,
       fecha: 'Por confirmar',
       hora: '',
       lugar: 'Por confirmar',
