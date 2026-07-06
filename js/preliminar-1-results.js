@@ -18,7 +18,7 @@
       competidores: 12,
       fases: ['grupos', 'semifinal', 'final'],
       gruposPorRonda: 2,
-      ordenGrupos: 'alfabetico_nombre',
+      ordenGrupos: 'sorteo_oficial',
       rondasGrupos: 6,
       semifinalistas: 6,
       finalistas: 3,
@@ -36,7 +36,16 @@
     { key: 'limpieza_taza', label: 'Limpieza de taza' }
   ];
 
-  /** Nombre corto en planilla → clave interna */
+  /** Orden real del sorteo — ronda clasificatoria (6 parejas, 2 por ronda). */
+  var GRUPOS_PAREJAS = [
+    ['Andrenia', 'Angela'],
+    ['Jessi', 'Brayan'],
+    ['Joe', 'Useche'],
+    ['Savedra', 'Manjares'],
+    ['Vera', 'Linda'],
+    ['Colorado', 'Polo']
+  ];
+
   var PLANILLA_TO_KEY = {
     Andrenia: 'andrenia',
     Angela: 'angela',
@@ -374,7 +383,7 @@
   }
 
   function formatDescription() {
-    return '12 competidores en 6 rondas de grupos (2 por ronda, orden alfabético por nombre). ' +
+    return '12 competidores en 6 rondas de grupos (2 por ronda, orden del sorteo oficial). ' +
       'A semifinal pasaron los mejores puntajes de cada ronda. ' +
       'La final reunió a los 3 mejores de semifinal. ' +
       'El podio oficial (1°, 2° y 3°) se definió por el puntaje total en la final.';
@@ -388,20 +397,18 @@
     return set;
   }
 
-  /** 6 rondas de grupos: parejas en orden alfabético por nombre (planilla). */
+  /** 6 rondas de grupos según el sorteo oficial de la clasificatoria. */
   function getGruposRondas() {
     var phase1 = getRowsByEntrada(1);
     var byName = {};
     phase1.forEach(function (row) {
       byName[row.participante] = row;
     });
-    var names = phase1.map(function (r) { return r.participante; })
-      .sort(function (a, b) { return a.localeCompare(b, 'es'); });
     var semiSet = getSemifinalistasSet();
     var rounds = [];
-    for (var i = 0; i < names.length; i += 2) {
-      var rowA = byName[names[i]] || null;
-      var rowB = names[i + 1] ? (byName[names[i + 1]] || null) : null;
+    GRUPOS_PAREJAS.forEach(function (pair, idx) {
+      var rowA = byName[pair[0]] || null;
+      var rowB = byName[pair[1]] || null;
       var mejorEnRonda = null;
       if (rowA && rowB) {
         if (rowA.total > rowB.total) mejorEnRonda = rowA.participante;
@@ -411,7 +418,7 @@
         mejorEnRonda = rowA.participante;
       }
       rounds.push({
-        ronda: rounds.length + 1,
+        ronda: idx + 1,
         participanteA: rowA,
         participanteB: rowB,
         mejorPuntajeRonda: mejorEnRonda,
@@ -419,7 +426,7 @@
           return !!semiSet[r.participante];
         }).map(function (r) { return r.participante; })
       });
-    }
+    });
     return rounds;
   }
 
