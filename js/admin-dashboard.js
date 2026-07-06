@@ -26,6 +26,8 @@
   var activeAdminSection = 'resumen';
   var ADMIN_TAB_KEY = 'feria_admin_tab';
   var ADMIN_SECTION_KEY = 'feria_admin_section';
+  var ADMIN_COMPETENCIA_EDITION_KEY = 'lsc_admin_competencia_edition';
+  var activeCompetenciaEdition = 'evento2';
 
   var ADMIN_SECTIONS = [
     'resumen', 'analiticas', 'competidores', 'stands', 'visitantes', 'sitio', 'pasaportes', 'operadores'
@@ -94,6 +96,121 @@
 
   function formatNumber(n) {
     return typeof n === 'number' ? n.toLocaleString('es-CO') : String(n || '0');
+  }
+
+  function competenciaEventKey(val) {
+    var s = String(val || '').trim();
+    if (!s) return '';
+    if (/preliminar\s*2/i.test(s) || /evento\s*2/i.test(s) || /2\.ª/i.test(s)) return 'V60 Championship — Preliminar 2';
+    if (/preliminar\s*1/i.test(s) || /evento\s*1/i.test(s) || /1\.ª/i.test(s)) return 'V60 Championship — Preliminar 1';
+    if (s === 'V60 Championship') return 'V60 Championship — Preliminar 1';
+    return s;
+  }
+
+  function getCompetenciaEditionLabel(editionKey) {
+    if (editionKey === 'evento1') return 'Preliminar 1';
+    if (editionKey === 'evento2') return 'Preliminar 2';
+    if (editionKey === 'all') return 'Todas las ediciones';
+    return editionKey || 'Preliminar 2';
+  }
+
+  function getCompetenciaEditionEventId(editionKey) {
+    if (!editionKey || editionKey === 'all') return '';
+    var cfg = global.EVENT_CONFIG || {};
+    var ev = cfg[editionKey] || (editionKey === 'evento2' ? cfg.evento2 : cfg.evento1) || {};
+    return String(ev.eventoId || ev.nombre || '').trim();
+  }
+
+  function getStoredCompetenciaEdition() {
+    try {
+      var stored = sessionStorage.getItem(ADMIN_COMPETENCIA_EDITION_KEY);
+      if (stored === 'evento1' || stored === 'evento2' || stored === 'all') return stored;
+    } catch (e) { /* ignore */ }
+    var cfg = global.EVENT_CONFIG || {};
+    return cfg.torneoActivo === 'evento1' ? 'evento1' : 'evento2';
+  }
+
+  function saveCompetenciaEdition(editionKey) {
+    activeCompetenciaEdition = editionKey;
+    try {
+      sessionStorage.setItem(ADMIN_COMPETENCIA_EDITION_KEY, editionKey);
+    } catch (e) { /* ignore */ }
+  }
+
+  function filterCompetenciaByEdition(rows, editionKey) {
+    if (!editionKey || editionKey === 'all') return (rows || []).slice();
+    var target = competenciaEventKey(getCompetenciaEditionEventId(editionKey));
+    if (!target) return (rows || []).slice();
+    return (rows || []).filter(function (row) {
+      return competenciaEventKey(row.Evento || row.evento) === target;
+    });
+  }
+
+  function pickCompetenciaRows(data) {
+    return filterCompetenciaByEdition(pickRows(data || lastDashboardData || {}, 'allCompetencia'), activeCompetenciaEdition);
+  }
+
+  function getCompetenciaCupoMax() {
+    var cfg = global.EVENT_CONFIG || {};
+    var max = parseInt(cfg.cupoCompetencia, 10);
+    return max > 0 ? max : 36;
+  }
+
+  function computeCompetenciaEditionCupo(rows, editionKey) {
+    var key = editionKey === 'all' ? 'evento2' : editionKey;
+    var filtered = filterCompetenciaByEdition(rows, key);
+    var max = getCompetenciaCupoMax();
+    var count = filtered.length;
+    return {
+      count: count,
+      max: max,
+      disponibles: Math.max(0, max - count),
+      completo: count >= max
+    };
+  }
+
+  function syncCompetenciaEditionUi() {
+    var sel = document.getElementById('adminCompetenciaEdition');
+    if (sel && sel.value !== activeCompetenciaEdition) sel.value = activeCompetenciaEdition;
+
+    var rows = pickCompetenciaRows(lastDashboardData || {});
+    var meta = document.getElementById('adminCompetenciaEditionMeta');
+    if (meta) {
+      meta.textContent = rows.length + ' competidores · ' + getCompetenciaEditionLabel(activeCompetenciaEdition);
+    }
+
+    var cupoEl = document.getElementById('adminCompetenciaCupoMeta');
+    if (cupoEl && lastDashboardData) {
+      var cupo = computeCompetenciaEditionCupo(pickRows(lastDashboardData, 'allCompetencia'), activeCompetenciaEdition);
+      if (activeCompetenciaEdition === 'all') {
+        var allRows = pickRows(lastDashboardData, 'allCompetencia');
+        var p1 = filterCompetenciaByEdition(allRows, 'evento1').length;
+        var p2 = filterCompetenciaByEdition(allRows, 'evento2').length;
+        cupoEl.textContent = 'P1: ' + p1 + ' · P2: ' + p2 + ' · Total: ' + allRows.length;
+      } else {
+        cupoEl.textContent = 'Cupo: ' + formatNumber(cupo.count) + ' / ' + formatNumber(cupo.max) +
+          (cupo.completo ? ' (completo)' : '');
+      }
+    }
+  }
+
+  function bindCompetenciaEditionSelector() {
+    var sel = document.getElementById('adminCompetenciaEdition');
+    if (!sel || sel.getAttribute('data-bound') === '1') return;
+    sel.setAttribute('data-bound', '1');
+    activeCompetenciaEdition = getStoredCompetenciaEdition();
+    sel.value = activeCompetenciaEdition;
+    sel.addEventListener('change', function () {
+      saveCompetenciaEdition(sel.value || 'evento2');
+      closeCompetidorEditor();
+      syncCompetenciaEditionUi();
+      if (lastDashboardData) renderAdminTabPanels(lastDashboardData);
+    });
+  }
+
+  function getActiveCompetenciaEventoForCreate() {
+    var key = activeCompetenciaEdition === 'all' ? 'evento2' : activeCompetenciaEdition;
+    return getCompetenciaEditionEventId(key) || 'V60 Championship — Preliminar 2';
   }
 
   function escapeHtml(s) {
@@ -875,7 +992,7 @@
       var row = findCompetidorRowById(id);
       if (row) return row;
     }
-    var rows = pickRows(lastDashboardData || {}, 'allCompetencia');
+    var rows = pickCompetenciaRows(lastDashboardData || {});
     for (var i = 0; i < rows.length; i++) {
       if (isHabilitadoValue(rows[i]['Habilitado']) && val(rows[i], ['Foto participante enlace Drive'])) {
         return rows[i];
@@ -922,7 +1039,7 @@
   }
 
   function downloadAllCompetitorPngsSequential() {
-    var rowsNow = pickRows(lastDashboardData || {}, 'allCompetencia').filter(function (row) {
+    var rowsNow = pickCompetenciaRows(lastDashboardData || {}).filter(function (row) {
       return isHabilitadoValue(row['Habilitado']);
     });
     if (!rowsNow.length) {
@@ -946,7 +1063,7 @@
     if (typeof global.JSZip === 'undefined') {
       return Promise.reject(new Error('JSZip no cargó. Recarga el admin (Ctrl+Shift+R).'));
     }
-    var rowsNow = pickRows(lastDashboardData || {}, 'allCompetencia').filter(function (row) {
+    var rowsNow = pickCompetenciaRows(lastDashboardData || {}).filter(function (row) {
       return isHabilitadoValue(row['Habilitado']);
     });
     if (!rowsNow.length) {
@@ -1110,7 +1227,7 @@
 
   function findCompetidorRowById(id) {
     if (!id || !lastDashboardData) return null;
-    var rows = pickRows(lastDashboardData, 'allCompetencia');
+    var rows = lastDashboardData.allCompetencia || pickRows(lastDashboardData, 'allCompetencia');
     for (var i = 0; i < rows.length; i++) {
       if (rows[i]['ID'] === id) return rows[i];
     }
@@ -1204,7 +1321,7 @@
   function openCompetidorEditor(row) {
     if (!row) return;
     selectedCompetidorId = row['ID'] || '';
-    renderCompetidorDashboard(pickRows(lastDashboardData || {}, 'allCompetencia'));
+    renderCompetidorDashboard(pickCompetenciaRows(lastDashboardData || {}));
 
     var panel = document.getElementById('competidorEditorPanel');
     if (panel) panel.hidden = false;
@@ -1225,7 +1342,7 @@
     selectedCompetidorId = '';
     var panel = document.getElementById('competidorEditorPanel');
     if (panel) panel.hidden = true;
-    renderCompetidorDashboard(pickRows(lastDashboardData || {}, 'allCompetencia'));
+    renderCompetidorDashboard(pickCompetenciaRows(lastDashboardData || {}));
   }
 
   function bindCompetidorEditorForm() {
@@ -1425,7 +1542,7 @@
     if (!data) return;
 
     var feriaRows = pickRows(data, 'allFeria');
-    var compRows = pickRows(data, 'allCompetencia');
+    var compRows = pickCompetenciaRows(data);
     var standsRows = pickRows(data, 'allStands');
 
     var panelComp = document.getElementById('adminTabPanelsCompetencia');
@@ -1433,7 +1550,7 @@
       panelComp.innerHTML = '<div class="admin-tab-panel" role="tabpanel">' +
         renderManageableTable(compRows, data.competenciaColumns || DEFAULT_COMP_COLS, {
           dataset: 'competencia',
-          metaText: compRows.length + ' competidores — más recientes primero.'
+          metaText: compRows.length + ' competidores · ' + getCompetenciaEditionLabel(activeCompetenciaEdition) + ' — más recientes primero.'
         }) + '</div>';
     }
 
@@ -1945,9 +2062,10 @@
       return true;
     }
     if (dataset === 'competencia') {
+      var compExportRows = pickCompetenciaRows(data);
       downloadCsvText(
-        stampFilename('v60-championship'),
-        rowsToCsv(data.competenciaColumns || DEFAULT_COMP_COLS, data.allCompetencia || data.recentCompetencia || [])
+        stampFilename('v60-championship-' + (activeCompetenciaEdition === 'all' ? 'todas' : activeCompetenciaEdition)),
+        rowsToCsv(data.competenciaColumns || DEFAULT_COMP_COLS, compExportRows)
       );
       return true;
     }
@@ -2130,6 +2248,7 @@
     }
 
     renderAdminTabPanels(data);
+    syncCompetenciaEditionUi();
 
     var updated = document.getElementById('dashboardUpdated');
     if (updated && data.generatedAt) {
@@ -2184,7 +2303,8 @@
         ciudad: document.getElementById('adminCompCiudad').value.trim(),
         estadoPago: document.getElementById('adminCompEstadoPago').value,
         cupoConfirmado: document.getElementById('adminCompCupoConfirmado').checked,
-        forzarCupo: document.getElementById('adminCompForzarCupo').checked
+        forzarCupo: document.getElementById('adminCompForzarCupo').checked,
+        evento: getActiveCompetenciaEventoForCreate()
       }).then(function (result) {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -2533,6 +2653,7 @@
     bindAdminTabs();
     bindPatrocinadorCompetenciaForm();
     bindAdminCreateMarcaForm();
+    bindCompetenciaEditionSelector();
     bindAdminCreateCompetidorForm();
     bindCompetidorEditorForm();
     mountCompetidorPngLayoutEditor();

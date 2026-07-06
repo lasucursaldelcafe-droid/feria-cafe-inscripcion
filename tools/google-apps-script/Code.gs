@@ -1227,8 +1227,9 @@ function handleAdminCreateCompetitor_(payload) {
   }
 
   var forzarCupo = payload.forzarCupo === true || payload.forzarCupo === 'true' || payload.forzarCupo === 1;
-  if (!forzarCupo && getCompetenciaCount_() >= CUPO_MAX_COMPETENCIA) {
-    return { ok: false, error: 'Cupo completo. Marca "Forzar si cupo lleno" para agregar igual.' };
+  var eventoTarget = payload.evento || ACTIVE_COMPETENCIA_EVENTO;
+  if (!forzarCupo && getCompetenciaCount_(eventoTarget) >= CUPO_MAX_COMPETENCIA) {
+    return { ok: false, error: 'Cupo completo para esta preliminar. Marca "Forzar si cupo lleno" para agregar igual.' };
   }
 
   var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
@@ -2812,6 +2813,10 @@ function handleAdminDashboard_(idToken) {
         max: CUPO_MAX_COMPETENCIA,
         disponibles: Math.max(0, CUPO_MAX_COMPETENCIA - competenciaCount),
         completo: competenciaCount >= CUPO_MAX_COMPETENCIA
+      },
+      competenciaPorEdicion: {
+        preliminar1: getCompetenciaCount_('V60 Championship — Preliminar 1'),
+        preliminar2: getCompetenciaCount_('V60 Championship — Preliminar 2')
       },
       feriaPageViewsToday: analytics.feriaPageToday,
       competenciaPageViewsToday: analytics.competenciaPageToday,
