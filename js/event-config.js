@@ -29,14 +29,6 @@ window.EVENT_CONFIG = {
     exploreIntro: '',
     explore: [
       {
-        id: 'evento',
-        label: 'El evento',
-        icon: '☕',
-        text: 'Qué es, fechas y por qué vale la pena asistir.',
-        link: 'evento',
-        cta: 'Ver el evento'
-      },
-      {
         id: 'actividades',
         label: 'Actividades',
         icon: '📋',
