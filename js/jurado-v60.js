@@ -41,7 +41,7 @@
   var REFRESH_MS = 3000;
 
   var WEB_APP_URL_CANONICAL =
-    'https://script.google.com/macros/s/AKfycbx3A5yW7yzwSibXKmNQpvmJ8wUyW_ZpPFX0QOncK2ZATMjhOJTELb8BRzWUabwbXHzV/exec';
+    'https://script.google.com/macros/s/AKfycby4AwJA4qvGcI5vpiGXFkBaiJHu4SF48vhbH3i6cdWaB0Za4AXIBMkNoLQ9er4xLJPM/exec';
 
   var pin = '';
   var mode = ''; // 'judge' | 'organizer'
