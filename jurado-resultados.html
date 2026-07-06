@@ -9,7 +9,7 @@
   <title>Mis resultados — Torneo sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260706resumen">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260706login">
 </head>
 <body class="jurado-page jurado-page--resultados">
   <div class="jurado-shell">
@@ -32,22 +32,25 @@
       </div>
       <div class="jurado-login-steps" role="list">
         <div class="jurado-login-step" role="listitem">
-          <strong>1. Tu nombre</strong>
-          Exactamente como aparece en tu inscripción
+          <strong>1. Tu cédula</strong>
+          Número de documento de identidad
         </div>
         <div class="jurado-login-step" role="listitem">
-          <strong>2. Tu cédula</strong>
-          Número de documento de identidad
+          <strong>2. Tu nombre</strong>
+          Elige de la lista o déjalo en automático si la cédula coincide
         </div>
       </div>
       <form id="resultadosLoginForm" class="jurado-login-form" autocomplete="on">
         <div class="jurado-field">
-          <label for="loginNombre">Nombre completo</label>
-          <input type="text" id="loginNombre" name="nombre" required maxlength="120" placeholder="Como aparece en tu inscripción" autocomplete="name">
-        </div>
-        <div class="jurado-field">
           <label for="loginDocumento">Número de cédula</label>
           <input type="text" id="loginDocumento" name="documento" required inputmode="numeric" pattern="[0-9.\-\s]{6,20}" maxlength="20" placeholder="Documento de identidad" autocomplete="off">
+        </div>
+        <div class="jurado-field">
+          <label for="loginNombre">Nombre en la inscripción</label>
+          <select id="loginNombre" name="nombre" class="jurado-select">
+            <option value="">— Se detecta con tu cédula o elige aquí —</option>
+          </select>
+          <p id="loginNombreHint" class="jurado-hint jurado-login-nombre-hint" hidden></p>
         </div>
         <p id="loginError" class="jurado-error" hidden></p>
         <button type="submit" class="jurado-btn">Ver mis resultados</button>
@@ -126,6 +129,6 @@
   </script>
   <script src="js/jurado-standards.js?v=20260706resumen"></script>
   <script src="js/preliminar-1-results.js?v=20260706resumen"></script>
-  <script src="js/jurado-resultados.js?v=20260706resumen"></script>
+  <script src="js/jurado-resultados.js?v=20260706login"></script>
 </body>
 </html>

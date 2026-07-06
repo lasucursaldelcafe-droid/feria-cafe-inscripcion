@@ -191,6 +191,9 @@ function doGet(e) {
       params.pin || ''
     ));
   }
+  if (params.action === 'jurado_resultados_inscritos') {
+    return jsonResponse(handleJuradoResultadosInscritos_(params.evt || ''));
+  }
   return jsonResponse({
     ok: true,
     message: 'API de inscripciones — La Sucursal del Café',
@@ -3528,6 +3531,43 @@ function findJuradoRowIndex_(sheet, competidorId) {
   return -1;
 }
 
+function listJuradoResultadosInscritos_(evt) {
+  var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
+  var lastRow = sheet.getLastRow();
+  var inscritos = [];
+  if (lastRow >= 2) {
+    var values = sheet.getRange(2, 1, lastRow, HEADERS_COMPETENCIA.length).getValues();
+    for (var i = 0; i < values.length; i++) {
+      var row = rowObjectFromValues_(HEADERS_COMPETENCIA, values[i]);
+      if (!isHabilitado_(row['Habilitado'])) continue;
+      var id = String(row['ID'] || '').trim();
+      var nombre = String(row['Nombre'] || '').trim();
+      if (!id || !nombre) continue;
+      var eventoRow = String(row['Evento'] || '').trim();
+      if (evt && eventoRow && eventoRow !== evt) continue;
+      inscritos.push({
+        id: id,
+        nombre: nombre,
+        ciudad: String(row['Ciudad'] || '').trim(),
+        representa: String(row['Representa'] || '').trim(),
+        evento: extractCompetenciaPreliminarKey_(eventoRow)
+      });
+    }
+  }
+  inscritos.sort(function (a, b) {
+    return a.nombre.localeCompare(b.nombre, 'es');
+  });
+  return inscritos;
+}
+
+function handleJuradoResultadosInscritos_(evt) {
+  var slug = String(evt || '').trim();
+  return {
+    ok: true,
+    inscritos: listJuradoResultadosInscritos_(slug)
+  };
+}
+
 function listJuradoCompetidores_() {
   var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
   var lastRow = sheet.getLastRow();
@@ -3653,6 +3693,30 @@ function normalizeNombre_(v) {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, ' ');
+}
+
+function findCompetidorByDocumento_(documento, evt) {
+  var docNorm = normalizeDoc_(documento);
+  if (!docNorm || docNorm.length < 6) return null;
+
+  var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return null;
+
+  var matches = [];
+  var values = sheet.getRange(2, 1, lastRow, HEADERS_COMPETENCIA.length).getValues();
+  for (var i = 0; i < values.length; i++) {
+    var row = rowObjectFromValues_(HEADERS_COMPETENCIA, values[i]);
+    if (!isHabilitado_(row['Habilitado'])) continue;
+    if (normalizeDoc_(row['Documento']) !== docNorm) continue;
+    if (evt) {
+      var eventoRow = String(row['Evento'] || '').trim();
+      if (eventoRow && eventoRow !== evt) continue;
+    }
+    matches.push(row);
+  }
+  if (matches.length === 1) return matches[0];
+  return null;
 }
 
 function findCompetidorByDocumentoNombre_(documento, nombre) {
@@ -4049,13 +4113,23 @@ function handleJuradoResultadosLogin_(payload) {
   var nombre = String(payload.nombre || '').trim();
   var documento = String(payload.documento || '').trim();
   var evt = String(payload.evt || '').trim();
-  if (!nombre || !documento) {
-    return { ok: false, error: 'Ingresa tu nombre y número de documento (cédula).' };
+  if (!documento) {
+    return { ok: false, error: 'Ingresa tu número de documento (cédula).' };
   }
 
-  var row = findCompetidorByDocumentoNombre_(documento, nombre);
+  var row = null;
+  if (nombre) {
+    row = findCompetidorByDocumentoNombre_(documento, nombre);
+  } else {
+    row = findCompetidorByDocumento_(documento, evt);
+  }
   if (!row) {
-    return { ok: false, error: 'No encontramos un inscrito habilitado con ese nombre y documento.' };
+    return {
+      ok: false,
+      error: nombre
+        ? 'No encontramos un inscrito habilitado con ese nombre y documento.'
+        : 'No encontramos un inscrito habilitado con esa cédula. Elige tu nombre en la lista o verifica el número.'
+    };
   }
 
   if (evt) {

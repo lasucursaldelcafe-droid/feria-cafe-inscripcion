@@ -3142,6 +3142,11 @@ body.jurado-page--resultados .jurado-shell {
   gap: 16px;
 }
 
+.jurado-login-nombre-hint {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+}
+
 .jurado-login-footer {
   margin-top: 20px;
   padding-top: 18px;

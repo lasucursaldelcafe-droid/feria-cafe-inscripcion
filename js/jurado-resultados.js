@@ -1,5 +1,5 @@
 /**
- * Portal de resultados — competidor ingresa con nombre + documento (cédula).
+ * Portal de resultados — cédula + nombre desde lista de inscritos.
  * Muestra rondas publicadas con selector compacto (lista/pestañas) y detalle bajo demanda.
  */
 (function () {
@@ -12,6 +12,121 @@
 
   var refreshTimer = null;
   var currentData = null;
+  var inscritosList = [];
+  var docToNombreMap = {};
+
+  function normalizeDoc(doc) {
+    return String(doc || '').replace(/\D/g, '');
+  }
+
+  function sheetsGet(params) {
+    var url = webAppUrl();
+    if (!url) return Promise.reject(new Error('Backend no configurado.'));
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    var qs = Object.keys(params || {}).map(function (k) {
+      return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+    }).join('&');
+    return fetch(url + sep + qs, { method: 'GET', redirect: 'follow', cache: 'no-store' })
+      .then(function (res) { return res.json(); });
+  }
+
+  function mergeInscritosLists(apiList, localList) {
+    var byId = {};
+    (localList || []).forEach(function (item) {
+      if (item && item.id) byId[item.id] = item;
+    });
+    (apiList || []).forEach(function (item) {
+      if (item && item.id) byId[item.id] = Object.assign({}, byId[item.id] || {}, item);
+    });
+    return Object.keys(byId).map(function (k) { return byId[k]; }).sort(function (a, b) {
+      return String(a.nombre || '').localeCompare(String(b.nombre || ''), 'es');
+    });
+  }
+
+  function buildDocToNombreMap(list) {
+    var map = {};
+    (list || []).forEach(function (item) {
+      var doc = normalizeDoc(item.documento);
+      if (doc && item.nombre) map[doc] = item.nombre;
+    });
+    return map;
+  }
+
+  function getLocalInscritos() {
+    var p1 = window.Preliminar1Results;
+    if (!p1 || !p1.getInscritosList) return [];
+    return p1.getInscritosList().map(function (ins) {
+      return {
+        id: ins.id,
+        nombre: ins.nombre,
+        documento: ins.documento || '',
+        ciudad: ins.ciudad || '',
+        representa: ins.representa || ''
+      };
+    });
+  }
+
+  function loadInscritosList() {
+    var local = getLocalInscritos();
+    docToNombreMap = buildDocToNombreMap(local);
+    inscritosList = local.slice();
+    populateLoginSelect();
+
+    var params = { action: 'jurado_resultados_inscritos' };
+    if (tenantSlug) params.evt = tenantSlug;
+
+    return sheetsGet(params).then(function (data) {
+      if (data && data.ok && Array.isArray(data.inscritos)) {
+        inscritosList = mergeInscritosLists(data.inscritos, local);
+        populateLoginSelect();
+      }
+    }).catch(function () { /* kit local como respaldo */ });
+  }
+
+  function populateLoginSelect() {
+    var select = $('loginNombre');
+    if (!select) return;
+    var current = select.value;
+    var html = '<option value="">— Se detecta con tu cédula o elige aquí —</option>';
+    inscritosList.forEach(function (item) {
+      if (!item || !item.nombre) return;
+      var label = item.nombre;
+      if (item.representa) label += ' · ' + item.representa;
+      else if (item.ciudad) label += ' · ' + item.ciudad;
+      html += '<option value="' + String(item.nombre).replace(/"/g, '&quot;') + '">' + escapeHtml(label) + '</option>';
+    });
+    select.innerHTML = html;
+    if (current) select.value = current;
+  }
+
+  function autoSelectNombreByDocumento() {
+    var docInput = $('loginDocumento');
+    var select = $('loginNombre');
+    var hint = $('loginNombreHint');
+    if (!docInput || !select) return;
+    var doc = normalizeDoc(docInput.value);
+    if (doc.length < 6) {
+      if (hint) hint.hidden = true;
+      return;
+    }
+    var nombre = docToNombreMap[doc] || '';
+    if (!nombre && inscritosList.length) {
+      var match = inscritosList.find(function (item) {
+        return normalizeDoc(item.documento) === doc;
+      });
+      if (match) nombre = match.nombre;
+    }
+    if (nombre) {
+      select.value = nombre;
+      if (hint) {
+        hint.textContent = 'Nombre detectado: ' + nombre;
+        hint.hidden = false;
+      }
+    } else if (hint) {
+      hint.textContent = 'Elige tu nombre en la lista si la cédula no se reconoce sola.';
+      hint.hidden = false;
+    }
+  }
 
   function $(id) {
     return document.getElementById(id);
@@ -488,17 +603,19 @@
   function login(nombre, documento) {
     setLoading(true);
     showError('');
-    return sheetsPost({
+    var body = {
       action: 'jurado_resultados_login',
-      nombre: nombre,
       documento: documento,
       evt: tenantSlug || undefined
-    }).then(function (data) {
+    };
+    if (nombre) body.nombre = nombre;
+    return sheetsPost(body).then(function (data) {
       if (!data || data.ok === false) {
         throw new Error((data && data.error) || 'No se pudo validar el acceso.');
       }
+      var resolvedNombre = (data.competidor && data.competidor.nombre) || nombre || '';
       if (data.competidor) data.competidor.documento = documento;
-      writeSession({ nombre: nombre, documento: documento });
+      writeSession({ nombre: resolvedNombre, documento: documento });
       renderResults(data);
       return data;
     }).catch(function (err) {
@@ -527,6 +644,12 @@
       });
     }
 
+    var docInput = $('loginDocumento');
+    if (docInput) {
+      docInput.addEventListener('input', autoSelectNombreByDocumento);
+      docInput.addEventListener('change', autoSelectNombreByDocumento);
+    }
+
     var logout = $('resultLogoutBtn');
     if (logout) {
       logout.addEventListener('click', function () {
@@ -549,6 +672,7 @@
   function init() {
     initTenantFromUrl();
     bindEvents();
+    loadInscritosList();
     var sess = readSession();
     if (sess && sess.nombre && sess.documento) {
       login(sess.nombre, sess.documento).finally(function () {
