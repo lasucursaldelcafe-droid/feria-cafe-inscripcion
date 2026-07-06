@@ -33,7 +33,7 @@
       </div>
       <div class="competencia-hero-badges" aria-label="Datos del torneo">
         <span class="jurado-hub-tag">📅 Preliminar 2: <span data-bind="torneo.fecha">Por confirmar</span></span>
-        <span class="jurado-hub-tag">🕠 Hora: <span data-bind="torneo.hora">5:30 p. m.</span></span>
+        <span class="jurado-hub-tag">🕞 Hora: <span data-bind="torneo.hora">3:30 p. m.</span></span>
         <span class="jurado-hub-tag">🏆 Final: 29–30 ago</span>
         <span class="jurado-hub-tag jurado-hub-tag--price">$90.000 COP</span>
         <span class="jurado-hub-tag">Cupo: 36</span>
@@ -46,7 +46,7 @@
           <strong>V60 Championship — Preliminar 2</strong> — competencia de café filtrado con V60 (cupo: 36 · inscripción $90.000 COP).
           <p style="margin:0.5rem 0 0">
             <strong>Preliminar 2:</strong> <span data-bind="torneo.fecha">Por confirmar</span> ·
-            <strong>Hora:</strong> <span data-bind="torneo.hora">5:30 p. m.</span> ·
+            <strong>Hora:</strong> <span data-bind="torneo.hora">3:30 p. m.</span> ·
             <strong>Sede:</strong> <span data-bind="torneo.lugar">Por confirmar</span>.
             <strong>Final:</strong> 29 y 30 de agosto de 2026 · Palmetto Plaza, Cali.
           </p>
@@ -456,13 +456,13 @@
       </nav>
       <p class="jurado-meta" style="margin-top:0.75rem">
         Preliminar 2: <span data-bind="torneo.fecha">Por confirmar</span> ·
-        <span data-bind="torneo.hora">5:30 p. m.</span> ·
+        <span data-bind="torneo.hora">3:30 p. m.</span> ·
         <span data-bind="torneo.lugar">Por confirmar</span>
       </p>
     </footer>
   </div>
 
-  <script src="js/event-config.js?v=20260705jurado29"></script>
+  <script src="js/event-config.js?v=20260706hora330"></script>
   <script src="js/site-links.js?v=20260705jurado29"></script>
   <script src="js/seo-structured-data.js"></script>
   <script src="js/sheets-config.js"></script>
@@ -482,7 +482,7 @@
       const EVENTO_NOMBRE = ev.nombre || ev.eventoId || "V60 Championship — Preliminar 2";
       const EVENTO_PRELIMINAR = ev.preliminar || "2.ª de 2 preliminares";
       const EVENTO_FECHA = ev.fecha || "Por confirmar";
-      const EVENTO_HORA = ev.horaInicio || "5:30 p. m.";
+      const EVENTO_HORA = ev.horaInicio || "3:30 p. m.";
       const EVENTO_SEDE = (window.SiteChrome && SiteChrome.torneoLugar) ? SiteChrome.torneoLugar() : (ev.sede + (ev.ciudad ? ", " + ev.ciudad : ""));
       const DEFAULT_WHATSAPP_GRUPO_URL = "https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9";
 

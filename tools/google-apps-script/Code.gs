@@ -21,6 +21,7 @@ var CUPO_MAX_COMPETENCIA = 36;
 var ACTIVE_COMPETENCIA_EVENTO = 'V60 Championship — Preliminar 2';
 /** Fecha y sede oficiales — Preliminar 2 */
 var PRELIMINAR2_FECHA = '8 de agosto de 2026';
+var PRELIMINAR2_HORA = '3:30 p. m.';
 var PRELIMINAR2_LUGAR = 'Mas Café, Cali';
 var COMPROBANTE_PREVIEW_MAX = 1000;
 var DRIVE_FOLDER_NAME = 'V60 Championship — Comprobantes';
@@ -2128,7 +2129,7 @@ function getCompetenciaEventoFechaLugar_(data) {
   if (evLabel.tabla === 'Preliminar 1') {
     return 'Edición realizada';
   }
-  return PRELIMINAR2_FECHA + ' · ' + PRELIMINAR2_LUGAR;
+  return PRELIMINAR2_FECHA + ' · ' + PRELIMINAR2_HORA + ' · ' + PRELIMINAR2_LUGAR;
 }
 
 function buildCompetenciaWaOrganizadorUrl_(data) {
@@ -4847,7 +4848,7 @@ function buildPreliminar1ThankYouPlain_(data) {
     '• Si no ves notas aún, el organizador puede estar publicándolas; vuelve a intentar más tarde.',
     '',
     '—— Siguiente paso: Preliminar 2 ——',
-    'La 2.ª preliminar es el ' + PRELIMINAR2_FECHA + ' en ' + PRELIMINAR2_LUGAR + '.',
+    'La 2.ª preliminar es el ' + PRELIMINAR2_FECHA + ' a las ' + PRELIMINAR2_HORA + ' en ' + PRELIMINAR2_LUGAR + '.',
     'Inscripción en línea (cupos limitados):',
     inscripcionUrl,
     '',
@@ -4897,7 +4898,7 @@ function buildPreliminar1ThankYouHtml_(data) {
     '<li style="margin-bottom:6px;">Si aún no ves notas, el organizador puede estar publicándolas — intenta de nuevo más tarde.</li>',
     '</ul>',
     '<h2 style="font-size:17px;color:#5f4a3a;margin:20px 0 10px;">¿Sigues en el circuito? Preliminar 2</h2>',
-    '<p style="margin:0 0 10px;"><strong>' + escapeHtml_(PRELIMINAR2_FECHA) + '</strong> · <strong>' + escapeHtml_(PRELIMINAR2_LUGAR) + '</strong></p>',
+    '<p style="margin:0 0 10px;"><strong>' + escapeHtml_(PRELIMINAR2_FECHA) + '</strong> · <strong>' + escapeHtml_(PRELIMINAR2_HORA) + '</strong> · <strong>' + escapeHtml_(PRELIMINAR2_LUGAR) + '</strong></p>',
     '<p style="margin:0 0 12px;">Inscríbete a la 2.ª preliminar (cupos limitados). Valor: <strong>$90.000 COP</strong> · Nubank <strong>@mbl616</strong> (Manuel Barraza).</p>',
     '<p style="margin:0 0 14px;"><a href="' + inscripcionUrl + '" style="' + btnBrown + '">Inscribirme en la Preliminar 2</a></p>',
     '<p style="margin:0 0 8px;font-size:14px;">Antes de inscribirte, revisa:</p>',
