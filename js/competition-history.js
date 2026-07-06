@@ -122,31 +122,6 @@
       '<div class="jurado-podium-map">' + cards + '</div></section>';
   }
 
-  function renderClassificationGrid(edition) {
-    var ranking = edition.ranking || [];
-    if (!ranking.length) return '';
-    var cards = ranking.map(function (row) {
-      var name = row.nombreInscrito || row.participante;
-      var sub = row.participante !== name
-        ? '<span class="jurado-clasificacion-planilla">' + escapeHtml(row.participante) + '</span>'
-        : '';
-      return '<article class="jurado-clasificacion-card ' + posMedalClass(row.posicion) + '">' +
-        '<span class="jurado-clasificacion-rank">' + row.posicion + '°</span>' +
-        competitorPhotoHtml(row.fotoUrl, 44, name) +
-        '<strong class="jurado-clasificacion-name">' + escapeHtml(name) + '</strong>' +
-        sub +
-        '<span class="jurado-clasificacion-meta">' + escapeHtml(row.representa || '') + '</span>' +
-        '<span class="jurado-clasificacion-scores">J1 ' + row.j1 + ' · J2 ' + row.j2 + ' · J3 ' + row.j3 + '</span>' +
-        '<span class="jurado-clasificacion-total">' + row.total + ' pts</span>' +
-        '<span class="jurado-clasificacion-phase">' + escapeHtml(phaseLabel(row.entrada)) + '</span>' +
-        '</article>';
-    }).join('');
-    return '<section class="jurado-clasificacion-section">' +
-      '<h3 class="jurado-clasificacion-title">Mapa de clasificación</h3>' +
-      '<p class="jurado-hint">Ranking por mejor tanda de cada competidor · podio oficial = final.</p>' +
-      '<div class="jurado-clasificacion-grid">' + cards + '</div></section>';
-  }
-
   function renderPhaseLanes(edition) {
     var phases = [1, 2, 3].map(function (entrada) {
       var rows = getPhaseRows(edition, entrada);
@@ -390,7 +365,6 @@
 
     html += renderPodiumMap(edition);
     html += renderGruposRondas(edition);
-    html += renderClassificationGrid(edition);
     html += renderPhaseLanes(edition);
 
     var rows = edition.ranking.map(function (row) {
@@ -458,7 +432,6 @@
     renderEditionSummaryCard: renderEditionSummaryCard,
     renderEditionDetail: renderEditionDetail,
     renderPodiumMap: renderPodiumMap,
-    renderClassificationGrid: renderClassificationGrid,
     renderPhaseLanes: renderPhaseLanes,
     downloadEditionKit: downloadEditionKit
   };
