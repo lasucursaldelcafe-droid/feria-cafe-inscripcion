@@ -3819,7 +3819,8 @@ function juradoNormalizeRound_(r) {
     notasPorJuez: notasPorJuez,
     notas: notas,
     sumaTotal: r.sumaTotal != null ? r.sumaTotal : null,
-    promedio: r.promedio != null ? r.promedio : null
+    promedio: r.promedio != null ? r.promedio : null,
+    meta: r.meta && typeof r.meta === 'object' ? r.meta : null
   };
 }
 

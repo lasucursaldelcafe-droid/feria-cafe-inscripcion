@@ -3626,6 +3626,11 @@ body.jurado-page--resultados .jurado-shell {
   scroll-margin-top: 88px;
 }
 
+.jurado-result-round-block--active {
+  border-color: rgba(201, 162, 39, 0.55);
+  box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.25);
+}
+
 .jurado-result-round-block-head {
   display: flex;
   align-items: flex-start;
