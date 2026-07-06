@@ -245,18 +245,18 @@ window.EVENT_CONFIG = {
     fecha: '8 de agosto de 2026',
     fechaCorta: '8 ago 2026',
     fechaIso: '2026-08-08',
-    horaInicio: '5:30 p. m.',
+    horaInicio: '3:30 p. m.',
     sede: 'Mas Café',
     ciudad: 'Cali',
     mapsQuery: 'Mas Café Cali',
     horario: [
-      { hora: '5:30 p. m.', actividad: 'Registro, bienvenida y entrega de café de ronda' },
-      { hora: '6:00 p. m.', actividad: 'Sorteo de método y explicación del protocolo' },
-      { hora: '6:30 p. m.', actividad: 'Ronda clasificatoria — estaciones en competencia' },
-      { hora: '7:45 p. m.', actividad: 'Catación / evaluación de jueces (estimado)' },
-      { hora: '8:30 p. m.', actividad: 'Resultados y cierre de la edición' }
+      { hora: '3:30 p. m.', actividad: 'Registro, bienvenida y entrega de café de ronda' },
+      { hora: '4:00 p. m.', actividad: 'Sorteo de método y explicación del protocolo' },
+      { hora: '4:30 p. m.', actividad: 'Ronda clasificatoria — estaciones en competencia' },
+      { hora: '5:45 p. m.', actividad: 'Catación / evaluación de jueces (estimado)' },
+      { hora: '6:30 p. m.', actividad: 'Resultados y cierre de la edición' }
     ],
-    horarioNota: 'La 2.ª edición inicia a las 5:30 p. m.; el juez principal confirmará tiempos exactos el día del evento.',
+    horarioNota: 'La 2.ª edición inicia a las 3:30 p. m.; el juez principal confirmará tiempos exactos el día del evento.',
     whatsappGrupoUrl: 'https://chat.whatsapp.com/GUFGVoaP8X81zWbBjZfIW9',
     whatsappGrupoNombre: 'V60 Championship — competidores'
   },
@@ -269,7 +269,7 @@ window.EVENT_CONFIG = {
   },
   proximosEventos: [
     { num: 1, label: 'Preliminar 1', estado: 'Realizada', fecha: 'Edición cerrada', sede: '—' },
-    { num: 2, label: 'Preliminar 2', estado: 'Inscripción abierta', fecha: '8 de agosto de 2026', sede: 'Mas Café, Cali' },
+    { num: 2, label: 'Preliminar 2', estado: 'Inscripción abierta', fecha: '8 de agosto de 2026 · 3:30 p. m.', sede: 'Mas Café, Cali' },
     {
       num: 3,
       label: 'Competencia principal',
