@@ -5579,19 +5579,61 @@ textarea.has-value {
   }
 }
 
-/* Hero home — ilustración sobre tarjeta crema */
-.bizcard--identity .bizcard__illustration {
-  margin: 0;
+/* Hero home — franja de marca (sin ilustración SVG) */
+.bizcard--identity {
+  position: relative;
+}
+
+.bizcard__hero-band {
+  position: relative;
+  min-height: clamp(5.5rem, 16vw, 8rem);
+  padding: 1.35rem 1.25rem 2.75rem;
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 0%, rgba(187, 94, 60, 0.32), transparent 58%),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(95, 127, 78, 0.14), transparent 50%),
+    var(--gradient-hero-coffee);
   overflow: hidden;
   border-radius: 18px 18px 0 0;
 }
 
-.bizcard--identity .bizcard__illustration img {
-  display: block;
-  width: 100%;
-  max-height: min(42vh, 380px);
-  object-fit: cover;
-  object-position: center 35%;
+.bizcard__hero-band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 12% 78%, rgba(233, 230, 221, 0.07) 0 2px, transparent 3px),
+    radial-gradient(circle at 88% 22%, rgba(233, 230, 221, 0.06) 0 2px, transparent 3px),
+    radial-gradient(circle at 72% 68%, rgba(233, 230, 221, 0.05) 0 1.5px, transparent 2.5px);
+  background-size: 48px 48px, 56px 56px, 40px 40px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.bizcard__hero-band__kicker {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 253, 249, 0.72);
+}
+
+.bizcard__body--hero {
+  margin-top: -2.35rem;
+  padding-top: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.bizcard__logo--hero {
+  padding: 0.55rem 0.85rem;
+  background: var(--logo-reborde-bg);
+  border-radius: 14px;
+  box-shadow: 0 10px 32px rgba(75, 53, 42, 0.14);
+  margin-bottom: 0.65rem;
 }
 
 /* —— V60 Championship showcase (inicio) —— */
