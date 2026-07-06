@@ -3500,6 +3500,65 @@ body.jurado-page--resultados .jurado-shell {
   color: rgba(255, 255, 255, 0.82);
 }
 
+.jurado-result-all-rounds {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.jurado-result-round-block {
+  border: 1px solid rgba(201, 162, 39, 0.22);
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.18);
+  scroll-margin-top: 88px;
+}
+
+.jurado-result-round-block-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.jurado-result-round-block-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.jurado-result-round-block-total {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--jurado-accent-light);
+  white-space: nowrap;
+}
+
+.jurado-result-round-inner {
+  margin-top: 12px;
+}
+
+.jurado-result-round-inner .jurado-card-head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.jurado-result-round-notas {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.jurado-result-rounds-tabs a.jurado-result-round-tab {
+  text-decoration: none;
+  display: block;
+}
+
 .jurado-result-criteria-table-wrap {
   overflow-x: auto;
   margin: 0 -4px;

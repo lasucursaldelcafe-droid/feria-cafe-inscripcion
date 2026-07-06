@@ -196,7 +196,19 @@
       });
     }
 
+    var hasEntradaDetail = apiRondas.some(function (r) {
+      return /^preliminar1\|entrada/i.test(String(r.roundKey || ''));
+    });
+    if (hasEntradaDetail) {
+      apiRondas = apiRondas.filter(function (r) {
+        return String(r.roundKey || '') !== 'preliminar-1|archivo';
+      });
+    }
+
     apiRondas.sort(function (a, b) {
+      var ea = a.meta && a.meta.entrada != null ? a.meta.entrada : 99;
+      var eb = b.meta && b.meta.entrada != null ? b.meta.entrada : 99;
+      if (ea !== eb) return ea - eb;
       return String(a.publicadoAt || a.faseLabel || '').localeCompare(String(b.publicadoAt || b.faseLabel || ''));
     });
     return apiRondas;
@@ -216,23 +228,12 @@
       return;
     }
     tabs.hidden = rondas.length <= 1;
-    if (selectedRoundIdx < 0 || selectedRoundIdx >= rondas.length) {
-      selectedRoundIdx = rondas.length - 1;
-    }
     tabs.innerHTML = rondas.map(function (r, idx) {
       var label = r.faseLabel || ('Ronda ' + (idx + 1));
       var pts = r.sumaTotal != null ? ' · ' + r.sumaTotal + ' pts' : '';
-      var active = idx === selectedRoundIdx ? ' jurado-result-round-tab--active' : '';
-      return '<button type="button" class="jurado-result-round-tab' + active + '" data-round-idx="' + idx + '">' +
-        escapeHtml(label) + '<span class="jurado-result-round-tab-pts">' + escapeHtml(pts) + '</span></button>';
+      return '<a class="jurado-result-round-tab" href="#result-round-' + idx + '">' +
+        escapeHtml(label) + '<span class="jurado-result-round-tab-pts">' + escapeHtml(pts) + '</span></a>';
     }).join('');
-
-    tabs.querySelectorAll('[data-round-idx]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        selectedRoundIdx = parseInt(btn.getAttribute('data-round-idx'), 10) || 0;
-        if (currentData) renderResults(currentData);
-      });
-    });
   }
 
   function renderCriteriaTable(round, criteria, scoring) {
@@ -270,6 +271,56 @@
     });
     html += '</tbody></table></div>';
     return html;
+  }
+
+  function renderRoundBlock(round, idx, criteria, scoring) {
+    var std = getStandards();
+    var label = round.faseLabel || ('Ronda ' + (idx + 1));
+    var total = round.sumaTotal != null ? round.sumaTotal + ' pts' : '—';
+    var promedio = round.promedio != null ? 'Promedio jueces: ' + round.promedio : '';
+    var summaryHtml = '';
+    if (std && std.roundSummaryObservation) {
+      summaryHtml = '<div class="jurado-result-round-summary">' +
+        '<h3>Resumen según estándar V60</h3><p>' +
+        escapeHtml(std.roundSummaryObservation(round, criteria, scoring.scaleMin, scoring.scaleMax)) +
+        '</p></div>';
+    }
+    var notas = round.notas ? String(round.notas).trim() : '';
+    var notasHtml = notas
+      ? '<div class="jurado-result-round-notas"><strong>Notas del jurado:</strong> ' + escapeHtml(notas) + '</div>'
+      : '';
+
+    return '<article class="jurado-result-round-block" id="result-round-' + idx + '">' +
+      '<header class="jurado-result-round-block-head">' +
+      '<div><h2>' + escapeHtml(label) + '</h2>' +
+      (promedio ? '<p class="jurado-meta">' + escapeHtml(promedio) + '</p>' : '') +
+      '</div>' +
+      '<p class="jurado-result-round-block-total">' + escapeHtml(total) + '</p>' +
+      '</header>' +
+      summaryHtml +
+      '<div class="jurado-card jurado-result-round-inner">' +
+      '<div class="jurado-card-head"><h3>Calificación por parámetro</h3>' +
+      '<p class="jurado-hint">Desglose según estándares sensoriales V60 (escala 1–5).</p></div>' +
+      renderCriteriaTable(round, criteria, scoring) +
+      '</div>' +
+      '<div class="jurado-card jurado-result-round-inner">' +
+      '<div class="jurado-card-head"><h3>Calificación por juez</h3></div>' +
+      '<div class="jurado-result-judges-grid">' + renderJudgesCards(round, criteria, scoring) + '</div>' +
+      '</div>' +
+      notasHtml +
+      '</article>';
+  }
+
+  function renderAllRounds(rondas, criteria, scoring) {
+    var wrap = $('resultAllRoundsWrap');
+    if (!wrap) return;
+    if (!rondas.length) {
+      wrap.innerHTML = '<p class="jurado-hint">Aún no hay calificaciones publicadas.</p>';
+      return;
+    }
+    wrap.innerHTML = rondas.map(function (r, idx) {
+      return renderRoundBlock(r, idx, criteria, scoring);
+    }).join('');
   }
 
   function renderJudgesCards(round, criteria, scoring) {
@@ -317,7 +368,7 @@
     var scoring = data.scoring || {};
     var criteria = getCriteria(scoring);
     var rondas = mergeRondas(data);
-    var cal = blocked ? null : (rondas[selectedRoundIdx >= 0 ? selectedRoundIdx : rondas.length - 1] || null);
+    var cal = blocked ? null : (rondas[rondas.length - 1] || null);
 
     $('resultCompetidorNombre').textContent = comp.nombre || '—';
     $('resultCompetidorMeta').textContent = [
@@ -345,7 +396,9 @@
     var detalle = torneo.detalle || null;
     estadoEl.textContent = estadoLabel(torneo.estado, detalle);
     estadoEl.className = 'jurado-result-estado ' + estadoClass(torneo.estado, detalle);
-    $('resultFaseLabel').textContent = (cal && cal.faseLabel) || torneo.faseLabel || 'Torneo';
+    $('resultFaseLabel').textContent = rondas.length > 1
+      ? 'Última ronda: ' + ((cal && cal.faseLabel) || torneo.faseLabel || 'Torneo')
+      : ((cal && cal.faseLabel) || torneo.faseLabel || 'Torneo');
 
     var edicionMeta = $('resultEdicionMeta');
     if (edicionMeta) {
@@ -360,48 +413,18 @@
     $('resultTotalPts').textContent = total;
     var promedioEl = $('resultPromedio');
     if (promedioEl) {
-      promedioEl.textContent = cal && cal.promedio != null
-        ? 'Promedio jueces: ' + cal.promedio
-        : (rondas.length > 1 ? rondas.length + ' rondas registradas' : 'Aún sin puntaje completo');
+      promedioEl.textContent = rondas.length > 1
+        ? rondas.length + ' rondas con calificación publicada'
+        : (cal && cal.promedio != null ? 'Promedio jueces: ' + cal.promedio : 'Aún sin puntaje completo');
     }
 
     renderRoundTabs(rondas);
-
-    var std = getStandards();
-    var summaryEl = $('resultRoundSummary');
-    if (summaryEl && cal && std && std.roundSummaryObservation) {
-      summaryEl.hidden = false;
-      summaryEl.innerHTML = '<h3>Resumen según estándar V60</h3><p>' +
-        escapeHtml(std.roundSummaryObservation(cal, criteria, scoring.scaleMin, scoring.scaleMax)) + '</p>';
-    } else if (summaryEl) {
-      summaryEl.hidden = true;
-    }
-
-    var criteriaWrap = $('resultCriteriaWrap');
-    if (criteriaWrap && cal) {
-      criteriaWrap.innerHTML = renderCriteriaTable(cal, criteria, scoring);
-    }
-
-    var judgesGrid = $('resultJudgesGrid');
-    if (judgesGrid && cal) {
-      judgesGrid.innerHTML = renderJudgesCards(cal, criteria, scoring);
-    }
-
-    var notasBox = $('resultNotasBox');
-    var notas = cal && cal.notas ? cal.notas.trim() : '';
-    if (notasBox) {
-      if (notas) {
-        notasBox.hidden = false;
-        $('resultNotasText').textContent = notas;
-      } else {
-        notasBox.hidden = true;
-      }
-    }
+    renderAllRounds(rondas, criteria, scoring);
 
     var roundsCount = $('resultRoundsCount');
     if (roundsCount) {
       roundsCount.textContent = rondas.length > 1
-        ? 'Historial: ' + rondas.length + ' rondas con calificación publicada'
+        ? 'Historial completo: ' + rondas.length + ' rondas'
         : '';
       roundsCount.hidden = rondas.length <= 1;
     }

@@ -9,7 +9,7 @@
   <title>Mis resultados — Torneo sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260706estado">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260706rondas">
 </head>
 <body class="jurado-page jurado-page--resultados">
   <div class="jurado-shell">
@@ -102,30 +102,7 @@
           </div>
         </div>
 
-        <div id="resultRoundSummary" class="jurado-card jurado-result-round-summary" hidden></div>
-
-        <div class="jurado-card">
-          <div class="jurado-card-head">
-            <h2>Calificación por parámetro</h2>
-            <p class="jurado-hint">Desglose según los estándares sensoriales del reglamento V60 Championship (escala 1–5).</p>
-          </div>
-          <div id="resultCriteriaWrap"></div>
-        </div>
-
-        <div class="jurado-card">
-          <div class="jurado-card-head">
-            <h2>Calificación por juez</h2>
-            <p class="jurado-hint">Subtotales y observaciones individuales de cada juez en la ronda seleccionada.</p>
-          </div>
-          <div id="resultJudgesGrid" class="jurado-result-judges-grid"></div>
-        </div>
-
-        <div id="resultNotasBox" class="jurado-card" hidden>
-          <div class="jurado-card-head">
-            <h2>Notas del jurado</h2>
-          </div>
-          <p id="resultNotasText" class="jurado-result-notas"></p>
-        </div>
+        <div id="resultAllRoundsWrap" class="jurado-result-all-rounds"></div>
       </div>
     </section>
 
@@ -144,8 +121,8 @@
     };
     if (window.SiteLinks) SiteLinks.applyLinkElements(document);
   </script>
-  <script src="js/jurado-standards.js?v=20260706estado"></script>
-  <script src="js/preliminar-1-results.js?v=20260706estado"></script>
-  <script src="js/jurado-resultados.js?v=20260706estado"></script>
+  <script src="js/jurado-standards.js?v=20260706rondas"></script>
+  <script src="js/preliminar-1-results.js?v=20260706rondas"></script>
+  <script src="js/jurado-resultados.js?v=20260706rondas"></script>
 </body>
 </html>
