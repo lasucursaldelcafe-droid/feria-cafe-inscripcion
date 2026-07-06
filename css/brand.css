@@ -5607,16 +5607,17 @@ textarea.has-value {
   position: relative;
   padding: clamp(1.5rem, 4vw, 2.25rem) clamp(1rem, 3vw, 1.75rem) clamp(1.75rem, 4vw, 2.5rem);
   background:
-    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(198, 142, 63, 0.22), transparent 55%),
-    linear-gradient(165deg, #1a1209 0%, #2a1c0e 42%, #1f150c 100%);
-  color: #f8f2e8;
+    radial-gradient(ellipse 110% 75% at 50% -15%, rgba(187, 94, 60, 0.35), transparent 52%),
+    radial-gradient(ellipse 80% 50% at 100% 100%, rgba(95, 127, 78, 0.12), transparent 45%),
+    var(--gradient-hero-coffee);
+  color: var(--text-on-dark);
   border-radius: inherit;
 }
 
 .comp-showcase__header {
   text-align: center;
   max-width: 36rem;
-  margin: 0 auto 1.75rem;
+  margin: 0 auto 1.5rem;
 }
 
 .comp-showcase__badge {
@@ -5628,25 +5629,25 @@ textarea.has-value {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #f5e6c8;
-  background: rgba(198, 142, 63, 0.22);
-  border: 1px solid rgba(198, 142, 63, 0.45);
+  color: var(--cream-light);
+  background: rgba(187, 94, 60, 0.25);
+  border: 1px solid rgba(187, 94, 60, 0.55);
 }
 
 .comp-showcase__title {
   margin: 0 0 0.35rem;
-  font-family: Montserrat, system-ui, sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(1.45rem, 4vw, 2rem);
   font-weight: 600;
   letter-spacing: 0.02em;
   line-height: 1.15;
-  color: #fff9f0;
+  color: var(--text-on-dark);
 }
 
 .comp-showcase__subtitle {
   margin: 0 0 0.65rem;
   font-size: clamp(0.95rem, 2.5vw, 1.05rem);
-  color: rgba(245, 230, 200, 0.88);
+  color: var(--text-on-dark-muted);
   font-weight: 500;
 }
 
@@ -5654,7 +5655,7 @@ textarea.has-value {
   margin: 0;
   font-size: 0.92rem;
   line-height: 1.55;
-  color: rgba(248, 242, 232, 0.78);
+  color: rgba(255, 253, 249, 0.78);
 }
 
 .comp-showcase__section-title {
@@ -5663,12 +5664,16 @@ textarea.has-value {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(245, 230, 200, 0.65);
+  color: rgba(233, 230, 221, 0.7);
   text-align: center;
 }
 
-.comp-showcase__podium {
+.comp-showcase__carousel-wrap {
   margin-bottom: 1.75rem;
+}
+
+.comp-showcase__podium {
+  margin-bottom: 1.5rem;
 }
 
 .comp-showcase__podium-map {
@@ -5687,8 +5692,8 @@ textarea.has-value {
   text-align: center;
   padding: 0.85rem 0.5rem 1rem;
   border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(233, 230, 221, 0.06);
+  border: 1px solid rgba(233, 230, 221, 0.12);
   backdrop-filter: blur(6px);
   transition: transform 0.25s ease;
 }
@@ -5696,20 +5701,20 @@ textarea.has-value {
 .comp-showcase__podium-slot--first {
   transform: translateY(-0.65rem);
   padding-bottom: 1.25rem;
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(233, 230, 221, 0.1);
 }
 
 .comp-showcase__podium-slot--gold {
-  border-color: rgba(212, 175, 55, 0.55);
-  box-shadow: 0 8px 28px rgba(212, 175, 55, 0.18);
+  border-color: rgba(187, 94, 60, 0.65);
+  box-shadow: 0 8px 28px rgba(187, 94, 60, 0.22);
 }
 
 .comp-showcase__podium-slot--silver {
-  border-color: rgba(192, 192, 192, 0.4);
+  border-color: rgba(233, 230, 221, 0.45);
 }
 
 .comp-showcase__podium-slot--bronze {
-  border-color: rgba(205, 127, 50, 0.45);
+  border-color: rgba(93, 58, 26, 0.55);
 }
 
 .comp-showcase__podium-medal {
@@ -5717,7 +5722,19 @@ textarea.has-value {
   font-weight: 700;
   letter-spacing: 0.06em;
   margin-bottom: 0.45rem;
-  color: rgba(245, 230, 200, 0.9);
+  color: var(--cream-light);
+}
+
+.comp-showcase__podium-slot--gold .comp-showcase__podium-medal {
+  color: #e8c9a0;
+}
+
+.comp-showcase__podium-slot--silver .comp-showcase__podium-medal {
+  color: var(--cream);
+}
+
+.comp-showcase__podium-slot--bronze .comp-showcase__podium-medal {
+  color: #c9a88a;
 }
 
 .comp-showcase__podium-photo-wrap {
@@ -5742,7 +5759,7 @@ textarea.has-value {
 .comp-showcase__podium-slot--gold .comp-showcase__photo {
   width: clamp(5.25rem, 17vw, 7rem);
   height: clamp(5.25rem, 17vw, 7rem);
-  border-color: rgba(212, 175, 55, 0.7);
+  border-color: rgba(187, 94, 60, 0.75);
 }
 
 .comp-showcase__photo--empty {
@@ -5751,8 +5768,8 @@ textarea.has-value {
   justify-content: center;
   font-size: 1.1rem;
   font-weight: 600;
-  color: rgba(245, 230, 200, 0.75);
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--cream-light);
+  background: rgba(75, 53, 42, 0.35);
 }
 
 .comp-showcase__podium-name {
@@ -5760,13 +5777,13 @@ textarea.has-value {
   font-size: 0.88rem;
   font-weight: 600;
   line-height: 1.25;
-  color: #fff9f0;
+  color: var(--text-on-dark);
 }
 
 .comp-showcase__podium-meta {
   margin: 0.2rem 0 0;
   font-size: 0.72rem;
-  color: rgba(248, 242, 232, 0.65);
+  color: var(--text-on-dark-muted);
   line-height: 1.3;
 }
 
@@ -5775,11 +5792,7 @@ textarea.has-value {
   margin-top: 0.35rem;
   font-size: 0.72rem;
   font-weight: 600;
-  color: rgba(198, 142, 63, 0.95);
-}
-
-.comp-showcase__carousel-wrap {
-  margin-bottom: 1.5rem;
+  color: var(--coffee-warm);
 }
 
 .comp-showcase__carousel-viewport {
@@ -5813,14 +5826,14 @@ textarea.has-value {
   width: clamp(9rem, 28vw, 11rem);
   border-radius: 1rem;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(233, 230, 221, 0.08);
+  border: 1px solid rgba(233, 230, 221, 0.14);
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .comp-showcase__card:hover {
   transform: translateY(-3px);
-  border-color: rgba(198, 142, 63, 0.45);
+  border-color: rgba(187, 94, 60, 0.55);
 }
 
 .comp-showcase__card-photo {
@@ -5846,13 +5859,13 @@ textarea.has-value {
   font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.25;
-  color: #fff9f0;
+  color: var(--text-on-dark);
 }
 
 .comp-showcase__card-meta {
   margin: 0.2rem 0 0;
   font-size: 0.7rem;
-  color: rgba(248, 242, 232, 0.62);
+  color: var(--text-on-dark-muted);
   line-height: 1.3;
 }
 
@@ -5872,8 +5885,13 @@ textarea.has-value {
 
 .comp-showcase__cta-secondary {
   background: transparent;
-  color: #f5e6c8;
-  border-color: rgba(245, 230, 200, 0.35);
+  color: var(--cream-light);
+  border-color: rgba(233, 230, 221, 0.4);
+}
+
+.comp-showcase__cta-secondary:hover {
+  background: rgba(233, 230, 221, 0.1);
+  color: var(--text-on-dark);
 }
 
 @media (max-width: 520px) {

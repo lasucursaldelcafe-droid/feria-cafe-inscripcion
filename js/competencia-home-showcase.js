@@ -148,8 +148,8 @@
       (data.subtitulo ? '<p class="comp-showcase__subtitle">' + escapeHtml(data.subtitulo) + '</p>' : '') +
       desc +
       '</header>' +
-      podio +
       carousel +
+      podio +
       actions +
       '</div>';
   }

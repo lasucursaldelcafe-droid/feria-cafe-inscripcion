@@ -3,7 +3,7 @@
  * Prueba E2E del panel jurado V60 (Apps Script en producción).
  */
 const WEB =
-  'https://script.google.com/macros/s/AKfycbyXd3dFMus3-b0NNhsyOu7M5UyFEOua9DICwFD6FPtOpcbrcfrPtK_3BHajQ7PTtulX/exec';
+  'https://script.google.com/macros/s/AKfycbyT6LCmQgDPoBcdP8W1bKRjYCXk99N0-7p1DXHwP32DaFHMQZvX-tGdLEAA5brC4sft/exec';
 const CONFIG_KEY = 'jurado_v60_calificaciones';
 const SITE = 'https://la-sucursal-del-cafe.web.app';
 
