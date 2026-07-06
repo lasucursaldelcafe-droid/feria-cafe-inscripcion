@@ -3976,9 +3976,12 @@
         importPreliminar1.textContent = 'Cargando…';
         importPreliminar1Results().then(function (result) {
           var msg = $('exportMsg');
-          var txt = '✓ Preliminar 1 cargada: ' + result.imported + ' competidor(es). Revisa la pestaña «Vista general».';
+          var txt = '✓ Preliminar 1 cargada: ' + result.imported + ' competidor(es)';
+          if (result.published) txt += ' · publicados en portal: ' + result.published;
           if (result.unmatched && result.unmatched.length) {
-            txt += ' Sin coincidencia en inscripciones: ' + result.unmatched.join(', ') + '.';
+            txt += '. Sin coincidencia en inscripciones: ' + result.unmatched.join(', ') + '.';
+          } else {
+            txt += '. Los competidores pueden ver puntajes en /jurado/resultados.';
           }
           if (msg) { msg.textContent = txt; msg.hidden = false; }
           renderOrganizerViews(calificacionesList());
@@ -4228,6 +4231,62 @@
     }
   }
 
+  function publishPreliminar1ScoresToPortal(scoresById, meta) {
+    var ids = Object.keys(scoresById || {}).filter(function (id) {
+      return scoresById[id] && scoresById[id].sumaTotal != null;
+    });
+    if (!ids.length) {
+      return Promise.reject(new Error('No hay puntajes válidos para publicar en el portal.'));
+    }
+    var now = new Date().toISOString();
+    var faseLabel = 'Preliminar 1 — archivo oficial';
+    var roundKey = 'preliminar-1|archivo';
+    var resultadosCompetidor = {};
+    ids.forEach(function (id) {
+      var row = scoresById[id];
+      resultadosCompetidor[id] = {
+        judges: JSON.parse(JSON.stringify(row.judges || {})),
+        notas: String(row.notas || '').trim(),
+        sumaTotal: row.sumaTotal,
+        promedio: row.promedio != null ? row.promedio : null,
+        roundKey: roundKey,
+        faseLabel: faseLabel,
+        publicadoAt: now
+      };
+    });
+    return sheetsPost({
+      action: 'jurado_import_preliminar1',
+      evt: tenantSlug || '',
+      scores: scoresById,
+      evento: (meta && meta.evento) || 'V60 Championship — Preliminar 1',
+      platform: (meta && meta.platform) || null
+    }).then(function (data) {
+      if (data && data.ok) {
+        return loadBracketStore().then(function () {
+          return { published: data.published != null ? data.published : ids.length };
+        });
+      }
+      return loadBracketStore().then(function () {
+        bracketState.fase = 'final';
+        bracketState.rondaEnFase = 1;
+        bracketState.activos = ids.slice();
+        bracketState.resultadosCompetidor = Object.assign(
+          {},
+          bracketState.resultadosCompetidor || {},
+          resultadosCompetidor
+        );
+        bracketState.preliminar1Archivo = {
+          at: now,
+          published: ids.length,
+          faseLabel: faseLabel
+        };
+        return saveBracketStore(bracketState).then(function () {
+          return { published: ids.length };
+        });
+      });
+    });
+  }
+
   function importPreliminar1Results() {
     var kit = getPreliminar1Kit();
     if (!kit || !kit.calificaciones || !kit.calificaciones.scores) {
@@ -4277,7 +4336,16 @@
           var cal = normalizeCalificacion(data.scores[id], id);
           if (cal) calificacionesMap[id] = cal;
         });
-        return { imported: mapped.length, unmatched: unmatched };
+        return publishPreliminar1ScoresToPortal(data.scores, {
+          evento: kit.event && kit.event.nombre ? kit.event.nombre : 'Preliminar 1',
+          platform: kit.platformConfig || null
+        }).then(function (pub) {
+          return {
+            imported: mapped.length,
+            published: pub.published != null ? pub.published : 0,
+            unmatched: unmatched
+          };
+        });
       });
     });
   }

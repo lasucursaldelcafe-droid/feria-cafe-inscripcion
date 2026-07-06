@@ -2532,6 +2532,91 @@
     return postAdminAction({ action: 'jurado_publish_resultados', evt: '' });
   }
 
+  function publishPreliminar1Archive() {
+    if (!global.Preliminar1Results || !global.Preliminar1Results.exportKit) {
+      return Promise.reject(new Error('Kit Preliminar 1 no disponible en esta página.'));
+    }
+    var kit = global.Preliminar1Results.exportKit();
+    var scores = kit.calificaciones && kit.calificaciones.scores;
+    if (!scores || !Object.keys(scores).length) {
+      return Promise.reject(new Error('El kit de Preliminar 1 no tiene calificaciones.'));
+    }
+    return postAdminAction({
+      action: 'jurado_import_preliminar1',
+      evt: '',
+      scores: scores,
+      evento: kit.event && kit.event.nombre ? kit.event.nombre : 'Preliminar 1',
+      platform: kit.platformConfig || null
+    }).then(function (data) {
+      if (data && data.ok) return data;
+      return publishPreliminar1ArchiveFallback_(kit, scores);
+    }).catch(function () {
+      return publishPreliminar1ArchiveFallback_(kit, scores);
+    });
+  }
+
+  function publishPreliminar1ArchiveFallback_(kit, scores) {
+    var ids = Object.keys(scores).filter(function (id) { return scores[id] && scores[id].sumaTotal != null; });
+    var now = new Date().toISOString();
+    var faseLabel = 'Preliminar 1 — archivo oficial';
+    var resultadosCompetidor = {};
+    ids.forEach(function (id) {
+      var row = scores[id];
+      resultadosCompetidor[id] = {
+        judges: JSON.parse(JSON.stringify(row.judges || {})),
+        notas: String(row.notas || '').trim(),
+        sumaTotal: row.sumaTotal,
+        promedio: row.promedio != null ? row.promedio : null,
+        roundKey: 'preliminar-1|archivo',
+        faseLabel: faseLabel,
+        publicadoAt: now
+      };
+    });
+    return fetchJuradoPasaporteConfig('jurado_v60_calificaciones').then(function (existingCal) {
+      var calData = Object.assign({}, existingCal || {});
+      calData.scores = Object.assign({}, calData.scores || {}, scores);
+      calData.actualizado = now;
+      calData.preliminar1Import = {
+        at: now,
+        evento: kit.event && kit.event.nombre ? kit.event.nombre : 'Preliminar 1',
+        count: ids.length
+      };
+      return postAdminAction({
+        action: 'pasaporte_config_save',
+        key: 'jurado_v60_calificaciones',
+        data: calData
+      });
+    }).then(function () {
+      return fetchJuradoPasaporteConfig('jurado_v60_bracket');
+    }).then(function (existingBracket) {
+      var bracketData = Object.assign({}, existingBracket || {}, {
+        fase: 'final',
+        rondaEnFase: 1,
+        activos: ids.slice(),
+        eliminados: (existingBracket && existingBracket.eliminados) || [],
+        resultadosCompetidor: Object.assign(
+          {},
+          (existingBracket && existingBracket.resultadosCompetidor) || {},
+          resultadosCompetidor
+        ),
+        preliminar1Archivo: { at: now, published: ids.length, faseLabel: faseLabel },
+        actualizado: now
+      });
+      return postAdminAction({
+        action: 'pasaporte_config_save',
+        key: 'jurado_v60_bracket',
+        data: bracketData
+      });
+    }).then(function () {
+      if (!kit.platformConfig) return { ok: true, published: ids.length };
+      return postAdminAction({
+        action: 'pasaporte_config_save',
+        key: 'jurado_v60_platform',
+        data: kit.platformConfig
+      }).then(function () { return { ok: true, published: ids.length }; });
+    });
+  }
+
   function syncAdminJuradoPublishUi() {
     var meta = document.getElementById('adminJuradoPublishMeta');
     if (!meta) return;
@@ -2555,6 +2640,9 @@
       if (pubCount > 0) {
         meta.textContent = '✓ ' + pubCount + ' competidor(es) ya pueden ver sus puntajes en el portal. ' +
           readyCount + ' con calificación completa en la ronda actual.';
+      } else if (bracket.preliminar1Archivo && bracket.preliminar1Archivo.published) {
+        meta.textContent = '✓ Preliminar 1 archivada: ' + bracket.preliminar1Archivo.published +
+          ' competidor(es) publicados en el portal de resultados.';
       } else {
         meta.textContent = readyCount
           ? readyCount + ' competidor(es) listos para publicar. Los puntajes no son visibles hasta que pulses el botón.'
@@ -2600,6 +2688,35 @@
         btn.textContent = 'Publicar resultados a competidores';
       });
     });
+
+    var p1Btn = document.getElementById('adminPublishPreliminar1Btn');
+    if (p1Btn && p1Btn.getAttribute('data-bound') !== '1') {
+      p1Btn.setAttribute('data-bound', '1');
+      p1Btn.addEventListener('click', function () {
+        if (!confirm('¿Publicar las calificaciones archivadas de Preliminar 1 en el portal de resultados?\n\nLos competidores habilitados podrán ver sus puntajes con nombre + cédula.')) return;
+        p1Btn.disabled = true;
+        p1Btn.textContent = 'Publicando P1…';
+        if (resultEl) resultEl.hidden = true;
+        publishPreliminar1Archive().then(function (data) {
+          if (!data || !data.ok) {
+            showError((data && data.error) || 'No se pudo publicar Preliminar 1.');
+            return;
+          }
+          showError('');
+          if (resultEl) {
+            resultEl.innerHTML = '<p><strong>✓ Preliminar 1 publicada:</strong> ' + formatNumber(data.published || 0) +
+              ' competidor(es) en <a href="/jurado/resultados" target="_blank" rel="noopener noreferrer">/jurado/resultados</a></p>';
+            resultEl.hidden = false;
+          }
+          syncAdminJuradoPublishUi();
+        }).catch(function (err) {
+          showError(err.message || 'Error al publicar Preliminar 1.');
+        }).finally(function () {
+          p1Btn.disabled = false;
+          p1Btn.textContent = 'Publicar Preliminar 1 (archivo)';
+        });
+      });
+    }
   }
 
   function juradoScoringSummary(platformCfg) {
