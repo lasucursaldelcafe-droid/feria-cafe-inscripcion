@@ -600,13 +600,15 @@
     if (active && login) login.hidden = true;
   }
 
-  function login(nombre, documento) {
+  function login(nombre, documento, options) {
+    options = options || {};
     setLoading(true);
     showError('');
     var body = {
       action: 'jurado_resultados_login',
       documento: documento,
-      evt: tenantSlug || undefined
+      evt: tenantSlug || undefined,
+      source: options.source || 'login'
     };
     if (nombre) body.nombre = nombre;
     return sheetsPost(body).then(function (data) {
@@ -630,7 +632,7 @@
   function refreshResults() {
     var sess = readSession();
     if (!sess || !sess.nombre || !sess.documento) return Promise.resolve();
-    return login(sess.nombre, sess.documento).catch(function () { /* silencioso */ });
+    return login(sess.nombre, sess.documento, { source: 'refresh' }).catch(function () { /* silencioso */ });
   }
 
   function bindEvents() {
@@ -640,7 +642,7 @@
         e.preventDefault();
         var nombre = ($('loginNombre') && $('loginNombre').value) || '';
         var documento = ($('loginDocumento') && $('loginDocumento').value) || '';
-        login(nombre.trim(), documento.trim());
+        login(nombre.trim(), documento.trim(), { source: 'login' });
       });
     }
 
@@ -675,7 +677,7 @@
     loadInscritosList();
     var sess = readSession();
     if (sess && sess.nombre && sess.documento) {
-      login(sess.nombre, sess.documento).finally(function () {
+      login(sess.nombre, sess.documento, { source: 'session' }).finally(function () {
         if (refreshTimer) clearInterval(refreshTimer);
         refreshTimer = setInterval(refreshResults, REFRESH_MS);
       });
