@@ -299,6 +299,9 @@ function doPost(e) {
     if (action === 'jurado_import_preliminar1') {
       return jsonResponse(handleJuradoImportPreliminar1_(payload));
     }
+    if (action === 'preliminar1_agradecimiento') {
+      return jsonResponse(handlePreliminar1Agradecimiento_(payload));
+    }
     if (action === 'expositor_update_profile') {
       return jsonResponse(handleExpositorUpdateProfile_(payload));
     }
@@ -4769,4 +4772,222 @@ function handleJuradoInstanceCreate_(payload) {
   ensureCompetenciaEventoSheet_(slug);
 
   return { ok: true, instance: instance, inscripcionUrl: inscripcionUrl };
+}
+
+// —— Agradecimiento Preliminar 1 (correo masivo a participantes) ——
+
+var PRELIMINAR1_EVENTO_LABEL = 'V60 Championship — Preliminar 1';
+
+function getResultadosPortalUrl_() {
+  return getSiteUrl_() + '/jurado/resultados';
+}
+
+function getCompetenciaInscripcionUrl_() {
+  return getSiteUrl_() + '/competencia';
+}
+
+function getComoFuncionaUrl_() {
+  return getSiteUrl_() + '/como-funciona';
+}
+
+function listPreliminar1ParticipantsForEmail_() {
+  var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
+  var lastRow = sheet.getLastRow();
+  var out = [];
+  if (lastRow < 2) return out;
+  var values = sheet.getRange(2, 1, lastRow, HEADERS_COMPETENCIA.length).getValues();
+  for (var i = 0; i < values.length; i++) {
+    var row = rowObjectFromValues_(HEADERS_COMPETENCIA, values[i]);
+    if (!isHabilitado_(row['Habilitado'])) continue;
+    var eventoRow = String(row['Evento'] || '').trim();
+    if (!isSameCompetenciaEvento_(eventoRow, PRELIMINAR1_EVENTO_LABEL)) continue;
+    var correo = normalizeEmail_(row['Correo']);
+    if (!correo || correo.indexOf('@') === -1) continue;
+    var nombre = String(row['Nombre'] || '').trim();
+    if (!nombre) continue;
+    out.push({
+      id: String(row['ID'] || '').trim(),
+      nombre: nombre,
+      documento: String(row['Documento'] || '').trim(),
+      correo: correo
+    });
+  }
+  var seen = {};
+  var unique = [];
+  out.forEach(function (p) {
+    if (seen[p.correo]) return;
+    seen[p.correo] = true;
+    unique.push(p);
+  });
+  unique.sort(function (a, b) {
+    return a.nombre.localeCompare(b.nombre, 'es');
+  });
+  return unique;
+}
+
+function buildPreliminar1ThankYouPlain_(data) {
+  var nombre = data.nombre || 'Competidor/a';
+  var resultadosUrl = getResultadosPortalUrl_();
+  var inscripcionUrl = getCompetenciaInscripcionUrl_();
+  var comoFuncionaUrl = getComoFuncionaUrl_();
+  var reglasUrl = getReglasUrl_();
+  var grupoUrl = WHATSAPP_GRUPO_COMPETENCIA;
+  return [
+    'Hola ' + nombre + ',',
+    '',
+    '¡Gracias por competir en la 1.ª preliminar del V60 Championship!',
+    'Tu participación en La Sucursal del Café hace posible este circuito de café filtrado en Cali.',
+    '',
+    '—— Tus resultados ——',
+    'Ya puedes consultar tus calificaciones y el resumen de tus rondas en el portal del competidor:',
+    resultadosUrl,
+    '',
+    'Instrucciones:',
+    '• Ingresa con tu número de cédula (el nombre se detecta automáticamente).',
+    '• Si no ves notas aún, el organizador puede estar publicándolas; vuelve a intentar más tarde.',
+    '',
+    '—— Siguiente paso: Preliminar 2 ——',
+    'La 2.ª preliminar es el ' + PRELIMINAR2_FECHA + ' en ' + PRELIMINAR2_LUGAR + '.',
+    'Inscripción en línea (cupos limitados):',
+    inscripcionUrl,
+    '',
+    'Valor: $90.000 COP · Nubank @mbl616 (Manuel Barraza).',
+  'Guía del circuito y formato:',
+    comoFuncionaUrl,
+    'Reglamento completo:',
+    reglasUrl,
+    '',
+    'Grupo de WhatsApp del torneo (avisos y logística):',
+    grupoUrl,
+    '',
+    'Dudas o inscripción: ' + ORGANIZER_EMAIL,
+    '',
+    '— La Sucursal del Café',
+    'V60 Championship · Preliminar 1 (agradecimiento)'
+  ].join('\n');
+}
+
+function buildPreliminar1ThankYouHtml_(data) {
+  var nombre = escapeHtml_(data.nombre || 'Competidor/a');
+  var resultadosUrl = escapeHtml_(getResultadosPortalUrl_());
+  var inscripcionUrl = escapeHtml_(getCompetenciaInscripcionUrl_());
+  var comoFuncionaUrl = escapeHtml_(getComoFuncionaUrl_());
+  var reglasUrl = escapeHtml_(getReglasUrl_());
+  var grupoUrl = escapeHtml_(WHATSAPP_GRUPO_COMPETENCIA);
+  var organizerEmail = escapeHtml_(ORGANIZER_EMAIL);
+  var btnStyle = 'display:inline-block;padding:12px 20px;margin:8px 8px 8px 0;text-decoration:none;border-radius:6px;font-weight:600;font-size:15px;';
+  var btnRed = btnStyle + 'background:#C1272D;color:#ffffff;';
+  var btnBrown = btnStyle + 'background:#5f4a3a;color:#ffffff;';
+  var btnGreen = btnStyle + 'background:#25D366;color:#ffffff;';
+
+  return [
+    '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#3d2b1f;max-width:600px;">',
+    '<div style="background:linear-gradient(135deg,#4B352A,#5D3A1A);color:#fff;padding:22px 20px;border-radius:12px 12px 0 0;text-align:center;">',
+    '<p style="margin:0 0 6px;font-size:13px;opacity:0.85;">La Sucursal del Café</p>',
+    '<h1 style="margin:0;font-size:21px;">Gracias por competir en la Preliminar 1</h1>',
+    '</div>',
+    '<div style="background:#f5f0ea;padding:22px 20px;border-radius:0 0 12px 12px;">',
+    '<p style="margin:0 0 14px;">Hola <strong>' + nombre + '</strong>,</p>',
+    '<p style="margin:0 0 16px;">Gracias por ser parte de la <strong>1.ª preliminar del V60 Championship</strong>. Tu esfuerzo en la barra impulsa el circuito de café filtrado que organizamos en Cali.</p>',
+    '<h2 style="font-size:17px;color:#5f4a3a;margin:20px 0 10px;">Tus resultados</h2>',
+    '<p style="margin:0 0 12px;">Consulta tus calificaciones y el resumen por ronda en el portal del competidor:</p>',
+    '<p style="margin:0 0 14px;"><a href="' + resultadosUrl + '" style="' + btnRed + '">Ver mis resultados</a></p>',
+    '<ul style="margin:0 0 16px;padding-left:20px;font-size:14px;color:#6b5344;">',
+    '<li style="margin-bottom:6px;">Ingresa con tu <strong>cédula</strong>; el nombre se detecta solo si coincide con la inscripción.</li>',
+    '<li style="margin-bottom:6px;">Si aún no ves notas, el organizador puede estar publicándolas — intenta de nuevo más tarde.</li>',
+    '</ul>',
+    '<h2 style="font-size:17px;color:#5f4a3a;margin:20px 0 10px;">¿Sigues en el circuito? Preliminar 2</h2>',
+    '<p style="margin:0 0 10px;"><strong>' + escapeHtml_(PRELIMINAR2_FECHA) + '</strong> · <strong>' + escapeHtml_(PRELIMINAR2_LUGAR) + '</strong></p>',
+    '<p style="margin:0 0 12px;">Inscríbete a la 2.ª preliminar (cupos limitados). Valor: <strong>$90.000 COP</strong> · Nubank <strong>@mbl616</strong> (Manuel Barraza).</p>',
+    '<p style="margin:0 0 14px;"><a href="' + inscripcionUrl + '" style="' + btnBrown + '">Inscribirme en la Preliminar 2</a></p>',
+    '<p style="margin:0 0 8px;font-size:14px;">Antes de inscribirte, revisa:</p>',
+    '<p style="margin:0 0 16px;">',
+    '<a href="' + comoFuncionaUrl + '" style="color:#8b4513;font-weight:600;">Cómo funciona el circuito</a>',
+    ' · ',
+    '<a href="' + reglasUrl + '" style="color:#8b4513;font-weight:600;">Reglamento V60</a>',
+    '</p>',
+    '<h2 style="font-size:17px;color:#5f4a3a;margin:20px 0 10px;">WhatsApp del torneo</h2>',
+    '<p style="margin:0 0 12px;">Únete al grupo para avisos, logística y novedades:</p>',
+    '<p style="margin:0 0 16px;"><a href="' + grupoUrl + '" style="' + btnGreen + '">Entrar al grupo de WhatsApp</a></p>',
+    '<p style="margin:0 0 8px;">Dudas o apoyo con la inscripción: <a href="mailto:' + organizerEmail + '" style="color:#8b4513;">' + organizerEmail + '</a></p>',
+    '<hr style="border:none;border-top:1px solid #e0d5c8;margin:20px 0;">',
+    '<p style="margin:0;font-size:12px;color:#888;">— La Sucursal del Café · V60 Championship</p>',
+    '</div>',
+    '</div>'
+  ].join('');
+}
+
+function sendPreliminar1ThankYouToParticipant_(participant) {
+  var correo = normalizeEmail_(participant.correo);
+  if (!correo || correo.indexOf('@') === -1) {
+    throw new Error('Correo inválido');
+  }
+  MailApp.sendEmail({
+    to: correo,
+    subject: 'Gracias por competir — V60 Preliminar 1 · resultados y Preliminar 2',
+    body: buildPreliminar1ThankYouPlain_(participant),
+    htmlBody: buildPreliminar1ThankYouHtml_(participant),
+    name: 'La Sucursal del Café'
+  });
+}
+
+/**
+ * Ejecutar en el editor Apps Script:
+ *   enviarAgradecimientoPreliminar1({ dryRun: true })
+ *   enviarAgradecimientoPreliminar1({ dryRun: false })
+ *   enviarAgradecimientoPreliminar1({ dryRun: false, soloCorreo: 'tu@gmail.com' })
+ */
+function enviarAgradecimientoPreliminar1(opts) {
+  opts = opts || {};
+  var dryRun = !!opts.dryRun;
+  var soloCorreo = normalizeEmail_(opts.soloCorreo || '');
+  var participants = listPreliminar1ParticipantsForEmail_();
+  if (soloCorreo) {
+    participants = participants.filter(function (p) {
+      return p.correo === soloCorreo;
+    });
+  }
+  var results = [];
+  participants.forEach(function (p) {
+    if (dryRun) {
+      results.push({ ok: true, dryRun: true, nombre: p.nombre, correo: p.correo, id: p.id });
+      return;
+    }
+    try {
+      sendPreliminar1ThankYouToParticipant_(p);
+      results.push({ ok: true, nombre: p.nombre, correo: p.correo, id: p.id });
+      Utilities.sleep(1500);
+    } catch (err) {
+      results.push({
+        ok: false,
+        nombre: p.nombre,
+        correo: p.correo,
+        id: p.id,
+        error: String(err.message || err)
+      });
+    }
+  });
+  var summary = {
+    ok: true,
+    dryRun: dryRun,
+    total: participants.length,
+    enviados: results.filter(function (r) { return r.ok && !r.dryRun; }).length,
+    errores: results.filter(function (r) { return !r.ok; }).length,
+    resultadosUrl: getResultadosPortalUrl_(),
+    inscripcionUrl: getCompetenciaInscripcionUrl_(),
+    results: results
+  };
+  Logger.log(JSON.stringify(summary, null, 2));
+  return summary;
+}
+
+function handlePreliminar1Agradecimiento_(payload) {
+  var pin = String(payload.pin || payload.pinOrganizador || '').trim().toLowerCase();
+  if (!pin || pin !== 'v60organizador') {
+    return { ok: false, error: 'PIN organizador inválido.' };
+  }
+  return enviarAgradecimientoPreliminar1({
+    dryRun: !!payload.dryRun,
+    soloCorreo: payload.soloCorreo || ''
+  });
 }
