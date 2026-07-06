@@ -5170,10 +5170,73 @@ textarea.has-value {
 
 .bizcard__lead {
   margin: 0;
-  max-width: 30rem;
-  font-size: 0.98rem;
-  line-height: 1.55;
-  color: rgba(75, 53, 42, 0.82);
+  max-width: 32rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(75, 53, 42, 0.88);
+}
+
+.bizcard__highlights {
+  list-style: none;
+  margin: 1rem 0 0.25rem;
+  padding: 0;
+  width: 100%;
+  max-width: 34rem;
+  display: grid;
+  gap: 0.55rem;
+  text-align: left;
+}
+
+.bizcard__highlight {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.7rem 0.85rem;
+  background: rgba(255, 253, 249, 0.72);
+  border: 1px solid rgba(93, 58, 26, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(75, 53, 42, 0.04);
+}
+
+.bizcard__highlight-icon {
+  flex: 0 0 auto;
+  font-size: 1.15rem;
+  line-height: 1.2;
+  margin-top: 0.05rem;
+}
+
+.bizcard__highlight-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.bizcard__highlight-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--brown-deep);
+  line-height: 1.25;
+}
+
+.bizcard__highlight-text {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: rgba(75, 53, 42, 0.78);
+}
+
+.bizcard__text--explore-intro {
+  font-weight: 600;
+  color: var(--brown-deep);
+  text-align: center;
+  margin-bottom: 0.15rem;
+}
+
+@media (min-width: 640px) {
+  .bizcard__highlights {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
 }
 
 .bizcard__text {

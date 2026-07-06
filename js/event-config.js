@@ -16,31 +16,57 @@ window.EVENT_CONFIG = {
     email: 'lasucursaldelcafe@gmail.com'
   },
   festival: {
-    slogan: 'Bienvenido al festival',
+    slogan: 'El festival del café especial en Cali',
     lema: 'La Sucursal es de los cafeteros',
+    heroBandKicker: 'Cata · Origen · Barismo · Comunidad',
     instagram: '@lasucursal.delcafe',
     instagramUrl: 'https://www.instagram.com/lasucursal.delcafe/',
     heroLead:
-      'La riqueza del café especial de Cali, en tus manos. Cata, talleres y comunidad — entrada gratis.',
+      'Dos días para oler, catar y celebrar lo mejor del grano vallecaucano: productores, tostadores y baristas ' +
+      'en un solo lugar. Entrada libre — solo traes las ganas de probar.',
     mensaje:
-      'Dos días en Cali para probar, aprender y conectar. Entrada sin costo; registro opcional con premios.',
+      'Palmetto Plaza se convierte en el punto de encuentro del café especial: prueba tazas, conoce fincas, ' +
+      'aprende en talleres y vive el V60 Championship en vivo. Sin boleto de entrada.',
     mensajeEvento:
-      'Productores, tostadores y baristas en un solo lugar para descubrir lo nuestro.',
-    exploreIntro: '',
+      'Un fin de semana para descubrir quién hace el café que tomas, cómo se cata y qué lo hace especial.',
+    exploreIntro:
+      'Cuatro formas de vivir la feria — elige por dónde empezar.',
+    highlights: [
+      {
+        icon: '☕',
+        title: 'Stands y cata',
+        text: 'Recorre expositores, prueba perfiles de taza y habla directo con quien tosta y sirve.'
+      },
+      {
+        icon: '🌱',
+        title: 'Del grano al origen',
+        text: 'Fincas y productores cuentan la historia detrás de cada café — variedad, proceso y territorio.'
+      },
+      {
+        icon: '🏆',
+        title: 'V60 en vivo',
+        text: 'Baristas compiten frente a ti: técnica, duelos y podio en el circuito V60 Championship.'
+      },
+      {
+        icon: '📚',
+        title: 'Talleres y formación',
+        text: 'Sesiones para entrenar paladar, métodos de extracción y cultura cafetera sin complicarte.'
+      }
+    ],
     explore: [
       {
         id: 'actividades',
         label: 'Actividades',
         icon: '📋',
-        text: 'Stands, fincas, cata, talleres y V60 en vivo.',
+        text: 'Stands, fincas, cata guiada, talleres y la competencia V60 — todo el programa en un vistazo.',
         link: 'actividades',
-        cta: 'Ver programa'
+        cta: 'Ver qué hay'
       },
       {
         id: 'visita',
         label: 'Tu visita',
         icon: '✓',
-        text: 'Entrada gratis. Regístrate solo si quieres premios de visitante.',
+        text: 'Entras gratis. Regístrate solo si quieres premios de visitante y novedades antes del evento.',
         link: 'feria',
         cta: 'Registro visitante'
       },
@@ -48,7 +74,7 @@ window.EVENT_CONFIG = {
         id: 'competencia',
         label: 'V60',
         icon: '🏆',
-        text: 'Competencia de café filtrado — inscripción aparte y de pago.',
+        text: 'El reto de filtrado más emocionante de la ciudad — inscripción aparte, cupos limitados.',
         link: 'competencia',
         cta: 'V60 Championship'
       }
