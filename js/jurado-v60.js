@@ -4181,6 +4181,7 @@
       '<div class="jurado-preliminar-card">' +
       '<div class="jurado-preliminar-head">' +
       '<h3>Preliminar 1 — cruzado con inscritos</h3>' +
+      '<p class="jurado-hint">' + escapeHtml(kit.formatDescription || (P && P.formatDescription ? P.formatDescription() : '')) + '</p>' +
       '<p class="jurado-hint">' + escapeHtml(kit.event.nombre) + ' · ' + inscritosCount + ' inscritos · ' +
       rawCount + ' tandas · ' + ranking.length + ' en ranking (mejor tanda) · IDs <code>SC-*</code></p>' +
       '<p class="jurado-hint jurado-preliminar-method">' + escapeHtml(methodNote) + '</p>' +

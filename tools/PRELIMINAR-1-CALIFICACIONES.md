@@ -7,7 +7,7 @@
 
 ## Formato de la competencia
 
-12 competidores en 6 rondas de grupos (2 por ronda, orden del sorteo oficial). A semifinal pasaron los mejores puntajes de cada ronda. La final reunió a los 3 mejores de semifinal. El podio oficial (1°, 2° y 3°) se definió por el puntaje total en la final.
+12 competidores en tres fases: fase de grupos (duelos 1v1, 6 rondas según sorteo oficial), fase de semifinales (duelos 1v1) y fase final (clasificación por mejor puntuación de tanda). El podio oficial (1°, 2° y 3°) corresponde a los puntajes de la final.
 
 ## Cómo se calcula el puntaje
 
