@@ -9,6 +9,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
+GRUPOS_PAREJAS = [
+    ("Andrenia", "Angela"),
+    ("Jessi", "Brayan"),
+    ("Joe", "Useche"),
+    ("Savedra", "Manjares"),
+    ("Vera", "Linda"),
+    ("Colorado", "Polo"),
+]
+
+
 PLANILLA = {
     "clasificatoria": [
         ("Andrenia", 1, 29, 24, 27, 80),
@@ -121,6 +131,18 @@ def main() -> int:
     event = kit.get("event") or {}
     if event.get("scaleMax") != 5:
         errors.append(f"Escala máxima debe ser 5, es {event.get('scaleMax')}")
+
+    grupos = kit.get("gruposRondas") or []
+    if len(grupos) != len(GRUPOS_PAREJAS):
+        errors.append(f"Esperadas {len(GRUPOS_PAREJAS)} rondas de grupos, hay {len(grupos)}")
+    for i, (a, b) in enumerate(GRUPOS_PAREJAS):
+        if i >= len(grupos):
+            break
+        g = grupos[i]
+        pa = (g.get("participanteA") or {}).get("participante")
+        pb = (g.get("participanteB") or {}).get("participante")
+        if pa != a or pb != b:
+            errors.append(f"Ronda {i + 1}: esperado {a} vs {b}, código {pa} vs {pb}")
 
     if errors:
         print(f"\n❌ {len(errors)} error(es):")
