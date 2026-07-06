@@ -2033,6 +2033,46 @@
     });
   }
 
+  function renderResultadosAccesosPanel(data) {
+    var stats = (data && data.stats) || {};
+    var rows = (data && data.resultadosAccesosRecent) || [];
+    var cols = (data && data.resultadosAccesosColumns) || [
+      'Timestamp', 'Competidor ID', 'Nombre', 'Evento', 'Doc últimos 4',
+      'Resultados publicados', 'Rondas', 'Tipo acceso', 'Tenant', 'Notificado'
+    ];
+
+    setText('statResultadosAccesosHoy', formatNumber(stats.resultadosAccesosToday));
+    setText('statResultadosCompetidoresHoy', formatNumber(stats.resultadosCompetidoresHoy));
+    setText('statResultadosLoginsHoy', formatNumber(stats.resultadosLoginsHoy));
+    setText('statResultadosAccesosTotal', formatNumber(stats.resultadosAccesosTotal));
+    setText('statResultadosAccesosResumen', formatNumber(stats.resultadosAccesosToday));
+
+    var tableEl = document.getElementById('adminResultadosAccesosTable');
+    if (!tableEl) return;
+
+    var displayRows = rows.map(function (row) {
+      var copy = {};
+      cols.forEach(function (col) {
+        var val = row[col] || '';
+        if (col === 'Timestamp' && val) {
+          try {
+            val = new Date(val).toLocaleString('es-CO');
+          } catch (e) { /* keep raw */ }
+        }
+        copy[col] = val;
+      });
+      return copy;
+    });
+
+    tableEl.innerHTML = renderTable(
+      displayRows,
+      cols,
+      rows.length
+        ? 'Últimos ' + rows.length + ' accesos (más recientes primero).'
+        : 'Aún no hay accesos registrados. Aparecerán cuando un competidor ingrese al portal.'
+    );
+  }
+
   function renderTable(rows, columns, metaText) {
     var cols = columns || [];
     var meta = metaText ? '<p class="admin-table-meta">' + escapeHtml(metaText) + '</p>' : '';
@@ -2319,6 +2359,7 @@
     }
     syncCompetenciaEditionUi();
     syncAdminJuradoPublishUi();
+    renderResultadosAccesosPanel(data);
 
     var updated = document.getElementById('dashboardUpdated');
     if (updated && data.generatedAt) {
