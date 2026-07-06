@@ -1606,13 +1606,22 @@
           : (window.EVENT_CONFIG.evento2 || window.EVENT_CONFIG.evento1 || {});
         eventFilter = String(activeEv.eventoId || activeEv.nombre || '').trim();
       }
-      return (data.allCompetencia || [])
+      var habilitados = (data.allCompetencia || [])
         .filter(function (row) { return isHabilitado(row.Habilitado); })
         .filter(function (row) {
-          if (!eventFilter) return true;
-          return competenciaEventKey(row.Evento) === competenciaEventKey(eventFilter);
-        })
-        .map(function (row) {
+          return String(row.ID || '').trim() && String(row.Nombre || '').trim();
+        });
+      var filtered = habilitados.filter(function (row) {
+        if (!eventFilter) return true;
+        return competenciaEventKey(row.Evento) === competenciaEventKey(eventFilter);
+      });
+      if (!filtered.length && habilitados.length && eventFilter) {
+        filtered = habilitados.slice();
+        window.__juradoCompetenciaEditionFallback = competenciaEventKey(eventFilter);
+      } else {
+        window.__juradoCompetenciaEditionFallback = '';
+      }
+      return filtered.map(function (row) {
           return {
             id: String(row.ID || '').trim(),
             nombre: String(row.Nombre || '').trim(),
@@ -3474,29 +3483,45 @@
     }
   }
 
-  function readCriteriaFromEditor() {
+  function readCriteriaFromEditorRaw() {
     var rows = document.querySelectorAll('.jurado-criterion-row');
     var list = [];
     rows.forEach(function (row) {
       var labelEl = row.querySelector('[data-crit-label]');
       var descEl = row.querySelector('[data-crit-desc]');
-      if (labelEl && labelEl.value.trim()) {
-        list.push({
-          label: labelEl.value.trim(),
-          desc: descEl ? descEl.value.trim() : ''
-        });
-      }
+      list.push({
+        key: '',
+        label: labelEl ? labelEl.value : '',
+        desc: descEl ? descEl.value : ''
+      });
     });
-    return normalizeCriteriaList(list);
+    return list;
+  }
+
+  function readCriteriaFromEditor() {
+    return normalizeCriteriaList(readCriteriaFromEditorRaw().filter(function (c) {
+      return String(c.label || '').trim();
+    }));
   }
 
   function renderCriteriaEditor(criteria) {
+    var list = (criteria && criteria.length)
+      ? criteria.map(function (c) {
+        return { key: c.key || '', label: c.label || '', desc: c.desc || '' };
+      })
+      : getCriteria().map(function (c) { return Object.assign({}, c); });
+    renderCriteriaEditorRaw(list);
+  }
+
+  function renderCriteriaEditorRaw(list) {
     var box = $('criteriaEditorList');
     if (!box) return;
-    var list = (criteria && criteria.length) ? criteria : getCriteria();
+    if (!list || !list.length) {
+      list = [{ key: '', label: '', desc: '' }];
+    }
     box.innerHTML = list.map(function (c, i) {
       return '<div class="jurado-criterion-row" data-crit-idx="' + i + '">' +
-        '<input type="text" data-crit-label placeholder="Nombre del criterio" value="' + escapeHtml(c.label) + '" maxlength="80">' +
+        '<input type="text" data-crit-label placeholder="Nombre del criterio" value="' + escapeHtml(c.label || '') + '" maxlength="80">' +
         '<input type="text" data-crit-desc placeholder="Descripción breve" value="' + escapeHtml(c.desc || '') + '" maxlength="160">' +
         '<button type="button" class="jurado-btn-inline jurado-btn-inline--danger" data-remove-crit aria-label="Quitar">✕</button>' +
         '</div>';
@@ -3681,9 +3706,9 @@
     if (addBtn && !addBtn.dataset.bound) {
       addBtn.dataset.bound = '1';
       addBtn.addEventListener('click', function () {
-        var list = readCriteriaFromEditor();
+        var list = readCriteriaFromEditorRaw();
         list.push({ key: '', label: '', desc: '' });
-        renderCriteriaEditor(list);
+        renderCriteriaEditorRaw(list);
       });
     }
     var listBox = $('criteriaEditorList');
@@ -3694,12 +3719,11 @@
         if (!rm) return;
         var row = rm.closest('.jurado-criterion-row');
         if (!row) return;
-        var list = readCriteriaFromEditor();
+        var list = readCriteriaFromEditorRaw();
         var idx = parseInt(row.getAttribute('data-crit-idx'), 10);
         if (!isNaN(idx)) list.splice(idx, 1);
-        else row.remove();
-        if (!list.length) list = [{ label: '', desc: '' }];
-        renderCriteriaEditor(list);
+        if (!list.length) list = [{ key: '', label: '', desc: '' }];
+        renderCriteriaEditorRaw(list);
       });
     }
   }

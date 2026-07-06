@@ -82,6 +82,13 @@ def verify_dashboard(web_url: str) -> bool:
     )
     if stats.get("analyticsSource") == "sheet_pageviews":
         ok("Fuente: analítica propia (Google Sheets)")
+    por_edicion = stats.get("competenciaPorEdicion") or {}
+    if por_edicion:
+        ok(
+            "competenciaPorEdicion — "
+            f"P1={por_edicion.get('preliminar1', '?')} "
+            f"P2={por_edicion.get('preliminar2', '?')}"
+        )
     return True
 
 

@@ -2797,7 +2797,10 @@ function handleAdminDashboard_(idToken) {
 
   var allFeria = readAllSheetRows_(SHEET_FERIA, HEADERS_FERIA, true);
   var allCompetencia = readAllSheetRows_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA, true)
-    .map(sanitizeCompetenciaRow_);
+    .map(sanitizeCompetenciaRow_)
+    .filter(function (row) {
+      return row && String(row.ID || '').trim() !== '' && String(row.Nombre || '').trim() !== '';
+    });
   var allStands = readAllSheetRows_(SHEET_STANDS, HEADERS_STANDS, true);
   var allPatrocinadoresCompetencia = readPatrocinadoresCompetenciaRows_();
 

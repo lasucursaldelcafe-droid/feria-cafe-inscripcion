@@ -146,8 +146,38 @@
     });
   }
 
+  function filterValidCompetenciaRows(rows) {
+    return (rows || []).filter(function (row) {
+      return String(row['ID'] || '').trim() && String(row['Nombre'] || '').trim();
+    });
+  }
+
+  function countCompetenciaEditionRows(rows, editionKey) {
+    return filterCompetenciaByEdition(filterValidCompetenciaRows(rows), editionKey).length;
+  }
+
+  function ensureCompetenciaEditionVisible(data) {
+    var all = filterValidCompetenciaRows(pickRows(data || {}, 'allCompetencia'));
+    if (!all.length) return false;
+    var visible = filterCompetenciaByEdition(all, activeCompetenciaEdition);
+    if (visible.length || activeCompetenciaEdition === 'all') return false;
+    var prev = activeCompetenciaEdition;
+    if (countCompetenciaEditionRows(all, 'evento2') > 0) {
+      saveCompetenciaEdition('evento2');
+    } else if (countCompetenciaEditionRows(all, 'evento1') > 0) {
+      saveCompetenciaEdition('evento1');
+    } else {
+      saveCompetenciaEdition('all');
+    }
+    syncCompetenciaEditionUi();
+    return prev !== activeCompetenciaEdition;
+  }
+
   function pickCompetenciaRows(data) {
-    return filterCompetenciaByEdition(pickRows(data || lastDashboardData || {}, 'allCompetencia'), activeCompetenciaEdition);
+    return filterCompetenciaByEdition(
+      filterValidCompetenciaRows(pickRows(data || lastDashboardData || {}, 'allCompetencia')),
+      activeCompetenciaEdition
+    );
   }
 
   function getCompetenciaCupoMax() {
@@ -181,17 +211,47 @@
 
     var cupoEl = document.getElementById('adminCompetenciaCupoMeta');
     if (cupoEl && lastDashboardData) {
-      var cupo = computeCompetenciaEditionCupo(pickRows(lastDashboardData, 'allCompetencia'), activeCompetenciaEdition);
+      var allValid = filterValidCompetenciaRows(pickRows(lastDashboardData, 'allCompetencia'));
+      var cupo = computeCompetenciaEditionCupo(allValid, activeCompetenciaEdition);
       if (activeCompetenciaEdition === 'all') {
-        var allRows = pickRows(lastDashboardData, 'allCompetencia');
-        var p1 = filterCompetenciaByEdition(allRows, 'evento1').length;
-        var p2 = filterCompetenciaByEdition(allRows, 'evento2').length;
-        cupoEl.textContent = 'P1: ' + p1 + ' · P2: ' + p2 + ' · Total: ' + allRows.length;
+        var p1 = countCompetenciaEditionRows(allValid, 'evento1');
+        var p2 = countCompetenciaEditionRows(allValid, 'evento2');
+        cupoEl.textContent = 'P1: ' + p1 + ' · P2: ' + p2 + ' · Total: ' + allValid.length;
       } else {
         cupoEl.textContent = 'Cupo: ' + formatNumber(cupo.count) + ' / ' + formatNumber(cupo.max) +
           (cupo.completo ? ' (completo)' : '');
       }
     }
+
+    var editionHint = document.getElementById('adminCompetenciaEditionHint');
+    if (editionHint && lastDashboardData) {
+      var allRows = filterValidCompetenciaRows(pickRows(lastDashboardData, 'allCompetencia'));
+      var visibleCount = pickCompetenciaRows(lastDashboardData).length;
+      if (!visibleCount && allRows.length && activeCompetenciaEdition !== 'all') {
+        editionHint.innerHTML = 'No hay inscritos en esta edición. ' +
+          '<button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-edition-switch="evento1">Ver Preliminar 1</button> ' +
+          '<button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-edition-switch="all">Ver todas</button>';
+        editionHint.hidden = false;
+      } else {
+        editionHint.hidden = true;
+        editionHint.textContent = '';
+      }
+    }
+  }
+
+  function bindCompetenciaEditionHintActions() {
+    document.addEventListener('click', function (event) {
+      var btn = event.target.closest('[data-edition-switch]');
+      if (!btn) return;
+      var edition = btn.getAttribute('data-edition-switch');
+      if (!edition) return;
+      var sel = document.getElementById('adminCompetenciaEdition');
+      if (sel) sel.value = edition;
+      saveCompetenciaEdition(edition);
+      closeCompetidorEditor();
+      syncCompetenciaEditionUi();
+      if (lastDashboardData) renderAdminTabPanels(lastDashboardData);
+    });
   }
 
   function bindCompetenciaEditionSelector() {
@@ -575,23 +635,29 @@
   }
 
   function bindToggleStatusButtons() {
-    document.querySelectorAll('.admin-toggle-status-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var id = btn.getAttribute('data-record-id');
-        var dataset = btn.getAttribute('data-dataset');
-        var enable = btn.getAttribute('data-enabled') === '1';
-        if (!id || !dataset) return;
-        btn.disabled = true;
-        toggleRecordStatus(dataset, id, enable).then(function (result) {
-          btn.disabled = false;
-          if (!result.ok) {
-            showError(result.error || 'No se pudo actualizar el estado.');
-            return;
-          }
-          showError('');
-          updateLocalHabilitado(dataset, id, result.habilitado || (enable ? 'Sí' : 'No'));
-          renderAdminTabPanels(lastDashboardData);
-        });
+    if (document.body.getAttribute('data-admin-toggle-bound') === '1') return;
+    document.body.setAttribute('data-admin-toggle-bound', '1');
+    document.addEventListener('click', function (event) {
+      var btn = event.target.closest('.admin-toggle-status-btn');
+      if (!btn || btn.disabled) return;
+      var id = btn.getAttribute('data-record-id');
+      var dataset = btn.getAttribute('data-dataset');
+      var enable = btn.getAttribute('data-enabled') === '1';
+      if (!id || !dataset) return;
+      btn.disabled = true;
+      toggleRecordStatus(dataset, id, enable).then(function (result) {
+        btn.disabled = false;
+        if (!result.ok) {
+          showError(result.error || 'No se pudo actualizar el estado.');
+          return;
+        }
+        showError('');
+        updateLocalHabilitado(dataset, id, result.habilitado || (enable ? 'Sí' : 'No'));
+        renderAdminTabPanels(lastDashboardData);
+        syncCompetenciaEditionUi();
+      }).catch(function (err) {
+        btn.disabled = false;
+        showError(err.message || 'Error al actualizar el estado.');
       });
     });
   }
@@ -2248,6 +2314,9 @@
     }
 
     renderAdminTabPanels(data);
+    if (ensureCompetenciaEditionVisible(data)) {
+      renderAdminTabPanels(data);
+    }
     syncCompetenciaEditionUi();
     syncAdminJuradoPublishUi();
 
@@ -2503,6 +2572,7 @@
     if (portalLink && global.SiteLinks && global.SiteLinks.buildJuradoUrls) {
       var urls = global.SiteLinks.buildJuradoUrls({});
       if (urls.resultados) portalLink.href = urls.resultados;
+      portalLink.textContent = 'Resultados competidor';
     }
     if (!btn || btn.getAttribute('data-bound') === '1') return;
     btn.setAttribute('data-bound', '1');
@@ -2564,7 +2634,10 @@
       ? global.SiteLinks.buildJuradoUrls({ pinOrganizador: pinOrg, pinJuez: pinJuez, jueces: jueces })
       : (global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60 && global.EVENT_CONFIG.juradoV60.links) || {};
 
-    if (orgQuick && urls.organizador) orgQuick.href = urls.organizador;
+    if (orgQuick && urls.organizador) {
+      orgQuick.href = urls.organizador;
+      orgQuick.textContent = 'Torneo en vivo';
+    }
 
     if (meta) {
       meta.textContent = juradoScoringSummary(platformCfg) +
@@ -2736,6 +2809,7 @@
     bindPatrocinadorCompetenciaForm();
     bindAdminCreateMarcaForm();
     bindCompetenciaEditionSelector();
+    bindCompetenciaEditionHintActions();
     bindAdminJuradoPublish();
     bindAdminCreateCompetidorForm();
     bindCompetidorEditorForm();
