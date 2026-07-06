@@ -100,7 +100,7 @@ async function main() {
         action: 'admin_toggle_status',
         dataset: 'competencia',
         id: sample.ID,
-        enable: false
+        enabled: false
       }),
       redirect: 'follow'
     });
@@ -116,7 +116,7 @@ async function main() {
         action: 'admin_toggle_status',
         dataset: 'competencia',
         id: sample.ID,
-        enable: true
+        enabled: true
       }),
       redirect: 'follow'
     });

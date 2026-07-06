@@ -293,6 +293,9 @@ function doPost(e) {
     if (action === 'jurado_publish_resultados') {
       return jsonResponse(handleJuradoPublishResultados_(payload));
     }
+    if (action === 'jurado_import_preliminar1') {
+      return jsonResponse(handleJuradoImportPreliminar1_(payload));
+    }
     if (action === 'expositor_update_profile') {
       return jsonResponse(handleExpositorUpdateProfile_(payload));
     }
@@ -3770,6 +3773,85 @@ function handleJuradoPublishResultados_(payload) {
     published: published,
     faseLabel: faseLabel,
     roundKey: roundKey
+  };
+}
+
+function handleJuradoImportPreliminar1_(payload) {
+  var evt = String((payload && payload.evt) || '').trim();
+  var scores = (payload && payload.scores) || (payload.calificaciones && payload.calificaciones.scores) || {};
+  if (!scores || typeof scores !== 'object') {
+    return { ok: false, error: 'Faltan calificaciones de Preliminar 1.' };
+  }
+
+  var ids = Object.keys(scores).filter(function (id) {
+    return scores[id] && scores[id].sumaTotal != null;
+  });
+  if (!ids.length) {
+    return { ok: false, error: 'No hay puntajes válidos para publicar.' };
+  }
+
+  var now = new Date().toISOString();
+  var calKey = juradoTenantKey_('jurado_v60_calificaciones', evt);
+  var bracketKey = juradoTenantKey_('jurado_v60_bracket', evt);
+  var calCfg = getPasaporteConfig_(calKey);
+  var calData = calCfg.data && typeof calCfg.data === 'object' ? calCfg.data : {};
+  if (!calData.scores || typeof calData.scores !== 'object') calData.scores = {};
+
+  ids.forEach(function (id) {
+    calData.scores[id] = scores[id];
+  });
+  calData.actualizado = now;
+  calData.preliminar1Import = {
+    at: now,
+    evento: String((payload && payload.evento) || 'V60 Championship — Preliminar 1').trim(),
+    count: ids.length,
+    source: 'jurado_import_preliminar1'
+  };
+  savePasaporteConfig_({ key: calKey, data: calData });
+
+  var faseLabel = 'Preliminar 1 — archivo oficial';
+  var roundKey = 'preliminar-1|archivo';
+  var resultadosCompetidor = {};
+  ids.forEach(function (id) {
+    var row = scores[id];
+    resultadosCompetidor[id] = {
+      judges: JSON.parse(JSON.stringify(row.judges || {})),
+      notas: String(row.notas || '').trim(),
+      sumaTotal: row.sumaTotal,
+      promedio: row.promedio != null ? row.promedio : null,
+      roundKey: roundKey,
+      faseLabel: faseLabel,
+      publicadoAt: now
+    };
+  });
+
+  var bracketCfg = getPasaporteConfig_(bracketKey);
+  var bracket = bracketCfg.data && typeof bracketCfg.data === 'object' ? bracketCfg.data : {};
+  bracket.fase = 'final';
+  bracket.rondaEnFase = 1;
+  bracket.activos = ids.slice();
+  bracket.eliminados = Array.isArray(bracket.eliminados) ? bracket.eliminados : [];
+  bracket.resultadosCompetidor = Object.assign(
+    {},
+    bracket.resultadosCompetidor && typeof bracket.resultadosCompetidor === 'object' ? bracket.resultadosCompetidor : {},
+    resultadosCompetidor
+  );
+  bracket.preliminar1Archivo = { at: now, published: ids.length, faseLabel: faseLabel };
+  bracket.actualizado = now;
+  savePasaporteConfig_({ key: bracketKey, data: bracket });
+
+  if (payload && payload.platform && typeof payload.platform === 'object') {
+    savePasaporteConfig_({
+      key: juradoTenantKey_('jurado_v60_platform', evt),
+      data: payload.platform
+    });
+  }
+
+  return {
+    ok: true,
+    imported: ids.length,
+    published: ids.length,
+    faseLabel: faseLabel
   };
 }
 
