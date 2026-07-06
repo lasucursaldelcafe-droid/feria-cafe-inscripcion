@@ -214,9 +214,102 @@
     return apiRondas;
   }
 
-  function judgeDone(judges, num) {
-    var g = judges && judges['j' + num];
-    return !!(g && g.subtotal != null);
+  function driveThumbUrl(url, size) {
+    if (!url) return '';
+    var s = String(url).trim();
+    var m = s.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (m) return 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w' + (size || 200);
+    if (/^https?:\/\//i.test(s)) return s;
+    return '';
+  }
+
+  function resolveCompetidorPhoto(comp) {
+    if (!comp) return '';
+    if (comp.fotoUrl) return driveThumbUrl(comp.fotoUrl, 160);
+    var p1 = window.Preliminar1Results;
+    if (p1 && p1.getCompetidorProfile) {
+      var profile = p1.getCompetidorProfile(comp.id, comp.documento, comp.nombre);
+      if (profile && profile.fotoUrl) return driveThumbUrl(profile.fotoUrl, 160);
+    }
+    return '';
+  }
+
+  function resolveRoundOpponent(round, comp) {
+    if (!round) return null;
+    if (round.meta && round.meta.oponente) return round.meta.oponente;
+    var p1 = window.Preliminar1Results;
+    if (!p1 || !p1.getRoundOpponent || !round.meta) return null;
+    var planilla = round.meta.planilla;
+    var entrada = round.meta.entrada;
+    if (!planilla || !entrada) return null;
+    return p1.getRoundOpponent(planilla, entrada);
+  }
+
+  function opponentLineText(oponente, entrada) {
+    if (!oponente) {
+      if (entrada === 3) return 'Clasificación por mejor tanda (sin duelo 1v1)';
+      return '';
+    }
+    if (oponente.tipo === 'final') {
+      return 'Compitió con: ' + oponente.nombre;
+    }
+    return 'Enfrentamiento vs ' + (oponente.nombre || oponente.planilla || 'rival');
+  }
+
+  function hasJudgeObservations(round) {
+    if (!round) return false;
+    if (String(round.notas || '').trim()) return true;
+    var np = round.notasPorJuez || {};
+    return !!(String(np.j1 || '').trim() || String(np.j2 || '').trim() || String(np.j3 || '').trim());
+  }
+
+  function collectJudgeObservations(round) {
+    var items = [];
+    var notas = String(round.notas || '').trim();
+    if (notas) items.push({ label: 'Jurado', text: notas });
+    var np = round.notasPorJuez || {};
+    for (var j = 1; j <= 3; j++) {
+      var txt = String(np['j' + j] || '').trim();
+      if (txt) items.push({ label: 'Juez ' + j, text: txt });
+    }
+    return items;
+  }
+
+  function renderBandSummary(round, criteria, scoring) {
+    var std = getStandards();
+    if (!std || !std.roundBandSummary) return '';
+    var groups = std.roundBandSummary(round, criteria, scoring.scaleMin, scoring.scaleMax);
+    var defs = [
+      { key: 'competitivo', label: 'Competitivo', hint: 'Dentro del estándar esperado en competencia V60.' },
+      { key: 'en_desarrollo', label: 'En desarrollo', hint: 'Atributos por reforzar en entrenamiento.' },
+      { key: 'por_fortalecer', label: 'Por fortalecer', hint: 'Alejados del estándar sensorial para esta fase.' }
+    ];
+    var html = '<div class="jurado-result-bands">';
+    defs.forEach(function (def) {
+      var list = groups[def.key] || [];
+      if (!list.length) return;
+      html += '<article class="jurado-result-band jurado-result-band--' + def.key + '">' +
+        '<h3>' + escapeHtml(def.label) + '</h3>' +
+        '<p class="jurado-result-band-params">' + escapeHtml(list.join(' · ')) + '</p>' +
+        '<p class="jurado-meta">' + escapeHtml(def.hint) + '</p></article>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function renderCompetidorPhoto(comp) {
+    var img = $('resultCompetidorFoto');
+    if (!img) return;
+    var url = resolveCompetidorPhoto(comp);
+    if (url) {
+      img.src = url;
+      img.alt = 'Foto de ' + (comp.nombre || 'competidor');
+      img.hidden = false;
+      img.onerror = function () { img.hidden = true; };
+    } else {
+      img.removeAttribute('src');
+      img.hidden = true;
+    }
   }
 
   function roundShortLabel(r, idx) {
@@ -260,112 +353,36 @@
     });
   }
 
-  function renderCriteriaTable(round, criteria, scoring) {
-    var std = getStandards();
-    var scaleMin = (scoring && scoring.scaleMin) || 1;
-    var scaleMax = (scoring && scoring.scaleMax) || 5;
-    var judges = round.judges || {};
-    var jmax = (scoring && scoring.jueces) || 3;
-
-    var html = '<div class="jurado-result-criteria-table-wrap"><table class="jurado-result-criteria-table">' +
-      '<thead><tr><th>Parámetro</th><th>Estándar</th>';
-    for (var h = 1; h <= jmax; h++) html += '<th>J' + h + '</th>';
-    html += '<th>Prom.</th><th>Observación</th></tr></thead><tbody>';
-
-    criteria.forEach(function (c) {
-      html += '<tr><td><strong>' + escapeHtml(c.label) + '</strong></td>';
-      html += '<td class="jurado-result-crit-desc">' + escapeHtml(c.desc || '') + '</td>';
-      for (var j = 1; j <= jmax; j++) {
-        var judge = judges['j' + j];
-        var val = judge && judge.scores && judge.scores[c.key] != null ? judge.scores[c.key] : '—';
-        html += '<td class="jurado-result-crit-num">' + val + '</td>';
-      }
-      var avg = std && std.averageCriterionScores
-        ? std.averageCriterionScores(judges, c.key, jmax)
-        : null;
-      var avgTxt = avg != null ? avg : '—';
-      var obs = std && std.criterionObservation && avg != null
-        ? std.criterionObservation(avg, c, scaleMin, scaleMax)
-        : { band: { level: 'sin_dato', label: '—' }, text: 'Sin datos suficientes.' };
-      html += '<td class="jurado-result-crit-num"><strong>' + avgTxt + '</strong></td>';
-      html += '<td class="jurado-result-crit-obs jurado-result-crit-obs--' + obs.band.level + '">' +
-        '<span class="jurado-result-crit-band">' + escapeHtml(obs.band.label) + '</span> ' +
-        escapeHtml(obs.text) + '</td>';
-      html += '</tr>';
-    });
-    html += '</tbody></table></div>';
-    return html;
-  }
-
-  function renderRoundDetail(round, criteria, scoring) {
+  function renderRoundDetail(round, criteria, scoring, comp) {
     var wrap = $('resultRoundDetailWrap');
     if (!wrap) return;
     if (!round) {
       wrap.innerHTML = '<p class="jurado-hint">Aún no hay calificaciones publicadas.</p>';
       return;
     }
-    var std = getStandards();
-    var summaryHtml = '';
-    if (std && std.roundSummaryObservation) {
-      summaryHtml = '<div class="jurado-card jurado-result-round-summary">' +
-        '<h3>Resumen según estándar V60</h3><p>' +
-        escapeHtml(std.roundSummaryObservation(round, criteria, scoring.scaleMin, scoring.scaleMax)) +
-        '</p></div>';
-    }
-    var notas = round.notas ? String(round.notas).trim() : '';
-    var notasHtml = notas
-      ? '<div class="jurado-card"><div class="jurado-card-head"><h3>Notas del jurado</h3></div>' +
-        '<p class="jurado-result-notas">' + escapeHtml(notas) + '</p></div>'
+
+    var entrada = round.meta && round.meta.entrada;
+    var oponente = resolveRoundOpponent(round, comp);
+    var vsText = opponentLineText(oponente, entrada);
+    var vsHtml = vsText
+      ? '<div class="jurado-card jurado-result-vs-card"><p class="jurado-result-vs-line">' + escapeHtml(vsText) + '</p></div>'
       : '';
 
-    wrap.innerHTML =
-      summaryHtml +
-      '<div class="jurado-card">' +
-      '<div class="jurado-card-head"><h2>Calificación por parámetro</h2>' +
-      '<p class="jurado-hint">Desglose según estándares sensoriales V60 (escala 1–5).</p></div>' +
-      renderCriteriaTable(round, criteria, scoring) +
-      '</div>' +
-      '<div class="jurado-card">' +
-      '<div class="jurado-card-head"><h2>Calificación por juez</h2>' +
-      '<p class="jurado-hint">Subtotales y observaciones de cada juez en esta ronda.</p></div>' +
-      '<div class="jurado-result-judges-grid">' + renderJudgesCards(round, criteria, scoring) + '</div>' +
-      '</div>' +
-      notasHtml;
-  }
-
-  function renderJudgesCards(round, criteria, scoring) {
-    var jmax = (scoring && scoring.jueces) || 3;
-    var judges = round.judges || {};
-    var notasPorJuez = round.notasPorJuez || {};
-    var html = '';
-
-    for (var j = 1; j <= jmax; j++) {
-      var judge = judges['j' + j];
-      var done = judgeDone(judges, j);
-      var notaJuez = String(notasPorJuez['j' + j] || '').trim();
-      html += '<article class="jurado-result-judge-card' + (done ? ' jurado-result-judge-card--done' : ' jurado-result-judge-card--pending') + '">';
-      html += '<h3><span>Juez ' + j + '</span>';
-      html += done
-        ? '<span class="jurado-result-judge-badge">Listo</span>'
-        : '<span class="jurado-result-judge-badge jurado-result-judge-badge--pending">Pendiente</span>';
-      html += '</h3>';
-      if (!done) {
-        html += '<p class="jurado-hint">Sin calificación en esta ronda.</p>';
-      } else {
-        html += '<p class="jurado-result-subtotal">Subtotal: <strong>' + judge.subtotal + ' pts</strong></p>';
-        html += '<ul class="jurado-result-criteria">';
-        criteria.forEach(function (c) {
-          var val = judge.scores && judge.scores[c.key] != null ? judge.scores[c.key] : '—';
-          html += '<li><span>' + escapeHtml(c.label) + '</span><strong>' + val + '</strong></li>';
-        });
-        html += '</ul>';
-        if (notaJuez) {
-          html += '<p class="jurado-result-judge-note"><strong>Observación del juez:</strong> ' + escapeHtml(notaJuez) + '</p>';
-        }
-      }
-      html += '</article>';
+    var obsItems = hasJudgeObservations(round) ? collectJudgeObservations(round) : [];
+    var obsHtml = '';
+    if (obsItems.length) {
+      obsHtml = '<div class="jurado-card"><div class="jurado-card-head"><h2>Observaciones del jurado</h2></div><ul class="jurado-result-obs-list">';
+      obsItems.forEach(function (item) {
+        obsHtml += '<li><strong>' + escapeHtml(item.label) + ':</strong> ' + escapeHtml(item.text) + '</li>';
+      });
+      obsHtml += '</ul></div>';
     }
-    return html;
+
+    var bandsHtml = '<div class="jurado-card"><div class="jurado-card-head"><h2>Perfil sensorial</h2>' +
+      '<p class="jurado-hint">Resumen por estándar V60 — sin desglose numérico por parámetro.</p></div>' +
+      renderBandSummary(round, criteria, scoring) + '</div>';
+
+    wrap.innerHTML = vsHtml + bandsHtml + obsHtml;
   }
 
   function renderResults(data) {
@@ -388,6 +405,7 @@
       comp.ciudad ? 'Ciudad: ' + comp.ciudad : '',
       comp.representa ? 'Representa: ' + comp.representa : ''
     ].filter(Boolean).join(' · ');
+    renderCompetidorPhoto(comp);
 
     var blockedBox = $('resultBlockedBox');
     var scoresWrap = $('resultScoresWrap');
@@ -432,12 +450,12 @@
     }
 
     renderRoundPicker(rondas);
-    renderRoundDetail(cal, criteria, scoring);
+    renderRoundDetail(cal, criteria, scoring, comp);
 
     var roundsCount = $('resultRoundsCount');
     if (roundsCount) {
       roundsCount.textContent = rondas.length > 1
-        ? rondas.length + ' rondas — selecciona una para ver parámetros y jueces'
+        ? rondas.length + ' rondas — elige una para ver enfrentamiento y perfil sensorial'
         : '';
       roundsCount.hidden = rondas.length <= 1;
     }

@@ -128,9 +128,36 @@
     });
   }
 
+  function simplifyBandLevel(level) {
+    if (level === 'excelente' || level === 'muy_bueno' || level === 'competitivo') return 'competitivo';
+    if (level === 'en_desarrollo') return 'en_desarrollo';
+    if (level === 'por_fortalecer') return 'por_fortalecer';
+    return null;
+  }
+
+  function roundBandSummary(round, criteria, scaleMin, scaleMax) {
+    var judges = round && round.judges ? round.judges : {};
+    var crits = criteria && criteria.length ? criteria : V60_CRITERIA;
+    var groups = {
+      competitivo: [],
+      en_desarrollo: [],
+      por_fortalecer: []
+    };
+    crits.forEach(function (c) {
+      var avg = averageCriterionScores(judges, c.key, 3);
+      if (avg == null) return;
+      var band = scoreBand(avg, scaleMin, scaleMax);
+      var bucket = simplifyBandLevel(band.level);
+      if (bucket && groups[bucket]) groups[bucket].push(c.label);
+    });
+    return groups;
+  }
+
   global.JuradoStandards = {
     V60_CRITERIA: V60_CRITERIA,
     scoreBand: scoreBand,
+    simplifyBandLevel: simplifyBandLevel,
+    roundBandSummary: roundBandSummary,
     criterionObservation: criterionObservation,
     averageCriterionScores: averageCriterionScores,
     roundSummaryObservation: roundSummaryObservation,

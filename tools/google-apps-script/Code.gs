@@ -4106,7 +4106,8 @@ function handleJuradoResultadosLogin_(payload) {
       nombre: String(row['Nombre'] || '').trim(),
       ciudad: String(row['Ciudad'] || '').trim(),
       representa: String(row['Representa'] || '').trim(),
-      evento: extractCompetenciaPreliminarKey_(row['Evento'])
+      evento: extractCompetenciaPreliminarKey_(row['Evento']),
+      fotoUrl: String(row['Foto participante enlace Drive'] || '').trim()
     },
     torneo: torneo,
     calificacion: calificacion,

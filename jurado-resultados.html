@@ -9,7 +9,7 @@
   <title>Mis resultados — Torneo sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260706picker">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260706resumen">
 </head>
 <body class="jurado-page jurado-page--resultados">
   <div class="jurado-shell">
@@ -59,10 +59,13 @@
 
     <section id="resultsSection" hidden>
       <div class="jurado-card jurado-toolbar-card">
-        <div class="jurado-toolbar">
-          <div>
-            <strong id="resultCompetidorNombre">—</strong>
-            <p id="resultCompetidorMeta" class="jurado-meta" style="margin:4px 0 0"></p>
+        <div class="jurado-toolbar jurado-toolbar--result-profile">
+          <div class="jurado-result-profile">
+            <img id="resultCompetidorFoto" class="jurado-result-profile-photo" hidden width="72" height="72" alt="">
+            <div>
+              <strong id="resultCompetidorNombre">—</strong>
+              <p id="resultCompetidorMeta" class="jurado-meta" style="margin:4px 0 0"></p>
+            </div>
           </div>
           <div class="jurado-toolbar-actions">
             <button type="button" id="resultRefreshBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Actualizar</button>
@@ -121,8 +124,8 @@
     };
     if (window.SiteLinks) SiteLinks.applyLinkElements(document);
   </script>
-  <script src="js/jurado-standards.js?v=20260706picker"></script>
-  <script src="js/preliminar-1-results.js?v=20260706picker"></script>
-  <script src="js/jurado-resultados.js?v=20260706picker"></script>
+  <script src="js/jurado-standards.js?v=20260706resumen"></script>
+  <script src="js/preliminar-1-results.js?v=20260706resumen"></script>
+  <script src="js/jurado-resultados.js?v=20260706resumen"></script>
 </body>
 </html>
