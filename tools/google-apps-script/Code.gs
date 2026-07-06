@@ -3853,10 +3853,46 @@ function handleJuradoPublishResultados_(payload) {
   };
 }
 
-function juradoResultadosTorneoStatus_(bracket, competidorId) {
-  if (!bracket || !competidorId) {
+function juradoResultadosTorneoStatus_(bracket, competidorId, row, platformCfg) {
+  if (!competidorId) {
     return { fase: '', faseLabel: 'Torneo', estado: 'pendiente', activo: false, eliminado: false };
   }
+
+  var rowEvento = extractCompetenciaPreliminarKey_(row && row['Evento']);
+  var platform = platformCfg && typeof platformCfg === 'object' ? platformCfg : {};
+  var liveEvento = extractCompetenciaPreliminarKey_(
+    platform.eventId || platform.eventName || ACTIVE_COMPETENCIA_EVENTO
+  );
+
+  /* Edición distinta a la activa (ej. P1 cuando el torneo en vivo es P2): no usar bracket.activos. */
+  if (rowEvento && liveEvento && rowEvento !== liveEvento) {
+    return {
+      fase: '',
+      faseLabel: rowEvento,
+      rondaEnFase: 0,
+      estado: 'finalizado',
+      activo: false,
+      eliminado: false,
+      edicion: rowEvento,
+      edicionEstado: 'realizada',
+      edicionActiva: liveEvento
+    };
+  }
+
+  if (!bracket) {
+    return {
+      fase: '',
+      faseLabel: liveEvento || 'Torneo',
+      rondaEnFase: 0,
+      estado: rowEvento ? 'inscrito' : 'pendiente',
+      activo: false,
+      eliminado: false,
+      edicion: rowEvento || liveEvento,
+      edicionEstado: 'activa',
+      edicionActiva: liveEvento
+    };
+  }
+
   var activos = Array.isArray(bracket.activos) ? bracket.activos : [];
   var eliminados = Array.isArray(bracket.eliminados) ? bracket.eliminados : [];
   var activo = activos.indexOf(competidorId) >= 0;
@@ -3867,13 +3903,23 @@ function juradoResultadosTorneoStatus_(bracket, competidorId) {
   if (eliminado) estado = 'eliminado';
   else if (activo) estado = 'activo';
   else if (!fase && !activos.length) estado = 'inscrito';
+  else if (!activo && !eliminado && fase) estado = 'inscrito';
+
+  if (bracket.finalizado === true || bracket.edicionEstado === 'realizada') {
+    estado = eliminado ? 'eliminado' : 'finalizado';
+    activo = false;
+  }
+
   return {
     fase: fase,
     faseLabel: juradoBracketPhaseLabel_(fase, ronda),
     rondaEnFase: ronda,
     estado: estado,
     activo: activo,
-    eliminado: eliminado
+    eliminado: eliminado,
+    edicion: rowEvento || liveEvento,
+    edicionEstado: bracket.edicionEstado || (bracket.finalizado ? 'realizada' : 'activa'),
+    edicionActiva: liveEvento
   };
 }
 
@@ -3924,8 +3970,8 @@ function handleJuradoResultadosLogin_(payload) {
   }
 
   var bracketForStatus = bracket;
-  var torneo = juradoResultadosTorneoStatus_(bracketForStatus, competidorId);
   var platform = platformCfg.data || {};
+  var torneo = juradoResultadosTorneoStatus_(bracketForStatus, competidorId, row, platform);
   var scoring = platform.scoring || {};
   var criteria = Array.isArray(scoring.criteria) && scoring.criteria.length
     ? scoring.criteria
@@ -3937,7 +3983,8 @@ function handleJuradoResultadosLogin_(payload) {
       id: competidorId,
       nombre: String(row['Nombre'] || '').trim(),
       ciudad: String(row['Ciudad'] || '').trim(),
-      representa: String(row['Representa'] || '').trim()
+      representa: String(row['Representa'] || '').trim(),
+      evento: extractCompetenciaPreliminarKey_(row['Evento'])
     },
     torneo: torneo,
     calificacion: calificacion,

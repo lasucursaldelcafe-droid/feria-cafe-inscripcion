@@ -675,6 +675,70 @@
     });
   }
 
+  /**
+   * Resultado oficial P1 para el portal de competidor (podio, semifinal, participación).
+   */
+  function getCompetitorOutcome(competidorId, documento, nombre) {
+    var targetId = resolveInscritoId(competidorId || '');
+    var doc = String(documento || '').replace(/\D/g, '');
+    var podio = getPodioFinal();
+    for (var p = 0; p < podio.length; p++) {
+      var pr = podio[p];
+      var ins = pr.inscrito || resolveInscrito(pr.participante);
+      if (pr.competidorId === targetId ||
+          (ins && doc && String(ins.documento || '').replace(/\D/g, '') === doc)) {
+        return {
+          estado: 'podio',
+          estadoLabel: pr.posicion === 1 ? 'Campeón Preliminar 1' :
+            (pr.posicion + '° lugar Preliminar 1'),
+          posicion: pr.posicion,
+          faseAlcanzada: 'final',
+          edicion: EVENT.nombre,
+          edicionEstado: 'realizada',
+          mejorTotal: pr.total
+        };
+      }
+    }
+    var rows = getEnrichedRows().filter(function (row) {
+      if (targetId && row.competidorId === targetId) return true;
+      var rowIns = row.inscrito;
+      if (rowIns && doc && String(rowIns.documento || '').replace(/\D/g, '') === doc) return true;
+      return false;
+    });
+    if (!rows.length) return null;
+    var maxEntrada = 1;
+    rows.forEach(function (r) { if (r.entrada > maxEntrada) maxEntrada = r.entrada; });
+    var best = rows.slice().sort(function (a, b) { return b.total - a.total; })[0];
+    if (maxEntrada >= 3) {
+      return {
+        estado: 'finalista',
+        estadoLabel: 'Finalista Preliminar 1',
+        faseAlcanzada: 'final',
+        edicion: EVENT.nombre,
+        edicionEstado: 'realizada',
+        mejorTotal: best ? best.total : null
+      };
+    }
+    if (maxEntrada >= 2) {
+      return {
+        estado: 'semifinalista',
+        estadoLabel: 'Semifinalista Preliminar 1',
+        faseAlcanzada: 'semifinal',
+        edicion: EVENT.nombre,
+        edicionEstado: 'realizada',
+        mejorTotal: best ? best.total : null
+      };
+    }
+    return {
+      estado: 'finalizado',
+      estadoLabel: 'Edición finalizada',
+      faseAlcanzada: 'grupos',
+      edicion: EVENT.nombre,
+      edicionEstado: 'realizada',
+      mejorTotal: best ? best.total : null
+    };
+  }
+
   function exportKit() {
     return {
       platform: 'jurado-v60',
@@ -720,6 +784,7 @@
     getPodioFinal: getPodioFinal,
     getGruposRondas: getGruposRondas,
     getRoundsForCompetidor: getRoundsForCompetidor,
+    getCompetitorOutcome: getCompetitorOutcome,
     formatDescription: formatDescription,
     buildCalificacionesStore: buildCalificacionesStore,
     buildCompetidorList: buildCompetidorList,

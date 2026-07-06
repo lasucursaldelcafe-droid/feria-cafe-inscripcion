@@ -91,17 +91,73 @@
     }
   }
 
-  function estadoLabel(estado) {
+  function estadoLabel(estado, detalle) {
+    if (detalle && detalle.estadoLabel) return detalle.estadoLabel;
     if (estado === 'activo') return 'En competencia';
-    if (estado === 'eliminado') return 'Eliminado';
+    if (estado === 'eliminado') return 'Eliminado en esta edición';
+    if (estado === 'finalizado') return 'Edición finalizada';
+    if (estado === 'podio') return 'Podio';
+    if (estado === 'finalista') return 'Finalista';
+    if (estado === 'semifinalista') return 'Semifinalista';
     if (estado === 'inscrito') return 'Inscrito';
     return 'Pendiente';
   }
 
-  function estadoClass(estado) {
+  function estadoClass(estado, detalle) {
+    if (detalle && detalle.posicion === 1) return 'jurado-result-estado--gold';
+    if (detalle && detalle.posicion === 2) return 'jurado-result-estado--silver';
+    if (detalle && detalle.posicion === 3) return 'jurado-result-estado--bronze';
     if (estado === 'activo') return 'jurado-result-estado--activo';
     if (estado === 'eliminado') return 'jurado-result-estado--out';
+    if (estado === 'podio' || estado === 'finalista') return 'jurado-result-estado--podio';
+    if (estado === 'semifinalista' || estado === 'finalizado') return 'jurado-result-estado--done';
+    if (estado === 'inscrito') return 'jurado-result-estado--inscrito';
     return 'jurado-result-estado--pending';
+  }
+
+  function isPreliminar1Evento(evento) {
+    var s = String(evento || '');
+    return /preliminar\s*1/i.test(s) || /1\.ª/i.test(s) || s === 'V60 Championship';
+  }
+
+  function resolveTorneoEstado(data) {
+    var torneo = Object.assign({}, data.torneo || {});
+    var comp = data.competidor || {};
+    var detalle = null;
+
+    var p1 = window.Preliminar1Results;
+    if (p1 && p1.getCompetitorOutcome && (isPreliminar1Evento(comp.evento) || torneo.estado === 'finalizado')) {
+      detalle = p1.getCompetitorOutcome(comp.id, comp.documento, comp.nombre);
+      if (detalle) {
+        torneo.estado = detalle.estado;
+        torneo.edicion = detalle.edicion || torneo.edicion;
+        torneo.edicionEstado = detalle.edicionEstado || 'realizada';
+        torneo.faseLabel = detalle.estadoLabel || torneo.faseLabel;
+        torneo.detalle = detalle;
+      }
+    }
+
+    if (torneo.estado === 'activo' && torneo.edicionEstado === 'realizada') {
+      torneo.estado = 'finalizado';
+    }
+
+    var cfg = window.EVENT_CONFIG;
+    if (cfg && cfg.evento1 && cfg.evento1.estado === 'realizada' && isPreliminar1Evento(comp.evento)) {
+      if (!detalle && p1 && p1.getCompetitorOutcome) {
+        detalle = p1.getCompetitorOutcome(comp.id, comp.documento, comp.nombre);
+      }
+      if (detalle) {
+        torneo.estado = detalle.estado;
+        torneo.faseLabel = detalle.estadoLabel;
+        torneo.detalle = detalle;
+      } else if (torneo.estado === 'activo') {
+        torneo.estado = 'finalizado';
+        torneo.faseLabel = 'Preliminar 1 — finalizada';
+      }
+    }
+
+    torneo.detalle = torneo.detalle || detalle;
+    return torneo;
   }
 
   function getStandards() {
@@ -256,7 +312,7 @@
     applyBranding(data.evento);
 
     var comp = data.competidor || {};
-    var torneo = data.torneo || {};
+    var torneo = resolveTorneoEstado(data);
     var blocked = data.resultadosPublicados === false && !mergeRondas(data).length;
     var scoring = data.scoring || {};
     var criteria = getCriteria(scoring);
@@ -286,11 +342,19 @@
     }
 
     var estadoEl = $('resultEstadoBadge');
-    estadoEl.textContent = estadoLabel(torneo.estado);
-    estadoEl.className = 'jurado-result-estado ' + estadoClass(torneo.estado);
-    $('resultFaseLabel').textContent = cal && cal.faseLabel
-      ? cal.faseLabel
-      : (torneo.faseLabel || 'Torneo');
+    var detalle = torneo.detalle || null;
+    estadoEl.textContent = estadoLabel(torneo.estado, detalle);
+    estadoEl.className = 'jurado-result-estado ' + estadoClass(torneo.estado, detalle);
+    $('resultFaseLabel').textContent = (cal && cal.faseLabel) || torneo.faseLabel || 'Torneo';
+
+    var edicionMeta = $('resultEdicionMeta');
+    if (edicionMeta) {
+      var edTxt = torneo.edicion ? String(torneo.edicion) : '';
+      if (torneo.edicionEstado === 'realizada' && edTxt) edTxt += ' · finalizada';
+      else if (torneo.edicionEstado === 'activa' && edTxt) edTxt += ' · en curso';
+      edicionMeta.textContent = edTxt;
+      edicionMeta.hidden = !edTxt;
+    }
 
     var total = cal && cal.sumaTotal != null ? cal.sumaTotal + ' pts' : '—';
     $('resultTotalPts').textContent = total;

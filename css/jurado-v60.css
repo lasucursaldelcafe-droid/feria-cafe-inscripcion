@@ -3223,6 +3223,42 @@ body.jurado-page--resultados .jurado-shell {
   border: 1px solid var(--jurado-border);
 }
 
+.jurado-result-estado--done {
+  background: rgba(129, 199, 132, 0.15);
+  color: #c8e6c9;
+  border: 1px solid rgba(129, 199, 132, 0.35);
+}
+
+.jurado-result-estado--inscrito {
+  background: rgba(100, 181, 246, 0.15);
+  color: #bbdefb;
+  border: 1px solid rgba(100, 181, 246, 0.35);
+}
+
+.jurado-result-estado--podio,
+.jurado-result-estado--gold {
+  background: rgba(255, 215, 64, 0.2);
+  color: #ffe082;
+  border: 1px solid rgba(255, 215, 64, 0.4);
+}
+
+.jurado-result-estado--silver {
+  background: rgba(189, 189, 189, 0.2);
+  color: #e0e0e0;
+  border: 1px solid rgba(189, 189, 189, 0.35);
+}
+
+.jurado-result-estado--bronze {
+  background: rgba(188, 140, 96, 0.25);
+  color: #ffcc80;
+  border: 1px solid rgba(188, 140, 96, 0.4);
+}
+
+.jurado-result-edicion-meta {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+}
+
 .jurado-result-fase {
   margin: 0;
   font-size: 1rem;
