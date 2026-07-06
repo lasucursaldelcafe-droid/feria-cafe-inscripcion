@@ -97,21 +97,38 @@
 
   function renderCarousel(carrusel) {
     if (!carrusel || !carrusel.length) return '';
-    var cards = carrusel.map(function (row) {
-      var meta = row.representa || row.ciudad || '';
-      return '<article class="comp-showcase__card">' +
-        '<div class="comp-showcase__card-photo">' + photoHtml(row.fotoUrl, row.nombre) + '</div>' +
-        '<div class="comp-showcase__card-body">' +
-        '<h4 class="comp-showcase__card-name">' + escapeHtml(row.nombre) + '</h4>' +
-        (meta ? '<p class="comp-showcase__card-meta">' + escapeHtml(meta) + '</p>' : '') +
-        '</div></article>';
-    }).join('');
-    var dup = cards;
+    var SC = global.ShowcaseCarousel;
+    var cards = SC && SC.loopHtml
+      ? SC.loopHtml(carrusel, function (row) {
+        var meta = row.representa || row.ciudad || '';
+        return '<article class="comp-showcase__card">' +
+          '<div class="comp-showcase__card-photo">' + photoHtml(row.fotoUrl, row.nombre) + '</div>' +
+          '<div class="comp-showcase__card-body">' +
+          '<h4 class="comp-showcase__card-name">' + escapeHtml(row.nombre) + '</h4>' +
+          (meta ? '<p class="comp-showcase__card-meta">' + escapeHtml(meta) + '</p>' : '') +
+          '</div></article>';
+      })
+      : '';
+    if (!cards) {
+      var dup = carrusel.map(function (row) {
+        var meta = row.representa || row.ciudad || '';
+        return '<article class="comp-showcase__card">' +
+          '<div class="comp-showcase__card-photo">' + photoHtml(row.fotoUrl, row.nombre) + '</div>' +
+          '<div class="comp-showcase__card-body">' +
+          '<h4 class="comp-showcase__card-name">' + escapeHtml(row.nombre) + '</h4>' +
+          (meta ? '<p class="comp-showcase__card-meta">' + escapeHtml(meta) + '</p>' : '') +
+          '</div></article>';
+      }).join('');
+      cards = dup + dup;
+    }
+    var animateCls = global.ShowcaseCarousel && !global.ShowcaseCarousel.prefersReducedMotion()
+      ? ' comp-showcase__carousel-track--animate'
+      : '';
     return '<section class="comp-showcase__carousel-wrap" aria-label="Competidores">' +
       '<h3 class="comp-showcase__section-title">Competidores</h3>' +
       '<div class="comp-showcase__carousel-viewport">' +
-      '<div class="comp-showcase__carousel-track" data-comp-carousel-track>' +
-      cards + dup +
+      '<div class="comp-showcase__carousel-track' + animateCls + '" data-comp-carousel-track>' +
+      cards +
       '</div></div></section>';
   }
 
@@ -213,6 +230,10 @@
   }
 
   function mountCarouselMotion(root) {
+    if (global.ShowcaseCarousel && global.ShowcaseCarousel.mount) {
+      global.ShowcaseCarousel.mount(root);
+      return;
+    }
     var track = root.querySelector('[data-comp-carousel-track]');
     if (!track || track.children.length < 2) return;
     var reduced = global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -242,6 +263,9 @@
     root.innerHTML = html;
     if (section) section.hidden = false;
     mountCarouselMotion(root);
+    global.requestAnimationFrame(function () {
+      mountCarouselMotion(root);
+    });
   }
 
   function load() {

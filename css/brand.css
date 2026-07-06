@@ -5915,6 +5915,7 @@ textarea.has-value {
 
 .comp-showcase__carousel-track--animate {
   animation: comp-showcase-scroll 42s linear infinite;
+  will-change: transform;
 }
 
 .comp-showcase__carousel-track--animate:hover {
@@ -6114,6 +6115,7 @@ textarea.has-value {
 
 .marcas-showcase__carousel-track--animate {
   animation: marcas-showcase-scroll 38s linear infinite;
+  will-change: transform;
 }
 
 .marcas-showcase__carousel-track--animate:hover {

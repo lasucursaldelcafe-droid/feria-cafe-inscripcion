@@ -99,11 +99,20 @@
       return '<section class="marcas-showcase__carousel-wrap" aria-label="' + escapeHtml(label) + '">' +
         '<p class="marcas-showcase__empty">Próximamente más marcas confirmadas.</p></section>';
     }
-    var cards = items.map(renderBrandCard).join('');
+    var cards;
+    if (global.ShowcaseCarousel && global.ShowcaseCarousel.loopHtml) {
+      cards = global.ShowcaseCarousel.loopHtml(items, renderBrandCard);
+    } else {
+      var base = items.map(renderBrandCard).join('');
+      cards = base + base;
+    }
+    var animateCls = global.ShowcaseCarousel && !global.ShowcaseCarousel.prefersReducedMotion()
+      ? ' marcas-showcase__carousel-track--animate'
+      : '';
     return '<section class="marcas-showcase__carousel-wrap" aria-label="' + escapeHtml(label) + '">' +
       '<div class="marcas-showcase__carousel-viewport">' +
-      '<div class="marcas-showcase__carousel-track" data-marcas-carousel-track>' +
-      cards + cards +
+      '<div class="marcas-showcase__carousel-track' + animateCls + '" data-marcas-carousel-track>' +
+      cards +
       '</div></div></section>';
   }
 
@@ -222,6 +231,10 @@
   }
 
   function mountCarouselMotion(root) {
+    if (global.ShowcaseCarousel && global.ShowcaseCarousel.mount) {
+      global.ShowcaseCarousel.mount(root);
+      return;
+    }
     root.querySelectorAll('[data-marcas-carousel-track]').forEach(function (track) {
       if (track.children.length < 2) return;
       var reduced = global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -287,6 +300,9 @@
     bindTabs(root);
     bindLogoFallbacks(root);
     mountCarouselMotion(root);
+    global.requestAnimationFrame(function () {
+      mountCarouselMotion(root);
+    });
   }
 
   function load() {
