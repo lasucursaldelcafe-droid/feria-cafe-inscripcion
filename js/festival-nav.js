@@ -67,6 +67,8 @@
     var visitante = feria.visitante || {};
 
     if (fest.slogan) setText('festivalSlogan', fest.slogan);
+    if (fest.heroBandKicker) setText('festivalHeroBandKicker', fest.heroBandKicker);
+    if (fest.exploreIntro) setText('festivalExploreIntro', fest.exploreIntro);
     var page = document.body.getAttribute('data-festival-page');
     if (page === 'evento' && fest.mensajeEvento) {
       setText('festivalMensaje', fest.mensajeEvento);
@@ -179,6 +181,22 @@
         li.textContent = item;
         premiosList.appendChild(li);
       });
+    }
+
+    var highlightsRoot = document.getElementById('festivalHighlights');
+    if (highlightsRoot && fest.highlights && fest.highlights.length) {
+      highlightsRoot.innerHTML = fest.highlights
+        .map(function (item) {
+          return (
+            '<li class="bizcard__highlight">' +
+            '<span class="bizcard__highlight-icon" aria-hidden="true">' + (item.icon || '•') + '</span>' +
+            '<div class="bizcard__highlight-body">' +
+            '<strong class="bizcard__highlight-title">' + item.title + '</strong>' +
+            '<span class="bizcard__highlight-text">' + item.text + '</span>' +
+            '</div></li>'
+          );
+        })
+        .join('');
     }
   }
 
