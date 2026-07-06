@@ -294,6 +294,28 @@
     ];
   }
 
+  function mergeRoundFields(apiRound, localRound) {
+    if (!localRound) return apiRound;
+    if (!apiRound) return localRound;
+    var out = Object.assign({}, apiRound);
+    var apiJudges = out.judges || {};
+    var hasApiJudges = !!(
+      (apiJudges.j1 && apiJudges.j1.scores) ||
+      (apiJudges.j2 && apiJudges.j2.scores) ||
+      (apiJudges.j3 && apiJudges.j3.scores)
+    );
+    if (!hasApiJudges && localRound.judges) out.judges = localRound.judges;
+    out.meta = Object.assign({}, localRound.meta || {}, out.meta || {});
+    if (out.sumaTotal == null && localRound.sumaTotal != null) out.sumaTotal = localRound.sumaTotal;
+    if (out.promedio == null && localRound.promedio != null) out.promedio = localRound.promedio;
+    if (!out.faseLabel && localRound.faseLabel) out.faseLabel = localRound.faseLabel;
+    if (!out.notas && localRound.notas) out.notas = localRound.notas;
+    if ((!out.notasPorJuez || !Object.keys(out.notasPorJuez).length) && localRound.notasPorJuez) {
+      out.notasPorJuez = localRound.notasPorJuez;
+    }
+    return out;
+  }
+
   function mergeRondas(data) {
     var apiRondas = Array.isArray(data.rondas) ? data.rondas.slice() : [];
     if (!apiRondas.length && data.calificacion) apiRondas.push(data.calificacion);
@@ -302,12 +324,21 @@
     if (p1 && p1.getRoundsForCompetidor && data.competidor) {
       var comp = data.competidor;
       var p1Rounds = p1.getRoundsForCompetidor(comp.id, comp.documento, comp.nombre) || [];
-      var keys = {};
-      apiRondas.forEach(function (r) {
-        if (r && r.roundKey) keys[r.roundKey] = true;
+      var byKey = {};
+      apiRondas.forEach(function (r, idx) {
+        if (r && r.roundKey) byKey[r.roundKey] = idx;
       });
-      p1Rounds.forEach(function (r) {
-        if (!keys[r.roundKey]) apiRondas.push(r);
+      p1Rounds.forEach(function (localRound) {
+        if (!localRound || !localRound.roundKey) return;
+        if (byKey[localRound.roundKey] != null) {
+          apiRondas[byKey[localRound.roundKey]] = mergeRoundFields(
+            apiRondas[byKey[localRound.roundKey]],
+            localRound
+          );
+        } else {
+          apiRondas.push(localRound);
+          byKey[localRound.roundKey] = apiRondas.length - 1;
+        }
       });
     }
 
@@ -352,11 +383,24 @@
   function resolveRoundOpponent(round, comp) {
     if (!round) return null;
     if (round.meta && round.meta.oponente) return round.meta.oponente;
+
+    var planilla = round.meta && round.meta.planilla;
+    var entrada = round.meta && round.meta.entrada;
     var p1 = window.Preliminar1Results;
-    if (!p1 || !p1.getRoundOpponent || !round.meta) return null;
-    var planilla = round.meta.planilla;
-    var entrada = round.meta.entrada;
-    if (!planilla || !entrada) return null;
+
+    if ((!planilla || !entrada) && p1 && p1.getRoundsForCompetidor && comp) {
+      var localRounds = p1.getRoundsForCompetidor(comp.id, comp.documento, comp.nombre) || [];
+      var match = localRounds.find(function (lr) {
+        return lr.roundKey && lr.roundKey === round.roundKey;
+      });
+      if (match && match.meta) {
+        planilla = match.meta.planilla || planilla;
+        entrada = match.meta.entrada != null ? match.meta.entrada : entrada;
+        if (match.meta.oponente) return match.meta.oponente;
+      }
+    }
+
+    if (!p1 || !p1.getRoundOpponent || !planilla || !entrada) return null;
     return p1.getRoundOpponent(planilla, entrada);
   }
 
@@ -388,6 +432,155 @@
       if (txt) items.push({ label: 'Juez ' + j, text: txt });
     }
     return items;
+  }
+
+  function hasJudgesData(round) {
+    var judges = round && round.judges;
+    if (!judges) return false;
+    return !!(
+      (judges.j1 && judges.j1.scores) ||
+      (judges.j2 && judges.j2.scores) ||
+      (judges.j3 && judges.j3.scores)
+    );
+  }
+
+  function judgeCount(scoring) {
+    return Math.max(1, Math.min(5, parseInt(scoring && scoring.jueces, 10) || 3));
+  }
+
+  function resolveRankingLabel(comp) {
+    var p1 = window.Preliminar1Results;
+    if (!p1 || !p1.getRankingConsolidado || !comp) return '';
+    var doc = normalizeDoc(comp.documento);
+    var list = p1.getRankingConsolidado() || [];
+    for (var i = 0; i < list.length; i++) {
+      var row = list[i];
+      if (comp.id && row.competidorId === comp.id) {
+        return row.posicion + '° lugar en Preliminar 1';
+      }
+      if (doc && row.inscrito && normalizeDoc(row.inscrito.documento) === doc) {
+        return row.posicion + '° lugar en Preliminar 1';
+      }
+    }
+    return '';
+  }
+
+  function renderJudgesGrid(round, scoring) {
+    var jmax = judgeCount(scoring);
+    var html = '<div class="jurado-result-judges-grid">';
+    for (var j = 1; j <= jmax; j++) {
+      var judge = round.judges && round.judges['j' + j];
+      var done = judge && judge.scores;
+      html += '<article class="jurado-result-judge-card' +
+        (done ? ' jurado-result-judge-card--done' : ' jurado-result-judge-card--pending') + '">';
+      html += '<h3>Juez ' + j + '</h3>';
+      if (done && judge.subtotal != null) {
+        html += '<p class="jurado-result-subtotal">Subtotal: <strong>' + judge.subtotal + '</strong></p>';
+      } else {
+        html += '<span class="jurado-result-judge-badge jurado-result-judge-badge--pending">Sin detalle</span>';
+      }
+      html += '</article>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function renderCriteriaTable(round, criteria, scoring) {
+    var std = getStandards();
+    if (!hasJudgesData(round)) return '';
+    var jmax = judgeCount(scoring);
+    var scaleMin = scoring.scaleMin || 1;
+    var scaleMax = scoring.scaleMax || 5;
+
+    var html = '<div class="jurado-result-criteria-table-wrap"><table class="jurado-result-criteria-table"><thead><tr>';
+    html += '<th>Parámetro</th>';
+    for (var jh = 1; jh <= jmax; jh++) html += '<th>J' + jh + '</th>';
+    html += '<th>Prom.</th><th>Nivel</th></tr></thead><tbody>';
+
+    criteria.forEach(function (c) {
+      var avg = std && std.averageCriterionScores
+        ? std.averageCriterionScores(round.judges, c.key, jmax)
+        : null;
+      var obs = std && std.criterionObservation && avg != null
+        ? std.criterionObservation(avg, c, scaleMin, scaleMax)
+        : null;
+      var bandClass = obs && obs.band ? ' jurado-result-crit-obs--' + obs.band.level : '';
+      html += '<tr><td><strong>' + escapeHtml(c.label) + '</strong>';
+      if (c.desc) {
+        html += '<br><span class="jurado-result-crit-desc">' + escapeHtml(c.desc) + '</span>';
+      }
+      html += '</td>';
+      for (var j = 1; j <= jmax; j++) {
+        var g = round.judges && round.judges['j' + j];
+        var val = g && g.scores ? g.scores[c.key] : '—';
+        html += '<td class="jurado-result-crit-num">' + (val != null && val !== '' ? val : '—') + '</td>';
+      }
+      html += '<td class="jurado-result-crit-num">' + (avg != null ? avg.toFixed(1) : '—') + '</td>';
+      html += '<td class="jurado-result-crit-obs' + bandClass + '">';
+      if (obs && obs.band) {
+        html += '<span class="jurado-result-crit-band">' + escapeHtml(obs.band.label) + '</span>';
+      }
+      html += '</td></tr>';
+    });
+
+    html += '</tbody><tfoot><tr><th>Subtotal</th>';
+    for (var s = 1; s <= jmax; s++) {
+      var gj = round.judges && round.judges['j' + s];
+      html += '<td><strong>' + (gj && gj.subtotal != null ? gj.subtotal : '—') + '</strong></td>';
+    }
+    html += '<td colspan="2"><strong>' + (round.sumaTotal != null ? round.sumaTotal + ' pts' : '—') + '</strong></td>';
+    html += '</tr></tfoot></table></div>';
+    return html;
+  }
+
+  function renderRoundSummaryText(round, criteria, scoring) {
+    var std = getStandards();
+    if (!std || !std.roundSummaryObservation || !hasJudgesData(round)) return '';
+    var text = std.roundSummaryObservation(round, criteria, scoring.scaleMin, scoring.scaleMax);
+    if (!text) return '';
+    return '<div class="jurado-card jurado-result-round-summary"><h3>Resumen del jurado</h3><p>' +
+      escapeHtml(text) + '</p></div>';
+  }
+
+  function buildRoundDetailInner(round, criteria, scoring, comp) {
+    var entrada = round.meta && round.meta.entrada;
+    var oponente = resolveRoundOpponent(round, comp);
+    var vsText = opponentLineText(oponente, entrada);
+    var html = '';
+
+    if (vsText) {
+      html += '<div class="jurado-card jurado-result-vs-card"><p class="jurado-result-vs-line">' +
+        escapeHtml(vsText) + '</p></div>';
+    }
+
+    if (hasJudgesData(round)) {
+      html += '<div class="jurado-card"><div class="jurado-card-head"><h2>Puntajes por juez</h2></div>' +
+        renderJudgesGrid(round, scoring) + '</div>';
+      html += '<div class="jurado-card"><div class="jurado-card-head"><h2>Desglose por parámetro</h2>' +
+        '<p class="jurado-hint">Escala ' + (scoring.scaleMin || 1) + '–' + (scoring.scaleMax || 5) +
+        ' por criterio SCA / WBrC.</p></div>' +
+        renderCriteriaTable(round, criteria, scoring) + '</div>';
+      html += renderRoundSummaryText(round, criteria, scoring);
+    }
+
+    var bands = renderBandSummary(round, criteria, scoring);
+    if (bands) {
+      html += '<div class="jurado-card"><div class="jurado-card-head"><h2>Perfil sensorial</h2>' +
+        '<p class="jurado-hint">Resumen por estándar V60 según el promedio de jueces.</p></div>' +
+        bands + '</div>';
+    }
+
+    if (hasJudgeObservations(round)) {
+      var obsItems = collectJudgeObservations(round);
+      html += '<div class="jurado-card"><div class="jurado-card-head"><h2>Observaciones del jurado</h2></div>' +
+        '<ul class="jurado-result-obs-list">';
+      obsItems.forEach(function (item) {
+        html += '<li><strong>' + escapeHtml(item.label) + ':</strong> ' + escapeHtml(item.text) + '</li>';
+      });
+      html += '</ul></div>';
+    }
+
+    return html;
   }
 
   function renderBandSummary(round, criteria, scoring) {
@@ -464,40 +657,41 @@
       btn.addEventListener('click', function () {
         selectedRoundIdx = parseInt(btn.getAttribute('data-round-idx'), 10) || 0;
         if (currentData) renderResults(currentData);
+        var block = document.getElementById('round-block-' + selectedRoundIdx);
+        if (block && block.scrollIntoView) block.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
   }
 
-  function renderRoundDetail(round, criteria, scoring, comp) {
+  function renderRoundDetail(rondas, criteria, scoring, comp) {
     var wrap = $('resultRoundDetailWrap');
     if (!wrap) return;
-    if (!round) {
+    if (!rondas || !rondas.length) {
       wrap.innerHTML = '<p class="jurado-hint">Aún no hay calificaciones publicadas.</p>';
       return;
     }
 
-    var entrada = round.meta && round.meta.entrada;
-    var oponente = resolveRoundOpponent(round, comp);
-    var vsText = opponentLineText(oponente, entrada);
-    var vsHtml = vsText
-      ? '<div class="jurado-card jurado-result-vs-card"><p class="jurado-result-vs-line">' + escapeHtml(vsText) + '</p></div>'
-      : '';
-
-    var obsItems = hasJudgeObservations(round) ? collectJudgeObservations(round) : [];
-    var obsHtml = '';
-    if (obsItems.length) {
-      obsHtml = '<div class="jurado-card"><div class="jurado-card-head"><h2>Observaciones del jurado</h2></div><ul class="jurado-result-obs-list">';
-      obsItems.forEach(function (item) {
-        obsHtml += '<li><strong>' + escapeHtml(item.label) + ':</strong> ' + escapeHtml(item.text) + '</li>';
-      });
-      obsHtml += '</ul></div>';
+    if (rondas.length === 1) {
+      wrap.innerHTML = buildRoundDetailInner(rondas[0], criteria, scoring, comp);
+      return;
     }
 
-    var bandsHtml = '<div class="jurado-card"><div class="jurado-card-head"><h2>Perfil sensorial</h2>' +
-      '<p class="jurado-hint">Resumen por estándar V60 — sin desglose numérico por parámetro.</p></div>' +
-      renderBandSummary(round, criteria, scoring) + '</div>';
-
-    wrap.innerHTML = vsHtml + bandsHtml + obsHtml;
+    var html = '<div class="jurado-result-all-rounds">';
+    rondas.forEach(function (round, idx) {
+      var isActive = idx === selectedRoundIdx;
+      html += '<section class="jurado-result-round-block' +
+        (isActive ? ' jurado-result-round-block--active' : '') + '" id="round-block-' + idx + '">';
+      html += '<header class="jurado-result-round-block-head">';
+      html += '<h2>' + escapeHtml(round.faseLabel || roundShortLabel(round, idx)) + '</h2>';
+      html += '<span class="jurado-result-round-block-total">' +
+        (round.sumaTotal != null ? round.sumaTotal + ' pts' : '—') + '</span>';
+      html += '</header>';
+      html += '<div class="jurado-result-round-inner">' +
+        buildRoundDetailInner(round, criteria, scoring, comp) + '</div>';
+      html += '</section>';
+    });
+    html += '</div>';
+    wrap.innerHTML = html;
   }
 
   function renderResults(data) {
@@ -516,10 +710,12 @@
     var cal = blocked ? null : (rondas[selectedRoundIdx >= 0 ? selectedRoundIdx : rondas.length - 1] || null);
 
     $('resultCompetidorNombre').textContent = comp.nombre || '—';
-    $('resultCompetidorMeta').textContent = [
+    var metaParts = [
       comp.ciudad ? 'Ciudad: ' + comp.ciudad : '',
-      comp.representa ? 'Representa: ' + comp.representa : ''
-    ].filter(Boolean).join(' · ');
+      comp.representa ? 'Representa: ' + comp.representa : '',
+      resolveRankingLabel(comp)
+    ].filter(Boolean);
+    $('resultCompetidorMeta').textContent = metaParts.join(' · ');
     renderCompetidorPhoto(comp);
 
     var blockedBox = $('resultBlockedBox');
@@ -565,12 +761,12 @@
     }
 
     renderRoundPicker(rondas);
-    renderRoundDetail(cal, criteria, scoring, comp);
+    renderRoundDetail(rondas, criteria, scoring, comp);
 
     var roundsCount = $('resultRoundsCount');
     if (roundsCount) {
       roundsCount.textContent = rondas.length > 1
-        ? rondas.length + ' rondas — elige una para ver enfrentamiento y perfil sensorial'
+        ? rondas.length + ' rondas publicadas — desplázate para ver cada fase'
         : '';
       roundsCount.hidden = rondas.length <= 1;
     }
