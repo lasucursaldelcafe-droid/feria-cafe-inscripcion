@@ -830,6 +830,22 @@
   color: var(--admin-text-muted);
 }
 
+.admin-competencia-edition-hint {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  background: rgba(255, 193, 7, 0.12);
+  border: 1px solid rgba(255, 193, 7, 0.35);
+  color: #5c4a00;
+}
+
+.admin-competencia-edition-hint .admin-btn {
+  margin-top: 0.25rem;
+  margin-right: 0.35rem;
+}
+
 .admin-jurado-publish-actions {
   display: flex;
   flex-wrap: wrap;
