@@ -640,6 +640,107 @@
     };
   }
 
+  function getRoundsForCompetidor(competidorId, documento, nombre) {
+    var targetId = resolveInscritoId(competidorId || '');
+    var doc = String(documento || '').replace(/\D/g, '');
+    var rows = getEnrichedRows().filter(function (row) {
+      if (targetId && row.competidorId === targetId) return true;
+      var ins = row.inscrito;
+      if (ins && doc && String(ins.documento || '').replace(/\D/g, '') === doc) return true;
+      if (nombre && ins && String(ins.nombre || '').toLowerCase().indexOf(String(nombre).toLowerCase().slice(0, 8)) >= 0) {
+        return true;
+      }
+      return false;
+    });
+    return rows.map(function (row) {
+      var suma = row.j1 + row.j2 + row.j3;
+      return {
+        roundKey: 'preliminar1|entrada' + row.entrada,
+        faseLabel: 'Preliminar 1 — ' + entradaLabel(row.entrada),
+        judges: row.judges,
+        notasPorJuez: { j1: '', j2: '', j3: '' },
+        notas: '',
+        sumaTotal: suma,
+        promedio: Math.round((suma / 3) * 10) / 10,
+        publicadoAt: '2026-07-04T18:00:00.000Z',
+        meta: {
+          preliminar: 1,
+          entrada: row.entrada,
+          planilla: row.participante,
+          imported: true
+        }
+      };
+    }).sort(function (a, b) {
+      var ea = (a.meta && a.meta.entrada) || 0;
+      var eb = (b.meta && b.meta.entrada) || 0;
+      return ea - eb;
+    });
+  }
+
+  /**
+   * Resultado oficial P1 para el portal de competidor (podio, semifinal, participación).
+   */
+  function getCompetitorOutcome(competidorId, documento, nombre) {
+    var targetId = resolveInscritoId(competidorId || '');
+    var doc = String(documento || '').replace(/\D/g, '');
+    var podio = getPodioFinal();
+    for (var p = 0; p < podio.length; p++) {
+      var pr = podio[p];
+      var ins = pr.inscrito || resolveInscrito(pr.participante);
+      if (pr.competidorId === targetId ||
+          (ins && doc && String(ins.documento || '').replace(/\D/g, '') === doc)) {
+        return {
+          estado: 'podio',
+          estadoLabel: pr.posicion === 1 ? 'Campeón Preliminar 1' :
+            (pr.posicion + '° lugar Preliminar 1'),
+          posicion: pr.posicion,
+          faseAlcanzada: 'final',
+          edicion: EVENT.nombre,
+          edicionEstado: 'realizada',
+          mejorTotal: pr.total
+        };
+      }
+    }
+    var rows = getEnrichedRows().filter(function (row) {
+      if (targetId && row.competidorId === targetId) return true;
+      var rowIns = row.inscrito;
+      if (rowIns && doc && String(rowIns.documento || '').replace(/\D/g, '') === doc) return true;
+      return false;
+    });
+    if (!rows.length) return null;
+    var maxEntrada = 1;
+    rows.forEach(function (r) { if (r.entrada > maxEntrada) maxEntrada = r.entrada; });
+    var best = rows.slice().sort(function (a, b) { return b.total - a.total; })[0];
+    if (maxEntrada >= 3) {
+      return {
+        estado: 'finalista',
+        estadoLabel: 'Finalista Preliminar 1',
+        faseAlcanzada: 'final',
+        edicion: EVENT.nombre,
+        edicionEstado: 'realizada',
+        mejorTotal: best ? best.total : null
+      };
+    }
+    if (maxEntrada >= 2) {
+      return {
+        estado: 'semifinalista',
+        estadoLabel: 'Semifinalista Preliminar 1',
+        faseAlcanzada: 'semifinal',
+        edicion: EVENT.nombre,
+        edicionEstado: 'realizada',
+        mejorTotal: best ? best.total : null
+      };
+    }
+    return {
+      estado: 'finalizado',
+      estadoLabel: 'Edición finalizada',
+      faseAlcanzada: 'grupos',
+      edicion: EVENT.nombre,
+      edicionEstado: 'realizada',
+      mejorTotal: best ? best.total : null
+    };
+  }
+
   function exportKit() {
     return {
       platform: 'jurado-v60',
@@ -684,6 +785,8 @@
     getRankingConsolidado: getRankingConsolidado,
     getPodioFinal: getPodioFinal,
     getGruposRondas: getGruposRondas,
+    getRoundsForCompetidor: getRoundsForCompetidor,
+    getCompetitorOutcome: getCompetitorOutcome,
     formatDescription: formatDescription,
     buildCalificacionesStore: buildCalificacionesStore,
     buildCompetidorList: buildCompetidorList,

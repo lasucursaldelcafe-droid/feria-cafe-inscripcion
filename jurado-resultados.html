@@ -9,7 +9,7 @@
   <title>Mis resultados — Torneo sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260707compact2">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260706estado">
 </head>
 <body class="jurado-page jurado-page--resultados">
   <div class="jurado-shell">
@@ -79,14 +79,19 @@
       </div>
 
       <div id="resultScoresWrap">
+        <p id="resultRoundsCount" class="jurado-meta jurado-result-rounds-count" hidden></p>
+
+        <div id="resultRoundsTabs" class="jurado-result-rounds-tabs" hidden role="tablist" aria-label="Rondas"></div>
+
         <div class="jurado-card jurado-result-summary">
           <div class="jurado-result-summary-grid">
             <div class="jurado-result-stat">
               <span class="jurado-result-stat-label">Estado</span>
               <p><span id="resultEstadoBadge" class="jurado-result-estado">—</span></p>
+              <p id="resultEdicionMeta" class="jurado-meta jurado-result-edicion-meta" hidden></p>
             </div>
             <div class="jurado-result-stat">
-              <span class="jurado-result-stat-label">Fase</span>
+              <span class="jurado-result-stat-label">Ronda</span>
               <p id="resultFaseLabel" class="jurado-result-fase">—</p>
             </div>
             <div class="jurado-result-stat">
@@ -97,10 +102,20 @@
           </div>
         </div>
 
+        <div id="resultRoundSummary" class="jurado-card jurado-result-round-summary" hidden></div>
+
+        <div class="jurado-card">
+          <div class="jurado-card-head">
+            <h2>Calificación por parámetro</h2>
+            <p class="jurado-hint">Desglose según los estándares sensoriales del reglamento V60 Championship (escala 1–5).</p>
+          </div>
+          <div id="resultCriteriaWrap"></div>
+        </div>
+
         <div class="jurado-card">
           <div class="jurado-card-head">
             <h2>Calificación por juez</h2>
-            <p class="jurado-hint">Desglose por criterios sensoriales de la ronda publicada.</p>
+            <p class="jurado-hint">Subtotales y observaciones individuales de cada juez en la ronda seleccionada.</p>
           </div>
           <div id="resultJudgesGrid" class="jurado-result-judges-grid"></div>
         </div>
@@ -121,7 +136,7 @@
     </footer>
   </div>
 
-  <script src="js/event-config.js?v=20260705jurado24"></script>
+  <script src="js/event-config.js?v=20260706estado"></script>
   <script src="js/site-links.js?v=20260705jurado24"></script>
   <script>
     window.SHEETS_CONFIG = window.SHEETS_CONFIG || {
@@ -129,6 +144,8 @@
     };
     if (window.SiteLinks) SiteLinks.applyLinkElements(document);
   </script>
-  <script src="js/jurado-resultados.js?v=20260705jurado24"></script>
+  <script src="js/jurado-standards.js?v=20260706estado"></script>
+  <script src="js/preliminar-1-results.js?v=20260706estado"></script>
+  <script src="js/jurado-resultados.js?v=20260706estado"></script>
 </body>
 </html>

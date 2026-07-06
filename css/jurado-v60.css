@@ -3223,6 +3223,42 @@ body.jurado-page--resultados .jurado-shell {
   border: 1px solid var(--jurado-border);
 }
 
+.jurado-result-estado--done {
+  background: rgba(129, 199, 132, 0.15);
+  color: #c8e6c9;
+  border: 1px solid rgba(129, 199, 132, 0.35);
+}
+
+.jurado-result-estado--inscrito {
+  background: rgba(100, 181, 246, 0.15);
+  color: #bbdefb;
+  border: 1px solid rgba(100, 181, 246, 0.35);
+}
+
+.jurado-result-estado--podio,
+.jurado-result-estado--gold {
+  background: rgba(255, 215, 64, 0.2);
+  color: #ffe082;
+  border: 1px solid rgba(255, 215, 64, 0.4);
+}
+
+.jurado-result-estado--silver {
+  background: rgba(189, 189, 189, 0.2);
+  color: #e0e0e0;
+  border: 1px solid rgba(189, 189, 189, 0.35);
+}
+
+.jurado-result-estado--bronze {
+  background: rgba(188, 140, 96, 0.25);
+  color: #ffcc80;
+  border: 1px solid rgba(188, 140, 96, 0.4);
+}
+
+.jurado-result-edicion-meta {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+}
+
 .jurado-result-fase {
   margin: 0;
   font-size: 1rem;
@@ -3398,6 +3434,159 @@ body.jurado-page--resultados .jurado-shell {
   margin: 0 0 10px;
   font-size: 1.15rem;
   font-family: 'Playfair Display', Georgia, serif;
+}
+
+.jurado-result-rounds-count {
+  text-align: center;
+  margin: 0 0 12px;
+  color: var(--jurado-accent-light);
+}
+
+.jurado-result-rounds-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.jurado-result-round-tab {
+  flex: 1 1 auto;
+  min-width: 120px;
+  padding: 10px 12px;
+  border: 1px solid var(--jurado-border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.jurado-result-round-tab:hover {
+  border-color: rgba(201, 162, 39, 0.45);
+}
+
+.jurado-result-round-tab--active {
+  border-color: var(--jurado-accent);
+  background: rgba(201, 162, 39, 0.12);
+  color: #fff;
+}
+
+.jurado-result-round-tab-pts {
+  display: block;
+  font-weight: 500;
+  font-size: 0.75rem;
+  opacity: 0.75;
+  margin-top: 2px;
+}
+
+.jurado-result-round-summary {
+  border-color: rgba(201, 162, 39, 0.3);
+  background: rgba(201, 162, 39, 0.06);
+}
+
+.jurado-result-round-summary h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.jurado-result-round-summary p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.jurado-result-criteria-table-wrap {
+  overflow-x: auto;
+  margin: 0 -4px;
+}
+
+.jurado-result-criteria-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.jurado-result-criteria-table th,
+.jurado-result-criteria-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--jurado-border);
+  vertical-align: top;
+  text-align: left;
+}
+
+.jurado-result-criteria-table th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
+}
+
+.jurado-result-crit-desc {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  max-width: 140px;
+}
+
+.jurado-result-crit-num {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.jurado-result-crit-obs {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  min-width: 180px;
+}
+
+.jurado-result-crit-band {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-right: 4px;
+}
+
+.jurado-result-crit-obs--excelente .jurado-result-crit-band {
+  background: rgba(76, 175, 80, 0.25);
+  color: #a5d6a7;
+}
+
+.jurado-result-crit-obs--muy_bueno .jurado-result-crit-band {
+  background: rgba(129, 199, 132, 0.2);
+  color: #c8e6c9;
+}
+
+.jurado-result-crit-obs--competitivo .jurado-result-crit-band {
+  background: rgba(201, 162, 39, 0.2);
+  color: var(--jurado-accent-light);
+}
+
+.jurado-result-crit-obs--en_desarrollo .jurado-result-crit-band {
+  background: rgba(255, 152, 0, 0.2);
+  color: #ffcc80;
+}
+
+.jurado-result-crit-obs--por_fortalecer .jurado-result-crit-band {
+  background: rgba(244, 67, 54, 0.2);
+  color: #ef9a9a;
+}
+
+.jurado-result-judge-note {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px dashed var(--jurado-border);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .jurado-page-footer {

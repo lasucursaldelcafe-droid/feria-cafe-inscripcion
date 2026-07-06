@@ -1796,15 +1796,33 @@
     Object.keys(raw).forEach(function (id) {
       var entry = raw[id];
       if (!entry || typeof entry !== 'object') return;
-      out[id] = {
-        roundKey: String(entry.roundKey || ''),
-        faseLabel: String(entry.faseLabel || ''),
-        publicadoAt: String(entry.publicadoAt || ''),
-        judges: entry.judges && typeof entry.judges === 'object' ? entry.judges : {},
-        notas: String(entry.notas || ''),
-        sumaTotal: entry.sumaTotal != null ? entry.sumaTotal : null,
-        promedio: entry.promedio != null ? entry.promedio : null
-      };
+      var rounds = [];
+      if (Array.isArray(entry.rounds)) {
+        rounds = entry.rounds.map(function (r) {
+          return {
+            roundKey: String(r.roundKey || ''),
+            faseLabel: String(r.faseLabel || ''),
+            publicadoAt: String(r.publicadoAt || ''),
+            judges: r.judges && typeof r.judges === 'object' ? r.judges : {},
+            notasPorJuez: r.notasPorJuez && typeof r.notasPorJuez === 'object' ? r.notasPorJuez : {},
+            notas: String(r.notas || ''),
+            sumaTotal: r.sumaTotal != null ? r.sumaTotal : null,
+            promedio: r.promedio != null ? r.promedio : null
+          };
+        });
+      } else if (entry.judges || entry.sumaTotal != null) {
+        rounds = [{
+          roundKey: String(entry.roundKey || ''),
+          faseLabel: String(entry.faseLabel || ''),
+          publicadoAt: String(entry.publicadoAt || ''),
+          judges: entry.judges && typeof entry.judges === 'object' ? entry.judges : {},
+          notasPorJuez: entry.notasPorJuez && typeof entry.notasPorJuez === 'object' ? entry.notasPorJuez : {},
+          notas: String(entry.notas || ''),
+          sumaTotal: entry.sumaTotal != null ? entry.sumaTotal : null,
+          promedio: entry.promedio != null ? entry.promedio : null
+        }];
+      }
+      out[id] = { rounds: rounds };
     });
     return out;
   }
@@ -1813,6 +1831,9 @@
     if (!row) return null;
     return {
       judges: JSON.parse(JSON.stringify(row.judges || {})),
+      notasPorJuez: row.notasPorJuez && typeof row.notasPorJuez === 'object'
+        ? JSON.parse(JSON.stringify(row.notasPorJuez))
+        : {},
       notas: String(row.notas || '').trim(),
       sumaTotal: row.sumaTotal != null ? row.sumaTotal : null,
       promedio: row.promedio != null ? row.promedio : null
@@ -1820,10 +1841,7 @@
   }
 
   function clearPublishedResultsForIds(ids) {
-    if (!bracketState || !bracketState.resultadosCompetidor) return;
-    ids.forEach(function (id) {
-      delete bracketState.resultadosCompetidor[id];
-    });
+    /* Conservar historial de rondas publicadas — no borrar al avanzar ganadores. */
   }
 
   function publishResultsToCompetitors() {
