@@ -61,17 +61,6 @@
     activate(initial);
   }
 
-  var EXPLORE_ILLUSTRATIONS = {
-    evento: 'assets/illustrations/explore-evento.svg',
-    actividades: 'assets/illustrations/explore-actividades.svg',
-    visita: 'assets/illustrations/explore-visita.svg',
-    competencia: 'assets/illustrations/explore-competencia.svg'
-  };
-
-  function exploreIllustration(id) {
-    return EXPLORE_ILLUSTRATIONS[id] || '';
-  }
-
   function renderExplore() {
     var mount = document.getElementById('festivalExplore');
     if (!mount) return;
@@ -97,16 +86,10 @@
         '<span class="festival-explore__tab-icon" aria-hidden="true">' + (item.icon || '') + '</span>' +
         '<span>' + item.label + '</span></button>';
 
-      var illust = exploreIllustration(item.id);
-      var illustHtml = illust
-        ? '<div class="festival-explore__illustration"><img src="' + illust + '" alt="" width="320" height="200" loading="lazy" decoding="async"></div>'
-        : '';
-
       panelsHtml +=
         '<div role="tabpanel" class="festival-explore__panel" id="' + panelId + '" ' +
         'data-panel="' + item.id + '" aria-labelledby="' + tabId + '" ' +
         (selected ? '' : 'hidden') + '>' +
-        illustHtml +
         '<p class="festival-explore__text">' + item.text + '</p>' +
         '<a class="festival-explore__cta" data-link="' + item.link + '" href="' + href(item.link) + '">' +
         (item.cta || 'Ver más') + ' →</a></div>';
