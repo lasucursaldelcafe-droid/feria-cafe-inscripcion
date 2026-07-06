@@ -66,9 +66,9 @@
     if (global.Preliminar1Results && global.Preliminar1Results.entradaLabel) {
       return global.Preliminar1Results.entradaLabel(entrada);
     }
-    if (entrada === 1) return 'Grupos';
-    if (entrada === 2) return 'Semifinal';
-    if (entrada === 3) return 'Final';
+    if (entrada === 1) return 'Fase de grupos (1v1)';
+    if (entrada === 2) return 'Semifinales (1v1)';
+    if (entrada === 3) return 'Final (mejor tanda)';
     return 'Tanda ' + entrada;
   }
 
@@ -97,8 +97,8 @@
         '</div></article>';
     }).join('');
     return '<section class="jurado-clasificacion-section">' +
-      '<h3 class="jurado-clasificacion-title">Grupos — rondas de 2</h3>' +
-      '<p class="jurado-hint">12 competidores · orden alfabético por nombre · a semifinal los mejores puntajes de cada ronda.</p>' +
+      '<h3 class="jurado-clasificacion-title">Fase de grupos — duelos 1v1</h3>' +
+      '<p class="jurado-hint">6 rondas · sorteo oficial · 2 competidores por duelo · avanzan a semifinales.</p>' +
       '<div class="jurado-grupos-rondas">' + cards + '</div></section>';
   }
 
@@ -118,7 +118,7 @@
     }).join('');
     return '<section class="jurado-clasificacion-section">' +
       '<h3 class="jurado-clasificacion-title">Podio oficial</h3>' +
-      '<p class="jurado-hint">1°, 2° y 3° por puntaje en la final.</p>' +
+      '<p class="jurado-hint">Final por mejor puntuación de tanda · 1°, 2° y 3° lugar.</p>' +
       '<div class="jurado-podium-map">' + cards + '</div></section>';
   }
 
@@ -142,6 +142,7 @@
     if (!phases) return '';
     return '<section class="jurado-clasificacion-section">' +
       '<h3 class="jurado-clasificacion-title">Recorrido por fases</h3>' +
+      '<p class="jurado-hint">Grupos 1v1 → semifinales 1v1 → final por mejor tanda.</p>' +
       '<div class="jurado-phase-lanes">' + phases + '</div></section>';
   }
 
