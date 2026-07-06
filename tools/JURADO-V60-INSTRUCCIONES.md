@@ -16,7 +16,7 @@ Plataforma de calificación sensorial en vivo, configurable para otros eventos (
 
 **Backend Apps Script (producción):**
 
-`https://script.google.com/macros/s/AKfycby4AwJA4qvGcI5vpiGXFkBaiJHu4SF48vhbH3i6cdWaB0Za4AXIBMkNoLQ9er4xLJPM/exec`
+`https://script.google.com/macros/s/AKfycbyundWWFTPmwhgfuoVKRExIUymYA8qsaQkh7w0ctXVz0mW3r2iubPDJq51_uWQNFRKG/exec`
 
 También desde el panel admin: **Competidores** → tarjeta «Enlaces del jurado» o «Clientes plataforma jurado».
 

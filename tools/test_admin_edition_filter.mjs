@@ -9,7 +9,7 @@ import { dirname, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const WEB =
-  'https://script.google.com/macros/s/AKfycby4AwJA4qvGcI5vpiGXFkBaiJHu4SF48vhbH3i6cdWaB0Za4AXIBMkNoLQ9er4xLJPM/exec';
+  'https://script.google.com/macros/s/AKfycbyundWWFTPmwhgfuoVKRExIUymYA8qsaQkh7w0ctXVz0mW3r2iubPDJq51_uWQNFRKG/exec';
 const SITE = 'https://la-sucursal-del-cafe.web.app';
 
 function competenciaEventKey(val) {
