@@ -9,7 +9,7 @@
   <title>Torneo en vivo — Jurado sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260707compact2">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260708merge1">
 </head>
 <body class="jurado-page" data-jurado-page="organizador">
   <div class="jurado-shell">
@@ -107,6 +107,17 @@
       <!-- Tab: Vista general -->
       <div class="jurado-dash-pane jurado-dash-pane--active" data-dash-pane="vista">
         <div class="jurado-stats-row" id="organizerStatsRow"></div>
+
+        <div class="jurado-card jurado-card--publish">
+          <div class="jurado-card-head">
+            <h2>Resultados para competidores</h2>
+            <p class="jurado-hint">Hasta que publiques, nadie ve sus puntajes en el portal de resultados.</p>
+          </div>
+          <div class="jurado-publish-panel jurado-publish-panel--prominent">
+            <p id="resultadosPublishStatusVista" class="jurado-hint">Los competidores no pueden ver sus puntajes hasta que publiques esta ronda.</p>
+            <button type="button" class="jurado-btn jurado-btn--publish" data-publish-resultados>Publicar resultados a competidores</button>
+          </div>
+        </div>
 
         <div class="jurado-card jurado-card--journey-mini" id="journeySummaryCard">
           <div class="jurado-card-head">
@@ -294,7 +305,7 @@
           <p id="bracketPhaseLabel" class="jurado-phase-label"></p>
           <div class="jurado-publish-panel">
             <p id="resultadosPublishStatus" class="jurado-hint">Los competidores no pueden ver sus puntajes hasta que publiques esta ronda.</p>
-            <button type="button" id="publishResultadosBtn" class="jurado-btn">Publicar resultados a competidores</button>
+            <button type="button" id="publishResultadosBtn" class="jurado-btn jurado-btn--publish" data-publish-resultados>Publicar resultados a competidores</button>
           </div>
           <div class="jurado-admin-actions">
             <button type="button" id="resetActivosScoresBtn" class="jurado-btn jurado-btn--secondary jurado-btn--small">Reiniciar puntajes de activos</button>
@@ -474,6 +485,6 @@
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxEVH5x6x8xj5vBFlwbkQjkEtpVNnfBoaeOwRDSk9FbF9K9_vuQFfwNBR9Kghtn2i6u/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260708evalsync1"></script>
+  <script src="js/jurado-v60.js?v=20260708merge1"></script>
 </body>
 </html>

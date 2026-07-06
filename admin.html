@@ -8,7 +8,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="googlebot" content="noindex, nofollow">
   <title>Panel de administración | La Sucursal del Café</title>
-  <link rel="stylesheet" href="css/admin.css?v=20260703png4">
+  <link rel="stylesheet" href="css/admin.css?v=20260706edition2">
   <link rel="stylesheet" href="css/fidelizacion.css?v=20260625d">
 </head>
 <body class="admin-page admin-page--minimal">
@@ -91,7 +91,7 @@
             <button type="button" class="admin-btn admin-btn--secondary admin-goto-section" data-goto="operadores">Operador de escaneo</button>
             <button type="button" class="admin-btn admin-btn--secondary admin-goto-section" data-goto="analiticas">Ver analíticas</button>
             <a class="admin-btn admin-btn--secondary" data-link="panelFidelizacion" href="dashboard-fidelizacion.html" target="_blank" rel="noopener">Panel fidelización completo</a>
-            <a class="admin-btn admin-btn--primary" id="adminJuradoOrganizadorLink" href="/jurado-v60?pin=v60organizador" target="_blank" rel="noopener noreferrer">Jurado V60 — organizador</a>
+            <a class="admin-btn admin-btn--primary" id="adminJuradoOrganizadorLink" href="/jurado/organizador?pin=v60organizador" target="_blank" rel="noopener noreferrer">Torneo en vivo</a>
           </div>
         </div>
       </section>
@@ -156,7 +156,19 @@
         <div class="admin-toolbar">
           <div>
             <h2 class="admin-toolbar__title">Competidores V60 Championship</h2>
-            <p class="admin-toolbar__meta">Alta manual y gestión de inscripciones</p>
+            <p class="admin-toolbar__meta" id="adminCompetenciaEditionMeta">Alta manual y gestión de inscripciones</p>
+            <div class="admin-competencia-edition-bar">
+              <label class="admin-competencia-edition-bar__field" for="adminCompetenciaEdition">
+                <span>Edición</span>
+                <select id="adminCompetenciaEdition" aria-label="Filtrar competidores por edición">
+                  <option value="evento2">Preliminar 2 (activa)</option>
+                  <option value="evento1">Preliminar 1 (archivo)</option>
+                  <option value="all">Todas las ediciones</option>
+                </select>
+              </label>
+              <p class="admin-competencia-edition-bar__cupo" id="adminCompetenciaCupoMeta" aria-live="polite"></p>
+            </div>
+            <p class="admin-table-meta admin-competencia-edition-hint" id="adminCompetenciaEditionHint" hidden></p>
           </div>
           <div class="admin-toolbar__actions">
             <button type="button" class="admin-btn admin-btn--primary admin-scroll-target" data-scroll-target="competidorDashboardPanel">Dashboard competidores</button>
@@ -170,7 +182,7 @@
 
         <div class="admin-card" data-admin-fold-open="true">
           <h4 class="admin-card__title">Registrar competidor manualmente</h4>
-          <p class="admin-table-meta">Úsalo cuando el pago ya está confirmado o necesitas forzar una inscripción.</p>
+          <p class="admin-table-meta">Úsalo cuando el pago ya está confirmado o necesitas forzar una inscripción. Se inscribe en la edición seleccionada arriba (por defecto Preliminar 2).</p>
           <form id="formAdminCreateCompetidor" class="admin-inline-form">
             <div class="admin-inline-form__row">
               <label class="admin-inline-form__field">
@@ -221,8 +233,18 @@
           <div id="adminCreateCompResult" class="admin-create-result" hidden role="status"></div>
         </div>
 
+        <div class="admin-card" id="adminJuradoPublishCard" data-admin-fold-open="true">
+          <h4 class="admin-card__title">Publicar resultados V60</h4>
+          <p class="admin-table-meta" id="adminJuradoPublishMeta">Los competidores no ven sus puntajes en el portal hasta que publiques la ronda actual.</p>
+          <div class="admin-jurado-publish-actions">
+            <button type="button" class="admin-btn admin-btn--primary" id="adminJuradoPublishBtn">Publicar resultados a competidores</button>
+            <a class="admin-btn admin-btn--secondary" id="adminJuradoResultadosLink" href="/jurado/resultados" target="_blank" rel="noopener noreferrer">Resultados competidor</a>
+          </div>
+          <div id="adminJuradoPublishResult" class="admin-create-result" hidden role="status"></div>
+        </div>
+
         <div class="admin-card" id="adminJuradoLinksCard" data-admin-fold-open="true">
-          <h4 class="admin-card__title">Enlaces jurado sensorial V60</h4>
+          <h4 class="admin-card__title">Enlaces del torneo V60</h4>
           <p class="admin-table-meta" id="adminJuradoLinksMeta">Cargando configuración del jurado…</p>
           <div id="adminJuradoLinksRoot" class="admin-jurado-links"></div>
         </div>
@@ -706,7 +728,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/OoGMjHXu4qWZXhshQ9e3qX4HIGXerHf3i4F3NoRt8qlytK0348M02iNHhv8gqseO7wAJviL/Btg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="js/admin-disclosures.js?v=20260703ux"></script>
   <script src="js/admin-competidor-png-layout.js?v=20260703png4"></script>
-  <script src="js/admin-dashboard.js?v=20260705jurado30"></script>
+  <script src="js/admin-dashboard.js?v=20260706edition2"></script>
   <script src="js/admin-pasaportes.js?v=20260625g"></script>
   <script src="js/admin-operadores.js?v=20260625g"></script>
 </body>

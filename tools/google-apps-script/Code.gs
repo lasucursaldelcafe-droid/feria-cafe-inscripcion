@@ -290,6 +290,9 @@ function doPost(e) {
     if (action === 'jurado_juez_profile_save') {
       return jsonResponse(handleJuradoJuezProfileSave_(payload));
     }
+    if (action === 'jurado_publish_resultados') {
+      return jsonResponse(handleJuradoPublishResultados_(payload));
+    }
     if (action === 'expositor_update_profile') {
       return jsonResponse(handleExpositorUpdateProfile_(payload));
     }
@@ -1227,8 +1230,9 @@ function handleAdminCreateCompetitor_(payload) {
   }
 
   var forzarCupo = payload.forzarCupo === true || payload.forzarCupo === 'true' || payload.forzarCupo === 1;
-  if (!forzarCupo && getCompetenciaCount_() >= CUPO_MAX_COMPETENCIA) {
-    return { ok: false, error: 'Cupo completo. Marca "Forzar si cupo lleno" para agregar igual.' };
+  var eventoTarget = payload.evento || ACTIVE_COMPETENCIA_EVENTO;
+  if (!forzarCupo && getCompetenciaCount_(eventoTarget) >= CUPO_MAX_COMPETENCIA) {
+    return { ok: false, error: 'Cupo completo para esta preliminar. Marca "Forzar si cupo lleno" para agregar igual.' };
   }
 
   var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
@@ -2793,7 +2797,10 @@ function handleAdminDashboard_(idToken) {
 
   var allFeria = readAllSheetRows_(SHEET_FERIA, HEADERS_FERIA, true);
   var allCompetencia = readAllSheetRows_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA, true)
-    .map(sanitizeCompetenciaRow_);
+    .map(sanitizeCompetenciaRow_)
+    .filter(function (row) {
+      return row && String(row.ID || '').trim() !== '' && String(row.Nombre || '').trim() !== '';
+    });
   var allStands = readAllSheetRows_(SHEET_STANDS, HEADERS_STANDS, true);
   var allPatrocinadoresCompetencia = readPatrocinadoresCompetenciaRows_();
 
@@ -2812,6 +2819,10 @@ function handleAdminDashboard_(idToken) {
         max: CUPO_MAX_COMPETENCIA,
         disponibles: Math.max(0, CUPO_MAX_COMPETENCIA - competenciaCount),
         completo: competenciaCount >= CUPO_MAX_COMPETENCIA
+      },
+      competenciaPorEdicion: {
+        preliminar1: getCompetenciaCount_('V60 Championship — Preliminar 1'),
+        preliminar2: getCompetenciaCount_('V60 Championship — Preliminar 2')
       },
       feriaPageViewsToday: analytics.feriaPageToday,
       competenciaPageViewsToday: analytics.competenciaPageToday,
@@ -3677,6 +3688,91 @@ function juradoBracketPhaseLabel_(fase, rondaEnFase) {
   return base;
 }
 
+function juradoActiveCompetitorIds_(bracket, evt) {
+  if (bracket && Array.isArray(bracket.activos) && bracket.activos.length) {
+    return bracket.activos.map(function (id) { return String(id || '').trim(); }).filter(Boolean);
+  }
+  var rows = readAllSheetRows_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA, true)
+    .map(sanitizeCompetenciaRow_);
+  var targetEvento = ACTIVE_COMPETENCIA_EVENTO;
+  if (evt) {
+    var platformCfg = getPasaporteConfig_(juradoTenantKey_('jurado_v60_platform', evt));
+    var platform = platformCfg.data || {};
+    targetEvento = String(platform.eventId || platform.eventName || evt).trim() || evt;
+  }
+  return rows.filter(function (row) {
+    if (!isHabilitadoCompetenciaRow_(row)) return false;
+    return isSameCompetenciaEvento_(row['Evento'], targetEvento);
+  }).map(function (row) { return String(row['ID'] || '').trim(); }).filter(Boolean);
+}
+
+function isHabilitadoCompetenciaRow_(row) {
+  var val = String((row && row['Habilitado']) || '').trim().toLowerCase();
+  if (!val) return true;
+  return val === 'sí' || val === 'si' || val === 'yes' || val === 'true' || val === '1';
+}
+
+function handleJuradoPublishResultados_(payload) {
+  var evt = String((payload && payload.evt) || '').trim();
+  var bracketCfg = getPasaporteConfig_(juradoTenantKey_('jurado_v60_bracket', evt));
+  var calCfg = getPasaporteConfig_(juradoTenantKey_('jurado_v60_calificaciones', evt));
+  var bracket = bracketCfg.data && typeof bracketCfg.data === 'object' ? bracketCfg.data : {};
+  var scoresMap = calCfg.data && calCfg.data.scores && typeof calCfg.data.scores === 'object'
+    ? calCfg.data.scores
+    : {};
+
+  var activos = juradoActiveCompetitorIds_(bracket, evt);
+  if (!activos.length) {
+    return { ok: false, error: 'No hay participantes activos en esta ronda.' };
+  }
+
+  if (!bracket.resultadosCompetidor || typeof bracket.resultadosCompetidor !== 'object') {
+    bracket.resultadosCompetidor = {};
+  }
+
+  var fase = String(bracket.fase || 'semifinal').trim();
+  var ronda = parseInt(bracket.rondaEnFase, 10) || 1;
+  var faseLabel = juradoBracketPhaseLabel_(fase, ronda);
+  var roundKey = fase + '|' + ronda;
+  var now = new Date().toISOString();
+  var published = 0;
+
+  activos.forEach(function (id) {
+    var row = scoresMap[id];
+    if (!row || row.sumaTotal == null) return;
+    bracket.resultadosCompetidor[id] = {
+      judges: JSON.parse(JSON.stringify(row.judges || {})),
+      notas: String(row.notas || '').trim(),
+      sumaTotal: row.sumaTotal,
+      promedio: row.promedio != null ? row.promedio : null,
+      roundKey: roundKey,
+      faseLabel: faseLabel,
+      publicadoAt: now
+    };
+    published++;
+  });
+
+  if (!published) {
+    return {
+      ok: false,
+      error: 'No hay calificaciones completas para publicar. Espera a que los jueces terminen.'
+    };
+  }
+
+  bracket.actualizado = now;
+  savePasaporteConfig_({
+    key: juradoTenantKey_('jurado_v60_bracket', evt),
+    data: bracket
+  });
+
+  return {
+    ok: true,
+    published: published,
+    faseLabel: faseLabel,
+    roundKey: roundKey
+  };
+}
+
 function juradoResultadosTorneoStatus_(bracket, competidorId) {
   if (!bracket || !competidorId) {
     return { fase: '', faseLabel: 'Torneo', estado: 'pendiente', activo: false, eliminado: false };
@@ -4186,7 +4282,67 @@ function listJuradoInstances_() {
   return { ok: true, instances: instances };
 }
 
-function defaultJuradoPlatformForTenant_(instance) {
+function juradoDisciplinaPreset_(disciplina) {
+  var presets = {
+    filtrado: {
+      disciplina: 'filtrado',
+      modo: 'duelos',
+      scaleMin: 1,
+      scaleMax: 6,
+      jueces: 3,
+      competidoresEsperados: 16,
+      avancePorRonda: 0
+    },
+    catacion: {
+      disciplina: 'catacion',
+      modo: 'puntaje_general',
+      scaleMin: 0,
+      scaleMax: 8,
+      jueces: 3,
+      competidoresEsperados: 24,
+      avancePorRonda: 8
+    },
+    arte_latte: {
+      disciplina: 'arte_latte',
+      modo: 'duelos',
+      scaleMin: 1,
+      scaleMax: 6,
+      jueces: 3,
+      competidoresEsperados: 12,
+      avancePorRonda: 0
+    },
+    tostion: {
+      disciplina: 'tostion',
+      modo: 'puntaje_general',
+      scaleMin: 1,
+      scaleMax: 6,
+      jueces: 3,
+      competidoresEsperados: 16,
+      avancePorRonda: 0
+    },
+    aeropress: {
+      disciplina: 'aeropress',
+      modo: 'duelos',
+      scaleMin: 1,
+      scaleMax: 6,
+      jueces: 3,
+      competidoresEsperados: 20,
+      avancePorRonda: 0
+    },
+    personalizado: {
+      disciplina: 'personalizado',
+      modo: 'duelos',
+      scaleMin: 1,
+      scaleMax: 5,
+      jueces: 3,
+      competidoresEsperados: 16,
+      avancePorRonda: 0
+    }
+  };
+  return presets[disciplina] || presets.filtrado;
+}
+
+function defaultJuradoPlatformForTenant_(instance, disciplina) {
   var slug = instance.slug;
   var now = new Date().toISOString();
   return {
@@ -4216,20 +4372,23 @@ function defaultJuradoPlatformForTenant_(instance) {
     sheetName: competenciaEventoSheetName_(instance.slug),
     eventId: instance.slug,
     tenantSlug: instance.slug,
-    scoring: {
-      disciplina: 'filtrado',
-      modo: 'duelos',
-      scaleMin: 1,
-      scaleMax: 5,
-      jueces: 3,
-      avancePorRonda: 0,
-      autoAvance: true,
-      competidoresEsperados: 16,
-      mostrarFotos: true,
-      criteria: juradoCriteriaApiList_().map(function (c) {
-        return { key: c.key, label: c.label, desc: '' };
-      })
-    },
+    scoring: (function () {
+      var preset = juradoDisciplinaPreset_(disciplina || 'filtrado');
+      return {
+        disciplina: preset.disciplina,
+        modo: preset.modo,
+        scaleMin: preset.scaleMin,
+        scaleMax: preset.scaleMax,
+        jueces: preset.jueces,
+        avancePorRonda: preset.avancePorRonda,
+        autoAvance: true,
+        competidoresEsperados: preset.competidoresEsperados,
+        mostrarFotos: true,
+        criteria: juradoCriteriaApiList_().map(function (c) {
+          return { key: c.key, label: c.label, desc: '' };
+        })
+      };
+    })(),
     panelImageDataUrl: '',
     actualizado: now
   };
@@ -4239,6 +4398,7 @@ function handleJuradoInstanceCreate_(payload) {
   var clientName = String(payload.clientName || '').trim();
   var eventName = String(payload.eventName || '').trim();
   var contactEmail = String(payload.contactEmail || '').trim();
+  var disciplina = String(payload.disciplina || 'filtrado').trim();
   if (!clientName) return { ok: false, error: 'Nombre del cliente requerido.' };
   if (!eventName) eventName = clientName + ' — Torneo sensorial';
 
@@ -4270,7 +4430,7 @@ function handleJuradoInstanceCreate_(payload) {
   instances.push(instance);
   savePasaporteConfig_({ key: JURADO_INSTANCES_KEY, data: { instances: instances } });
 
-  var platform = defaultJuradoPlatformForTenant_(instance);
+  var platform = defaultJuradoPlatformForTenant_(instance, disciplina);
   savePasaporteConfig_({
     key: juradoTenantKey_('jurado_v60_platform', slug),
     data: platform

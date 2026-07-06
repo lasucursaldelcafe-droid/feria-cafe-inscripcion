@@ -26,6 +26,8 @@
   var activeAdminSection = 'resumen';
   var ADMIN_TAB_KEY = 'feria_admin_tab';
   var ADMIN_SECTION_KEY = 'feria_admin_section';
+  var ADMIN_COMPETENCIA_EDITION_KEY = 'lsc_admin_competencia_edition';
+  var activeCompetenciaEdition = 'evento2';
 
   var ADMIN_SECTIONS = [
     'resumen', 'analiticas', 'competidores', 'stands', 'visitantes', 'sitio', 'pasaportes', 'operadores'
@@ -94,6 +96,181 @@
 
   function formatNumber(n) {
     return typeof n === 'number' ? n.toLocaleString('es-CO') : String(n || '0');
+  }
+
+  function competenciaEventKey(val) {
+    var s = String(val || '').trim();
+    if (!s) return '';
+    if (/preliminar\s*2/i.test(s) || /evento\s*2/i.test(s) || /2\.ª/i.test(s)) return 'V60 Championship — Preliminar 2';
+    if (/preliminar\s*1/i.test(s) || /evento\s*1/i.test(s) || /1\.ª/i.test(s)) return 'V60 Championship — Preliminar 1';
+    if (s === 'V60 Championship') return 'V60 Championship — Preliminar 1';
+    return s;
+  }
+
+  function getCompetenciaEditionLabel(editionKey) {
+    if (editionKey === 'evento1') return 'Preliminar 1';
+    if (editionKey === 'evento2') return 'Preliminar 2';
+    if (editionKey === 'all') return 'Todas las ediciones';
+    return editionKey || 'Preliminar 2';
+  }
+
+  function getCompetenciaEditionEventId(editionKey) {
+    if (!editionKey || editionKey === 'all') return '';
+    var cfg = global.EVENT_CONFIG || {};
+    var ev = cfg[editionKey] || (editionKey === 'evento2' ? cfg.evento2 : cfg.evento1) || {};
+    return String(ev.eventoId || ev.nombre || '').trim();
+  }
+
+  function getStoredCompetenciaEdition() {
+    try {
+      var stored = sessionStorage.getItem(ADMIN_COMPETENCIA_EDITION_KEY);
+      if (stored === 'evento1' || stored === 'evento2' || stored === 'all') return stored;
+    } catch (e) { /* ignore */ }
+    var cfg = global.EVENT_CONFIG || {};
+    return cfg.torneoActivo === 'evento1' ? 'evento1' : 'evento2';
+  }
+
+  function saveCompetenciaEdition(editionKey) {
+    activeCompetenciaEdition = editionKey;
+    try {
+      sessionStorage.setItem(ADMIN_COMPETENCIA_EDITION_KEY, editionKey);
+    } catch (e) { /* ignore */ }
+  }
+
+  function filterCompetenciaByEdition(rows, editionKey) {
+    if (!editionKey || editionKey === 'all') return (rows || []).slice();
+    var target = competenciaEventKey(getCompetenciaEditionEventId(editionKey));
+    if (!target) return (rows || []).slice();
+    return (rows || []).filter(function (row) {
+      return competenciaEventKey(row.Evento || row.evento) === target;
+    });
+  }
+
+  function filterValidCompetenciaRows(rows) {
+    return (rows || []).filter(function (row) {
+      return String(row['ID'] || '').trim() && String(row['Nombre'] || '').trim();
+    });
+  }
+
+  function countCompetenciaEditionRows(rows, editionKey) {
+    return filterCompetenciaByEdition(filterValidCompetenciaRows(rows), editionKey).length;
+  }
+
+  function ensureCompetenciaEditionVisible(data) {
+    var all = filterValidCompetenciaRows(pickRows(data || {}, 'allCompetencia'));
+    if (!all.length) return false;
+    var visible = filterCompetenciaByEdition(all, activeCompetenciaEdition);
+    if (visible.length || activeCompetenciaEdition === 'all') return false;
+    var prev = activeCompetenciaEdition;
+    if (countCompetenciaEditionRows(all, 'evento2') > 0) {
+      saveCompetenciaEdition('evento2');
+    } else if (countCompetenciaEditionRows(all, 'evento1') > 0) {
+      saveCompetenciaEdition('evento1');
+    } else {
+      saveCompetenciaEdition('all');
+    }
+    syncCompetenciaEditionUi();
+    return prev !== activeCompetenciaEdition;
+  }
+
+  function pickCompetenciaRows(data) {
+    return filterCompetenciaByEdition(
+      filterValidCompetenciaRows(pickRows(data || lastDashboardData || {}, 'allCompetencia')),
+      activeCompetenciaEdition
+    );
+  }
+
+  function getCompetenciaCupoMax() {
+    var cfg = global.EVENT_CONFIG || {};
+    var max = parseInt(cfg.cupoCompetencia, 10);
+    return max > 0 ? max : 36;
+  }
+
+  function computeCompetenciaEditionCupo(rows, editionKey) {
+    var key = editionKey === 'all' ? 'evento2' : editionKey;
+    var filtered = filterCompetenciaByEdition(rows, key);
+    var max = getCompetenciaCupoMax();
+    var count = filtered.length;
+    return {
+      count: count,
+      max: max,
+      disponibles: Math.max(0, max - count),
+      completo: count >= max
+    };
+  }
+
+  function syncCompetenciaEditionUi() {
+    var sel = document.getElementById('adminCompetenciaEdition');
+    if (sel && sel.value !== activeCompetenciaEdition) sel.value = activeCompetenciaEdition;
+
+    var rows = pickCompetenciaRows(lastDashboardData || {});
+    var meta = document.getElementById('adminCompetenciaEditionMeta');
+    if (meta) {
+      meta.textContent = rows.length + ' competidores · ' + getCompetenciaEditionLabel(activeCompetenciaEdition);
+    }
+
+    var cupoEl = document.getElementById('adminCompetenciaCupoMeta');
+    if (cupoEl && lastDashboardData) {
+      var allValid = filterValidCompetenciaRows(pickRows(lastDashboardData, 'allCompetencia'));
+      var cupo = computeCompetenciaEditionCupo(allValid, activeCompetenciaEdition);
+      if (activeCompetenciaEdition === 'all') {
+        var p1 = countCompetenciaEditionRows(allValid, 'evento1');
+        var p2 = countCompetenciaEditionRows(allValid, 'evento2');
+        cupoEl.textContent = 'P1: ' + p1 + ' · P2: ' + p2 + ' · Total: ' + allValid.length;
+      } else {
+        cupoEl.textContent = 'Cupo: ' + formatNumber(cupo.count) + ' / ' + formatNumber(cupo.max) +
+          (cupo.completo ? ' (completo)' : '');
+      }
+    }
+
+    var editionHint = document.getElementById('adminCompetenciaEditionHint');
+    if (editionHint && lastDashboardData) {
+      var allRows = filterValidCompetenciaRows(pickRows(lastDashboardData, 'allCompetencia'));
+      var visibleCount = pickCompetenciaRows(lastDashboardData).length;
+      if (!visibleCount && allRows.length && activeCompetenciaEdition !== 'all') {
+        editionHint.innerHTML = 'No hay inscritos en esta edición. ' +
+          '<button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-edition-switch="evento1">Ver Preliminar 1</button> ' +
+          '<button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-edition-switch="all">Ver todas</button>';
+        editionHint.hidden = false;
+      } else {
+        editionHint.hidden = true;
+        editionHint.textContent = '';
+      }
+    }
+  }
+
+  function bindCompetenciaEditionHintActions() {
+    document.addEventListener('click', function (event) {
+      var btn = event.target.closest('[data-edition-switch]');
+      if (!btn) return;
+      var edition = btn.getAttribute('data-edition-switch');
+      if (!edition) return;
+      var sel = document.getElementById('adminCompetenciaEdition');
+      if (sel) sel.value = edition;
+      saveCompetenciaEdition(edition);
+      closeCompetidorEditor();
+      syncCompetenciaEditionUi();
+      if (lastDashboardData) renderAdminTabPanels(lastDashboardData);
+    });
+  }
+
+  function bindCompetenciaEditionSelector() {
+    var sel = document.getElementById('adminCompetenciaEdition');
+    if (!sel || sel.getAttribute('data-bound') === '1') return;
+    sel.setAttribute('data-bound', '1');
+    activeCompetenciaEdition = getStoredCompetenciaEdition();
+    sel.value = activeCompetenciaEdition;
+    sel.addEventListener('change', function () {
+      saveCompetenciaEdition(sel.value || 'evento2');
+      closeCompetidorEditor();
+      syncCompetenciaEditionUi();
+      if (lastDashboardData) renderAdminTabPanels(lastDashboardData);
+    });
+  }
+
+  function getActiveCompetenciaEventoForCreate() {
+    var key = activeCompetenciaEdition === 'all' ? 'evento2' : activeCompetenciaEdition;
+    return getCompetenciaEditionEventId(key) || 'V60 Championship — Preliminar 2';
   }
 
   function escapeHtml(s) {
@@ -458,23 +635,29 @@
   }
 
   function bindToggleStatusButtons() {
-    document.querySelectorAll('.admin-toggle-status-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var id = btn.getAttribute('data-record-id');
-        var dataset = btn.getAttribute('data-dataset');
-        var enable = btn.getAttribute('data-enabled') === '1';
-        if (!id || !dataset) return;
-        btn.disabled = true;
-        toggleRecordStatus(dataset, id, enable).then(function (result) {
-          btn.disabled = false;
-          if (!result.ok) {
-            showError(result.error || 'No se pudo actualizar el estado.');
-            return;
-          }
-          showError('');
-          updateLocalHabilitado(dataset, id, result.habilitado || (enable ? 'Sí' : 'No'));
-          renderAdminTabPanels(lastDashboardData);
-        });
+    if (document.body.getAttribute('data-admin-toggle-bound') === '1') return;
+    document.body.setAttribute('data-admin-toggle-bound', '1');
+    document.addEventListener('click', function (event) {
+      var btn = event.target.closest('.admin-toggle-status-btn');
+      if (!btn || btn.disabled) return;
+      var id = btn.getAttribute('data-record-id');
+      var dataset = btn.getAttribute('data-dataset');
+      var enable = btn.getAttribute('data-enabled') === '1';
+      if (!id || !dataset) return;
+      btn.disabled = true;
+      toggleRecordStatus(dataset, id, enable).then(function (result) {
+        btn.disabled = false;
+        if (!result.ok) {
+          showError(result.error || 'No se pudo actualizar el estado.');
+          return;
+        }
+        showError('');
+        updateLocalHabilitado(dataset, id, result.habilitado || (enable ? 'Sí' : 'No'));
+        renderAdminTabPanels(lastDashboardData);
+        syncCompetenciaEditionUi();
+      }).catch(function (err) {
+        btn.disabled = false;
+        showError(err.message || 'Error al actualizar el estado.');
       });
     });
   }
@@ -875,7 +1058,7 @@
       var row = findCompetidorRowById(id);
       if (row) return row;
     }
-    var rows = pickRows(lastDashboardData || {}, 'allCompetencia');
+    var rows = pickCompetenciaRows(lastDashboardData || {});
     for (var i = 0; i < rows.length; i++) {
       if (isHabilitadoValue(rows[i]['Habilitado']) && val(rows[i], ['Foto participante enlace Drive'])) {
         return rows[i];
@@ -922,7 +1105,7 @@
   }
 
   function downloadAllCompetitorPngsSequential() {
-    var rowsNow = pickRows(lastDashboardData || {}, 'allCompetencia').filter(function (row) {
+    var rowsNow = pickCompetenciaRows(lastDashboardData || {}).filter(function (row) {
       return isHabilitadoValue(row['Habilitado']);
     });
     if (!rowsNow.length) {
@@ -946,7 +1129,7 @@
     if (typeof global.JSZip === 'undefined') {
       return Promise.reject(new Error('JSZip no cargó. Recarga el admin (Ctrl+Shift+R).'));
     }
-    var rowsNow = pickRows(lastDashboardData || {}, 'allCompetencia').filter(function (row) {
+    var rowsNow = pickCompetenciaRows(lastDashboardData || {}).filter(function (row) {
       return isHabilitadoValue(row['Habilitado']);
     });
     if (!rowsNow.length) {
@@ -1110,7 +1293,7 @@
 
   function findCompetidorRowById(id) {
     if (!id || !lastDashboardData) return null;
-    var rows = pickRows(lastDashboardData, 'allCompetencia');
+    var rows = lastDashboardData.allCompetencia || pickRows(lastDashboardData, 'allCompetencia');
     for (var i = 0; i < rows.length; i++) {
       if (rows[i]['ID'] === id) return rows[i];
     }
@@ -1204,7 +1387,7 @@
   function openCompetidorEditor(row) {
     if (!row) return;
     selectedCompetidorId = row['ID'] || '';
-    renderCompetidorDashboard(pickRows(lastDashboardData || {}, 'allCompetencia'));
+    renderCompetidorDashboard(pickCompetenciaRows(lastDashboardData || {}));
 
     var panel = document.getElementById('competidorEditorPanel');
     if (panel) panel.hidden = false;
@@ -1225,7 +1408,7 @@
     selectedCompetidorId = '';
     var panel = document.getElementById('competidorEditorPanel');
     if (panel) panel.hidden = true;
-    renderCompetidorDashboard(pickRows(lastDashboardData || {}, 'allCompetencia'));
+    renderCompetidorDashboard(pickCompetenciaRows(lastDashboardData || {}));
   }
 
   function bindCompetidorEditorForm() {
@@ -1425,7 +1608,7 @@
     if (!data) return;
 
     var feriaRows = pickRows(data, 'allFeria');
-    var compRows = pickRows(data, 'allCompetencia');
+    var compRows = pickCompetenciaRows(data);
     var standsRows = pickRows(data, 'allStands');
 
     var panelComp = document.getElementById('adminTabPanelsCompetencia');
@@ -1433,7 +1616,7 @@
       panelComp.innerHTML = '<div class="admin-tab-panel" role="tabpanel">' +
         renderManageableTable(compRows, data.competenciaColumns || DEFAULT_COMP_COLS, {
           dataset: 'competencia',
-          metaText: compRows.length + ' competidores — más recientes primero.'
+          metaText: compRows.length + ' competidores · ' + getCompetenciaEditionLabel(activeCompetenciaEdition) + ' — más recientes primero.'
         }) + '</div>';
     }
 
@@ -1945,9 +2128,10 @@
       return true;
     }
     if (dataset === 'competencia') {
+      var compExportRows = pickCompetenciaRows(data);
       downloadCsvText(
-        stampFilename('v60-championship'),
-        rowsToCsv(data.competenciaColumns || DEFAULT_COMP_COLS, data.allCompetencia || data.recentCompetencia || [])
+        stampFilename('v60-championship-' + (activeCompetenciaEdition === 'all' ? 'todas' : activeCompetenciaEdition)),
+        rowsToCsv(data.competenciaColumns || DEFAULT_COMP_COLS, compExportRows)
       );
       return true;
     }
@@ -2130,6 +2314,11 @@
     }
 
     renderAdminTabPanels(data);
+    if (ensureCompetenciaEditionVisible(data)) {
+      renderAdminTabPanels(data);
+    }
+    syncCompetenciaEditionUi();
+    syncAdminJuradoPublishUi();
 
     var updated = document.getElementById('dashboardUpdated');
     if (updated && data.generatedAt) {
@@ -2184,7 +2373,8 @@
         ciudad: document.getElementById('adminCompCiudad').value.trim(),
         estadoPago: document.getElementById('adminCompEstadoPago').value,
         cupoConfirmado: document.getElementById('adminCompCupoConfirmado').checked,
-        forzarCupo: document.getElementById('adminCompForzarCupo').checked
+        forzarCupo: document.getElementById('adminCompForzarCupo').checked,
+        evento: getActiveCompetenciaEventoForCreate()
       }).then(function (result) {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -2330,6 +2520,88 @@
     });
   }
 
+  function fetchJuradoPasaporteConfig(key) {
+    var requestUrl = buildAdminUrl('pasaporte_config', { key: key });
+    if (!requestUrl) return Promise.resolve(null);
+    return fetchJson(requestUrl).then(function (data) {
+      return data.ok && data.data ? data.data : null;
+    });
+  }
+
+  function publishJuradoResultados() {
+    return postAdminAction({ action: 'jurado_publish_resultados', evt: '' });
+  }
+
+  function syncAdminJuradoPublishUi() {
+    var meta = document.getElementById('adminJuradoPublishMeta');
+    if (!meta) return;
+    Promise.all([
+      fetchJuradoPasaporteConfig('jurado_v60_bracket'),
+      fetchJuradoPasaporteConfig('jurado_v60_calificaciones')
+    ]).then(function (results) {
+      var bracket = results[0] || {};
+      var cal = results[1] || {};
+      var activos = Array.isArray(bracket.activos) && bracket.activos.length
+        ? bracket.activos
+        : pickCompetenciaRows(lastDashboardData || {}).map(function (row) { return row['ID']; }).filter(Boolean);
+      var map = bracket.resultadosCompetidor && typeof bracket.resultadosCompetidor === 'object'
+        ? bracket.resultadosCompetidor
+        : {};
+      var scores = cal.scores && typeof cal.scores === 'object' ? cal.scores : {};
+      var pubCount = activos.filter(function (id) { return !!map[id]; }).length;
+      var readyCount = activos.filter(function (id) {
+        return scores[id] && scores[id].sumaTotal != null;
+      }).length;
+      if (pubCount > 0) {
+        meta.textContent = '✓ ' + pubCount + ' competidor(es) ya pueden ver sus puntajes en el portal. ' +
+          readyCount + ' con calificación completa en la ronda actual.';
+      } else {
+        meta.textContent = readyCount
+          ? readyCount + ' competidor(es) listos para publicar. Los puntajes no son visibles hasta que pulses el botón.'
+          : 'Aún no hay calificaciones completas para publicar en esta ronda.';
+      }
+    }).catch(function () {
+      meta.textContent = 'Los competidores no ven sus puntajes en el portal hasta que publiques la ronda actual.';
+    });
+  }
+
+  function bindAdminJuradoPublish() {
+    var btn = document.getElementById('adminJuradoPublishBtn');
+    var resultEl = document.getElementById('adminJuradoPublishResult');
+    var portalLink = document.getElementById('adminJuradoResultadosLink');
+    if (portalLink && global.SiteLinks && global.SiteLinks.buildJuradoUrls) {
+      var urls = global.SiteLinks.buildJuradoUrls({});
+      if (urls.resultados) portalLink.href = urls.resultados;
+      portalLink.textContent = 'Resultados competidor';
+    }
+    if (!btn || btn.getAttribute('data-bound') === '1') return;
+    btn.setAttribute('data-bound', '1');
+    btn.addEventListener('click', function () {
+      if (!confirm('¿Publicar los resultados de la ronda actual para que los competidores los vean en el portal?\n\nSolo verán sus puntajes después de esta acción.')) return;
+      btn.disabled = true;
+      btn.textContent = 'Publicando…';
+      if (resultEl) resultEl.hidden = true;
+      publishJuradoResultados().then(function (data) {
+        if (!data || !data.ok) {
+          showError((data && data.error) || 'No se pudieron publicar los resultados.');
+          return;
+        }
+        showError('');
+        if (resultEl) {
+          resultEl.innerHTML = '<p><strong>✓ Publicados:</strong> ' + formatNumber(data.published || 0) +
+            ' competidor(es)' + (data.faseLabel ? ' · ' + escapeHtml(data.faseLabel) : '') + '</p>';
+          resultEl.hidden = false;
+        }
+        syncAdminJuradoPublishUi();
+      }).catch(function (err) {
+        showError(err.message || 'Error al publicar resultados.');
+      }).finally(function () {
+        btn.disabled = false;
+        btn.textContent = 'Publicar resultados a competidores';
+      });
+    });
+  }
+
   function juradoScoringSummary(platformCfg) {
     var sc = platformCfg && platformCfg.scoring;
     if (!sc) return 'Duelos 1v1 · 3 jueces · escala 1–5';
@@ -2362,7 +2634,10 @@
       ? global.SiteLinks.buildJuradoUrls({ pinOrganizador: pinOrg, pinJuez: pinJuez, jueces: jueces })
       : (global.EVENT_CONFIG && global.EVENT_CONFIG.juradoV60 && global.EVENT_CONFIG.juradoV60.links) || {};
 
-    if (orgQuick && urls.organizador) orgQuick.href = urls.organizador;
+    if (orgQuick && urls.organizador) {
+      orgQuick.href = urls.organizador;
+      orgQuick.textContent = 'Torneo en vivo';
+    }
 
     if (meta) {
       meta.textContent = juradoScoringSummary(platformCfg) +
@@ -2533,6 +2808,9 @@
     bindAdminTabs();
     bindPatrocinadorCompetenciaForm();
     bindAdminCreateMarcaForm();
+    bindCompetenciaEditionSelector();
+    bindCompetenciaEditionHintActions();
+    bindAdminJuradoPublish();
     bindAdminCreateCompetidorForm();
     bindCompetidorEditorForm();
     mountCompetidorPngLayoutEditor();
