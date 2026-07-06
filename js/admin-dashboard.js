@@ -1659,6 +1659,9 @@
 
     renderCompetidorDashboard(compRows);
     renderCompetitorCards(compRows);
+    if (global.AdminCompetenciaShowcase && global.AdminCompetenciaShowcase.mount) {
+      global.AdminCompetenciaShowcase.mount(filterValidCompetenciaRows(pickRows(data, 'allCompetencia')));
+    }
     if (pngLayoutEditorHandle && pngLayoutEditorHandle.setPreviewRow) {
       var previewRow = getCompetidorPreviewRow();
       if (previewRow) pngLayoutEditorHandle.setPreviewRow(previewRow);
