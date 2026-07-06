@@ -6,7 +6,7 @@ import { chromium } from 'playwright';
 import { writeFileSync } from 'fs';
 
 const SHEETS_URL =
-  'https://script.google.com/macros/s/AKfycbxDZ-gXRSVpgVaMewOclstexVemlWk-tYUOqWTd57cK7a3D4tjT4DMErbYxcg67YTZN/exec';
+  'https://script.google.com/macros/s/AKfycbyiLN6ms5dSbm6f1ZmZsR7ktqWLFGxGJd5zAnhZlmX3d0lpKFx1AhLXMXWfnF8txsp0/exec';
 const FILE_ID = '1jET4LD5HZ92cjFeemK4PQyKv6ltLc6Ht';
 
 async function fetchFotoData() {
