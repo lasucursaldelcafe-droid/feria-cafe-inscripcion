@@ -140,6 +140,7 @@
 
   var setupStepperBound = false;
   var configSavedOnce = false;
+  var hubCreateBound = false;
 
   function getLinkVisual(roleKey) {
     if (roleKey === 'config') return { icon: '⚙️', tone: 'config' };
@@ -430,9 +431,115 @@
     if (!hub) return;
     hub.hidden = false;
     applyPlatformBranding();
+    bindHubCreateEventForm();
     renderHubTournamentPicker();
     renderHubLinks();
     renderHubHistorialPreview();
+    showHubNewEventBanner();
+  }
+
+  function hubTenantConfigUrl(slug, pinOrg) {
+    var q = '?pin=' + encodeURIComponent(pinOrg) + '&evt=' + encodeURIComponent(slug);
+    return juradoPageUrl('config', q);
+  }
+
+  function setHubCreateSectionVisible(visible) {
+    var section = $('hubCreateSection');
+    if (section) section.hidden = !visible;
+  }
+
+  function bindHubCreateEventForm() {
+    if (!isHubMode() || hubCreateBound) return;
+    var form = $('hubCreateEventForm');
+    if (!form) return;
+    hubCreateBound = true;
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var errEl = $('hubCreateError');
+      var okEl = $('hubCreateSuccess');
+      var btn = $('hubCreateEventBtn');
+      if (errEl) errEl.hidden = true;
+      if (okEl) okEl.hidden = true;
+
+      var clientName = ($('hubCreateClientName') && $('hubCreateClientName').value || '').trim();
+      var eventName = ($('hubCreateEventName') && $('hubCreateEventName').value || '').trim();
+      var contactEmail = ($('hubCreateContactEmail') && $('hubCreateContactEmail').value || '').trim();
+      var disciplina = ($('hubCreateDisciplina') && $('hubCreateDisciplina').value) || 'filtrado';
+
+      if (!clientName) {
+        if (errEl) {
+          errEl.textContent = 'Escribe el nombre del organizador o cliente.';
+          errEl.hidden = false;
+        }
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Creando torneo…';
+      }
+
+      sheetsPost({
+        action: 'jurado_instance_create',
+        clientName: clientName,
+        eventName: eventName,
+        contactEmail: contactEmail,
+        disciplina: disciplina
+      }).then(function (data) {
+        var inst = data.instance;
+        if (!inst || !inst.slug) throw new Error('Respuesta incompleta del servidor.');
+        var hubUrl = juradoPageUrl('hub');
+        var sep = hubUrl.indexOf('?') >= 0 ? '&' : '?';
+        try {
+          sessionStorage.setItem('lsc_hub_new_event', JSON.stringify({
+            slug: inst.slug,
+            eventName: inst.eventName || eventName || clientName,
+            configUrl: hubTenantConfigUrl(inst.slug, inst.pinOrganizador),
+            inscripcionUrl: data.inscripcionUrl || inst.inscripcionUrl || ''
+          }));
+        } catch (storeErr) { /* ignore */ }
+        window.location.href = hubUrl + sep + 'evt=' + encodeURIComponent(inst.slug);
+      }).catch(function (err) {
+        if (errEl) {
+          errEl.textContent = err.message || 'No se pudo crear el torneo.';
+          errEl.hidden = false;
+        }
+      }).finally(function () {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Crear torneo y abrir consola';
+        }
+      });
+    });
+  }
+
+  function showHubNewEventBanner() {
+    if (!isHubMode() || !hasHubTournamentContext()) return;
+    var raw;
+    try {
+      raw = sessionStorage.getItem('lsc_hub_new_event');
+      if (!raw) return;
+      sessionStorage.removeItem('lsc_hub_new_event');
+    } catch (e) {
+      return;
+    }
+    var info;
+    try {
+      info = JSON.parse(raw);
+    } catch (e2) {
+      return;
+    }
+    if (!info || info.slug !== tenantSlug) return;
+    var active = $('hubTournamentActive');
+    if (!active) return;
+    var extra = document.createElement('div');
+    extra.className = 'jurado-hub-new-event';
+    extra.innerHTML =
+      '<p class="jurado-success">✓ Torneo creado: <strong>' + escapeHtml(info.eventName || info.slug) + '</strong></p>' +
+      '<p class="jurado-hint">Siguiente paso: abre <a href="' + escapeHtml(info.configUrl) + '">Configurar torneo</a>' +
+      (info.inscripcionUrl ? ' o comparte la <a href="' + escapeHtml(info.inscripcionUrl) + '" target="_blank" rel="noopener noreferrer">inscripción pública</a>' : '') +
+      '.</p>';
+    active.insertBefore(extra, active.firstChild);
   }
 
   function renderHubTournamentPicker() {
@@ -441,6 +548,7 @@
 
     if (hasHubTournamentContext()) {
       box.hidden = true;
+      setHubCreateSectionVisible(false);
       var active = $('hubTournamentActive');
       if (active) {
         active.hidden = false;
@@ -467,6 +575,7 @@
     }
 
     box.hidden = false;
+    setHubCreateSectionVisible(true);
     var activeHide = $('hubTournamentActive');
     if (activeHide) activeHide.hidden = true;
     var list = $('hubTournamentList');
@@ -496,7 +605,7 @@
 
       if (!instances.length) {
         list.innerHTML =
-          '<p class="jurado-hint">Aún no hay torneos white-label creados en el panel admin. Puedes usar el torneo principal o crear uno nuevo desde Admin → Jurado.</p>' +
+          '<p class="jurado-hint">Aún no hay torneos adicionales. Usa el torneo principal del festival o crea uno nuevo abajo.</p>' +
           items.join('');
       } else {
         list.innerHTML =
@@ -1606,13 +1715,22 @@
           : (window.EVENT_CONFIG.evento2 || window.EVENT_CONFIG.evento1 || {});
         eventFilter = String(activeEv.eventoId || activeEv.nombre || '').trim();
       }
-      return (data.allCompetencia || [])
+      var habilitados = (data.allCompetencia || [])
         .filter(function (row) { return isHabilitado(row.Habilitado); })
         .filter(function (row) {
-          if (!eventFilter) return true;
-          return competenciaEventKey(row.Evento) === competenciaEventKey(eventFilter);
-        })
-        .map(function (row) {
+          return String(row.ID || '').trim() && String(row.Nombre || '').trim();
+        });
+      var filtered = habilitados.filter(function (row) {
+        if (!eventFilter) return true;
+        return competenciaEventKey(row.Evento) === competenciaEventKey(eventFilter);
+      });
+      if (!filtered.length && habilitados.length && eventFilter) {
+        filtered = habilitados.slice();
+        window.__juradoCompetenciaEditionFallback = competenciaEventKey(eventFilter);
+      } else {
+        window.__juradoCompetenciaEditionFallback = '';
+      }
+      return filtered.map(function (row) {
           return {
             id: String(row.ID || '').trim(),
             nombre: String(row.Nombre || '').trim(),
@@ -3474,29 +3592,45 @@
     }
   }
 
-  function readCriteriaFromEditor() {
+  function readCriteriaFromEditorRaw() {
     var rows = document.querySelectorAll('.jurado-criterion-row');
     var list = [];
     rows.forEach(function (row) {
       var labelEl = row.querySelector('[data-crit-label]');
       var descEl = row.querySelector('[data-crit-desc]');
-      if (labelEl && labelEl.value.trim()) {
-        list.push({
-          label: labelEl.value.trim(),
-          desc: descEl ? descEl.value.trim() : ''
-        });
-      }
+      list.push({
+        key: '',
+        label: labelEl ? labelEl.value : '',
+        desc: descEl ? descEl.value : ''
+      });
     });
-    return normalizeCriteriaList(list);
+    return list;
+  }
+
+  function readCriteriaFromEditor() {
+    return normalizeCriteriaList(readCriteriaFromEditorRaw().filter(function (c) {
+      return String(c.label || '').trim();
+    }));
   }
 
   function renderCriteriaEditor(criteria) {
+    var list = (criteria && criteria.length)
+      ? criteria.map(function (c) {
+        return { key: c.key || '', label: c.label || '', desc: c.desc || '' };
+      })
+      : getCriteria().map(function (c) { return Object.assign({}, c); });
+    renderCriteriaEditorRaw(list);
+  }
+
+  function renderCriteriaEditorRaw(list) {
     var box = $('criteriaEditorList');
     if (!box) return;
-    var list = (criteria && criteria.length) ? criteria : getCriteria();
+    if (!list || !list.length) {
+      list = [{ key: '', label: '', desc: '' }];
+    }
     box.innerHTML = list.map(function (c, i) {
       return '<div class="jurado-criterion-row" data-crit-idx="' + i + '">' +
-        '<input type="text" data-crit-label placeholder="Nombre del criterio" value="' + escapeHtml(c.label) + '" maxlength="80">' +
+        '<input type="text" data-crit-label placeholder="Nombre del criterio" value="' + escapeHtml(c.label || '') + '" maxlength="80">' +
         '<input type="text" data-crit-desc placeholder="Descripción breve" value="' + escapeHtml(c.desc || '') + '" maxlength="160">' +
         '<button type="button" class="jurado-btn-inline jurado-btn-inline--danger" data-remove-crit aria-label="Quitar">✕</button>' +
         '</div>';
@@ -3681,9 +3815,9 @@
     if (addBtn && !addBtn.dataset.bound) {
       addBtn.dataset.bound = '1';
       addBtn.addEventListener('click', function () {
-        var list = readCriteriaFromEditor();
+        var list = readCriteriaFromEditorRaw();
         list.push({ key: '', label: '', desc: '' });
-        renderCriteriaEditor(list);
+        renderCriteriaEditorRaw(list);
       });
     }
     var listBox = $('criteriaEditorList');
@@ -3694,12 +3828,11 @@
         if (!rm) return;
         var row = rm.closest('.jurado-criterion-row');
         if (!row) return;
-        var list = readCriteriaFromEditor();
+        var list = readCriteriaFromEditorRaw();
         var idx = parseInt(row.getAttribute('data-crit-idx'), 10);
         if (!isNaN(idx)) list.splice(idx, 1);
-        else row.remove();
-        if (!list.length) list = [{ label: '', desc: '' }];
-        renderCriteriaEditor(list);
+        if (!list.length) list = [{ key: '', label: '', desc: '' }];
+        renderCriteriaEditorRaw(list);
       });
     }
   }

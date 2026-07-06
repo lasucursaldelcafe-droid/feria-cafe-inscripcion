@@ -130,9 +130,7 @@
     var evt = opts.evt ? String(opts.evt).trim().toLowerCase() : '';
     var pinOrg = String(opts.pinOrganizador || j.pinOrganizador || 'v60organizador').trim();
     var pinJuez = String(opts.pinJuez || j.pinJuez || 'v60sensorial').trim();
-    var jueces = opts.jueces != null
-      ? Math.max(0, Math.min(5, parseInt(opts.jueces, 10) || 0))
-      : Math.max(1, Math.min(5, parseInt(j.jueces, 10) || 3));
+    var jueces = Math.max(1, Math.min(5, parseInt(opts.jueces, 10) || j.jueces || 3));
     var local = isLocalDev();
     var site = String(ev.siteUrl || global.location.origin).replace(/\/$/, '');
 

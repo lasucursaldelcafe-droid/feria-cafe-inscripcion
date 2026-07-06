@@ -2797,7 +2797,10 @@ function handleAdminDashboard_(idToken) {
 
   var allFeria = readAllSheetRows_(SHEET_FERIA, HEADERS_FERIA, true);
   var allCompetencia = readAllSheetRows_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA, true)
-    .map(sanitizeCompetenciaRow_);
+    .map(sanitizeCompetenciaRow_)
+    .filter(function (row) {
+      return row && String(row.ID || '').trim() !== '' && String(row.Nombre || '').trim() !== '';
+    });
   var allStands = readAllSheetRows_(SHEET_STANDS, HEADERS_STANDS, true);
   var allPatrocinadoresCompetencia = readPatrocinadoresCompetenciaRows_();
 
@@ -4279,7 +4282,67 @@ function listJuradoInstances_() {
   return { ok: true, instances: instances };
 }
 
-function defaultJuradoPlatformForTenant_(instance) {
+function juradoDisciplinaPreset_(disciplina) {
+  var presets = {
+    filtrado: {
+      disciplina: 'filtrado',
+      modo: 'duelos',
+      scaleMin: 1,
+      scaleMax: 6,
+      jueces: 3,
+      competidoresEsperados: 16,
+      avancePorRonda: 0
+    },
+    catacion: {
+      disciplina: 'catacion',
+      modo: 'puntaje_general',
+      scaleMin: 0,
+      scaleMax: 8,
+      jueces: 3,
+      competidoresEsperados: 24,
+      avancePorRonda: 8
+    },
+    arte_latte: {
+      disciplina: 'arte_latte',
+      modo: 'duelos',
+      scaleMin: 1,
+      scaleMax: 6,
+      jueces: 3,
+      competidoresEsperados: 12,
+      avancePorRonda: 0
+    },
+    tostion: {
+      disciplina: 'tostion',
+      modo: 'puntaje_general',
+      scaleMin: 1,
+      scaleMax: 6,
+      jueces: 3,
+      competidoresEsperados: 16,
+      avancePorRonda: 0
+    },
+    aeropress: {
+      disciplina: 'aeropress',
+      modo: 'duelos',
+      scaleMin: 1,
+      scaleMax: 6,
+      jueces: 3,
+      competidoresEsperados: 20,
+      avancePorRonda: 0
+    },
+    personalizado: {
+      disciplina: 'personalizado',
+      modo: 'duelos',
+      scaleMin: 1,
+      scaleMax: 5,
+      jueces: 3,
+      competidoresEsperados: 16,
+      avancePorRonda: 0
+    }
+  };
+  return presets[disciplina] || presets.filtrado;
+}
+
+function defaultJuradoPlatformForTenant_(instance, disciplina) {
   var slug = instance.slug;
   var now = new Date().toISOString();
   return {
@@ -4309,20 +4372,23 @@ function defaultJuradoPlatformForTenant_(instance) {
     sheetName: competenciaEventoSheetName_(instance.slug),
     eventId: instance.slug,
     tenantSlug: instance.slug,
-    scoring: {
-      disciplina: 'filtrado',
-      modo: 'duelos',
-      scaleMin: 1,
-      scaleMax: 5,
-      jueces: 3,
-      avancePorRonda: 0,
-      autoAvance: true,
-      competidoresEsperados: 16,
-      mostrarFotos: true,
-      criteria: juradoCriteriaApiList_().map(function (c) {
-        return { key: c.key, label: c.label, desc: '' };
-      })
-    },
+    scoring: (function () {
+      var preset = juradoDisciplinaPreset_(disciplina || 'filtrado');
+      return {
+        disciplina: preset.disciplina,
+        modo: preset.modo,
+        scaleMin: preset.scaleMin,
+        scaleMax: preset.scaleMax,
+        jueces: preset.jueces,
+        avancePorRonda: preset.avancePorRonda,
+        autoAvance: true,
+        competidoresEsperados: preset.competidoresEsperados,
+        mostrarFotos: true,
+        criteria: juradoCriteriaApiList_().map(function (c) {
+          return { key: c.key, label: c.label, desc: '' };
+        })
+      };
+    })(),
     panelImageDataUrl: '',
     actualizado: now
   };
@@ -4332,6 +4398,7 @@ function handleJuradoInstanceCreate_(payload) {
   var clientName = String(payload.clientName || '').trim();
   var eventName = String(payload.eventName || '').trim();
   var contactEmail = String(payload.contactEmail || '').trim();
+  var disciplina = String(payload.disciplina || 'filtrado').trim();
   if (!clientName) return { ok: false, error: 'Nombre del cliente requerido.' };
   if (!eventName) eventName = clientName + ' — Torneo sensorial';
 
@@ -4363,7 +4430,7 @@ function handleJuradoInstanceCreate_(payload) {
   instances.push(instance);
   savePasaporteConfig_({ key: JURADO_INSTANCES_KEY, data: { instances: instances } });
 
-  var platform = defaultJuradoPlatformForTenant_(instance);
+  var platform = defaultJuradoPlatformForTenant_(instance, disciplina);
   savePasaporteConfig_({
     key: juradoTenantKey_('jurado_v60_platform', slug),
     data: platform

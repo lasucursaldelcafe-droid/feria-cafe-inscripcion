@@ -7,7 +7,7 @@
 
 ## Formato de la competencia
 
-12 competidores en 6 rondas de grupos (2 por ronda, orden alfabético por nombre). A semifinal pasaron los mejores puntajes de cada ronda. La final reunió a los 3 mejores de semifinal. El podio oficial (1°, 2° y 3°) se definió por el puntaje total en la final.
+12 competidores en 6 rondas de grupos (2 por ronda, orden del sorteo oficial). A semifinal pasaron los mejores puntajes de cada ronda. La final reunió a los 3 mejores de semifinal. El podio oficial (1°, 2° y 3°) se definió por el puntaje total en la final.
 
 ## Cómo se calcula el puntaje
 
@@ -17,8 +17,18 @@ La planilla original registra el subtotal de cada juez (J1+J2+J3). Como no hay n
 
 **Parámetros evaluados:** Aroma, Sabor, Acidez, Dulzor, Cuerpo, Balance, Limpieza de taza.
 
-## Grupos
+## Grupos (orden del sorteo — clasificatoria)
 
+| Ronda | Participante A | Participante B |
+|------:|----------------|----------------|
+| 1 | Andrenia | Angela |
+| 2 | Jessi | Brayan |
+| 3 | Joe | Useche |
+| 4 | Savedra | Manjares |
+| 5 | Vera | Linda |
+| 6 | Colorado | Polo |
+
+## Grupos — detalle por competidor
 #### Andrenia — Grupos (total **80**)
 
 Subtotales: J1=29 · J2=24 · J3=27 → **80**

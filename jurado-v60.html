@@ -2,13 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <title>Consola principal — Jurado sensorial</title>
   <link rel="icon" type="image/png" href="assets/logo-la-sucursal-del-cafe.png" id="faviconLink">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/jurado-v60.css?v=20260706publish1">
+  <link rel="stylesheet" href="css/jurado-v60.css?v=20260708merge1">
 </head>
 <body class="jurado-page" data-jurado-page="hub">
   <div class="jurado-shell">
@@ -29,11 +30,46 @@
     <section id="hubSection" class="jurado-card jurado-card--hub" hidden>
       <div class="jurado-card-head">
         <h2>Consola principal</h2>
-        <p class="jurado-hint">Elige el torneo y luego comparte cada enlace. Los jurados dependen del torneo creado y de cuántos jueces configuraste en ese torneo.</p>
+        <p class="jurado-hint">Elige un torneo existente o crea uno nuevo. Los enlaces de jueces dependen de la configuración guardada de cada torneo.</p>
       </div>
       <div id="hubTournamentPicker" class="jurado-hub-picker" hidden>
         <h3 class="jurado-admin-subtitle">Selecciona el torneo</h3>
         <div id="hubTournamentList" class="jurado-hub-tournament-list"></div>
+      </div>
+      <div id="hubCreateSection" class="jurado-hub-create" hidden>
+        <h3 class="jurado-admin-subtitle">Crear nuevo torneo</h3>
+        <p class="jurado-hint">Genera un apartado con configuración, inscripción, panel en vivo y enlaces de jueces. Después podrás personalizar disciplina, criterios y PINs.</p>
+        <form id="hubCreateEventForm" class="jurado-hub-create-form" onsubmit="return false">
+          <div class="jurado-config-grid">
+            <div class="jurado-field">
+              <label for="hubCreateClientName">Organizador / cliente</label>
+              <input type="text" id="hubCreateClientName" required maxlength="120" placeholder="Festival del Café" autocomplete="organization">
+            </div>
+            <div class="jurado-field">
+              <label for="hubCreateEventName">Nombre del torneo</label>
+              <input type="text" id="hubCreateEventName" maxlength="120" placeholder="V60 Championship 2026" autocomplete="off">
+            </div>
+            <div class="jurado-field">
+              <label for="hubCreateContactEmail">Correo de contacto (opcional)</label>
+              <input type="email" id="hubCreateContactEmail" maxlength="160" placeholder="evento@ejemplo.com" autocomplete="email">
+            </div>
+            <div class="jurado-field jurado-field--full">
+              <label for="hubCreateDisciplina">Disciplina inicial</label>
+              <select id="hubCreateDisciplina">
+                <option value="filtrado">Filtrado / Brewers (WBrC)</option>
+                <option value="catacion">Catación / Cup Tasters (WCTC)</option>
+                <option value="arte_latte">Arte latte (WLAC)</option>
+                <option value="tostion">Tostión (WCRC)</option>
+                <option value="aeropress">Aeropress (WAC)</option>
+                <option value="personalizado">Personalizado</option>
+              </select>
+              <p class="jurado-field-hint">Puedes ajustar criterios y reglas después en Configurar torneo.</p>
+            </div>
+          </div>
+          <button type="submit" id="hubCreateEventBtn" class="jurado-btn">Crear torneo y abrir consola</button>
+        </form>
+        <p id="hubCreateSuccess" class="jurado-success" hidden></p>
+        <p id="hubCreateError" class="jurado-error" hidden></p>
       </div>
       <div id="hubTournamentActive" class="jurado-hub-active" hidden></div>
       <div id="hubLinksGrid" class="jurado-hub-grid"></div>
@@ -518,7 +554,7 @@
     <p id="loadingMsg" class="jurado-loading">Cargando…</p>
   </div>
 
-  <script src="js/preliminar-1-results.js?v=20260707scale5"></script>
+  <script src="js/preliminar-1-results.js?v=20260708sorteo1"></script>
   <script src="js/competition-history.js?v=20260707compact2"></script>
   <script src="js/site-links.js?v=20260708presets1"></script>
   <script src="js/tournament-presets.js?v=20260708presets1"></script>
@@ -528,6 +564,6 @@
       WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxEVH5x6x8xj5vBFlwbkQjkEtpVNnfBoaeOwRDSk9FbF9K9_vuQFfwNBR9Kghtn2i6u/exec'
     };
   </script>
-  <script src="js/jurado-v60.js?v=20260706publish1"></script>
+  <script src="js/jurado-v60.js?v=20260708merge1"></script>
 </body>
 </html>
