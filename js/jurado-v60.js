@@ -770,7 +770,7 @@
         fee: torneo.precio || '$90.000 COP',
         cupo: torneo.cupo || 36,
         fecha: torneo.fecha || 'Por confirmar',
-        hora: torneo.hora || '5:30 p. m.',
+        hora: torneo.hora || '3:30 p. m.',
         lugar: torneo.lugar || 'Por confirmar',
         contactEmail: (ev.alerts && ev.alerts.email) || '',
         whatsapp: (ev.contact && ev.contact.whatsapp) || '',

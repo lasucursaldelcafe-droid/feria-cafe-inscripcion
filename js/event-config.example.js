@@ -52,7 +52,7 @@ window.EVENT_CONFIG = {
     fecha: '8 de agosto de 2026',
     fechaCorta: '8 ago 2026',
     fechaIso: '2026-08-08',
-    horaInicio: '5:30 p. m.',
+    horaInicio: '3:30 p. m.',
     sede: 'Mas Café',
     ciudad: 'Cali',
     mapsQuery: 'Mas Café Cali',

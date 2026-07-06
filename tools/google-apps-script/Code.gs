@@ -11,16 +11,23 @@ var SHEET_STANDS = 'Stands';
 var SHEET_LISTA_ESPERA = 'Lista de espera';
 var SHEET_ANALYTICS = 'Analytics';
 var SHEET_NOVEDADES = 'Novedades';
+var SHEET_RESULTADOS_ACCESOS = 'Resultados accesos';
 var EXPOSITOR_PANEL_PATH = '/mi-stand';
 
 var HEADERS_ANALYTICS = [
   'Timestamp', 'Path', 'Titulo', 'Referrer', 'Session ID', 'User agent'
 ];
+var HEADERS_RESULTADOS_ACCESOS = [
+  'Timestamp', 'Competidor ID', 'Nombre', 'Evento', 'Doc últimos 4',
+  'Resultados publicados', 'Rondas', 'Tipo acceso', 'Tenant', 'Notificado'
+];
+var RESULTADOS_ACCESO_NOTIFY_COOLDOWN_MS = 30 * 60 * 1000;
 var CUPO_MAX_COMPETENCIA = 36;
 /** Evento activo para cupo, duplicados e inscripciones nuevas (Preliminar 2). */
 var ACTIVE_COMPETENCIA_EVENTO = 'V60 Championship — Preliminar 2';
 /** Fecha y sede oficiales — Preliminar 2 */
 var PRELIMINAR2_FECHA = '8 de agosto de 2026';
+var PRELIMINAR2_HORA = '3:30 p. m.';
 var PRELIMINAR2_LUGAR = 'Mas Café, Cali';
 var COMPROBANTE_PREVIEW_MAX = 1000;
 var DRIVE_FOLDER_NAME = 'V60 Championship — Comprobantes';
@@ -382,9 +389,13 @@ function sincronizarEncabezados() {
   applyHeaders_(getOrCreateSheet_(SHEET_PASAPORTE_OPS, HEADERS_PASAPORTE_OPS), HEADERS_PASAPORTE_OPS);
   applyHeaders_(getOrCreateSheet_(SHEET_PASAPORTE_ESCANEOS, HEADERS_PASAPORTE_ESCANEOS), HEADERS_PASAPORTE_ESCANEOS);
   applyHeaders_(getOrCreateSheet_(SHEET_JURADO_V60, HEADERS_JURADO_V60), HEADERS_JURADO_V60);
+  applyHeaders_(
+    getOrCreateSheet_(SHEET_RESULTADOS_ACCESOS, HEADERS_RESULTADOS_ACCESOS),
+    HEADERS_RESULTADOS_ACCESOS
+  );
   ensureDefaultPatrocinadoresCompetencia_();
   Logger.log(
-    'Encabezados sincronizados: Feria, Competencia, Stands, Lista de espera, Analytics, Novedades, Patrocinadores, Pasaportes, Jurado V60.'
+    'Encabezados sincronizados: Feria, Competencia, Stands, Lista de espera, Analytics, Novedades, Patrocinadores, Pasaportes, Jurado V60, Resultados accesos.'
   );
 }
 
@@ -2128,7 +2139,7 @@ function getCompetenciaEventoFechaLugar_(data) {
   if (evLabel.tabla === 'Preliminar 1') {
     return 'Edición realizada';
   }
-  return PRELIMINAR2_FECHA + ' · ' + PRELIMINAR2_LUGAR;
+  return PRELIMINAR2_FECHA + ' · ' + PRELIMINAR2_HORA + ' · ' + PRELIMINAR2_LUGAR;
 }
 
 function buildCompetenciaWaOrganizadorUrl_(data) {
@@ -2483,6 +2494,19 @@ function buildOrganizerAlertBody_(formType, data) {
     lines.push('Motivo: ' + (data.motivo || 'Cupo completo'));
     lines.push('');
     lines.push('Revisa la hoja "' + SHEET_LISTA_ESPERA + '" en Google Sheets.');
+  } else if (formType === 'jurado_resultados_acceso') {
+    lines = ['Portal de resultados V60 — un competidor consultó sus calificaciones', ''];
+    lines.push('Nombre: ' + (data.nombre || ''));
+    lines.push('ID inscripción: ' + (data.competidorId || data.id || ''));
+    lines.push('Evento: ' + (data.evento || ''));
+    lines.push('Resultados publicados: ' + (data.resultadosPublicados
+      ? 'Sí (' + (data.rondas || 0) + ' ronda(s) visible(s))'
+      : 'No — el competidor entró pero aún no hay notas publicadas'));
+    lines.push('Tipo de acceso: ' + (data.source || 'login'));
+    if (data.evt) lines.push('Torneo white-label: ' + data.evt);
+    lines.push('');
+    lines.push('Portal competidor: ' + getResultadosPortalUrl_());
+    lines.push('Revisa la hoja "' + SHEET_RESULTADOS_ACCESOS + '" en Google Sheets para el historial.');
   } else {
     var intereses = Array.isArray(data.intereses) ? data.intereses.join(', ') : String(data.intereses || '');
     lines.push('Formulario: Feria de café');
@@ -2521,6 +2545,10 @@ function buildOrganizerAlertSubject_(formType, data) {
   }
   if (formType === 'lista_espera') {
     return '[Lista de espera] ' + nombre + (id ? ' (' + id + ')' : '');
+  }
+  if (formType === 'jurado_resultados_acceso') {
+    var pub = data.resultadosPublicados ? 'con resultados' : 'sin publicar aún';
+    return '[V60 Resultados] ' + (data.nombre || 'Competidor') + ' consultó el portal (' + pub + ')';
   }
   return '[Feria] Nueva inscripción — ' + nombre + (id ? ' (' + id + ')' : '');
 }
@@ -2796,6 +2824,7 @@ function handleAdminDashboard_(idToken) {
   var standsCount = getSheetRowCount_(SHEET_STANDS, HEADERS_STANDS);
   var listaCount = getSheetRowCount_(SHEET_LISTA_ESPERA, HEADERS_LISTA_ESPERA);
   var analytics = getAnalyticsStats_();
+  var resultadosAccesos = getResultadosAccesosStats_();
 
   var feriaConv = analytics.feriaPageToday > 0
     ? Math.round((feriaCount / analytics.feriaPageToday) * 100)
@@ -2841,7 +2870,11 @@ function handleAdminDashboard_(idToken) {
       uniquePathsTotal: analytics.uniquePathsTotal,
       topPagesToday: analytics.topPagesToday,
       topPagesAll: analytics.topPagesAll,
-      analyticsSource: 'sheet_pageviews'
+      analyticsSource: 'sheet_pageviews',
+      resultadosAccesosToday: resultadosAccesos.accesosToday,
+      resultadosAccesosTotal: resultadosAccesos.accesosTotal,
+      resultadosCompetidoresHoy: resultadosAccesos.uniqueCompetidoresToday,
+      resultadosLoginsHoy: resultadosAccesos.loginsToday
     },
     feriaColumns: HEADERS_FERIA,
     competenciaColumns: competenciaDisplayHeaders_(),
@@ -2850,7 +2883,9 @@ function handleAdminDashboard_(idToken) {
     allFeria: allFeria,
     allCompetencia: allCompetencia,
     allStands: allStands,
-    allPatrocinadoresCompetencia: allPatrocinadoresCompetencia
+    allPatrocinadoresCompetencia: allPatrocinadoresCompetencia,
+    resultadosAccesosColumns: HEADERS_RESULTADOS_ACCESOS,
+    resultadosAccesosRecent: resultadosAccesos.recent
   });
 }
 
@@ -2914,6 +2949,16 @@ function handleAdminExport_(idToken, dataset) {
     });
   }
 
+  if (dataset === 'resultados_accesos') {
+    var accesosRows = readAllSheetRows_(SHEET_RESULTADOS_ACCESOS, HEADERS_RESULTADOS_ACCESOS, false);
+    return jsonResponse({
+      ok: true,
+      dataset: 'resultados_accesos',
+      filename: 'resultados-accesos-' + stamp + '.csv',
+      csv: rowsToCsv_(HEADERS_RESULTADOS_ACCESOS, accesosRows)
+    });
+  }
+
   if (dataset === 'all') {
     return jsonResponse({
       ok: true,
@@ -2941,6 +2986,13 @@ function handleAdminExport_(idToken, dataset) {
         {
           filename: 'lista-espera-' + stamp + '.csv',
           csv: rowsToCsv_(HEADERS_LISTA_ESPERA, readAllSheetRows_(SHEET_LISTA_ESPERA, HEADERS_LISTA_ESPERA, false))
+        },
+        {
+          filename: 'resultados-accesos-' + stamp + '.csv',
+          csv: rowsToCsv_(
+            HEADERS_RESULTADOS_ACCESOS,
+            readAllSheetRows_(SHEET_RESULTADOS_ACCESOS, HEADERS_RESULTADOS_ACCESOS, false)
+          )
         }
       ]
     });
@@ -2948,7 +3000,7 @@ function handleAdminExport_(idToken, dataset) {
 
   return jsonResponse({
     ok: false,
-    error: 'dataset inválido. Usa: feria, competencia, stands, analytics, lista_espera, all'
+    error: 'dataset inválido. Usa: feria, competencia, stands, analytics, lista_espera, resultados_accesos, all'
   }, 400);
 }
 
@@ -4112,6 +4164,95 @@ function juradoResultadosTorneoStatus_(bracket, competidorId, row, platformCfg) 
   };
 }
 
+function maskDocLast4_(documento) {
+  var d = normalizeDoc_(documento);
+  if (d.length < 4) return '****';
+  return '***' + d.slice(-4);
+}
+
+function normalizeResultadosAccessSource_(source) {
+  var s = String(source || 'login').trim().toLowerCase();
+  if (s === 'refresh' || s === 'session') return s;
+  return 'login';
+}
+
+function shouldNotifyResultadosAccess_(competidorId, source) {
+  if (source === 'refresh') return false;
+  var rows = readSheetRows_(SHEET_RESULTADOS_ACCESOS, HEADERS_RESULTADOS_ACCESOS, 300);
+  var now = Date.now();
+  var cutoff = new Date(now - RESULTADOS_ACCESO_NOTIFY_COOLDOWN_MS);
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    if (String(row['Competidor ID'] || '').trim() !== competidorId) continue;
+    var notificado = String(row['Notificado'] || '').toLowerCase();
+    if (notificado !== 'sí' && notificado !== 'si') continue;
+    var ts = new Date(row['Timestamp'] || 0);
+    if (!isNaN(ts.getTime()) && ts >= cutoff) return false;
+  }
+  return true;
+}
+
+function logJuradoResultadosAccess_(accessData) {
+  var competidorId = String(accessData.competidorId || '').trim();
+  if (!competidorId) return { logged: false, notified: false };
+
+  var source = normalizeResultadosAccessSource_(accessData.source);
+  var notify = shouldNotifyResultadosAccess_(competidorId, source);
+  if (notify) {
+    try {
+      sendOrganizerNotificationEmail_('jurado_resultados_acceso', accessData);
+    } catch (err) {
+      Logger.log('No se pudo notificar acceso resultados: ' + err);
+      notify = false;
+    }
+  }
+
+  var sheet = getOrCreateSheet_(SHEET_RESULTADOS_ACCESOS, HEADERS_RESULTADOS_ACCESOS);
+  sheet.appendRow([
+    new Date().toISOString(),
+    competidorId,
+    String(accessData.nombre || '').trim(),
+    String(accessData.evento || '').trim(),
+    maskDocLast4_(accessData.documento),
+    accessData.resultadosPublicados ? 'Sí' : 'No',
+    parseInt(accessData.rondas, 10) || 0,
+    source,
+    String(accessData.evt || '').trim(),
+    notify ? 'Sí' : 'No'
+  ]);
+
+  return { logged: true, notified: notify };
+}
+
+function getResultadosAccesosStats_() {
+  var rows = readAllSheetRows_(SHEET_RESULTADOS_ACCESOS, HEADERS_RESULTADOS_ACCESOS, true);
+  var today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  var todayCount = 0;
+  var uniqueToday = {};
+  var uniqueTotal = {};
+  var loginToday = 0;
+
+  rows.forEach(function (row) {
+    var ts = String(row['Timestamp'] || '');
+    var id = String(row['Competidor ID'] || '').trim();
+    if (id) uniqueTotal[id] = true;
+    if (ts.indexOf(today) === 0) {
+      todayCount++;
+      if (id) uniqueToday[id] = true;
+      if (String(row['Tipo acceso'] || '') === 'login') loginToday++;
+    }
+  });
+
+  return {
+    accesosToday: todayCount,
+    accesosTotal: rows.length,
+    uniqueCompetidoresToday: Object.keys(uniqueToday).length,
+    uniqueCompetidoresTotal: Object.keys(uniqueTotal).length,
+    loginsToday: loginToday,
+    recent: rows.slice(0, 80)
+  };
+}
+
 function handleJuradoResultadosLogin_(payload) {
   var nombre = String(payload.nombre || '').trim();
   var documento = String(payload.documento || '').trim();
@@ -4175,6 +4316,17 @@ function handleJuradoResultadosLogin_(payload) {
   var criteria = Array.isArray(scoring.criteria) && scoring.criteria.length
     ? scoring.criteria
     : juradoDefaultCriteria_();
+
+  logJuradoResultadosAccess_({
+    competidorId: competidorId,
+    nombre: String(row['Nombre'] || '').trim(),
+    evento: extractCompetenciaPreliminarKey_(row['Evento']),
+    documento: documento,
+    resultadosPublicados: resultadosPublicados,
+    rondas: rondas.length,
+    source: normalizeResultadosAccessSource_(payload.source),
+    evt: evt
+  });
 
   return {
     ok: true,
@@ -4847,7 +4999,7 @@ function buildPreliminar1ThankYouPlain_(data) {
     '• Si no ves notas aún, el organizador puede estar publicándolas; vuelve a intentar más tarde.',
     '',
     '—— Siguiente paso: Preliminar 2 ——',
-    'La 2.ª preliminar es el ' + PRELIMINAR2_FECHA + ' en ' + PRELIMINAR2_LUGAR + '.',
+    'La 2.ª preliminar es el ' + PRELIMINAR2_FECHA + ' a las ' + PRELIMINAR2_HORA + ' en ' + PRELIMINAR2_LUGAR + '.',
     'Inscripción en línea (cupos limitados):',
     inscripcionUrl,
     '',
@@ -4897,7 +5049,7 @@ function buildPreliminar1ThankYouHtml_(data) {
     '<li style="margin-bottom:6px;">Si aún no ves notas, el organizador puede estar publicándolas — intenta de nuevo más tarde.</li>',
     '</ul>',
     '<h2 style="font-size:17px;color:#5f4a3a;margin:20px 0 10px;">¿Sigues en el circuito? Preliminar 2</h2>',
-    '<p style="margin:0 0 10px;"><strong>' + escapeHtml_(PRELIMINAR2_FECHA) + '</strong> · <strong>' + escapeHtml_(PRELIMINAR2_LUGAR) + '</strong></p>',
+    '<p style="margin:0 0 10px;"><strong>' + escapeHtml_(PRELIMINAR2_FECHA) + '</strong> · <strong>' + escapeHtml_(PRELIMINAR2_HORA) + '</strong> · <strong>' + escapeHtml_(PRELIMINAR2_LUGAR) + '</strong></p>',
     '<p style="margin:0 0 12px;">Inscríbete a la 2.ª preliminar (cupos limitados). Valor: <strong>$90.000 COP</strong> · Nubank <strong>@mbl616</strong> (Manuel Barraza).</p>',
     '<p style="margin:0 0 14px;"><a href="' + inscripcionUrl + '" style="' + btnBrown + '">Inscribirme en la Preliminar 2</a></p>',
     '<p style="margin:0 0 8px;font-size:14px;">Antes de inscribirte, revisa:</p>',
