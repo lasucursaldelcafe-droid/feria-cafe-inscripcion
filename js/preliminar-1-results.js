@@ -49,6 +49,13 @@
     ['Colorado', 'Polo']
   ];
 
+  /** Semifinales 1v1: ganadores de ronda 1 vs 6, 2 vs 5, 3 vs 4 (sorteo oficial). */
+  var SEMIFINAL_PAREJAS = [
+    ['Andrenia', 'Colorado'],
+    ['Jessi', 'Linda'],
+    ['Useche', 'Savedra']
+  ];
+
   var PLANILLA_TO_KEY = {
     Andrenia: 'andrenia',
     Angela: 'angela',
@@ -400,6 +407,71 @@
   }
 
   /** 6 rondas de grupos según el sorteo oficial de la clasificatoria. */
+  function getRoundOpponent(planilla, entrada) {
+    var name = String(planilla || '').trim();
+    if (!name) return null;
+    if (entrada === 1) {
+      for (var i = 0; i < GRUPOS_PAREJAS.length; i++) {
+        var pair = GRUPOS_PAREJAS[i];
+        if (pair[0] === name) return resolveOpponentInfo_(pair[1]);
+        if (pair[1] === name) return resolveOpponentInfo_(pair[0]);
+      }
+      return null;
+    }
+    if (entrada === 2) {
+      for (var j = 0; j < SEMIFINAL_PAREJAS.length; j++) {
+        var semi = SEMIFINAL_PAREJAS[j];
+        if (semi[0] === name) return resolveOpponentInfo_(semi[1]);
+        if (semi[1] === name) return resolveOpponentInfo_(semi[0]);
+      }
+      return null;
+    }
+    if (entrada === 3) {
+      var finalistas = getRowsByEntrada(3).map(function (row) {
+        var ins = row.inscrito || resolveInscrito(row.participante);
+        return ins ? ins.nombre : row.participante;
+      }).filter(function (n) {
+        var insSelf = resolveInscrito(name);
+        var selfName = insSelf ? insSelf.nombre : name;
+        return String(n).toLowerCase() !== String(selfName).toLowerCase();
+      });
+      if (!finalistas.length) return null;
+      return {
+        tipo: 'final',
+        nombre: finalistas.join(' · '),
+        planilla: '',
+        label: 'Finalistas en la misma tanda'
+      };
+    }
+    return null;
+  }
+
+  function resolveOpponentInfo_(planillaName) {
+    var ins = resolveInscrito(planillaName);
+    return {
+      tipo: 'duelo',
+      nombre: ins ? ins.nombre : planillaName,
+      planilla: planillaName,
+      fotoUrl: ins ? ins.fotoUrl : ''
+    };
+  }
+
+  function getCompetidorProfile(competidorId, documento, nombre) {
+    var targetId = resolveInscritoId(competidorId || '');
+    var doc = String(documento || '').replace(/\D/g, '');
+    var list = getInscritosList();
+    for (var i = 0; i < list.length; i++) {
+      var ins = list[i];
+      if (targetId && ins.id === targetId) return ins;
+      if (doc && String(ins.documento || '').replace(/\D/g, '') === doc) return ins;
+      if (nombre && String(ins.nombre || '').toLowerCase().indexOf(String(nombre).toLowerCase().slice(0, 8)) >= 0) {
+        return ins;
+      }
+    }
+    return null;
+  }
+
+  /** 6 rondas de grupos según el sorteo oficial de la clasificatoria. */
   function getGruposRondas() {
     var phase1 = getRowsByEntrada(1);
     var byName = {};
@@ -654,6 +726,7 @@
     });
     return rows.map(function (row) {
       var suma = row.j1 + row.j2 + row.j3;
+      var oponente = getRoundOpponent(row.participante, row.entrada);
       return {
         roundKey: 'preliminar1|entrada' + row.entrada,
         faseLabel: 'Preliminar 1 — ' + entradaLabel(row.entrada),
@@ -667,7 +740,8 @@
           preliminar: 1,
           entrada: row.entrada,
           planilla: row.participante,
-          imported: true
+          imported: true,
+          oponente: oponente
         }
       };
     }).sort(function (a, b) {
@@ -786,6 +860,8 @@
     getPodioFinal: getPodioFinal,
     getGruposRondas: getGruposRondas,
     getRoundsForCompetidor: getRoundsForCompetidor,
+    getRoundOpponent: getRoundOpponent,
+    getCompetidorProfile: getCompetidorProfile,
     getCompetitorOutcome: getCompetitorOutcome,
     formatDescription: formatDescription,
     buildCalificacionesStore: buildCalificacionesStore,

@@ -3513,6 +3513,87 @@ body.jurado-page--resultados .jurado-shell {
   }
 }
 
+.jurado-toolbar--result-profile .jurado-result-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.jurado-result-profile-photo {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(201, 162, 39, 0.45);
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.jurado-result-vs-card {
+  border-color: rgba(201, 162, 39, 0.28);
+  background: rgba(201, 162, 39, 0.05);
+}
+
+.jurado-result-vs-line {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.jurado-result-bands {
+  display: grid;
+  gap: 10px;
+}
+
+.jurado-result-band {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--jurado-border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.jurado-result-band h3 {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.jurado-result-band--competitivo {
+  border-color: rgba(76, 175, 120, 0.35);
+  background: rgba(76, 175, 120, 0.08);
+}
+
+.jurado-result-band--en_desarrollo {
+  border-color: rgba(255, 193, 7, 0.35);
+  background: rgba(255, 193, 7, 0.08);
+}
+
+.jurado-result-band--por_fortalecer {
+  border-color: rgba(244, 67, 54, 0.35);
+  background: rgba(244, 67, 54, 0.08);
+}
+
+.jurado-result-band-params {
+  margin: 0 0 4px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.jurado-result-obs-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.jurado-result-obs-list li + li {
+  margin-top: 8px;
+}
+
 .jurado-result-round-summary h3 {
   margin: 0 0 8px;
   font-size: 0.95rem;
