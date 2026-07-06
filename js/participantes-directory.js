@@ -8,7 +8,7 @@
   var TIPO_LABELS = {
     expositor: 'Expositor',
     patrocinador: 'Patrocinador',
-    aliado: 'Aliado'
+    aliado: 'Patrocinador'
   };
 
   var SOCIAL_LABELS = {
@@ -89,9 +89,19 @@
     var redSocial = participante.redSocial || '';
     var logo = primaryLogo(participante);
     var alt = escapeHtml((logo && logo.marca) || participante.marca || 'Marca en la feria');
+    var shared = global.SponsorCardShared;
     var avatar;
 
-    if (logo && logo.url) {
+    if (shared && shared.renderLogoWrap) {
+      avatar = shared.renderLogoWrap({
+        imageUrl: logo && logo.url ? logo.url : '',
+        alt: (logo && logo.marca) || participante.marca || 'Marca en la feria',
+        name: participante.marca,
+        size: 320,
+        width: 128,
+        height: 88
+      });
+    } else if (logo && logo.url) {
       avatar =
         '<div class="festival-sponsor-card__logo-wrap">' +
         '<img class="festival-sponsor-card__avatar festival-sponsor-card__avatar--logo" src="' +
@@ -175,6 +185,10 @@
 
   function bindAvatarFallbacks(root) {
     if (!root) return;
+    if (global.SponsorCardShared && global.SponsorCardShared.bindLogoFallbacks) {
+      global.SponsorCardShared.bindLogoFallbacks(root);
+      return;
+    }
     root.querySelectorAll('img.festival-sponsor-card__avatar--logo').forEach(function (img) {
       img.addEventListener('error', function onAvatarError() {
         img.removeEventListener('error', onAvatarError);

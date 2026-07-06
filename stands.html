@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Adquiere tu stand en la feria de café especial La Sucursal del Café, Cali. Expositores y marcas: Zona Origen, Zona Gran Reserva y Aliado Patrocinador. 29–30 agosto 2026, Palmetto Plaza.">
+  <meta name="description" content="Adquiere tu stand en la feria de café especial La Sucursal del Café, Cali. Expositores y marcas: Zona Origen, Zona Gran Reserva y patrocinio de marca. 29–30 agosto 2026, Palmetto Plaza.">
   <link rel="canonical" href="https://la-sucursal-del-cafe.web.app/stands">
   <meta property="og:title" content="Adquiere tu stand | Feria café Cali — La Sucursal del Café">
   <meta property="og:description" content="Inscripción de expositores y stands en la feria de café especial. 29–30 ago 2026 · Palmetto Plaza, Cali.">
@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/brand.css?v=20260706coffee2">
+  <link rel="stylesheet" href="css/brand.css?v=20260706visual1">
 </head>
 <body class="page-festival page-form" data-festival-page="stands">
   <header class="site-header">
@@ -61,7 +61,7 @@
           <p style="margin:0.5rem 0 0"><span id="infoStandsDetalle"></span></p>
           <ul class="hint" style="margin:0.5rem 0 0;padding-left:1.25rem">
             <li><strong>Para marcas y negocios:</strong> este formulario es para reservar o solicitar un stand como expositor.</li>
-            <li><strong>Planes:</strong> Zona Origen, Zona Gran Reserva o Aliado Patrocinador (<a data-link="patrocinadores" href="patrocinadores.html">ver detalle y precios</a>).</li>
+            <li><strong>Planes:</strong> Zona Origen, Zona Gran Reserva o patrocinio de marca (<a data-link="patrocinadores" href="patrocinadores.html">ver detalle y precios</a>).</li>
             <li><strong>Confirmación:</strong> el equipo te contactará por correo o WhatsApp para cerrar disponibilidad y pago.</li>
           </ul>
           <p class="hint" style="margin:0.5rem 0 0">
@@ -87,15 +87,15 @@
               <option value="">Selecciona…</option>
               <option value="Zona Origen">Zona Origen — stand 120×60 cm ($1.500.000 COP)</option>
               <option value="Zona Gran Reserva">Zona Gran Reserva — stand 3×2 m ($3.000.000 COP)</option>
-              <option value="Aliado Patrocinador">Aliado Patrocinador — visibilidad (a convenir)</option>
+              <option value="Aliado Patrocinador">Patrocinio de marca — visibilidad (a convenir)</option>
               <option value="Quiero asesoría">Aún no sé / Quiero asesoría</option>
             </select>
-            <p id="plan-hint" class="hint">Expositores (Zona Origen o Gran Reserva): elige plan y luego un stand de la lista. Aliado Patrocinador: solo datos básicos — la negociación ya está cerrada con el equipo.</p>
+            <p id="plan-hint" class="hint">Expositores (Zona Origen o Gran Reserva): elige plan y luego un stand de la lista. Patrocinio de marca: solo datos básicos — la negociación ya está cerrada con el equipo.</p>
             <span id="plan-error" class="error-msg" role="alert"></span>
           </div>
 
           <div id="aliadoPatrocinadorNotice" class="info-box" role="note" hidden>
-            <strong>Aliado / patrocinador</strong>
+            <strong>Patrocinio de marca</strong>
             <p style="margin:0.5rem 0 0">No necesitas elegir stand en el listado. Completa tus datos y logo(s). <strong>Tu solicitud será validada por el equipo — te contactaremos sobre el tipo de patrocinio.</strong></p>
           </div>
 
@@ -407,15 +407,15 @@
     </footer>
   </div>
 
-  <script src="js/event-config.js?v=20260705assets1"></script>
-  <script src="js/site-links.js?v=20260705assets1"></script>
+  <script src="js/event-config.js?v=20260706visual1"></script>
+  <script src="js/site-links.js?v=20260706visual1"></script>
   <script src="js/seo-structured-data.js"></script>
   <script src="js/sheets-config.js"></script>
   <script src="js/form-submit.js"></script>
   <script src="js/stands-map.js?v=20260705standslist"></script>
   <script src="js/terms-disclosure.js"></script>
-  <script src="js/site-chrome.js?v=20260705assets1"></script>
-  <script src="js/festival-nav.js?v=20260705assets1"></script>
+  <script src="js/site-chrome.js?v=20260706visual1"></script>
+  <script src="js/festival-nav.js?v=20260706visual1"></script>
   <script>
     (function () {
       const STORAGE_KEY = "feria_cafe_stands";
@@ -753,7 +753,7 @@
           }
           var successLead = document.getElementById("successLeadStands");
           if (successLead && isAliadoSuccess) {
-            successLead.innerHTML = "Gracias por tu interés en ser aliado o patrocinador de <strong>La Sucursal del Café</strong>. " +
+            successLead.innerHTML = "Gracias por tu interés en ser patrocinador de <strong>La Sucursal del Café</strong>. " +
               "<strong>Tu solicitud será validada por el equipo — te contactaremos sobre el tipo de patrocinio.</strong>";
           }
           var accessBlock = document.getElementById("successAccessBlock");
