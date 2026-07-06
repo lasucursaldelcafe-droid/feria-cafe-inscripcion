@@ -367,31 +367,6 @@
     html += renderGruposRondas(edition);
     html += renderPhaseLanes(edition);
 
-    var rows = edition.ranking.map(function (row) {
-      var name = row.nombreInscrito || row.participante;
-      return '<tr>' +
-        '<td class="jurado-preliminar-rank">' + row.posicion + '</td>' +
-        '<td class="jurado-clasificacion-table-photo">' + competitorPhotoHtml(row.fotoUrl, 32, name) + '</td>' +
-        '<td><code class="jurado-preliminar-id">' + escapeHtml(row.competidorId) + '</code></td>' +
-        '<td><strong>' + escapeHtml(name) + '</strong>' +
-        (row.representa ? '<br><span class="jurado-hint">' + escapeHtml(row.representa) + '</span>' : '') +
-        '</td>' +
-        '<td class="jurado-preliminar-num">' + escapeHtml(phaseLabel(row.entrada)) + '</td>' +
-        '<td class="jurado-preliminar-num">' + row.j1 + '</td>' +
-        '<td class="jurado-preliminar-num">' + row.j2 + '</td>' +
-        '<td class="jurado-preliminar-num">' + row.j3 + '</td>' +
-        '<td class="jurado-preliminar-total"><strong>' + row.total + '</strong></td>' +
-        '</tr>';
-    }).join('');
-
-    html +=
-      '<section class="jurado-clasificacion-section">' +
-      '<h3 class="jurado-clasificacion-title">Tabla de resultados</h3>' +
-      '<div class="jurado-preliminar-table-wrap">' +
-      '<table class="jurado-preliminar-table">' +
-      '<thead><tr><th>#</th><th>Foto</th><th>ID</th><th>Competidor</th><th>Fase</th><th>J1</th><th>J2</th><th>J3</th><th>Total</th></tr></thead>' +
-      '<tbody>' + rows + '</tbody></table></div></section>';
-
     html += renderBreakdownSection(edition);
 
     if (edition.rawRows && edition.rawRows.length > edition.ranking.length) {
