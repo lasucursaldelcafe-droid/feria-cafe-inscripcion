@@ -1,5 +1,6 @@
 /**
  * Portal de resultados — competidor ingresa con nombre + documento (cédula).
+ * Muestra todas las rondas publicadas con observaciones según estándar V60.
  */
 (function () {
   'use strict';
@@ -7,6 +8,7 @@
   var SESSION_KEY = 'lsc_jurado_resultados_session';
   var REFRESH_MS = 8000;
   var tenantSlug = '';
+  var selectedRoundIdx = -1;
 
   var refreshTimer = null;
   var currentData = null;
@@ -102,9 +104,151 @@
     return 'jurado-result-estado--pending';
   }
 
+  function getStandards() {
+    return window.JuradoStandards || null;
+  }
+
+  function getCriteria(scoring) {
+    var std = getStandards();
+    if (std && std.mergeCriteria) return std.mergeCriteria(scoring && scoring.criteria);
+    if (scoring && scoring.criteria && scoring.criteria.length) return scoring.criteria;
+    return [
+      { key: 'aroma', label: 'Aroma', desc: 'Intensidad y calidad en seco y húmedo' },
+      { key: 'dulzor', label: 'Dulzor', desc: 'Percepción de dulzor natural' },
+      { key: 'acidez', label: 'Acidez', desc: 'Calidad, intensidad y tipo' },
+      { key: 'sabor', label: 'Sabor', desc: 'Amplitud y complejidad del perfil' },
+      { key: 'balance', label: 'Balance', desc: 'Integración armónica de atributos' },
+      { key: 'cuerpo', label: 'Cuerpo', desc: 'Textura y sensación en boca' },
+      { key: 'limpieza_taza', label: 'Limpieza de taza', desc: 'Ausencia de defectos u off-flavors' }
+    ];
+  }
+
+  function mergeRondas(data) {
+    var apiRondas = Array.isArray(data.rondas) ? data.rondas.slice() : [];
+    if (!apiRondas.length && data.calificacion) apiRondas.push(data.calificacion);
+
+    var p1 = window.Preliminar1Results;
+    if (p1 && p1.getRoundsForCompetidor && data.competidor) {
+      var comp = data.competidor;
+      var p1Rounds = p1.getRoundsForCompetidor(comp.id, comp.documento, comp.nombre) || [];
+      var keys = {};
+      apiRondas.forEach(function (r) {
+        if (r && r.roundKey) keys[r.roundKey] = true;
+      });
+      p1Rounds.forEach(function (r) {
+        if (!keys[r.roundKey]) apiRondas.push(r);
+      });
+    }
+
+    apiRondas.sort(function (a, b) {
+      return String(a.publicadoAt || a.faseLabel || '').localeCompare(String(b.publicadoAt || b.faseLabel || ''));
+    });
+    return apiRondas;
+  }
+
   function judgeDone(judges, num) {
     var g = judges && judges['j' + num];
     return !!(g && g.subtotal != null);
+  }
+
+  function renderRoundTabs(rondas) {
+    var tabs = $('resultRoundsTabs');
+    if (!tabs) return;
+    if (!rondas.length) {
+      tabs.innerHTML = '';
+      tabs.hidden = true;
+      return;
+    }
+    tabs.hidden = rondas.length <= 1;
+    if (selectedRoundIdx < 0 || selectedRoundIdx >= rondas.length) {
+      selectedRoundIdx = rondas.length - 1;
+    }
+    tabs.innerHTML = rondas.map(function (r, idx) {
+      var label = r.faseLabel || ('Ronda ' + (idx + 1));
+      var pts = r.sumaTotal != null ? ' · ' + r.sumaTotal + ' pts' : '';
+      var active = idx === selectedRoundIdx ? ' jurado-result-round-tab--active' : '';
+      return '<button type="button" class="jurado-result-round-tab' + active + '" data-round-idx="' + idx + '">' +
+        escapeHtml(label) + '<span class="jurado-result-round-tab-pts">' + escapeHtml(pts) + '</span></button>';
+    }).join('');
+
+    tabs.querySelectorAll('[data-round-idx]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        selectedRoundIdx = parseInt(btn.getAttribute('data-round-idx'), 10) || 0;
+        if (currentData) renderResults(currentData);
+      });
+    });
+  }
+
+  function renderCriteriaTable(round, criteria, scoring) {
+    var std = getStandards();
+    var scaleMin = (scoring && scoring.scaleMin) || 1;
+    var scaleMax = (scoring && scoring.scaleMax) || 5;
+    var judges = round.judges || {};
+    var jmax = (scoring && scoring.jueces) || 3;
+
+    var html = '<div class="jurado-result-criteria-table-wrap"><table class="jurado-result-criteria-table">' +
+      '<thead><tr><th>Parámetro</th><th>Estándar</th>';
+    for (var h = 1; h <= jmax; h++) html += '<th>J' + h + '</th>';
+    html += '<th>Prom.</th><th>Observación</th></tr></thead><tbody>';
+
+    criteria.forEach(function (c) {
+      html += '<tr><td><strong>' + escapeHtml(c.label) + '</strong></td>';
+      html += '<td class="jurado-result-crit-desc">' + escapeHtml(c.desc || '') + '</td>';
+      for (var j = 1; j <= jmax; j++) {
+        var judge = judges['j' + j];
+        var val = judge && judge.scores && judge.scores[c.key] != null ? judge.scores[c.key] : '—';
+        html += '<td class="jurado-result-crit-num">' + val + '</td>';
+      }
+      var avg = std && std.averageCriterionScores
+        ? std.averageCriterionScores(judges, c.key, jmax)
+        : null;
+      var avgTxt = avg != null ? avg : '—';
+      var obs = std && std.criterionObservation && avg != null
+        ? std.criterionObservation(avg, c, scaleMin, scaleMax)
+        : { band: { level: 'sin_dato', label: '—' }, text: 'Sin datos suficientes.' };
+      html += '<td class="jurado-result-crit-num"><strong>' + avgTxt + '</strong></td>';
+      html += '<td class="jurado-result-crit-obs jurado-result-crit-obs--' + obs.band.level + '">' +
+        '<span class="jurado-result-crit-band">' + escapeHtml(obs.band.label) + '</span> ' +
+        escapeHtml(obs.text) + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  function renderJudgesCards(round, criteria, scoring) {
+    var jmax = (scoring && scoring.jueces) || 3;
+    var judges = round.judges || {};
+    var notasPorJuez = round.notasPorJuez || {};
+    var html = '';
+
+    for (var j = 1; j <= jmax; j++) {
+      var judge = judges['j' + j];
+      var done = judgeDone(judges, j);
+      var notaJuez = String(notasPorJuez['j' + j] || '').trim();
+      html += '<article class="jurado-result-judge-card' + (done ? ' jurado-result-judge-card--done' : ' jurado-result-judge-card--pending') + '">';
+      html += '<h3><span>Juez ' + j + '</span>';
+      html += done
+        ? '<span class="jurado-result-judge-badge">Listo</span>'
+        : '<span class="jurado-result-judge-badge jurado-result-judge-badge--pending">Pendiente</span>';
+      html += '</h3>';
+      if (!done) {
+        html += '<p class="jurado-hint">Sin calificación en esta ronda.</p>';
+      } else {
+        html += '<p class="jurado-result-subtotal">Subtotal: <strong>' + judge.subtotal + ' pts</strong></p>';
+        html += '<ul class="jurado-result-criteria">';
+        criteria.forEach(function (c) {
+          var val = judge.scores && judge.scores[c.key] != null ? judge.scores[c.key] : '—';
+          html += '<li><span>' + escapeHtml(c.label) + '</span><strong>' + val + '</strong></li>';
+        });
+        html += '</ul>';
+        if (notaJuez) {
+          html += '<p class="jurado-result-judge-note"><strong>Observación del juez:</strong> ' + escapeHtml(notaJuez) + '</p>';
+        }
+      }
+      html += '</article>';
+    }
+    return html;
   }
 
   function renderResults(data) {
@@ -113,21 +257,11 @@
 
     var comp = data.competidor || {};
     var torneo = data.torneo || {};
-    var blocked = data.resultadosPublicados === false;
-    var cal = blocked ? null : data.calificacion;
+    var blocked = data.resultadosPublicados === false && !mergeRondas(data).length;
     var scoring = data.scoring || {};
-    var jmax = scoring.jueces || 3;
-    var criteria = scoring.criteria && scoring.criteria.length
-      ? scoring.criteria
-      : [
-        { key: 'aroma', label: 'Aroma' },
-        { key: 'dulzor', label: 'Dulzor' },
-        { key: 'acidez', label: 'Acidez' },
-        { key: 'sabor', label: 'Sabor' },
-        { key: 'balance', label: 'Balance' },
-        { key: 'cuerpo', label: 'Cuerpo' },
-        { key: 'limpieza_taza', label: 'Limpieza de taza' }
-      ];
+    var criteria = getCriteria(scoring);
+    var rondas = mergeRondas(data);
+    var cal = blocked ? null : (rondas[selectedRoundIdx >= 0 ? selectedRoundIdx : rondas.length - 1] || null);
 
     $('resultCompetidorNombre').textContent = comp.nombre || '—';
     $('resultCompetidorMeta').textContent = [
@@ -154,7 +288,9 @@
     var estadoEl = $('resultEstadoBadge');
     estadoEl.textContent = estadoLabel(torneo.estado);
     estadoEl.className = 'jurado-result-estado ' + estadoClass(torneo.estado);
-    $('resultFaseLabel').textContent = (cal && cal.faseLabel) || torneo.faseLabel || 'Torneo';
+    $('resultFaseLabel').textContent = cal && cal.faseLabel
+      ? cal.faseLabel
+      : (torneo.faseLabel || 'Torneo');
 
     var total = cal && cal.sumaTotal != null ? cal.sumaTotal + ' pts' : '—';
     $('resultTotalPts').textContent = total;
@@ -162,33 +298,30 @@
     if (promedioEl) {
       promedioEl.textContent = cal && cal.promedio != null
         ? 'Promedio jueces: ' + cal.promedio
-        : 'Aún sin puntaje completo';
+        : (rondas.length > 1 ? rondas.length + ' rondas registradas' : 'Aún sin puntaje completo');
     }
 
-    var judgesHtml = '';
-    for (var j = 1; j <= jmax; j++) {
-      var judge = cal && cal.judges ? cal.judges['j' + j] : null;
-      var done = judgeDone(cal && cal.judges, j);
-      judgesHtml += '<article class="jurado-result-judge-card' + (done ? ' jurado-result-judge-card--done' : ' jurado-result-judge-card--pending') + '">';
-      judgesHtml += '<h3><span>Juez ' + j + '</span>';
-      judgesHtml += done
-        ? '<span class="jurado-result-judge-badge">Listo</span>'
-        : '<span class="jurado-result-judge-badge jurado-result-judge-badge--pending">Pendiente</span>';
-      judgesHtml += '</h3>';
-      if (!done) {
-        judgesHtml += '<p class="jurado-hint">El juez aún no ha enviado su calificación.</p>';
-      } else {
-        judgesHtml += '<p class="jurado-result-subtotal">Subtotal: <strong>' + judge.subtotal + ' pts</strong></p>';
-        judgesHtml += '<ul class="jurado-result-criteria">';
-        criteria.forEach(function (c) {
-          var val = judge.scores && judge.scores[c.key] != null ? judge.scores[c.key] : '—';
-          judgesHtml += '<li><span>' + escapeHtml(c.label) + '</span><strong>' + val + '</strong></li>';
-        });
-        judgesHtml += '</ul>';
-      }
-      judgesHtml += '</article>';
+    renderRoundTabs(rondas);
+
+    var std = getStandards();
+    var summaryEl = $('resultRoundSummary');
+    if (summaryEl && cal && std && std.roundSummaryObservation) {
+      summaryEl.hidden = false;
+      summaryEl.innerHTML = '<h3>Resumen según estándar V60</h3><p>' +
+        escapeHtml(std.roundSummaryObservation(cal, criteria, scoring.scaleMin, scoring.scaleMax)) + '</p>';
+    } else if (summaryEl) {
+      summaryEl.hidden = true;
     }
-    $('resultJudgesGrid').innerHTML = judgesHtml;
+
+    var criteriaWrap = $('resultCriteriaWrap');
+    if (criteriaWrap && cal) {
+      criteriaWrap.innerHTML = renderCriteriaTable(cal, criteria, scoring);
+    }
+
+    var judgesGrid = $('resultJudgesGrid');
+    if (judgesGrid && cal) {
+      judgesGrid.innerHTML = renderJudgesCards(cal, criteria, scoring);
+    }
 
     var notasBox = $('resultNotasBox');
     var notas = cal && cal.notas ? cal.notas.trim() : '';
@@ -199,6 +332,14 @@
       } else {
         notasBox.hidden = true;
       }
+    }
+
+    var roundsCount = $('resultRoundsCount');
+    if (roundsCount) {
+      roundsCount.textContent = rondas.length > 1
+        ? 'Historial: ' + rondas.length + ' rondas con calificación publicada'
+        : '';
+      roundsCount.hidden = rondas.length <= 1;
     }
 
     $('loginSection').hidden = true;
@@ -238,6 +379,7 @@
       if (!data || data.ok === false) {
         throw new Error((data && data.error) || 'No se pudo validar el acceso.');
       }
+      if (data.competidor) data.competidor.documento = documento;
       writeSession({ nombre: nombre, documento: documento });
       renderResults(data);
       return data;
@@ -272,6 +414,7 @@
       logout.addEventListener('click', function () {
         clearSession();
         currentData = null;
+        selectedRoundIdx = -1;
         showLogin();
         showError('');
       });

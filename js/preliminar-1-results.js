@@ -638,6 +638,43 @@
     };
   }
 
+  function getRoundsForCompetidor(competidorId, documento, nombre) {
+    var targetId = resolveInscritoId(competidorId || '');
+    var doc = String(documento || '').replace(/\D/g, '');
+    var rows = getEnrichedRows().filter(function (row) {
+      if (targetId && row.competidorId === targetId) return true;
+      var ins = row.inscrito;
+      if (ins && doc && String(ins.documento || '').replace(/\D/g, '') === doc) return true;
+      if (nombre && ins && String(ins.nombre || '').toLowerCase().indexOf(String(nombre).toLowerCase().slice(0, 8)) >= 0) {
+        return true;
+      }
+      return false;
+    });
+    return rows.map(function (row) {
+      var suma = row.j1 + row.j2 + row.j3;
+      return {
+        roundKey: 'preliminar1|entrada' + row.entrada,
+        faseLabel: 'Preliminar 1 — ' + entradaLabel(row.entrada),
+        judges: row.judges,
+        notasPorJuez: { j1: '', j2: '', j3: '' },
+        notas: '',
+        sumaTotal: suma,
+        promedio: Math.round((suma / 3) * 10) / 10,
+        publicadoAt: '2026-07-04T18:00:00.000Z',
+        meta: {
+          preliminar: 1,
+          entrada: row.entrada,
+          planilla: row.participante,
+          imported: true
+        }
+      };
+    }).sort(function (a, b) {
+      var ea = (a.meta && a.meta.entrada) || 0;
+      var eb = (b.meta && b.meta.entrada) || 0;
+      return ea - eb;
+    });
+  }
+
   function exportKit() {
     return {
       platform: 'jurado-v60',
@@ -682,6 +719,7 @@
     getRankingConsolidado: getRankingConsolidado,
     getPodioFinal: getPodioFinal,
     getGruposRondas: getGruposRondas,
+    getRoundsForCompetidor: getRoundsForCompetidor,
     formatDescription: formatDescription,
     buildCalificacionesStore: buildCalificacionesStore,
     buildCompetidorList: buildCompetidorList,

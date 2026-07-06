@@ -3712,6 +3712,80 @@ function isHabilitadoCompetenciaRow_(row) {
   return val === 'sí' || val === 'si' || val === 'yes' || val === 'true' || val === '1';
 }
 
+function juradoDefaultCriteria_() {
+  return [
+    { key: 'aroma', label: 'Aroma', desc: 'Intensidad y calidad en seco y húmedo' },
+    { key: 'dulzor', label: 'Dulzor', desc: 'Percepción de dulzor natural' },
+    { key: 'acidez', label: 'Acidez', desc: 'Calidad, intensidad y tipo' },
+    { key: 'sabor', label: 'Sabor', desc: 'Amplitud y complejidad del perfil' },
+    { key: 'balance', label: 'Balance', desc: 'Integración armónica de atributos' },
+    { key: 'cuerpo', label: 'Cuerpo', desc: 'Textura y sensación en boca' },
+    { key: 'limpieza_taza', label: 'Limpieza de taza', desc: 'Ausencia de defectos u off-flavors' }
+  ];
+}
+
+function juradoAggregateNotasPorJuez_(row) {
+  var notasPorJuez = row && row.notasPorJuez && typeof row.notasPorJuez === 'object' ? row.notasPorJuez : {};
+  var parts = [];
+  for (var j = 1; j <= 5; j++) {
+    var n = String(notasPorJuez['j' + j] || '').trim();
+    if (n) parts.push('Juez ' + j + ': ' + n);
+  }
+  var direct = String((row && row.notas) || '').trim();
+  if (!parts.length) return direct;
+  return parts.join('\n\n');
+}
+
+function juradoNormalizeRound_(r) {
+  if (!r || typeof r !== 'object') return null;
+  var notasPorJuez = r.notasPorJuez && typeof r.notasPorJuez === 'object' ? r.notasPorJuez : {};
+  var notas = String(r.notas || '').trim();
+  if (!notas) notas = juradoAggregateNotasPorJuez_({ notasPorJuez: notasPorJuez, notas: '' });
+  return {
+    roundKey: String(r.roundKey || '').trim(),
+    faseLabel: String(r.faseLabel || '').trim(),
+    publicadoAt: String(r.publicadoAt || '').trim(),
+    judges: r.judges && typeof r.judges === 'object' ? r.judges : {},
+    notasPorJuez: notasPorJuez,
+    notas: notas,
+    sumaTotal: r.sumaTotal != null ? r.sumaTotal : null,
+    promedio: r.promedio != null ? r.promedio : null
+  };
+}
+
+function juradoNormalizeCompetidorResultados_(entry) {
+  if (!entry || typeof entry !== 'object') return { rounds: [] };
+  if (Array.isArray(entry.rounds)) {
+    return {
+      rounds: entry.rounds.map(function (r) { return juradoNormalizeRound_(r); }).filter(Boolean)
+    };
+  }
+  if (entry.judges || entry.sumaTotal != null) {
+    var legacy = juradoNormalizeRound_(entry);
+    return legacy ? { rounds: [legacy] } : { rounds: [] };
+  }
+  return { rounds: [] };
+}
+
+function juradoUpsertCompetidorRound_(entry, round) {
+  var norm = juradoNormalizeCompetidorResultados_(entry);
+  var rounds = norm.rounds.slice();
+  var key = String(round.roundKey || '').trim();
+  var idx = -1;
+  for (var i = 0; i < rounds.length; i++) {
+    if (String(rounds[i].roundKey || '').trim() === key) {
+      idx = i;
+      break;
+    }
+  }
+  if (idx >= 0) rounds[idx] = round;
+  else rounds.push(round);
+  rounds.sort(function (a, b) {
+    return String(a.publicadoAt || '').localeCompare(String(b.publicadoAt || ''));
+  });
+  return { rounds: rounds };
+}
+
 function handleJuradoPublishResultados_(payload) {
   var evt = String((payload && payload.evt) || '').trim();
   var bracketCfg = getPasaporteConfig_(juradoTenantKey_('jurado_v60_bracket', evt));
@@ -3740,15 +3814,21 @@ function handleJuradoPublishResultados_(payload) {
   activos.forEach(function (id) {
     var row = scoresMap[id];
     if (!row || row.sumaTotal == null) return;
-    bracket.resultadosCompetidor[id] = {
+    var notasPorJuez = row.notasPorJuez && typeof row.notasPorJuez === 'object'
+      ? JSON.parse(JSON.stringify(row.notasPorJuez))
+      : {};
+    var newRound = {
       judges: JSON.parse(JSON.stringify(row.judges || {})),
-      notas: String(row.notas || '').trim(),
+      notasPorJuez: notasPorJuez,
+      notas: juradoAggregateNotasPorJuez_(row),
       sumaTotal: row.sumaTotal,
       promedio: row.promedio != null ? row.promedio : null,
       roundKey: roundKey,
       faseLabel: faseLabel,
       publicadoAt: now
     };
+    var prev = bracket.resultadosCompetidor[id] || {};
+    bracket.resultadosCompetidor[id] = juradoUpsertCompetidorRound_(prev, newRound);
     published++;
   });
 
@@ -3827,23 +3907,18 @@ function handleJuradoResultadosLogin_(payload) {
   var resultadosMap = bracket && bracket.resultadosCompetidor && typeof bracket.resultadosCompetidor === 'object'
     ? bracket.resultadosCompetidor
     : {};
-  var published = resultadosMap[competidorId] || null;
+  var entry = resultadosMap[competidorId] || null;
+  var normalized = juradoNormalizeCompetidorResultados_(entry);
+  var rondas = normalized.rounds;
 
   var calificacion = null;
   var resultadosPublicados = false;
   var mensajeBloqueo = '';
 
-  if (published) {
+  if (rondas.length) {
     resultadosPublicados = true;
-    calificacion = {
-      competidorId: competidorId,
-      judges: published.judges || {},
-      notas: String(published.notas || '').trim(),
-      sumaTotal: published.sumaTotal != null ? published.sumaTotal : null,
-      promedio: published.promedio != null ? published.promedio : null,
-      faseLabel: String(published.faseLabel || '').trim(),
-      publicadoAt: String(published.publicadoAt || '').trim()
-    };
+    calificacion = JSON.parse(JSON.stringify(rondas[rondas.length - 1]));
+    calificacion.competidorId = competidorId;
   } else {
     mensajeBloqueo = 'El organizador aún no ha publicado los resultados de esta ronda. Vuelve a consultar cuando el torneo lo indique.';
   }
@@ -3852,7 +3927,9 @@ function handleJuradoResultadosLogin_(payload) {
   var torneo = juradoResultadosTorneoStatus_(bracketForStatus, competidorId);
   var platform = platformCfg.data || {};
   var scoring = platform.scoring || {};
-  var criteria = Array.isArray(scoring.criteria) ? scoring.criteria : [];
+  var criteria = Array.isArray(scoring.criteria) && scoring.criteria.length
+    ? scoring.criteria
+    : juradoDefaultCriteria_();
 
   return {
     ok: true,
@@ -3864,6 +3941,7 @@ function handleJuradoResultadosLogin_(payload) {
     },
     torneo: torneo,
     calificacion: calificacion,
+    rondas: rondas,
     resultadosPublicados: resultadosPublicados,
     mensajeBloqueo: mensajeBloqueo,
     evento: {
