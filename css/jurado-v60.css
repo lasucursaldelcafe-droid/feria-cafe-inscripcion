@@ -2985,6 +2985,31 @@ body.jurado-page[data-jurado-page="hub"] .jurado-shell {
   margin-bottom: 1rem;
 }
 
+.jurado-hub-create {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.1rem 1.15rem;
+  border: 1px dashed rgba(201, 162, 39, 0.45);
+  border-radius: var(--jurado-radius);
+  background: rgba(201, 162, 39, 0.06);
+}
+
+.jurado-hub-create-form {
+  margin-top: 0.75rem;
+}
+
+.jurado-hub-create-form .jurado-btn {
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.jurado-hub-new-event {
+  margin-bottom: 0.85rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--jurado-radius-sm);
+  background: rgba(72, 187, 120, 0.12);
+  border: 1px solid rgba(72, 187, 120, 0.35);
+}
+
 .jurado-hub-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
