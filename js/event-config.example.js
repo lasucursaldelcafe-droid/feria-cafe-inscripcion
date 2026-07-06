@@ -46,8 +46,9 @@ window.EVENT_CONFIG = {
   },
   evento2: {
     estado: 'activa',
-    eventoId: 'V60 Championship — Preliminar 2',
-    nombre: 'V60 Championship — Preliminar 2',
+    eventoId: 'V60 Championship — Competencia 2',
+    nombre: 'V60 Championship — Competencia 2',
+    torneoSlug: 'competencia-2',
     preliminar: '2.ª de 2 preliminares',
     fecha: '8 de agosto de 2026',
     fechaCorta: '8 ago 2026',
