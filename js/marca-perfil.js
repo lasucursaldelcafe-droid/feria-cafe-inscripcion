@@ -68,7 +68,21 @@
     var root = document.getElementById('marcaPerfilAvatar');
     if (!root) return;
 
+    var shared = global.SponsorCardShared;
     var logo = primaryLogo(participante);
+    if (shared && shared.renderLogoWrap) {
+      root.innerHTML = shared.renderLogoWrap({
+        imageUrl: logo && logo.url ? logo.url : '',
+        alt: participante.marca || 'Logo',
+        name: participante.marca,
+        size: 400,
+        width: 120,
+        height: 100
+      });
+      if (shared.bindLogoFallbacks) shared.bindLogoFallbacks(root);
+      return;
+    }
+
     if (logo && logo.url) {
       root.innerHTML = '<img src="' + escapeHtml(driveImageUrl(logo.url, 400)) + '" alt="' +
         escapeHtml(participante.marca || 'Logo') + '" width="120" height="120" loading="eager">';

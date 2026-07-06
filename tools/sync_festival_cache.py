@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CACHE = "20260705assets1"
+CACHE = "20260706visual1"
 
 FONT_LINK = (
     "https://fonts.googleapis.com/css2?"
@@ -27,6 +27,9 @@ REPLACEMENTS = [
     (re.compile(r"festival-nav\.js\?v=[^\"']+"), f"festival-nav.js?v={CACHE}"),
     (re.compile(r"festival-explore\.js\?v=[^\"']+"), f"festival-explore.js?v={CACHE}"),
     (re.compile(r"sponsors\.js\?v=[^\"']+"), f"sponsors.js?v={CACHE}"),
+    (re.compile(r"participantes-directory\.js\?v=[^\"']+"), f"participantes-directory.js?v={CACHE}"),
+    (re.compile(r"marca-perfil\.js\?v=[^\"']+"), f"marca-perfil.js?v={CACHE}"),
+    (re.compile(r"sponsor-card-shared\.js\?v=[^\"']+"), f"sponsor-card-shared.js?v={CACHE}"),
     (re.compile(r"competition-sponsors\.js\?v=[^\"']+"), f"competition-sponsors.js?v={CACHE}"),
     (re.compile(r"form-submit\.js\?v=[^\"']+"), f"form-submit.js?v={CACHE}"),
 ]

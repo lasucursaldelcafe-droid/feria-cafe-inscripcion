@@ -4,66 +4,36 @@
 (function (global) {
   'use strict';
 
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
-  function initials(name) {
-    return String(name || '')
-      .split(/\s+/)
-      .slice(0, 2)
-      .map(function (part) {
-        return part.charAt(0);
-      })
-      .join('')
-      .toUpperCase();
-  }
-
-  function resolveImageUrl(image) {
-    var src = String(image || '').trim();
-    if (!src) return '';
-    if (/^https?:\/\//i.test(src)) return src;
-    var cfg = global.EVENT_CONFIG || {};
-    var base = String(cfg.siteUrl || '').replace(/\/$/, '');
-    if (!base && global.location) {
-      base = global.location.origin;
-    }
-    if (src.charAt(0) === '/') return base + src;
-    return base ? base + '/' + src : src;
-  }
+  var shared = global.SponsorCardShared || {};
+  var escapeHtml = shared.escapeHtml || function (s) { return String(s); };
+  var renderLogoWrap = shared.renderLogoWrap;
+  var bindLogoFallbacks = shared.bindLogoFallbacks;
 
   function renderCard(sponsor) {
     var name = escapeHtml(sponsor.name || '');
     var handle = sponsor.instagramHandle ? escapeHtml(sponsor.instagramHandle) : '';
     var url = sponsor.instagramUrl || '';
-    var imageUrl = resolveImageUrl(sponsor.image);
     var alt = escapeHtml(sponsor.imageAlt || sponsor.name || 'Patrocinador');
     var lowerName = String(sponsor.name || '').toLowerCase();
     var featured = /ghost|medium|más|mas/.test(lowerName);
     var badge = featured ? (lowerName.indexOf('ghost') !== -1 ? 'Café invitado' : 'Coffee Shop') : '';
-    var tagline = featured ? (lowerName.indexOf('ghost') !== -1
-      ? 'Café especial con identidad propia'
-      : 'Café de especialidad para descubrir en feria') : '';
+    var tagline = featured
+      ? lowerName.indexOf('ghost') !== -1
+        ? 'Café especial con identidad propia'
+        : 'Café de especialidad para descubrir en feria'
+      : '';
     var classes = 'festival-sponsor-card' + (featured ? ' festival-sponsor-card--featured' : '');
-    var avatar;
 
-    if (imageUrl) {
-      avatar =
-        '<img class="festival-sponsor-card__avatar" src="' +
-        escapeHtml(imageUrl) +
-        '" alt="' +
-        alt +
-        '" width="72" height="72" loading="lazy">';
-    } else {
-      avatar =
-        '<span class="festival-sponsor-card__avatar festival-sponsor-card__avatar--placeholder" aria-hidden="true">' +
-        escapeHtml(initials(sponsor.name)) +
-        '</span>';
-    }
+    var avatar = renderLogoWrap
+      ? renderLogoWrap({
+          imageUrl: sponsor.image,
+          alt: sponsor.imageAlt || sponsor.name || 'Patrocinador',
+          name: sponsor.name,
+          size: 320,
+          width: 128,
+          height: 88
+        })
+      : '';
 
     var inner =
       avatar +
@@ -106,16 +76,7 @@
     }
     el.hidden = false;
     el.innerHTML = sponsors.map(renderCard).join('');
-    el.querySelectorAll('img.festival-sponsor-card__avatar').forEach(function (img) {
-      img.addEventListener('error', function onAvatarError() {
-        img.removeEventListener('error', onAvatarError);
-        var span = document.createElement('span');
-        span.className = 'festival-sponsor-card__avatar festival-sponsor-card__avatar--placeholder';
-        span.setAttribute('aria-hidden', 'true');
-        span.textContent = initials(img.getAttribute('alt') || '');
-        img.replaceWith(span);
-      });
-    });
+    if (bindLogoFallbacks) bindLogoFallbacks(el);
   }
 
   function setSectionVisible() {
