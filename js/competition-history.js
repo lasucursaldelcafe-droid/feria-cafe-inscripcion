@@ -66,9 +66,9 @@
     if (global.Preliminar1Results && global.Preliminar1Results.entradaLabel) {
       return global.Preliminar1Results.entradaLabel(entrada);
     }
-    if (entrada === 1) return 'Grupos';
-    if (entrada === 2) return 'Semifinal';
-    if (entrada === 3) return 'Final';
+    if (entrada === 1) return 'Fase de grupos (1v1)';
+    if (entrada === 2) return 'Semifinales (1v1)';
+    if (entrada === 3) return 'Final (mejor tanda)';
     return 'Tanda ' + entrada;
   }
 
@@ -97,8 +97,8 @@
         '</div></article>';
     }).join('');
     return '<section class="jurado-clasificacion-section">' +
-      '<h3 class="jurado-clasificacion-title">Grupos — rondas de 2</h3>' +
-      '<p class="jurado-hint">12 competidores · orden alfabético por nombre · a semifinal los mejores puntajes de cada ronda.</p>' +
+      '<h3 class="jurado-clasificacion-title">Fase de grupos — duelos 1v1</h3>' +
+      '<p class="jurado-hint">6 rondas · sorteo oficial · 2 competidores por duelo · avanzan a semifinales.</p>' +
       '<div class="jurado-grupos-rondas">' + cards + '</div></section>';
   }
 
@@ -118,33 +118,8 @@
     }).join('');
     return '<section class="jurado-clasificacion-section">' +
       '<h3 class="jurado-clasificacion-title">Podio oficial</h3>' +
-      '<p class="jurado-hint">1°, 2° y 3° por puntaje en la final.</p>' +
+      '<p class="jurado-hint">Final por mejor puntuación de tanda · 1°, 2° y 3° lugar.</p>' +
       '<div class="jurado-podium-map">' + cards + '</div></section>';
-  }
-
-  function renderClassificationGrid(edition) {
-    var ranking = edition.ranking || [];
-    if (!ranking.length) return '';
-    var cards = ranking.map(function (row) {
-      var name = row.nombreInscrito || row.participante;
-      var sub = row.participante !== name
-        ? '<span class="jurado-clasificacion-planilla">' + escapeHtml(row.participante) + '</span>'
-        : '';
-      return '<article class="jurado-clasificacion-card ' + posMedalClass(row.posicion) + '">' +
-        '<span class="jurado-clasificacion-rank">' + row.posicion + '°</span>' +
-        competitorPhotoHtml(row.fotoUrl, 44, name) +
-        '<strong class="jurado-clasificacion-name">' + escapeHtml(name) + '</strong>' +
-        sub +
-        '<span class="jurado-clasificacion-meta">' + escapeHtml(row.representa || '') + '</span>' +
-        '<span class="jurado-clasificacion-scores">J1 ' + row.j1 + ' · J2 ' + row.j2 + ' · J3 ' + row.j3 + '</span>' +
-        '<span class="jurado-clasificacion-total">' + row.total + ' pts</span>' +
-        '<span class="jurado-clasificacion-phase">' + escapeHtml(phaseLabel(row.entrada)) + '</span>' +
-        '</article>';
-    }).join('');
-    return '<section class="jurado-clasificacion-section">' +
-      '<h3 class="jurado-clasificacion-title">Mapa de clasificación</h3>' +
-      '<p class="jurado-hint">Ranking por mejor tanda de cada competidor · podio oficial = final.</p>' +
-      '<div class="jurado-clasificacion-grid">' + cards + '</div></section>';
   }
 
   function renderPhaseLanes(edition) {
@@ -167,6 +142,7 @@
     if (!phases) return '';
     return '<section class="jurado-clasificacion-section">' +
       '<h3 class="jurado-clasificacion-title">Recorrido por fases</h3>' +
+      '<p class="jurado-hint">Grupos 1v1 → semifinales 1v1 → final por mejor tanda.</p>' +
       '<div class="jurado-phase-lanes">' + phases + '</div></section>';
   }
 
@@ -390,33 +366,7 @@
 
     html += renderPodiumMap(edition);
     html += renderGruposRondas(edition);
-    html += renderClassificationGrid(edition);
     html += renderPhaseLanes(edition);
-
-    var rows = edition.ranking.map(function (row) {
-      var name = row.nombreInscrito || row.participante;
-      return '<tr>' +
-        '<td class="jurado-preliminar-rank">' + row.posicion + '</td>' +
-        '<td class="jurado-clasificacion-table-photo">' + competitorPhotoHtml(row.fotoUrl, 32, name) + '</td>' +
-        '<td><code class="jurado-preliminar-id">' + escapeHtml(row.competidorId) + '</code></td>' +
-        '<td><strong>' + escapeHtml(name) + '</strong>' +
-        (row.representa ? '<br><span class="jurado-hint">' + escapeHtml(row.representa) + '</span>' : '') +
-        '</td>' +
-        '<td class="jurado-preliminar-num">' + escapeHtml(phaseLabel(row.entrada)) + '</td>' +
-        '<td class="jurado-preliminar-num">' + row.j1 + '</td>' +
-        '<td class="jurado-preliminar-num">' + row.j2 + '</td>' +
-        '<td class="jurado-preliminar-num">' + row.j3 + '</td>' +
-        '<td class="jurado-preliminar-total"><strong>' + row.total + '</strong></td>' +
-        '</tr>';
-    }).join('');
-
-    html +=
-      '<section class="jurado-clasificacion-section">' +
-      '<h3 class="jurado-clasificacion-title">Tabla de resultados</h3>' +
-      '<div class="jurado-preliminar-table-wrap">' +
-      '<table class="jurado-preliminar-table">' +
-      '<thead><tr><th>#</th><th>Foto</th><th>ID</th><th>Competidor</th><th>Fase</th><th>J1</th><th>J2</th><th>J3</th><th>Total</th></tr></thead>' +
-      '<tbody>' + rows + '</tbody></table></div></section>';
 
     html += renderBreakdownSection(edition);
 
@@ -458,7 +408,6 @@
     renderEditionSummaryCard: renderEditionSummaryCard,
     renderEditionDetail: renderEditionDetail,
     renderPodiumMap: renderPodiumMap,
-    renderClassificationGrid: renderClassificationGrid,
     renderPhaseLanes: renderPhaseLanes,
     downloadEditionKit: downloadEditionKit
   };

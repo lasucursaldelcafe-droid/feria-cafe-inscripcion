@@ -17,6 +17,9 @@
     formato: {
       competidores: 12,
       fases: ['grupos', 'semifinal', 'final'],
+      faseGrupos: 'duelos_1v1',
+      faseSemifinal: 'duelos_1v1',
+      faseFinal: 'mejor_tanda',
       gruposPorRonda: 2,
       ordenGrupos: 'sorteo_oficial',
       rondasGrupos: 6,
@@ -376,17 +379,16 @@
   }
 
   function entradaLabel(entrada) {
-    if (entrada === 1) return 'Grupos';
-    if (entrada === 2) return 'Semifinal';
-    if (entrada === 3) return 'Final';
+    if (entrada === 1) return 'Fase de grupos (1v1)';
+    if (entrada === 2) return 'Semifinales (1v1)';
+    if (entrada === 3) return 'Final (mejor tanda)';
     return 'Tanda ' + entrada;
   }
 
   function formatDescription() {
-    return '12 competidores en 6 rondas de grupos (2 por ronda, orden del sorteo oficial). ' +
-      'A semifinal pasaron los mejores puntajes de cada ronda. ' +
-      'La final reunió a los 3 mejores de semifinal. ' +
-      'El podio oficial (1°, 2° y 3°) se definió por el puntaje total en la final.';
+    return '12 competidores en tres fases: fase de grupos (duelos 1v1, 6 rondas según sorteo oficial), ' +
+      'fase de semifinales (duelos 1v1) y fase final (clasificación por mejor puntuación de tanda). ' +
+      'El podio oficial (1°, 2° y 3°) corresponde a los puntajes de la final.';
   }
 
   function getSemifinalistasSet() {
