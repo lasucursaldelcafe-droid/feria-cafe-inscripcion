@@ -1709,34 +1709,16 @@
   }
 
   function publishResultsToCompetitors() {
-    if (!bracketState) return Promise.reject(new Error('No hay torneo iniciado.'));
-    var activos = getActiveCompetitorIds();
-    if (!activos.length) return Promise.reject(new Error('No hay participantes activos en esta ronda.'));
-
-    if (!bracketState.resultadosCompetidor) bracketState.resultadosCompetidor = {};
-    var roundKey = roundProgressKey();
-    var faseLabel = currentPhaseTitle();
-    var now = new Date().toISOString();
-    var published = 0;
-
-    activos.forEach(function (id) {
-      var row = getRowById(id);
-      var snap = snapshotCalificacionForPublish(row);
-      if (!snap || snap.sumaTotal == null) return;
-      bracketState.resultadosCompetidor[id] = Object.assign({}, snap, {
-        roundKey: roundKey,
-        faseLabel: faseLabel,
-        publicadoAt: now
+    return sheetsPost({
+      action: 'jurado_publish_resultados',
+      evt: tenantSlug || ''
+    }).then(function (data) {
+      if (!data || data.ok === false) {
+        throw new Error((data && data.error) || 'No se pudieron publicar los resultados.');
+      }
+      return loadBracketStore().then(function () {
+        return data.published != null ? data.published : 0;
       });
-      published++;
-    });
-
-    if (!published) {
-      return Promise.reject(new Error('No hay calificaciones completas para publicar. Espera a que los jueces terminen.'));
-    }
-
-    return saveBracketStore(bracketState).then(function () {
-      return published;
     });
   }
 
@@ -4272,20 +4254,25 @@
       ' · ' + getActiveCompetitorIds().length + ' activo(s)';
 
     var pubStatus = $('resultadosPublishStatus');
-    if (pubStatus) {
-      var activosPub = getActiveCompetitorIds();
-      var map = (bracketState && bracketState.resultadosCompetidor) ? bracketState.resultadosCompetidor : {};
-      var pubCount = activosPub.filter(function (id) { return !!map[id]; }).length;
-      if (pubCount > 0) {
-        pubStatus.textContent = '✓ Resultados visibles para ' + pubCount + ' competidor(es) en ' + currentPhaseTitle() + '.';
-        pubStatus.className = 'jurado-success';
-        pubStatus.hidden = false;
-      } else {
-        pubStatus.textContent = 'Los competidores no pueden ver sus puntajes hasta que publiques esta ronda.';
-        pubStatus.className = 'jurado-hint';
-        pubStatus.hidden = false;
-      }
+    var pubStatusVista = $('resultadosPublishStatusVista');
+    var activosPub = getActiveCompetitorIds();
+    var map = (bracketState && bracketState.resultadosCompetidor) ? bracketState.resultadosCompetidor : {};
+    var pubCount = activosPub.filter(function (id) { return !!map[id]; }).length;
+    var pubText;
+    var pubClass;
+    if (pubCount > 0) {
+      pubText = '✓ Resultados visibles para ' + pubCount + ' competidor(es) en ' + currentPhaseTitle() + '.';
+      pubClass = 'jurado-success';
+    } else {
+      pubText = 'Los competidores no pueden ver sus puntajes hasta que publiques esta ronda.';
+      pubClass = 'jurado-hint';
     }
+    [pubStatus, pubStatusVista].forEach(function (el) {
+      if (!el) return;
+      el.textContent = pubText;
+      el.className = pubClass;
+      el.hidden = false;
+    });
 
     var advanceBtn = $('advanceWinnersBtn');
     if (advanceBtn) {
@@ -4381,20 +4368,25 @@
     }
 
     var publishBtn = $('publishResultadosBtn');
-    if (publishBtn) {
-      publishBtn.addEventListener('click', function () {
+    document.querySelectorAll('[data-publish-resultados]').forEach(function (btn) {
+      if (btn.getAttribute('data-bound') === '1') return;
+      btn.setAttribute('data-bound', '1');
+      btn.addEventListener('click', function () {
         var fase = currentPhaseTitle();
         if (!confirm('¿Publicar los resultados de «' + fase + '» para que los competidores los vean en el portal?\n\nSolo verán sus puntajes después de esta acción.')) return;
-        publishBtn.disabled = true;
+        document.querySelectorAll('[data-publish-resultados]').forEach(function (b) { b.disabled = true; });
         publishResultsToCompetitors().then(function (count) {
           showAdminMsg('✓ Resultados publicados para ' + count + ' competidor(es). Ya pueden consultarlos.');
           refreshOrganizer();
         }).catch(function (err) {
           showAdminMsg(err.message || 'No se pudieron publicar los resultados.', true);
         }).finally(function () {
-          publishBtn.disabled = false;
+          document.querySelectorAll('[data-publish-resultados]').forEach(function (b) { b.disabled = false; });
         });
       });
+    });
+    if (publishBtn && !publishBtn.getAttribute('data-bound')) {
+      publishBtn.setAttribute('data-bound', '1');
     }
 
     var advanceBtn = $('advanceWinnersBtn');
