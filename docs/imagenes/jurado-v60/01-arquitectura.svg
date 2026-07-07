@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" font-family="Inter, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#4B352A"/>
+    </marker>
+    <style>
+      .box { fill:#FFFDF9; stroke:#4B352A; stroke-width:2; rx:12 }
+      .title { font-size:18px; font-weight:700; fill:#4B352A }
+      .label { font-size:13px; fill:#4B352A }
+      .small { font-size:11px; fill:#6B5346 }
+      .num { fill:#BB5E3C; font-size:14px; font-weight:700 }
+      .line { stroke:#4B352A; stroke-width:1.5; fill:none; marker-end:url(#arrow) }
+    </style>
+  </defs>
+  <rect width="920" height="520" fill="#F5F0E8"/>
+  <text x="460" y="34" text-anchor="middle" class="title">Arquitectura  Plataforma de calificación V60</text>
+
+  <rect class="box" x="40" y="60" width="200" height="120"/>
+  <text x="140" y="88" text-anchor="middle" class="label" font-weight="600">` Admin</text>
+  <text x="140" y="108" text-anchor="middle" class="small">/admin ’ Competidores</text>
+  <text x="140" y="126" text-anchor="middle" class="small">Ediciones, alta manual,</text>
+  <text x="140" y="142" text-anchor="middle" class="small">clientes white-label,</text>
+  <text x="140" y="158" text-anchor="middle" class="small">publicar resultados</text>
+
+  <rect class="box" x="40" y="210" width="200" height="120"/>
+  <text x="140" y="238" text-anchor="middle" class="label" font-weight="600">a Inscripción</text>
+  <text x="140" y="258" text-anchor="middle" class="small">/competencia</text>
+  <text x="140" y="274" text-anchor="middle" class="small">/competencia/torneo?evt=</text>
+  <text x="140" y="294" text-anchor="middle" class="small">Formulario público ’</text>
+  <text x="140" y="310" text-anchor="middle" class="small">Hoja Competencia</text>
+
+  <rect class="box" x="360" y="130" width="200" height="150"/>
+  <text x="460" y="158" text-anchor="middle" class="label" font-weight="600">b Apps Script + Sheets</text>
+  <text x="460" y="180" text-anchor="middle" class="small">GET admin_dashboard</text>
+  <text x="460" y="198" text-anchor="middle" class="small">POST pasaporte_config_save</text>
+  <text x="460" y="216" text-anchor="middle" class="small">POST jurado_publish_resultados</text>
+  <text x="460" y="234" text-anchor="middle" class="small">Script Properties:</text>
+  <text x="460" y="252" text-anchor="middle" class="small">platform, calificaciones, bracket</text>
+
+  <rect class="box" x="680" y="60" width="200" height="100"/>
+  <text x="780" y="88" text-anchor="middle" class="label" font-weight="600">c Organizador</text>
+  <text x="780" y="108" text-anchor="middle" class="small">/jurado/organizador</text>
+  <text x="780" y="126" text-anchor="middle" class="small">Sorteo, rondas, avance,</text>
+  <text x="780" y="142" text-anchor="middle" class="small">publicar a competidores</text>
+
+  <rect class="box" x="680" y="180" width="200" height="100"/>
+  <text x="780" y="208" text-anchor="middle" class="label" font-weight="600">d Jueces (móvil)</text>
+  <text x="780" y="228" text-anchor="middle" class="small">/jurado/juez?juez=N</text>
+  <text x="780" y="246" text-anchor="middle" class="small">7 criterios SCA × escala</text>
+  <text x="780" y="262" text-anchor="middle" class="small">Guardan columna jN</text>
+
+  <rect class="box" x="680" y="300" width="200" height="100"/>
+  <text x="780" y="328" text-anchor="middle" class="label" font-weight="600">e Resultados</text>
+  <text x="780" y="348" text-anchor="middle" class="small">/jurado/resultados</text>
+  <text x="780" y="366" text-anchor="middle" class="small">Nombre + cédula</text>
+  <text x="780" y="382" text-anchor="middle" class="small">Solo tras publicar</text>
+
+  <path class="line" d="M240 120 L360 180"/>
+  <path class="line" d="M240 270 L360 220"/>
+  <path class="line" d="M560 180 L680 110"/>
+  <path class="line" d="M560 210 L680 230"/>
+  <path class="line" d="M560 240 L680 350"/>
+
+  <rect x="40" y="380" width="840" height="110" fill="#E9E6DD" stroke="#5F7F4E" stroke-width="2" rx="10"/>
+  <text x="60" y="408" class="label" font-weight="600">Claves de datos (por torneo / evt=slug)</text>
+  <text x="60" y="432" class="small">" jurado_v60_platform  marca, PINs, criterios, modo duelos/ranking, campos inscripción</text>
+  <text x="60" y="452" class="small">" jurado_v60_calificaciones  puntajes en vivo { scores: { competidorId: { j1&j5, total } } }</text>
+  <text x="60" y="472" class="small">" jurado_v60_bracket  fase, activos, eliminados, grupos, historial, resultadosCompetidor (publicados)</text>
+</svg>

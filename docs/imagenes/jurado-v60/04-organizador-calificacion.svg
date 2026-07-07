@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 680" font-family="Inter, Arial, sans-serif">
+  <style>
+    .bg{fill:#1a1410}.card{fill:#2a221c;stroke:#4a3d34;stroke-width:1.5;rx:10}
+    .tab-on{fill:#BB5E3C}.tab{fill:#3a3028}
+    .w{fill:#fff;font-size:12px}.g{fill:#c9bfb0;font-size:11px}.n{fill:#BB5E3C;font-size:14px;font-weight:700}
+    .title{fill:#fff;font-size:17px;font-weight:700}
+  </style>
+  <rect width="920" height="680" class="bg"/>
+  <text x="460" y="30" text-anchor="middle" class="title">Panel Organizador  Torneo en vivo</text>
+  <text x="460" y="50" text-anchor="middle" class="g">/jurado/organizador?pin=v60organizador</text>
+
+  <rect x="30" y="65" width="860" height="36" fill="#3a3028" rx="8"/>
+  <rect class="tab-on" x="35" y="69" width="90" height="28" rx="6"/><text x="80" y="87" text-anchor="middle" class="w" font-size="10">Vista general</text>
+  <rect class="tab" x="130" y="69" width="72" height="28" rx="6"/><text x="166" y="87" text-anchor="middle" class="g" font-size="10">Recorrido</text>
+  <rect class="tab" x="207" y="69" width="60" height="28" rx="6"/><text x="237" y="87" text-anchor="middle" class="g" font-size="10">Torneo</text>
+  <rect class="tab" x="272" y="69" width="68" height="28" rx="6"/><text x="306" y="87" text-anchor="middle" class="g" font-size="10">Puntajes</text>
+  <rect class="tab" x="345" y="69" width="58" height="28" rx="6"/><text x="374" y="87" text-anchor="middle" class="g" font-size="10">Control</text>
+  <text x="420" y="87" class="g" font-size="10">Historial | Marca | Exportar</text>
+
+  <rect class="card" x="30" y="115" width="270" height="80"/>
+  <text x="50" y="138" class="n">`</text><text x="68" y="138" class="w" font-weight="600">Resumen en vivo</text>
+  <text x="50" y="158" class="g">Activos, eliminados, fase actual</text>
+  <text x="50" y="176" class="g">Ranking FIFA-style, refresh 3 s</text>
+
+  <rect class="card" x="320" y="115" width="270" height="80"/>
+  <text x="340" y="138" class="n">a</text><text x="358" y="138" class="w" font-weight="600">Publicar resultados</text>
+  <text x="340" y="158" class="g">Obligatorio para portal competidor</text>
+  <rect x="340" y="168" width="200" height="22" fill="#BB5E3C" rx="5"/><text x="440" y="183" text-anchor="middle" fill="#fff" font-size="10">Publicar resultados a competidores</text>
+
+  <rect class="card" x="610" y="115" width="280" height="80"/>
+  <text x="630" y="138" class="n">b</text><text x="648" y="138" class="w" font-weight="600">Enlaces jueces</text>
+  <text x="630" y="158" class="g">/jurado/juez?pin=&&amp;juez=1&N</text>
+  <text x="630" y="176" class="g">Un enlace por juez (móvil)</text>
+
+  <rect class="card" x="30" y="210" width="420" height="200"/>
+  <text x="50" y="235" class="n">c</text><text x="68" y="235" class="w" font-weight="600">Pestaña Control  Sorteo y avance</text>
+  <text x="50" y="258" class="g"><² Sorteo automático: mezcla habilitados, define fase</text>
+  <text x="50" y="276" class="g">Modo duelos: parejas 1v1 ’ mayor total gana</text>
+  <text x="50" y="294" class="g">Modo ranking: top N avanzan por puntaje</text>
+  <text x="50" y="318" class="g">Botones: Avanzar ganadores | Cerrar grupo | Reiniciar puntajes</text>
+  <text x="50" y="336" class="g">Auto-avance: si todos calificados, avanza en 5 s</text>
+  <rect x="50" y="350" width="160" height="26" fill="#5F7F4E" rx="6"/><text x="130" y="367" text-anchor="middle" fill="#fff" font-size="10">Sorteo automático</text>
+  <rect x="220" y="350" width="160" height="26" fill="#4B352A" rx="6"/><text x="300" y="367" text-anchor="middle" fill="#fff" font-size="10">Avanzar ganadores</text>
+
+  <rect class="card" x="470" y="210" width="420" height="200"/>
+  <text x="490" y="235" class="n">d</text><text x="508" y="235" class="w" font-weight="600">Fases del torneo (automáticas)</text>
+  <text x="490" y="260" class="g">2 comp. ’ Final directa</text>
+  <text x="490" y="278" class="g">34 ’ Semifinal ’ Final</text>
+  <text x="490" y="296" class="g">58 ’ Cuartos ’ Semifinal ’ Final</text>
+  <text x="490" y="314" class="g">916 ’ Octavos ’ & ’ Final</text>
+  <text x="490" y="332" class="g">1732 ’ Dieciseisavos ’ &</text>
+  <text x="490" y="350" class="g">33+ ’ Grupos (top 2) ’ eliminatoria</text>
+  <text x="490" y="375" class="g">Estado en bracket.fase: grupos | semifinal | final&</text>
+
+  <rect class="card" x="30" y="430" width="860" height="220"/>
+  <text x="50" y="455" class="n">e</text><text x="68" y="455" class="w" font-weight="600">Cálculo de puntaje (7 criterios SCA)</text>
+  <text x="50" y="478" class="g">Por juez: Aroma + Dulzor + Acidez + Sabor + Balance + Cuerpo + Limpieza de taza (escala 15 c/u)</text>
+  <text x="50" y="498" class="g">Subtotal juez Jn = suma de sus 7 criterios (máx. 35 pts por juez)</text>
+  <text x="50" y="518" class="g">Total competidor = J1 + J2 + J3 (+ J4, J5 si configurados)</text>
+  <text x="50" y="545" class="w" font-weight="600">Flujo de datos al guardar juez:</text>
+  <text x="50" y="565" class="g">Juez guarda ’ POST pasaporte_config_save (clave calificaciones) ’ solo actualiza su columna jN</text>
+  <text x="50" y="585" class="g">Organizador lee la misma clave cada 3 s ’ ve matriz en Puntajes y ranking en Vista general</text>
+  <text x="50" y="605" class="g">Publicar ’ POST jurado_publish_resultados ’ copia a bracket.resultadosCompetidor (histórico por ronda)</text>
+  <text x="50" y="630" class="g">Competidor en /jurado/resultados solo ve rondas publicadas (nombre + cédula)</text>
+</svg>

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" font-family="Inter, Arial, sans-serif">
+  <defs>
+    <marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5F7F4E"/></marker>
+    <style>
+      .step { fill:#FFFDF9; stroke:#4B352A; stroke-width:2; rx:10 }
+      .title { font-size:16px; font-weight:700; fill:#4B352A }
+      .body { font-size:12px; fill:#6B5346 }
+      .arrow { stroke:#5F7F4E; stroke-width:2; fill:none; marker-end:url(#a) }
+      .num { fill:#BB5E3C; font-size:18px; font-weight:700 }
+    </style>
+  </defs>
+  <rect width="900" height="700" fill="#F5F0E8"/>
+  <text x="450" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#4B352A">Asignación de torneos desde Admin</text>
+  <text x="450" y="54" text-anchor="middle" font-size="13" fill="#6B5346">Dos caminos: feria principal (V60) o cliente white-label</text>
+
+  <text x="60" y="88" class="title">A) Torneo feria  V60 Championship</text>
+  <rect class="step" x="40" y="100" width="380" height="70"/>
+  <text x="60" y="125" class="num">1</text>
+  <text x="85" y="125" class="title">Elegir edición</text>
+  <text x="85" y="145" class="body">Admin ’ Competidores ’ filtro Preliminar 1 / 2 / Todas</text>
+  <text x="85" y="160" class="body">Columna Evento en Sheets = «V60 Championship  Preliminar N»</text>
+
+  <rect class="step" x="40" y="190" width="380" height="70"/>
+  <text x="60" y="215" class="num">2</text>
+  <text x="85" y="215" class="title">Inscribir competidores</text>
+  <text x="85" y="235" class="body">Público: /competencia (formType competencia)</text>
+  <text x="85" y="250" class="body">Manual: formulario admin con edición activa</text>
+
+  <rect class="step" x="40" y="280" width="380" height="70"/>
+  <text x="60" y="305" class="num">3</text>
+  <text x="85" y="305" class="title">Habilitar</text>
+  <text x="85" y="325" class="body">Toggle Habilitado = Sí en tabla</text>
+  <text x="85" y="340" class="body">Sin esto NO aparecen en jurado</text>
+
+  <rect class="step" x="40" y="370" width="380" height="70"/>
+  <text x="60" y="395" class="num">4</text>
+  <text x="85" y="395" class="title">Día del evento</text>
+  <text x="85" y="415" class="body">Organizador: /jurado/organizador?pin=v60organizador</text>
+  <text x="85" y="430" class="body">Sorteo automático asigna fase y parejas</text>
+
+  <path class="arrow" d="M230 170 L230 190"/>
+  <path class="arrow" d="M230 260 L230 280"/>
+  <path class="arrow" d="M230 350 L230 370"/>
+
+  <text x="480" y="88" class="title">B) Torneo cliente (white-label)</text>
+  <rect class="step" x="460" y="100" width="400" height="85"/>
+  <text x="480" y="125" class="num">1</text>
+  <text x="505" y="125" class="title">Crear apartado</text>
+  <text x="505" y="145" class="body">Admin ’ Clientes plataforma jurado</text>
+  <text x="505" y="160" class="body">API: jurado_instance_create ’ slug, PIN org/juez</text>
+  <text x="505" y="175" class="body">Hoja nueva: Comp. {slug} + fila en Competencia</text>
+
+  <rect class="step" x="460" y="205" width="400" height="85"/>
+  <text x="480" y="230" class="num">2</text>
+  <text x="505" y="230" class="title">Cliente configura</text>
+  <text x="505" y="250" class="body">/jurado/config?evt=slug&amp;pin=&</text>
+  <text x="505" y="265" class="body">Marca, duelos/ranking, criterios, jueces, cupo</text>
+  <text x="505" y="280" class="body">Guardar ’ regenera enlaces en pestaña 3</text>
+
+  <rect class="step" x="460" y="310" width="400" height="85"/>
+  <text x="480" y="335" class="num">3</text>
+  <text x="505" y="335" class="title">Inscripciones del cliente</text>
+  <text x="505" y="355" class="body">/competencia/torneo?evt=slug</text>
+  <text x="505" y="370" class="body">Evento = slug en Competencia + hoja Comp.{slug}</text>
+  <text x="505" y="385" class="body">Organizador ve lista en config ’ Inscripciones</text>
+
+  <rect class="step" x="460" y="415" width="400" height="85"/>
+  <text x="480" y="440" class="num">4</text>
+  <text x="505" y="440" class="title">Torneo aislado</text>
+  <text x="505" y="460" class="body">?evt=slug en todas las URLs jurado</text>
+  <text x="505" y="475" class="body">Datos en Script Properties con sufijo __slug</text>
+  <text x="505" y="490" class="body">Competidores filtrados por Evento = slug</text>
+
+  <path class="arrow" d="M660 185 L660 205"/>
+  <path class="arrow" d="M660 290 L660 310"/>
+  <path class="arrow" d="M660 395 L660 415"/>
+
+  <rect x="40" y="520" width="820" height="150" fill="#E9E6DD" stroke="#4B352A" rx="12"/>
+  <text x="60" y="548" class="title">¿Cómo sabe el sistema a qué torneo pertenece cada competidor?</text>
+  <text x="60" y="572" class="body">" Hoja Google Sheets «Competencia»: columna Evento (preliminar o slug white-label)</text>
+  <text x="60" y="592" class="body">" Jurado carga admin_dashboard y filtra Habilitado + Evento según ?evt= o EVENT_CONFIG activo</text>
+  <text x="60" y="612" class="body">" El sorteo (bracket) guarda activos[], eliminados[], fase actual y plan de fases en jurado_v60_bracket</text>
+  <text x="60" y="632" class="body">" Publicar resultados copia puntajes de activos ’ resultadosCompetidor[id].rounds[] (visible en portal)</text>
+  <text x="60" y="652" class="body">" Admin puede forzar publicación sin entrar al organizador (mismo endpoint jurado_publish_resultados)</text>
+</svg>

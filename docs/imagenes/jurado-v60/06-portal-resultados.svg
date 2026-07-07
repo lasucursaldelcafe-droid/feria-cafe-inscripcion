@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" font-family="Inter, Arial, sans-serif">
+  <style>
+    .bg{fill:#F5F0E8}.card{fill:#FFFDF9;stroke:#C9BFB0;rx:10}
+    .t{font-size:14px;fill:#4B352A;font-weight:600}.s{font-size:12px;fill:#6B5346}
+    .n{fill:#BB5E3C;font-size:14px;font-weight:700}
+    .ok{fill:#5F7F4E}.block{fill:#E8D5D0}
+  </style>
+  <rect width="900" height="560" class="bg"/>
+  <text x="450" y="30" text-anchor="middle" font-size="18" font-weight="700" fill="#4B352A">Portal Resultados  Competidor</text>
+  <text x="450" y="50" text-anchor="middle" class="s">/jurado/resultados</text>
+
+  <rect class="card" x="40" y="70" width="380" height="220"/>
+  <text x="60" y="95" class="n">`</text><text x="78" y="95" class="t">Login</text>
+  <text x="60" y="118" class="s">Nombre (como en inscripción)</text>
+  <rect x="60" y="125" width="300" height="28" fill="#E9E6DD" stroke="#4B352A"/>
+  <text x="60" y="165" class="s">Cédula / documento</text>
+  <rect x="60" y="172" width="300" height="28" fill="#E9E6DD" stroke="#4B352A"/>
+  <rect x="60" y="215" width="160" height="30" fill="#4B352A" rx="6"/>
+  <text x="140" y="235" text-anchor="middle" fill="#fff" font-size="11">Ver mis resultados</text>
+  <text x="60" y="265" class="s">POST jurado_resultados_login</text>
+
+  <rect class="card block" x="450" y="70" width="410" height="100"/>
+  <text x="470" y="95" class="n">a</text><text x="488" y="95" class="t">Antes de publicar  bloqueado</text>
+  <text x="470" y="118" class="s">«El organizador aún no ha publicado&»</text>
+  <text x="470" y="138" class="s">Live scores NO visibles aquí</text>
+  <text x="470" y="158" class="s">Organizador o Admin debe pulsar Publicar</text>
+
+  <rect class="card" x="450" y="190" width="410" height="250"/>
+  <text x="470" y="215" class="n">b</text><text x="488" y="215" class="t">Después de publicar</text>
+  <text x="470" y="238" class="s">Foto + nombre + estado (activo, eliminado, podio&)</text>
+  <text x="470" y="258" class="s">Selector de ronda si hay varias publicadas</text>
+  <text x="470" y="285" class="s">Total puntos · desglose por juez y criterio</text>
+  <text x="470" y="305" class="s">Notas del jurado · rival en duelos (P1 archivo)</text>
+  <text x="470" y="330" class="s">Auto-refresh cada 8 segundos</text>
+  <rect x="470" y="345" width="120" height="24" fill="#5F7F4E" rx="5"/><text x="530" y="361" text-anchor="middle" fill="#fff" font-size="10">Ronda 1</text>
+  <rect x="600" y="345" width="120" height="24" fill="#E9E6DD" stroke="#4B352A" rx="5"/><text x="660" y="361" text-anchor="middle" class="s">Semifinal</text>
+  <text x="470" y="400" class="s">Primera Preliminar archivada: datos de preliminar-1-results.js</text>
+
+  <rect x="40" y="310" width="380" height="220" class="card"/>
+  <text x="60" y="335" class="n">c</text><text x="78" y="335" class="t">Auditoría (Admin)</text>
+  <text x="60" y="358" class="s">Cada login ’ hoja Resultados accesos</text>
+  <text x="60" y="378" class="s">Correo al organizador (máx. 1 / 30 min)</text>
+  <text x="60" y="398" class="s">Admin ’ Accesos al portal de resultados</text>
+  <text x="60" y="430" class="n">d</text><text x="78" y="430" class="t">White-label</text>
+  <text x="60" y="453" class="s">?evt=slug filtra inscritos y resultados del torneo cliente</text>
+  <text x="60" y="473" class="s">Misma lógica de publicación por tenant</text>
+  <text x="60" y="505" class="s">URL: /jurado/resultados?evt=slug-del-cliente</text>
+</svg>

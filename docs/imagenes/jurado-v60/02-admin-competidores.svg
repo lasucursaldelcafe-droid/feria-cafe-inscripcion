@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="Inter, Arial, sans-serif">
+  <defs>
+    <style>
+      .bg { fill:#F0EBE3 }
+      .panel { fill:#FFFDF9; stroke:#C9BFB0; stroke-width:1.5; rx:8 }
+      .header { fill:#4B352A }
+      .ht { fill:#FFF; font-size:16px; font-weight:700 }
+      .t { font-size:13px; fill:#4B352A }
+      .s { font-size:11px; fill:#6B5346 }
+      .callout { fill:none; stroke:#BB5E3C; stroke-width:2 }
+      .num { fill:#BB5E3C; font-size:15px; font-weight:700 }
+      .badge { fill:#5F7F4E; font-size:10px; fill:white }
+    </style>
+  </defs>
+  <rect width="900" height="620" class="bg"/>
+  <text x="450" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#4B352A">Panel Admin ’ Competidores</text>
+  <text x="450" y="48" text-anchor="middle" class="s">la-sucursal-del-cafe.web.app/admin</text>
+
+  <rect class="header" x="30" y="65" width="840" height="44" rx="8"/>
+  <text x="50" y="93" class="ht">Competidores  V60 Championship</text>
+
+  <rect class="panel" x="30" y="120" width="840" height="56"/>
+  <text x="50" y="142" class="t" font-weight="600">` Filtro de edición</text>
+  <rect x="200" y="128" width="180" height="28" fill="#E9E6DD" stroke="#4B352A"/>
+  <text x="210" y="147" class="s">Preliminar 2 (activa) ¼</text>
+  <text x="420" y="147" class="s">Cupo: 12 / 36  filtra hoja Competencia por columna Evento</text>
+
+  <rect class="panel" x="30" y="188" width="400" height="90"/>
+  <text x="50" y="210" class="t" font-weight="600">a Registrar competidor manual</text>
+  <text x="50" y="230" class="s">Nombre, correo, cédula, ciudad, foto Drive&</text>
+  <text x="50" y="248" class="s">Se asigna a la edición del filtro `</text>
+  <rect x="50" y="258" width="140" height="26" fill="#4B352A" rx="6"/>
+  <text x="120" y="275" text-anchor="middle" fill="white" font-size="11">Crear competidor</text>
+
+  <rect class="panel" x="450" y="188" width="420" height="90"/>
+  <text x="470" y="210" class="t" font-weight="600">b Clientes plataforma jurado</text>
+  <text x="470" y="230" class="s">Crea apartado white-label ’ slug + PINs + hoja Comp.{slug}</text>
+  <rect x="470" y="240" width="200" height="26" fill="#5F7F4E" rx="6"/>
+  <text x="570" y="257" text-anchor="middle" fill="white" font-size="11">Crear apartado y enlace</text>
+
+  <rect class="panel" x="30" y="290" width="400" height="80"/>
+  <text x="50" y="312" class="t" font-weight="600">c Enlaces del torneo V60</text>
+  <text x="50" y="332" class="s">Config, organizador, juez 1&N, resultados</text>
+  <text x="50" y="350" class="s">Copiar y compartir el día del evento</text>
+
+  <rect class="panel" x="450" y="290" width="420" height="80"/>
+  <text x="470" y="312" class="t" font-weight="600">d Publicar resultados V60</text>
+  <text x="470" y="332" class="s">Copia puntajes activos al portal competidor</text>
+  <rect x="470" y="340" width="220" height="26" fill="#BB5E3C" rx="6"/>
+  <text x="580" y="357" text-anchor="middle" fill="white" font-size="11">Publicar resultados a competidores</text>
+
+  <rect class="panel" x="30" y="385" width="840" height="200"/>
+  <text x="50" y="408" class="t" font-weight="600">e Tabla de competidores</text>
+  <rect x="50" y="420" width="800" height="22" fill="#4B352A"/>
+  <text x="60" y="435" fill="white" font-size="10">ID | Nombre | Evento | Habilitado | Ciudad | &</text>
+  <rect x="50" y="442" width="800" height="20" fill="#FFFDF9" stroke="#E0D8CE"/>
+  <rect x="50" y="462" width="800" height="20" fill="#FAF7F2" stroke="#E0D8CE"/>
+  <text x="60" y="456" class="s">SC-& | Ana | Preliminar 2 |  Habilitado | Cali</text>
+  <text x="60" y="476" class="s">SC-& | Luis | Preliminar 2 |  Habilitado | Pereira</text>
+  <text x="50" y="510" class="s">Toggle Habilitado = aparece en jurado. Editar fila = perfil completo.</text>
+  <text x="50" y="530" class="s">Solo filas Habilitado=Sí entran al sorteo y a los desplegables de jueces.</text>
+
+  <circle cx="875" cy="148" r="14" fill="#BB5E3C"/><text x="875" y="153" text-anchor="middle" fill="white" class="num">1</text>
+  <circle cx="395" cy="210" r="14" fill="#BB5E3C"/><text x="395" y="215" text-anchor="middle" fill="white" class="num">2</text>
+  <circle cx="875" cy="210" r="14" fill="#BB5E3C"/><text x="875" y="215" text-anchor="middle" fill="white" class="num">3</text>
+  <circle cx="395" cy="312" r="14" fill="#BB5E3C"/><text x="395" y="317" text-anchor="middle" fill="white" class="num">4</text>
+  <circle cx="875" cy="312" r="14" fill="#BB5E3C"/><text x="875" y="317" text-anchor="middle" fill="white" class="num">5</text>
+  <circle cx="875" cy="408" r="14" fill="#BB5E3C"/><text x="875" y="413" text-anchor="middle" fill="white" class="num">6</text>
+</svg>
