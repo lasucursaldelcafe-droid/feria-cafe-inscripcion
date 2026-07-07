@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informe — Plataforma jurado V60 | La Sucursal del Café</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --coffee-deep: #4B352A;
+      --coffee-warm: #BB5E3C;
+      --cream: #E9E6DD;
+      --cream-light: #FFFDF9;
+      --green: #5F7F4E;
+      --text-muted: #6B5346;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Karla, system-ui, sans-serif;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--coffee-deep);
+      background: linear-gradient(180deg, #f5f0e8 0%, var(--cream-light) 120px);
+    }
+    .wrap { max-width: 52rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+    header {
+      text-align: center;
+      padding: 2rem 1rem;
+      margin-bottom: 2rem;
+      background: var(--coffee-deep);
+      color: var(--cream-light);
+      border-radius: 1rem;
+    }
+    header h1 {
+      font-family: Montserrat, sans-serif;
+      font-size: clamp(1.35rem, 4vw, 1.85rem);
+      margin: 0 0 0.5rem;
+      font-weight: 600;
+    }
+    header p { margin: 0.25rem 0; opacity: 0.88; font-size: 0.95rem; }
+    nav.toc {
+      background: var(--cream-light);
+      border: 1px solid rgba(75,53,42,0.12);
+      border-radius: 0.75rem;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    nav.toc h2 { margin: 0 0 0.75rem; font-size: 1rem; font-family: Montserrat, sans-serif; }
+    nav.toc ol { margin: 0; padding-left: 1.25rem; }
+    nav.toc a { color: var(--coffee-warm); text-decoration: none; }
+    nav.toc a:hover { text-decoration: underline; }
+    section { margin-bottom: 2.75rem; }
+    h2 {
+      font-family: Montserrat, sans-serif;
+      font-size: 1.35rem;
+      margin: 0 0 1rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 2px solid var(--coffee-warm);
+    }
+    h3 { font-size: 1.05rem; margin: 1.5rem 0 0.65rem; color: var(--coffee-warm); }
+    .figure {
+      margin: 1.25rem 0;
+      padding: 0.75rem;
+      background: #fff;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(75,53,42,0.1);
+      box-shadow: 0 4px 20px rgba(75,53,42,0.06);
+    }
+    .figure img, .figure object {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 0.5rem;
+    }
+    .figure figcaption {
+      margin-top: 0.65rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+    }
+    th, td {
+      border: 1px solid rgba(75,53,42,0.15);
+      padding: 0.5rem 0.65rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: var(--coffee-deep); color: var(--cream-light); font-weight: 600; }
+    tr:nth-child(even) { background: rgba(233,230,221,0.35); }
+    .callout {
+      background: rgba(95,127,78,0.12);
+      border-left: 4px solid var(--green);
+      padding: 0.85rem 1rem;
+      margin: 1rem 0;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+    .callout strong { color: var(--coffee-deep); }
+    pre, code {
+      font-family: ui-monospace, monospace;
+      font-size: 0.85rem;
+      background: rgba(75,53,42,0.06);
+      border-radius: 0.35rem;
+    }
+    pre { padding: 1rem; overflow-x: auto; }
+    code { padding: 0.15rem 0.35rem; }
+    ul, ol { padding-left: 1.35rem; }
+    li { margin-bottom: 0.35rem; }
+    .flow {
+      background: var(--cream);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.88rem;
+      line-height: 1.7;
+    }
+    .checklist { list-style: none; padding: 0; }
+    .checklist li::before { content: "☐ "; color: var(--coffee-warm); }
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(75,53,42,0.15);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    a { color: var(--coffee-warm); }
+    @media print {
+      body { background: #fff; }
+      header { background: #333; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .figure { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Plataforma de calificación V60</h1>
+      <p>Informe con diagramas anotados — asignación de torneos y jurado sensorial</p>
+      <p>La Sucursal del Café · julio 2026</p>
+    </header>
+
+    <nav class="toc" aria-label="Índice">
+      <h2>Índice</h2>
+      <ol>
+        <li><a href="#vision">Visión general</a></li>
+        <li><a href="#roles">Roles y pantallas</a></li>
+        <li><a href="#admin">Panel administrativo</a></li>
+        <li><a href="#asignacion">Asignación de torneos</a></li>
+        <li><a href="#organizador">Calificación — Organizador</a></li>
+        <li><a href="#juez">Calificación — Juez</a></li>
+        <li><a href="#resultados">Portal resultados</a></li>
+        <li><a href="#puntaje">Modelo de puntaje</a></li>
+        <li><a href="#fases">Fases del torneo</a></li>
+        <li><a href="#backend">Backend</a></li>
+        <li><a href="#dia-evento">Día del evento</a></li>
+        <li><a href="#urls">URLs de producción</a></li>
+      </ol>
+    </nav>
+
+    <section id="vision">
+      <h2>1. Visión general</h2>
+      <p>La plataforma conecta <strong>administración</strong>, <strong>organizador</strong>, <strong>jueces</strong> y <strong>competidores</strong>. Los datos viven en Google Sheets (registro) y Apps Script (puntajes en vivo y bracket).</p>
+      <figure class="figure">
+        <img src="imagenes/jurado-v60/01-arquitectura.svg" alt="Diagrama de arquitectura: Admin, inscripción, Apps Script, organizador, jueces y portal resultados">
+        <figcaption>Fig. 1 — Arquitectura general (numeración en el diagrama)</figcaption>
+      </figure>
+      <table>
+        <thead><tr><th>Pieza</th><th>URL</th><th>Función</th></tr></thead>
+        <tbody>
+          <tr><td>Admin</td><td><code>/admin</code> → Competidores</td><td>Ediciones, alta manual, white-label, publicar</td></tr>
+          <tr><td>Inscripción</td><td><code>/competencia</code></td><td>Formulario público V60</td></tr>
+          <tr><td>Inscripción cliente</td><td><code>/competencia/torneo?evt=slug</code></td><td>White-label</td></tr>
+          <tr><td>Organizador</td><td><code>/jurado/organizador?pin=…</code></td><td>Sorteo, rondas, publicar</td></tr>
+          <tr><td>Juez N</td><td><code>/jurado/juez?pin=…&amp;juez=N</code></td><td>Calificación móvil</td></tr>
+          <tr><td>Resultados</td><td><code>/jurado/resultados</code></td><td>Nombre + cédula</td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <strong>Regla clave:</strong> el competidor <strong>no ve</strong> puntajes hasta que se pulse <strong>«Publicar resultados a competidores»</strong> (organizador o admin).
+      </div>
+    </section>
+
+    <section id="roles">
+      <h2>2. Roles y pantallas</h2>
+      <table>
+        <thead><tr><th>Rol</th><th>Acceso</th><th>Qué hace</th></tr></thead>
+        <tbody>
+          <tr><td>Admin feria</td><td><code>/admin</code></td><td>Gestiona Competencia, crea torneos white-label, publica, audita accesos</td></tr>
+          <tr><td>Organizador</td><td>PIN + <code>/jurado/organizador</code></td><td>Sorteo, fases, matriz puntajes, avanzar ganadores</td></tr>
+          <tr><td>Juez</td><td>PIN + <code>/jurado/juez?juez=N</code></td><td>Califica; solo edita su columna jN</td></tr>
+          <tr><td>Competidor</td><td>Nombre + cédula</td><td>Ve solo rondas <strong>publicadas</strong></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="admin">
+      <h2>3. Panel administrativo — Competidores</h2>
+      <p>Ruta: <strong>Admin → Competidores</strong> (<code>admin.html</code>)</p>
+      <figure class="figure">
+        <img src="imagenes/jurado-v60/02-admin-competidores.svg" alt="Panel admin competidores con 6 zonas numeradas">
+        <figcaption>Fig. 2 — Admin: filtro edición, alta manual, white-label, enlaces, publicar, tabla</figcaption>
+      </figure>
+      <h3>① Filtro de edición</h3>
+      <p>Preliminar 2 (activa), Preliminar 1 (archivo) o Todas. Filtra la hoja <code>Competencia</code> por columna <code>Evento</code>.</p>
+      <h3>② Registrar competidor manual</h3>
+      <p>Alta con pago confirmado. Se asigna a la edición del filtro ①. API: <code>admin_create_competitor</code>.</p>
+      <h3>③ Clientes plataforma jurado</h3>
+      <p>Crea apartado white-label → <code>slug</code>, PINs, hoja <code>Comp. {slug}</code>. API: <code>jurado_instance_create</code>.</p>
+      <h3>④ Enlaces del torneo</h3>
+      <p>Config, organizador, jueces 1…N, resultados — generados por <code>SiteLinks.buildJuradoUrls()</code>.</p>
+      <h3>⑤ Publicar resultados</h3>
+      <p>Copia puntajes de activos al portal. API: <code>jurado_publish_resultados</code>.</p>
+      <h3>⑥ Tabla competidores</h3>
+      <p><strong>Habilitado = Sí</strong> → aparece en jurado. <strong>No</strong> → invisible para sorteo y jueces.</p>
+    </section>
+
+    <section id="asignacion">
+      <h2>4. Asignación de torneos</h2>
+      <figure class="figure">
+        <img src="imagenes/jurado-v60/03-asignacion-torneo.svg" alt="Flujo asignación torneo feria vs white-label">
+        <figcaption>Fig. 3 — Dos caminos: feria V60 vs cliente white-label</figcaption>
+      </figure>
+      <h3>A) Torneo feria — V60 Championship</h3>
+      <ol>
+        <li>Elegir edición en admin</li>
+        <li>Inscribir (<code>/competencia</code> o manual)</li>
+        <li>Habilitar en tabla</li>
+        <li>Día del evento: sorteo en <code>/jurado/organizador</code></li>
+      </ol>
+      <h3>B) Torneo cliente (white-label)</h3>
+      <ol>
+        <li>Admin crea apartado → <code>slug</code></li>
+        <li>Cliente configura en <code>/jurado/config?evt=slug</code></li>
+        <li>Inscripciones en <code>/competencia/torneo?evt=slug</code></li>
+        <li>Todas las URLs con <code>?evt=slug</code>; datos aislados</li>
+      </ol>
+      <p>El sistema asigna por columna <strong>Evento</strong> en Sheets + claves <code>jurado_v60_*__slug</code> en Script Properties.</p>
+    </section>
+
+    <section id="organizador">
+      <h2>5. Calificación en vivo — Organizador</h2>
+      <p><code>/jurado/organizador?pin=v60organizador</code></p>
+      <figure class="figure">
+        <img src="imagenes/jurado-v60/04-organizador-calificacion.svg" alt="Panel organizador con pestañas y flujo de calificación">
+        <figcaption>Fig. 4 — Organizador: vista general, control, fases y cálculo de puntaje</figcaption>
+      </figure>
+      <table>
+        <thead><tr><th>Pestaña</th><th>Uso</th></tr></thead>
+        <tbody>
+          <tr><td>Vista general</td><td>Ranking en vivo, publicar, enlaces jueces</td></tr>
+          <tr><td>Recorrido</td><td>Progreso de ronda y grupos</td></tr>
+          <tr><td>Torneo</td><td>Bracket 1v1 o ranking</td></tr>
+          <tr><td>Puntajes</td><td>Matriz J1…JN</td></tr>
+          <tr><td>Control</td><td>Sorteo, avanzar, reiniciar puntajes</td></tr>
+          <tr><td>Historial</td><td>Rondas archivadas</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Secuencia:</strong> Sorteo → jueces califican → Publicar → Avanzar ganadores → repetir.</p>
+    </section>
+
+    <section id="juez">
+      <h2>6. Calificación en vivo — Juez</h2>
+      <p><code>/jurado/juez?pin=v60sensorial&amp;juez=1</code> (móvil)</p>
+      <figure class="figure">
+        <img src="imagenes/jurado-v60/05-panel-juez.svg" alt="Panel juez móvil con criterios SCA">
+        <figcaption>Fig. 5 — Juez: selector, 7 criterios, subtotal, guardar columna jN</figcaption>
+      </figure>
+      <table>
+        <thead><tr><th>#</th><th>Elemento</th><th>Comportamiento</th></tr></thead>
+        <tbody>
+          <tr><td>①</td><td>Badge Juez N</td><td>Columna jN a guardar</td></tr>
+          <tr><td>②</td><td>Selector</td><td>Solo competidores activos</td></tr>
+          <tr><td>③</td><td>Criterios</td><td>7 parámetros SCA, escala 1–5</td></tr>
+          <tr><td>⑤</td><td>Guardar</td><td><code>pasaporte_config_save</code></td></tr>
+          <tr><td>⑥</td><td>Aislamiento</td><td>No ve otros jueces</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="resultados">
+      <h2>7. Portal resultados — Competidor</h2>
+      <p><code>/jurado/resultados</code></p>
+      <figure class="figure">
+        <img src="imagenes/jurado-v60/06-portal-resultados.svg" alt="Portal resultados login y estados">
+        <figcaption>Fig. 6 — Login, bloqueo sin publicar, vista publicada</figcaption>
+      </figure>
+      <table>
+        <thead><tr><th>Estado</th><th>Qué ve</th></tr></thead>
+        <tbody>
+          <tr><td>Sin publicar</td><td>Mensaje de bloqueo</td></tr>
+          <tr><td>Publicado</td><td>Total, desglose, notas, rondas</td></tr>
+          <tr><td>Primera Preliminar</td><td>Archivo desde <code>preliminar-1-results.js</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="puntaje">
+      <h2>8. Modelo de puntaje</h2>
+      <p><strong>Criterios:</strong> Aroma, Dulzor, Acidez, Sabor, Balance, Cuerpo, Limpieza de taza.</p>
+      <p><strong>Escala:</strong> 1–5 por criterio → subtotal juez (máx. 35) → total = suma de jueces.</p>
+      <pre>J1: 4+3+4+5+4+3+4 = 27
+J2: 5+4+3+4+4+4+3 = 27
+J3: 4+4+4+4+3+3+4 = 26
+─────────────────────
+Total competidor   = 80 pts</pre>
+      <table>
+        <thead><tr><th>Modo</th><th>Cómo gana</th></tr></thead>
+        <tbody>
+          <tr><td>Duelos</td><td>Mayor total en pareja 1v1</td></tr>
+          <tr><td>Puntaje general</td><td>Top N del ranking</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="fases">
+      <h2>9. Fases del torneo</h2>
+      <table>
+        <thead><tr><th>Competidores</th><th>Fases</th></tr></thead>
+        <tbody>
+          <tr><td>2</td><td>Final</td></tr>
+          <tr><td>3–4</td><td>Semifinal → Final</td></tr>
+          <tr><td>5–8</td><td>Cuartos → Semifinal → Final</td></tr>
+          <tr><td>9–16</td><td>Octavos → … → Final</td></tr>
+          <tr><td>17–32</td><td>Dieciseisavos → … → Final</td></tr>
+          <tr><td>33+</td><td>Grupos → eliminatoria</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="backend">
+      <h2>10. Backend</h2>
+      <p>Google Apps Script + Sheets. Claves por torneo:</p>
+      <pre>jurado_v60_platform[__evt]       → marca, PINs, criterios
+jurado_v60_calificaciones[__evt] → puntajes en vivo
+jurado_v60_bracket[__evt]        → fase, activos, resultados publicados</pre>
+      <p>APIs clave: <code>admin_dashboard</code>, <code>pasaporte_config_save</code>, <code>jurado_publish_resultados</code>, <code>jurado_resultados_login</code>, <code>jurado_instance_create</code>.</p>
+    </section>
+
+    <section id="dia-evento">
+      <h2>11. Día del evento — checklist</h2>
+      <div class="flow">
+        Admin habilita competidores → Organizador sorteo → Jueces califican (j1…jN) → Organizador publica → Competidor consulta portal → Avanzar ganadores → nueva ronda
+      </div>
+      <ul class="checklist">
+        <li>Competidores inscritos y Habilitado = Sí</li>
+        <li>Edición / evt correctos</li>
+        <li>Enlaces juez 1…N enviados</li>
+        <li>Publicar tras cada ronda de cata</li>
+        <li>Avanzar cuando todos calificaron</li>
+      </ul>
+    </section>
+
+    <section id="urls">
+      <h2>12. URLs de producción</h2>
+      <table>
+        <thead><tr><th>Panel</th><th>URL</th></tr></thead>
+        <tbody>
+          <tr><td>Admin</td><td><a href="https://la-sucursal-del-cafe.web.app/admin">la-sucursal-del-cafe.web.app/admin</a></td></tr>
+          <tr><td>Consola jurado</td><td><a href="https://la-sucursal-del-cafe.web.app/jurado-v60">…/jurado-v60</a></td></tr>
+          <tr><td>Configuración</td><td><a href="https://la-sucursal-del-cafe.web.app/jurado/config?pin=v60organizador">…/jurado/config</a></td></tr>
+          <tr><td>Torneo en vivo</td><td><a href="https://la-sucursal-del-cafe.web.app/jurado/organizador?pin=v60organizador">…/jurado/organizador</a></td></tr>
+          <tr><td>Resultados</td><td><a href="https://la-sucursal-del-cafe.web.app/jurado/resultados">…/jurado/resultados</a></td></tr>
+          <tr><td>Inscripción</td><td><a href="https://la-sucursal-del-cafe.web.app/competencia">…/competencia</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer>
+      <p>La Sucursal del Café — Informe plataforma jurado V60</p>
+      <p>También disponible en <code>docs/informe-plataforma-jurado-v60.md</code></p>
+    </footer>
+  </div>
+</body>
+</html>
