@@ -30,7 +30,7 @@ Este documento explica, con diagramas anotados, cómo funciona la aplicación de
 
 La plataforma conecta cuatro actores: **administración de la feria**, **organizador del torneo**, **jueces sensoriales** y **competidores**. Los datos viven en Google Sheets (registro maestro) y en propiedades del script de Apps Script (puntajes en vivo y estado del bracket).
 
-![Arquitectura general](imagenes/jurado-v60/01-arquitectura.svg)
+![Arquitectura general](https://la-sucursal-del-cafe.web.app/docs/imagenes/jurado-v60/01-arquitectura.svg)
 
 | Pieza | URL típica | Función |
 |-------|------------|---------|
@@ -72,7 +72,7 @@ flowchart LR
 
 Ruta: **Admin → sección Competidores** (`admin.html` + `js/admin-dashboard.js`).
 
-![Panel Admin Competidores](imagenes/jurado-v60/02-admin-competidores.svg)
+![Panel Admin Competidores](https://la-sucursal-del-cafe.web.app/docs/imagenes/jurado-v60/02-admin-competidores.svg)
 
 ### ① Filtro de edición
 
@@ -118,7 +118,7 @@ Ruta: **Admin → sección Competidores** (`admin.html` + `js/admin-dashboard.js
 
 Hay **dos caminos** para asignar competidores a un torneo:
 
-![Asignación de torneos](imagenes/jurado-v60/03-asignacion-torneo.svg)
+![Asignación de torneos](https://la-sucursal-del-cafe.web.app/docs/imagenes/jurado-v60/03-asignacion-torneo.svg)
 
 ### A) Torneo feria — V60 Championship
 
@@ -154,7 +154,7 @@ El sorteo lee competidores habilitados cuyo **Evento** coincide con la edición 
 URL: `/jurado/organizador?pin=v60organizador`  
 Archivo: `jurado-organizador.html` + `js/jurado-v60.js`
 
-![Panel organizador](imagenes/jurado-v60/04-organizador-calificacion.svg)
+![Panel organizador](https://la-sucursal-del-cafe.web.app/docs/imagenes/jurado-v60/04-organizador-calificacion.svg)
 
 ### Pestañas del panel
 
@@ -190,7 +190,7 @@ Archivo: `jurado-organizador.html` + `js/jurado-v60.js`
 URL: `/jurado/juez?pin=v60sensorial&juez=1` (cambiar `juez=2`, `3`, etc.)  
 Archivo: `jurado-juez.html` — interfaz optimizada para móvil.
 
-![Panel juez](imagenes/jurado-v60/05-panel-juez.svg)
+![Panel juez](https://la-sucursal-del-cafe.web.app/docs/imagenes/jurado-v60/05-panel-juez.svg)
 
 | # | Elemento | Comportamiento |
 |---|----------|----------------|
@@ -210,7 +210,7 @@ Archivo: `jurado-juez.html` — interfaz optimizada para móvil.
 URL: `/jurado/resultados` (opcional `?evt=slug` para white-label)  
 Archivos: `jurado-resultados.html` + `js/jurado-resultados.js`
 
-![Portal resultados](imagenes/jurado-v60/06-portal-resultados.svg)
+![Portal resultados](https://la-sucursal-del-cafe.web.app/docs/imagenes/jurado-v60/06-portal-resultados.svg)
 
 | Estado | Qué ve el competidor |
 |--------|----------------------|

@@ -68,11 +68,22 @@
       border: 1px solid rgba(75,53,42,0.1);
       box-shadow: 0 4px 20px rgba(75,53,42,0.06);
     }
-    .figure img, .figure object {
+    .figure img, .figure object, .figure .svg-inline svg {
       display: block;
       width: 100%;
       height: auto;
       border-radius: 0.5rem;
+    }
+    .figure .svg-inline {
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 0.5rem;
+    }
+    .figure .svg-inline svg {
+      display: block;
+      width: 100%;
+      height: auto;
     }
     .figure figcaption {
       margin-top: 0.65rem;
@@ -167,7 +178,75 @@
       <h2>1. Visión general</h2>
       <p>La plataforma conecta <strong>administración</strong>, <strong>organizador</strong>, <strong>jueces</strong> y <strong>competidores</strong>. Los datos viven en Google Sheets (registro) y Apps Script (puntajes en vivo y bracket).</p>
       <figure class="figure">
-        <img src="imagenes/jurado-v60/01-arquitectura.svg" alt="Diagrama de arquitectura: Admin, inscripción, Apps Script, organizador, jueces y portal resultados">
+        <div class="svg-inline" role="img" aria-label="Diagrama de arquitectura: Admin, inscripción, Apps Script, organizador, jueces y portal resultados"><svg role="img" aria-label="Diagrama de arquitectura: Admin, inscripción, Apps Script, organizador, jueces y portal resultados" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" font-family="Inter, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#4B352A"/>
+    </marker>
+    <style>
+      .box { fill:#FFFDF9; stroke:#4B352A; stroke-width:2; rx:12 }
+      .title { font-size:18px; font-weight:700; fill:#4B352A }
+      .label { font-size:13px; fill:#4B352A }
+      .small { font-size:11px; fill:#6B5346 }
+      .num { fill:#BB5E3C; font-size:14px; font-weight:700 }
+      .line { stroke:#4B352A; stroke-width:1.5; fill:none; marker-end:url(#arrow) }
+    </style>
+  </defs>
+  <rect width="920" height="520" fill="#F5F0E8"/>
+  <text x="460" y="34" text-anchor="middle" class="title">Arquitectura  Plataforma de calificaci�n V60</text>
+
+  <rect class="box" x="40" y="60" width="200" height="120"/>
+  <text x="140" y="88" text-anchor="middle" class="label" font-weight="600">` Admin</text>
+  <text x="140" y="108" text-anchor="middle" class="small">/admin � Competidores</text>
+  <text x="140" y="126" text-anchor="middle" class="small">Ediciones, alta manual,</text>
+  <text x="140" y="142" text-anchor="middle" class="small">clientes white-label,</text>
+  <text x="140" y="158" text-anchor="middle" class="small">publicar resultados</text>
+
+  <rect class="box" x="40" y="210" width="200" height="120"/>
+  <text x="140" y="238" text-anchor="middle" class="label" font-weight="600">a Inscripci�n</text>
+  <text x="140" y="258" text-anchor="middle" class="small">/competencia</text>
+  <text x="140" y="274" text-anchor="middle" class="small">/competencia/torneo?evt=</text>
+  <text x="140" y="294" text-anchor="middle" class="small">Formulario p�blico �</text>
+  <text x="140" y="310" text-anchor="middle" class="small">Hoja Competencia</text>
+
+  <rect class="box" x="360" y="130" width="200" height="150"/>
+  <text x="460" y="158" text-anchor="middle" class="label" font-weight="600">b Apps Script + Sheets</text>
+  <text x="460" y="180" text-anchor="middle" class="small">GET admin_dashboard</text>
+  <text x="460" y="198" text-anchor="middle" class="small">POST pasaporte_config_save</text>
+  <text x="460" y="216" text-anchor="middle" class="small">POST jurado_publish_resultados</text>
+  <text x="460" y="234" text-anchor="middle" class="small">Script Properties:</text>
+  <text x="460" y="252" text-anchor="middle" class="small">platform, calificaciones, bracket</text>
+
+  <rect class="box" x="680" y="60" width="200" height="100"/>
+  <text x="780" y="88" text-anchor="middle" class="label" font-weight="600">c Organizador</text>
+  <text x="780" y="108" text-anchor="middle" class="small">/jurado/organizador</text>
+  <text x="780" y="126" text-anchor="middle" class="small">Sorteo, rondas, avance,</text>
+  <text x="780" y="142" text-anchor="middle" class="small">publicar a competidores</text>
+
+  <rect class="box" x="680" y="180" width="200" height="100"/>
+  <text x="780" y="208" text-anchor="middle" class="label" font-weight="600">d Jueces (m�vil)</text>
+  <text x="780" y="228" text-anchor="middle" class="small">/jurado/juez?juez=N</text>
+  <text x="780" y="246" text-anchor="middle" class="small">7 criterios SCA � escala</text>
+  <text x="780" y="262" text-anchor="middle" class="small">Guardan columna jN</text>
+
+  <rect class="box" x="680" y="300" width="200" height="100"/>
+  <text x="780" y="328" text-anchor="middle" class="label" font-weight="600">e Resultados</text>
+  <text x="780" y="348" text-anchor="middle" class="small">/jurado/resultados</text>
+  <text x="780" y="366" text-anchor="middle" class="small">Nombre + c�dula</text>
+  <text x="780" y="382" text-anchor="middle" class="small">Solo tras publicar</text>
+
+  <path class="line" d="M240 120 L360 180"/>
+  <path class="line" d="M240 270 L360 220"/>
+  <path class="line" d="M560 180 L680 110"/>
+  <path class="line" d="M560 210 L680 230"/>
+  <path class="line" d="M560 240 L680 350"/>
+
+  <rect x="40" y="380" width="840" height="110" fill="#E9E6DD" stroke="#5F7F4E" stroke-width="2" rx="10"/>
+  <text x="60" y="408" class="label" font-weight="600">Claves de datos (por torneo / evt=slug)</text>
+  <text x="60" y="432" class="small">" jurado_v60_platform  marca, PINs, criterios, modo duelos/ranking, campos inscripci�n</text>
+  <text x="60" y="452" class="small">" jurado_v60_calificaciones  puntajes en vivo { scores: { competidorId: { j1&j5, total } } }</text>
+  <text x="60" y="472" class="small">" jurado_v60_bracket  fase, activos, eliminados, grupos, historial, resultadosCompetidor (publicados)</text>
+</svg></div>
         <figcaption>Fig. 1 — Arquitectura general (numeración en el diagrama)</figcaption>
       </figure>
       <table>
@@ -203,7 +282,75 @@
       <h2>3. Panel administrativo — Competidores</h2>
       <p>Ruta: <strong>Admin → Competidores</strong> (<code>admin.html</code>)</p>
       <figure class="figure">
-        <img src="imagenes/jurado-v60/02-admin-competidores.svg" alt="Panel admin competidores con 6 zonas numeradas">
+        <div class="svg-inline" role="img" aria-label="Panel admin competidores con 6 zonas numeradas"><svg role="img" aria-label="Panel admin competidores con 6 zonas numeradas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="Inter, Arial, sans-serif">
+  <defs>
+    <style>
+      .bg { fill:#F0EBE3 }
+      .panel { fill:#FFFDF9; stroke:#C9BFB0; stroke-width:1.5; rx:8 }
+      .header { fill:#4B352A }
+      .ht { fill:#FFF; font-size:16px; font-weight:700 }
+      .t { font-size:13px; fill:#4B352A }
+      .s { font-size:11px; fill:#6B5346 }
+      .callout { fill:none; stroke:#BB5E3C; stroke-width:2 }
+      .num { fill:#BB5E3C; font-size:15px; font-weight:700 }
+      .badge { fill:#5F7F4E; font-size:10px; fill:white }
+    </style>
+  </defs>
+  <rect width="900" height="620" class="bg"/>
+  <text x="450" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#4B352A">Panel Admin � Competidores</text>
+  <text x="450" y="48" text-anchor="middle" class="s">la-sucursal-del-cafe.web.app/admin</text>
+
+  <rect class="header" x="30" y="65" width="840" height="44" rx="8"/>
+  <text x="50" y="93" class="ht">Competidores  V60 Championship</text>
+
+  <rect class="panel" x="30" y="120" width="840" height="56"/>
+  <text x="50" y="142" class="t" font-weight="600">` Filtro de edici�n</text>
+  <rect x="200" y="128" width="180" height="28" fill="#E9E6DD" stroke="#4B352A"/>
+  <text x="210" y="147" class="s">Preliminar 2 (activa) �</text>
+  <text x="420" y="147" class="s">Cupo: 12 / 36  filtra hoja Competencia por columna Evento</text>
+
+  <rect class="panel" x="30" y="188" width="400" height="90"/>
+  <text x="50" y="210" class="t" font-weight="600">a Registrar competidor manual</text>
+  <text x="50" y="230" class="s">Nombre, correo, c�dula, ciudad, foto Drive&</text>
+  <text x="50" y="248" class="s">Se asigna a la edici�n del filtro `</text>
+  <rect x="50" y="258" width="140" height="26" fill="#4B352A" rx="6"/>
+  <text x="120" y="275" text-anchor="middle" fill="white" font-size="11">Crear competidor</text>
+
+  <rect class="panel" x="450" y="188" width="420" height="90"/>
+  <text x="470" y="210" class="t" font-weight="600">b Clientes plataforma jurado</text>
+  <text x="470" y="230" class="s">Crea apartado white-label � slug + PINs + hoja Comp.{slug}</text>
+  <rect x="470" y="240" width="200" height="26" fill="#5F7F4E" rx="6"/>
+  <text x="570" y="257" text-anchor="middle" fill="white" font-size="11">Crear apartado y enlace</text>
+
+  <rect class="panel" x="30" y="290" width="400" height="80"/>
+  <text x="50" y="312" class="t" font-weight="600">c Enlaces del torneo V60</text>
+  <text x="50" y="332" class="s">Config, organizador, juez 1&N, resultados</text>
+  <text x="50" y="350" class="s">Copiar y compartir el d�a del evento</text>
+
+  <rect class="panel" x="450" y="290" width="420" height="80"/>
+  <text x="470" y="312" class="t" font-weight="600">d Publicar resultados V60</text>
+  <text x="470" y="332" class="s">Copia puntajes activos al portal competidor</text>
+  <rect x="470" y="340" width="220" height="26" fill="#BB5E3C" rx="6"/>
+  <text x="580" y="357" text-anchor="middle" fill="white" font-size="11">Publicar resultados a competidores</text>
+
+  <rect class="panel" x="30" y="385" width="840" height="200"/>
+  <text x="50" y="408" class="t" font-weight="600">e Tabla de competidores</text>
+  <rect x="50" y="420" width="800" height="22" fill="#4B352A"/>
+  <text x="60" y="435" fill="white" font-size="10">ID | Nombre | Evento | Habilitado | Ciudad | &</text>
+  <rect x="50" y="442" width="800" height="20" fill="#FFFDF9" stroke="#E0D8CE"/>
+  <rect x="50" y="462" width="800" height="20" fill="#FAF7F2" stroke="#E0D8CE"/>
+  <text x="60" y="456" class="s">SC-& | Ana | Preliminar 2 |  Habilitado | Cali</text>
+  <text x="60" y="476" class="s">SC-& | Luis | Preliminar 2 |  Habilitado | Pereira</text>
+  <text x="50" y="510" class="s">Toggle Habilitado = aparece en jurado. Editar fila = perfil completo.</text>
+  <text x="50" y="530" class="s">Solo filas Habilitado=S� entran al sorteo y a los desplegables de jueces.</text>
+
+  <circle cx="875" cy="148" r="14" fill="#BB5E3C"/><text x="875" y="153" text-anchor="middle" fill="white" class="num">1</text>
+  <circle cx="395" cy="210" r="14" fill="#BB5E3C"/><text x="395" y="215" text-anchor="middle" fill="white" class="num">2</text>
+  <circle cx="875" cy="210" r="14" fill="#BB5E3C"/><text x="875" y="215" text-anchor="middle" fill="white" class="num">3</text>
+  <circle cx="395" cy="312" r="14" fill="#BB5E3C"/><text x="395" y="317" text-anchor="middle" fill="white" class="num">4</text>
+  <circle cx="875" cy="312" r="14" fill="#BB5E3C"/><text x="875" y="317" text-anchor="middle" fill="white" class="num">5</text>
+  <circle cx="875" cy="408" r="14" fill="#BB5E3C"/><text x="875" y="413" text-anchor="middle" fill="white" class="num">6</text>
+</svg></div>
         <figcaption>Fig. 2 — Admin: filtro edición, alta manual, white-label, enlaces, publicar, tabla</figcaption>
       </figure>
       <h3>① Filtro de edición</h3>
@@ -223,7 +370,91 @@
     <section id="asignacion">
       <h2>4. Asignación de torneos</h2>
       <figure class="figure">
-        <img src="imagenes/jurado-v60/03-asignacion-torneo.svg" alt="Flujo asignación torneo feria vs white-label">
+        <div class="svg-inline" role="img" aria-label="Flujo asignación torneo feria vs white-label"><svg role="img" aria-label="Flujo asignación torneo feria vs white-label" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" font-family="Inter, Arial, sans-serif">
+  <defs>
+    <marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5F7F4E"/></marker>
+    <style>
+      .step { fill:#FFFDF9; stroke:#4B352A; stroke-width:2; rx:10 }
+      .title { font-size:16px; font-weight:700; fill:#4B352A }
+      .body { font-size:12px; fill:#6B5346 }
+      .arrow { stroke:#5F7F4E; stroke-width:2; fill:none; marker-end:url(#a) }
+      .num { fill:#BB5E3C; font-size:18px; font-weight:700 }
+    </style>
+  </defs>
+  <rect width="900" height="700" fill="#F5F0E8"/>
+  <text x="450" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#4B352A">Asignaci�n de torneos desde Admin</text>
+  <text x="450" y="54" text-anchor="middle" font-size="13" fill="#6B5346">Dos caminos: feria principal (V60) o cliente white-label</text>
+
+  <text x="60" y="88" class="title">A) Torneo feria  V60 Championship</text>
+  <rect class="step" x="40" y="100" width="380" height="70"/>
+  <text x="60" y="125" class="num">1</text>
+  <text x="85" y="125" class="title">Elegir edici�n</text>
+  <text x="85" y="145" class="body">Admin � Competidores � filtro Preliminar 1 / 2 / Todas</text>
+  <text x="85" y="160" class="body">Columna Evento en Sheets = �V60 Championship  Preliminar N�</text>
+
+  <rect class="step" x="40" y="190" width="380" height="70"/>
+  <text x="60" y="215" class="num">2</text>
+  <text x="85" y="215" class="title">Inscribir competidores</text>
+  <text x="85" y="235" class="body">P�blico: /competencia (formType competencia)</text>
+  <text x="85" y="250" class="body">Manual: formulario admin con edici�n activa</text>
+
+  <rect class="step" x="40" y="280" width="380" height="70"/>
+  <text x="60" y="305" class="num">3</text>
+  <text x="85" y="305" class="title">Habilitar</text>
+  <text x="85" y="325" class="body">Toggle Habilitado = S� en tabla</text>
+  <text x="85" y="340" class="body">Sin esto NO aparecen en jurado</text>
+
+  <rect class="step" x="40" y="370" width="380" height="70"/>
+  <text x="60" y="395" class="num">4</text>
+  <text x="85" y="395" class="title">D�a del evento</text>
+  <text x="85" y="415" class="body">Organizador: /jurado/organizador?pin=v60organizador</text>
+  <text x="85" y="430" class="body">Sorteo autom�tico asigna fase y parejas</text>
+
+  <path class="arrow" d="M230 170 L230 190"/>
+  <path class="arrow" d="M230 260 L230 280"/>
+  <path class="arrow" d="M230 350 L230 370"/>
+
+  <text x="480" y="88" class="title">B) Torneo cliente (white-label)</text>
+  <rect class="step" x="460" y="100" width="400" height="85"/>
+  <text x="480" y="125" class="num">1</text>
+  <text x="505" y="125" class="title">Crear apartado</text>
+  <text x="505" y="145" class="body">Admin � Clientes plataforma jurado</text>
+  <text x="505" y="160" class="body">API: jurado_instance_create � slug, PIN org/juez</text>
+  <text x="505" y="175" class="body">Hoja nueva: Comp. {slug} + fila en Competencia</text>
+
+  <rect class="step" x="460" y="205" width="400" height="85"/>
+  <text x="480" y="230" class="num">2</text>
+  <text x="505" y="230" class="title">Cliente configura</text>
+  <text x="505" y="250" class="body">/jurado/config?evt=slug&amp;pin=&</text>
+  <text x="505" y="265" class="body">Marca, duelos/ranking, criterios, jueces, cupo</text>
+  <text x="505" y="280" class="body">Guardar � regenera enlaces en pesta�a 3</text>
+
+  <rect class="step" x="460" y="310" width="400" height="85"/>
+  <text x="480" y="335" class="num">3</text>
+  <text x="505" y="335" class="title">Inscripciones del cliente</text>
+  <text x="505" y="355" class="body">/competencia/torneo?evt=slug</text>
+  <text x="505" y="370" class="body">Evento = slug en Competencia + hoja Comp.{slug}</text>
+  <text x="505" y="385" class="body">Organizador ve lista en config � Inscripciones</text>
+
+  <rect class="step" x="460" y="415" width="400" height="85"/>
+  <text x="480" y="440" class="num">4</text>
+  <text x="505" y="440" class="title">Torneo aislado</text>
+  <text x="505" y="460" class="body">?evt=slug en todas las URLs jurado</text>
+  <text x="505" y="475" class="body">Datos en Script Properties con sufijo __slug</text>
+  <text x="505" y="490" class="body">Competidores filtrados por Evento = slug</text>
+
+  <path class="arrow" d="M660 185 L660 205"/>
+  <path class="arrow" d="M660 290 L660 310"/>
+  <path class="arrow" d="M660 395 L660 415"/>
+
+  <rect x="40" y="520" width="820" height="150" fill="#E9E6DD" stroke="#4B352A" rx="12"/>
+  <text x="60" y="548" class="title">�C�mo sabe el sistema a qu� torneo pertenece cada competidor?</text>
+  <text x="60" y="572" class="body">" Hoja Google Sheets �Competencia�: columna Evento (preliminar o slug white-label)</text>
+  <text x="60" y="592" class="body">" Jurado carga admin_dashboard y filtra Habilitado + Evento seg�n ?evt= o EVENT_CONFIG activo</text>
+  <text x="60" y="612" class="body">" El sorteo (bracket) guarda activos[], eliminados[], fase actual y plan de fases en jurado_v60_bracket</text>
+  <text x="60" y="632" class="body">" Publicar resultados copia puntajes de activos � resultadosCompetidor[id].rounds[] (visible en portal)</text>
+  <text x="60" y="652" class="body">" Admin puede forzar publicaci�n sin entrar al organizador (mismo endpoint jurado_publish_resultados)</text>
+</svg></div>
         <figcaption>Fig. 3 — Dos caminos: feria V60 vs cliente white-label</figcaption>
       </figure>
       <h3>A) Torneo feria — V60 Championship</h3>
@@ -247,7 +478,71 @@
       <h2>5. Calificación en vivo — Organizador</h2>
       <p><code>/jurado/organizador?pin=v60organizador</code></p>
       <figure class="figure">
-        <img src="imagenes/jurado-v60/04-organizador-calificacion.svg" alt="Panel organizador con pestañas y flujo de calificación">
+        <div class="svg-inline" role="img" aria-label="Panel organizador con pestañas y flujo de calificación"><svg role="img" aria-label="Panel organizador con pestañas y flujo de calificación" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 680" font-family="Inter, Arial, sans-serif">
+  <style>
+    .bg{fill:#1a1410}.card{fill:#2a221c;stroke:#4a3d34;stroke-width:1.5;rx:10}
+    .tab-on{fill:#BB5E3C}.tab{fill:#3a3028}
+    .w{fill:#fff;font-size:12px}.g{fill:#c9bfb0;font-size:11px}.n{fill:#BB5E3C;font-size:14px;font-weight:700}
+    .title{fill:#fff;font-size:17px;font-weight:700}
+  </style>
+  <rect width="920" height="680" class="bg"/>
+  <text x="460" y="30" text-anchor="middle" class="title">Panel Organizador  Torneo en vivo</text>
+  <text x="460" y="50" text-anchor="middle" class="g">/jurado/organizador?pin=v60organizador</text>
+
+  <rect x="30" y="65" width="860" height="36" fill="#3a3028" rx="8"/>
+  <rect class="tab-on" x="35" y="69" width="90" height="28" rx="6"/><text x="80" y="87" text-anchor="middle" class="w" font-size="10">Vista general</text>
+  <rect class="tab" x="130" y="69" width="72" height="28" rx="6"/><text x="166" y="87" text-anchor="middle" class="g" font-size="10">Recorrido</text>
+  <rect class="tab" x="207" y="69" width="60" height="28" rx="6"/><text x="237" y="87" text-anchor="middle" class="g" font-size="10">Torneo</text>
+  <rect class="tab" x="272" y="69" width="68" height="28" rx="6"/><text x="306" y="87" text-anchor="middle" class="g" font-size="10">Puntajes</text>
+  <rect class="tab" x="345" y="69" width="58" height="28" rx="6"/><text x="374" y="87" text-anchor="middle" class="g" font-size="10">Control</text>
+  <text x="420" y="87" class="g" font-size="10">Historial | Marca | Exportar</text>
+
+  <rect class="card" x="30" y="115" width="270" height="80"/>
+  <text x="50" y="138" class="n">`</text><text x="68" y="138" class="w" font-weight="600">Resumen en vivo</text>
+  <text x="50" y="158" class="g">Activos, eliminados, fase actual</text>
+  <text x="50" y="176" class="g">Ranking FIFA-style, refresh 3 s</text>
+
+  <rect class="card" x="320" y="115" width="270" height="80"/>
+  <text x="340" y="138" class="n">a</text><text x="358" y="138" class="w" font-weight="600">Publicar resultados</text>
+  <text x="340" y="158" class="g">Obligatorio para portal competidor</text>
+  <rect x="340" y="168" width="200" height="22" fill="#BB5E3C" rx="5"/><text x="440" y="183" text-anchor="middle" fill="#fff" font-size="10">Publicar resultados a competidores</text>
+
+  <rect class="card" x="610" y="115" width="280" height="80"/>
+  <text x="630" y="138" class="n">b</text><text x="648" y="138" class="w" font-weight="600">Enlaces jueces</text>
+  <text x="630" y="158" class="g">/jurado/juez?pin=&&amp;juez=1&N</text>
+  <text x="630" y="176" class="g">Un enlace por juez (m�vil)</text>
+
+  <rect class="card" x="30" y="210" width="420" height="200"/>
+  <text x="50" y="235" class="n">c</text><text x="68" y="235" class="w" font-weight="600">Pesta�a Control  Sorteo y avance</text>
+  <text x="50" y="258" class="g"><� Sorteo autom�tico: mezcla habilitados, define fase</text>
+  <text x="50" y="276" class="g">Modo duelos: parejas 1v1 � mayor total gana</text>
+  <text x="50" y="294" class="g">Modo ranking: top N avanzan por puntaje</text>
+  <text x="50" y="318" class="g">Botones: Avanzar ganadores | Cerrar grupo | Reiniciar puntajes</text>
+  <text x="50" y="336" class="g">Auto-avance: si todos calificados, avanza en 5 s</text>
+  <rect x="50" y="350" width="160" height="26" fill="#5F7F4E" rx="6"/><text x="130" y="367" text-anchor="middle" fill="#fff" font-size="10">Sorteo autom�tico</text>
+  <rect x="220" y="350" width="160" height="26" fill="#4B352A" rx="6"/><text x="300" y="367" text-anchor="middle" fill="#fff" font-size="10">Avanzar ganadores</text>
+
+  <rect class="card" x="470" y="210" width="420" height="200"/>
+  <text x="490" y="235" class="n">d</text><text x="508" y="235" class="w" font-weight="600">Fases del torneo (autom�ticas)</text>
+  <text x="490" y="260" class="g">2 comp. � Final directa</text>
+  <text x="490" y="278" class="g">34 � Semifinal � Final</text>
+  <text x="490" y="296" class="g">58 � Cuartos � Semifinal � Final</text>
+  <text x="490" y="314" class="g">916 � Octavos � & � Final</text>
+  <text x="490" y="332" class="g">1732 � Dieciseisavos � &</text>
+  <text x="490" y="350" class="g">33+ � Grupos (top 2) � eliminatoria</text>
+  <text x="490" y="375" class="g">Estado en bracket.fase: grupos | semifinal | final&</text>
+
+  <rect class="card" x="30" y="430" width="860" height="220"/>
+  <text x="50" y="455" class="n">e</text><text x="68" y="455" class="w" font-weight="600">C�lculo de puntaje (7 criterios SCA)</text>
+  <text x="50" y="478" class="g">Por juez: Aroma + Dulzor + Acidez + Sabor + Balance + Cuerpo + Limpieza de taza (escala 15 c/u)</text>
+  <text x="50" y="498" class="g">Subtotal juez Jn = suma de sus 7 criterios (m�x. 35 pts por juez)</text>
+  <text x="50" y="518" class="g">Total competidor = J1 + J2 + J3 (+ J4, J5 si configurados)</text>
+  <text x="50" y="545" class="w" font-weight="600">Flujo de datos al guardar juez:</text>
+  <text x="50" y="565" class="g">Juez guarda � POST pasaporte_config_save (clave calificaciones) � solo actualiza su columna jN</text>
+  <text x="50" y="585" class="g">Organizador lee la misma clave cada 3 s � ve matriz en Puntajes y ranking en Vista general</text>
+  <text x="50" y="605" class="g">Publicar � POST jurado_publish_resultados � copia a bracket.resultadosCompetidor (hist�rico por ronda)</text>
+  <text x="50" y="630" class="g">Competidor en /jurado/resultados solo ve rondas publicadas (nombre + c�dula)</text>
+</svg></div>
         <figcaption>Fig. 4 — Organizador: vista general, control, fases y cálculo de puntaje</figcaption>
       </figure>
       <table>
@@ -268,7 +563,49 @@
       <h2>6. Calificación en vivo — Juez</h2>
       <p><code>/jurado/juez?pin=v60sensorial&amp;juez=1</code> (móvil)</p>
       <figure class="figure">
-        <img src="imagenes/jurado-v60/05-panel-juez.svg" alt="Panel juez móvil con criterios SCA">
+        <div class="svg-inline" role="img" aria-label="Panel juez móvil con criterios SCA"><svg role="img" aria-label="Panel juez móvil con criterios SCA" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 720" font-family="Inter, Arial, sans-serif">
+  <style>
+    .phone{fill:#1a1410;stroke:#4a3d34;stroke-width:3;rx:24}
+    .card{fill:#2a221c;stroke:#4a3d34;rx:12}
+    .w{fill:#fff;font-size:13px}.g{fill:#c9bfb0;font-size:11px}.n{fill:#BB5E3C;font-weight:700;font-size:14px}
+    .btn{fill:#BB5E3C;rx:8}.field{fill:#3a3028;stroke:#5a4d44;rx:6}
+  </style>
+  <rect width="420" height="720" fill="#F5F0E8"/>
+  <text x="210" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#4B352A">Panel Juez (m�vil)</text>
+  <text x="210" y="48" text-anchor="middle" class="g" fill="#6B5346">/jurado/juez?pin=v60sensorial&amp;juez=1</text>
+
+  <rect class="phone" x="50" y="65" width="320" height="620"/>
+  <rect x="170" y="75" width="80" height="6" fill="#4a3d34" rx="3"/>
+
+  <text x="70" y="105" class="n">`</text><text x="88" y="105" fill="#fff" font-size="12" font-weight="600">Badge Juez 1</text>
+  <text x="70" y="125" class="g" fill="#c9bfb0">Primera vez: onboarding nombre + foto</text>
+
+  <rect class="card" x="65" y="140" width="290" height="55"/>
+  <text x="80" y="162" class="n">a</text><text x="98" y="162" fill="#fff" font-size="11" font-weight="600">Competidor a calificar</text>
+  <rect class="field" x="80" y="170" width="260" height="22"/><text x="90" y="185" fill="#c9bfb0" font-size="10"> Selecciona competidor  �</text>
+
+  <rect class="card" x="65" y="210" width="290" height="340"/>
+  <text x="80" y="232" class="n">b</text><text x="98" y="232" fill="#fff" font-size="11" font-weight="600">Criterios (dropdowns 15)</text>
+  <text x="80" y="252" class="g" fill="#c9bfb0">Aroma ������������� [4 �]</text>
+  <text x="80" y="272" class="g" fill="#c9bfb0">Dulzor ������������ [3 �]</text>
+  <text x="80" y="292" class="g" fill="#c9bfb0">Acidez ������������ [4 �]</text>
+  <text x="80" y="312" class="g" fill="#c9bfb0">Sabor ������������ [5 �]</text>
+  <text x="80" y="332" class="g" fill="#c9bfb0">Balance ���������� [4 �]</text>
+  <text x="80" y="352" class="g" fill="#c9bfb0">Cuerpo ����������� [3 �]</text>
+  <text x="80" y="372" class="g" fill="#c9bfb0">Limpieza taza ���� [4 �]</text>
+  <rect x="80" y="390" width="260" height="40" fill="#3a3028" rx="6"/>
+  <text x="210" y="408" text-anchor="middle" fill="#BB5E3C" font-size="12" font-weight="700">Tu subtotal: 27 pts</text>
+  <text x="210" y="422" text-anchor="middle" fill="#c9bfb0" font-size="9">M�x. 35 pts</text>
+  <text x="80" y="448" class="n">c</text><text x="98" y="448" fill="#fff" font-size="10">Notas opcionales (textarea)</text>
+  <rect class="field" x="80" y="455" width="260" height="35"/>
+
+  <rect class="btn" x="65" y="565" width="290" height="36"/>
+  <text x="210" y="588" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">d Guardar mi calificaci�n</text>
+
+  <text x="70" y="625" class="n">e</text><text x="88" y="625" fill="#c9bfb0" font-size="10">Solo guarda TU columna (j1, j2&)</text>
+  <text x="70" y="642" fill="#c9bfb0" font-size="10">Organizador ve estado  por juez</text>
+  <text x="70" y="659" fill="#c9bfb0" font-size="10">No puedes ver/editar otros jueces</text>
+</svg></div>
         <figcaption>Fig. 5 — Juez: selector, 7 criterios, subtotal, guardar columna jN</figcaption>
       </figure>
       <table>
@@ -287,7 +624,54 @@
       <h2>7. Portal resultados — Competidor</h2>
       <p><code>/jurado/resultados</code></p>
       <figure class="figure">
-        <img src="imagenes/jurado-v60/06-portal-resultados.svg" alt="Portal resultados login y estados">
+        <div class="svg-inline" role="img" aria-label="Portal resultados login y estados"><svg role="img" aria-label="Portal resultados login y estados" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" font-family="Inter, Arial, sans-serif">
+  <style>
+    .bg{fill:#F5F0E8}.card{fill:#FFFDF9;stroke:#C9BFB0;rx:10}
+    .t{font-size:14px;fill:#4B352A;font-weight:600}.s{font-size:12px;fill:#6B5346}
+    .n{fill:#BB5E3C;font-size:14px;font-weight:700}
+    .ok{fill:#5F7F4E}.block{fill:#E8D5D0}
+  </style>
+  <rect width="900" height="560" class="bg"/>
+  <text x="450" y="30" text-anchor="middle" font-size="18" font-weight="700" fill="#4B352A">Portal Resultados  Competidor</text>
+  <text x="450" y="50" text-anchor="middle" class="s">/jurado/resultados</text>
+
+  <rect class="card" x="40" y="70" width="380" height="220"/>
+  <text x="60" y="95" class="n">`</text><text x="78" y="95" class="t">Login</text>
+  <text x="60" y="118" class="s">Nombre (como en inscripci�n)</text>
+  <rect x="60" y="125" width="300" height="28" fill="#E9E6DD" stroke="#4B352A"/>
+  <text x="60" y="165" class="s">C�dula / documento</text>
+  <rect x="60" y="172" width="300" height="28" fill="#E9E6DD" stroke="#4B352A"/>
+  <rect x="60" y="215" width="160" height="30" fill="#4B352A" rx="6"/>
+  <text x="140" y="235" text-anchor="middle" fill="#fff" font-size="11">Ver mis resultados</text>
+  <text x="60" y="265" class="s">POST jurado_resultados_login</text>
+
+  <rect class="card block" x="450" y="70" width="410" height="100"/>
+  <text x="470" y="95" class="n">a</text><text x="488" y="95" class="t">Antes de publicar  bloqueado</text>
+  <text x="470" y="118" class="s">�El organizador a�n no ha publicado&�</text>
+  <text x="470" y="138" class="s">Live scores NO visibles aqu�</text>
+  <text x="470" y="158" class="s">Organizador o Admin debe pulsar Publicar</text>
+
+  <rect class="card" x="450" y="190" width="410" height="250"/>
+  <text x="470" y="215" class="n">b</text><text x="488" y="215" class="t">Despu�s de publicar</text>
+  <text x="470" y="238" class="s">Foto + nombre + estado (activo, eliminado, podio&)</text>
+  <text x="470" y="258" class="s">Selector de ronda si hay varias publicadas</text>
+  <text x="470" y="285" class="s">Total puntos � desglose por juez y criterio</text>
+  <text x="470" y="305" class="s">Notas del jurado � rival en duelos (P1 archivo)</text>
+  <text x="470" y="330" class="s">Auto-refresh cada 8 segundos</text>
+  <rect x="470" y="345" width="120" height="24" fill="#5F7F4E" rx="5"/><text x="530" y="361" text-anchor="middle" fill="#fff" font-size="10">Ronda 1</text>
+  <rect x="600" y="345" width="120" height="24" fill="#E9E6DD" stroke="#4B352A" rx="5"/><text x="660" y="361" text-anchor="middle" class="s">Semifinal</text>
+  <text x="470" y="400" class="s">Primera Preliminar archivada: datos de preliminar-1-results.js</text>
+
+  <rect x="40" y="310" width="380" height="220" class="card"/>
+  <text x="60" y="335" class="n">c</text><text x="78" y="335" class="t">Auditor�a (Admin)</text>
+  <text x="60" y="358" class="s">Cada login � hoja Resultados accesos</text>
+  <text x="60" y="378" class="s">Correo al organizador (m�x. 1 / 30 min)</text>
+  <text x="60" y="398" class="s">Admin � Accesos al portal de resultados</text>
+  <text x="60" y="430" class="n">d</text><text x="78" y="430" class="t">White-label</text>
+  <text x="60" y="453" class="s">?evt=slug filtra inscritos y resultados del torneo cliente</text>
+  <text x="60" y="473" class="s">Misma l�gica de publicaci�n por tenant</text>
+  <text x="60" y="505" class="s">URL: /jurado/resultados?evt=slug-del-cliente</text>
+</svg></div>
         <figcaption>Fig. 6 — Login, bloqueo sin publicar, vista publicada</figcaption>
       </figure>
       <table>
