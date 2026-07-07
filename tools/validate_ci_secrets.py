@@ -208,7 +208,10 @@ def validate_oauth_token_json(raw: str) -> tuple[bool, str]:
 def check_ci_apps_script_secrets() -> tuple[bool, str]:
     import os
 
-    ok_oauth, msg_oauth = validate_oauth_token_json(os.environ.get("APPS_SCRIPT_OAUTH_TOKEN", ""))
+    oauth_raw = os.environ.get("OAUTH_SCRIPT_TOKEN", "") or os.environ.get(
+        "APPS_SCRIPT_OAUTH_TOKEN", ""
+    )
+    ok_oauth, msg_oauth = validate_oauth_token_json(oauth_raw)
     if not ok_oauth:
         return False, msg_oauth
 

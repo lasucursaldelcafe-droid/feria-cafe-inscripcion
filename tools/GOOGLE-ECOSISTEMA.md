@@ -30,6 +30,17 @@ Formularios web (Firebase Hosting)
 py tools/automatizar_google.py mantenimiento
 ```
 
+**Windows (doble clic):** `AUTOMATIZAR.bat` en la raíz — app gráfica o corrección automática de faltantes.
+
+**Auditar / corregir pendientes:**
+
+```powershell
+py tools/automatizar_faltantes.py --auditar --reporte
+py tools/automatizar_faltantes.py --aplicar
+py tools/automatizar_google.py faltantes
+py tools/feria_automatizador_gui.py
+```
+
 Equivalente a `automatizar_manual.py --todo`: Apps Script + sheets-config + secretos GitHub + Firebase + verificación.
 
 ### Todos los modos

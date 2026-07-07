@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Reporte faltantes — Feria Café</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:960px;margin:2rem auto;padding:0 1rem;color:#4B352A}
+h1{border-bottom:3px solid #BB5E3C;padding-bottom:.5rem}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{border:1px solid #ddd;padding:.5rem;text-align:left;vertical-align:top}
+th{background:#4B352A;color:#fff}
+.actions{margin:1.5rem 0;padding:1rem;background:#f5f0e8;border-radius:8px}
+code{background:#eee;padding:.1rem .3rem;border-radius:4px;font-size:.85rem}
+</style></head><body>
+<h1>Reporte de faltantes</h1>
+<p>Generado: 2026-07-07T18:54:44.589120+00:00 UTC · <a href="https://la-sucursal-del-cafe.web.app">https://la-sucursal-del-cafe.web.app</a></p>
+<div class="actions">
+<strong>Automatizar en Windows:</strong> doble clic en <code>AUTOMATIZAR.bat</code><br>
+<strong>Corregir todo:</strong> <code>py tools/automatizar_faltantes.py --aplicar</code><br>
+<strong>App gráfica:</strong> <code>py tools/feria_automatizador_gui.py</code>
+</div>
+<table>
+<thead><tr><th>Estado</th><th>Ítem</th><th>Detalle</th><th>Comando</th><th>Enlace</th></tr></thead>
+<tbody>
+<tr><td style='color:#5F7F4E;font-weight:600'>OK</td><td>URL Apps Script (local)</td><td>https://script.google.com/macros/s/AKfycbyiLN6ms5dSbm6f1ZmZs…</td><td>—</td><td>—</td></tr><tr><td style='color:#5F7F4E;font-weight:600'>OK</td><td>sheets-config.js en producción</td><td>https://la-sucursal-del-cafe.web.app</td><td>—</td><td>—</td></tr><tr><td style='color:#5F7F4E;font-weight:600'>OK</td><td>Apps Script /exec</td><td>health OK</td><td>—</td><td>—</td></tr><tr><td style='color:#C47A2C;font-weight:600'>WARN</td><td>Token OAuth Apps Script</td><td>Requiere autorizar Google en el navegador (una vez)</td><td><code>py tools/automatizar_faltantes.py --oauth</code></td><td><a href="https://script.google.com/home">https://script.google.com/home</a></td></tr><tr><td style='color:#C47A2C;font-weight:600'>WARN</td><td>APPS_SCRIPT_ID</td><td>Vacío — necesario para CI Apps Script</td><td><code>py tools/_find_script_id.py</code></td><td><a href="https://script.google.com/home">https://script.google.com/home</a></td></tr><tr><td style='color:#6B5346;font-weight:600'>MANUAL</td><td>GOOGLE_SHEET_ID en tools/.env</td><td>Opcional si el script ya está vinculado a la hoja</td><td><code># Pegar ID en tools/.env o GUI → campo Hoja</code></td><td>—</td></tr><tr><td style='color:#5F7F4E;font-weight:600'>OK</td><td>Cuenta servicio Firebase</td><td>firebase-hosting-sa.json</td><td>—</td><td>—</td></tr><tr><td style='color:#5F7F4E;font-weight:600'>OK</td><td>GitHub CLI</td><td>gh disponible</td><td>—</td><td>—</td></tr><tr><td style='color:#C47A2C;font-weight:600'>WARN</td><td>Secretos GitHub (CI)</td><td>Sincronizar tras OAuth + SA</td><td><code>py tools/setup_github_ci.py && py tools/setup_github_ci.py --apps-script</code></td><td><a href="https://github.com/lasucursaldelcafe-droid/feria-cafe-inscripcion/settings/secrets/actions">https://github.com/lasucursaldelcafe-droid/feria-cafe-inscripcion/settings/secrets/actions</a></td></tr><tr><td style='color:#C47A2C;font-weight:600'>WARN</td><td>Google Wallet (opcional)</td><td>generateWalletPass → 404</td><td><code>py tools/setup_google_wallet.py --auto</code></td><td><a href="https://pay.google.com/business/console">https://pay.google.com/business/console</a></td></tr><tr><td style='color:#5F7F4E;font-weight:600'>OK</td><td>tools/.env</td><td>/workspace/tools/.env</td><td>—</td><td>—</td></tr>
+</tbody></table>
+<p><a href="informe-conectividad-100.html">Informe conectividad completo</a></p>
+</body></html>

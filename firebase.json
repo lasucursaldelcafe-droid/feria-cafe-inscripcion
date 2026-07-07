@@ -14,7 +14,10 @@
       ".git/**",
       ".github/**",
       "tools/**",
-      "js/firebase-config.js"
+      "js/firebase-config.js",
+      "**/*.sh",
+      "AUTOMATIZAR.bat",
+      "AUTOMATIZAR.ps1"
     ],
     "redirects": [
       {

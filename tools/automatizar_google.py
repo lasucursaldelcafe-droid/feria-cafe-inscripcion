@@ -36,6 +36,9 @@ SCRIPTS: dict[str, list[str]] = {
     "verificar": ["automatizar_manual.py", "--verificar"],
     "sin-sa": ["automatizar_todo.py", "--sin-cuenta-servicio"],
     "urls": ["automatizar_manual.py", "--abrir-urls"],
+    "faltantes": ["automatizar_faltantes.py", "--aplicar", "--reporte"],
+    "faltantes-audit": ["automatizar_faltantes.py", "--auditar", "--reporte"],
+    "gui": ["feria_automatizador_gui.py"],
 }
 
 DOCS = TOOLS_DIR / "GOOGLE-ECOSISTEMA.md"
@@ -63,6 +66,9 @@ def print_help_table() -> None:
         ("verificar", "Comprobar endpoints y configuración"),
         ("sin-sa", "Configurar sin JSON de cuenta de servicio GCP"),
         ("urls", "Abrir consolas Google/Firebase/GitHub en el navegador"),
+        ("faltantes", "Auditar y corregir faltantes automáticamente (+ reporte HTML)"),
+        ("faltantes-audit", "Solo auditar faltantes y generar reporte"),
+        ("gui", "App Windows (tkinter) — automatizador gráfico"),
     ]
     for name, desc in rows:
         print(f"  {name:<16} {desc}")

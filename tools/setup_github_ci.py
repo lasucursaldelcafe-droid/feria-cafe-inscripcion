@@ -314,8 +314,11 @@ def sync_apps_script_secrets(*, dry_run: bool = False) -> bool:
         return False
 
     oauth_text = OAUTH_TOKEN_PATH.read_text(encoding="utf-8")
-    if not gh_secret_set("APPS_SCRIPT_OAUTH_TOKEN", oauth_text):
+    # El workflow deploy-apps-script.yml lee secrets.OAUTH_SCRIPT_TOKEN
+    if not gh_secret_set("OAUTH_SCRIPT_TOKEN", oauth_text):
         return False
+    # Alias legacy (documentación antigua)
+    gh_secret_set("APPS_SCRIPT_OAUTH_TOKEN", oauth_text)
     if not gh_secret_set("APPS_SCRIPT_ID", script_id):
         return False
     if not gh_secret_set("SHEETS_WEB_APP_URL", sheets_url):
