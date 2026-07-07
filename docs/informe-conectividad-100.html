@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informe conectividad 100% — La Sucursal del Café</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --coffee-deep: #4B352A;
+      --coffee-warm: #BB5E3C;
+      --cream: #E9E6DD;
+      --cream-light: #FFFDF9;
+      --green: #5F7F4E;
+      --amber: #C47A2C;
+      --text-muted: #6B5346;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Karla, system-ui, sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.55;
+      color: var(--coffee-deep);
+      background: linear-gradient(180deg, #f5f0e8 0%, var(--cream-light) 120px);
+    }
+    .wrap { max-width: 58rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    header {
+      text-align: center;
+      padding: 2rem 1rem;
+      margin-bottom: 1.5rem;
+      background: var(--coffee-deep);
+      color: var(--cream-light);
+      border-radius: 1rem;
+    }
+    header h1 {
+      font-family: Montserrat, sans-serif;
+      font-size: clamp(1.25rem, 4vw, 1.75rem);
+      margin: 0 0 0.5rem;
+    }
+    header p { margin: 0.2rem 0; opacity: 0.9; font-size: 0.9rem; }
+    .badges { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-top: 1rem; }
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+    }
+    .badge.ok { background: var(--green); color: #fff; }
+    .badge.warn { background: var(--amber); color: #fff; }
+    nav.toc {
+      background: #fff;
+      border: 1px solid rgba(75,53,42,0.12);
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+    }
+    nav.toc h2 { margin: 0 0 0.5rem; font-size: 0.95rem; font-family: Montserrat, sans-serif; }
+    nav.toc ul { margin: 0; padding-left: 1.2rem; columns: 2; column-gap: 1.5rem; }
+    nav.toc a { color: var(--coffee-warm); text-decoration: none; }
+    nav.toc a:hover { text-decoration: underline; }
+    @media (max-width: 600px) { nav.toc ul { columns: 1; } }
+    section { margin-bottom: 2.5rem; }
+    h2 {
+      font-family: Montserrat, sans-serif;
+      font-size: 1.2rem;
+      margin: 0 0 0.75rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 2px solid var(--coffee-warm);
+    }
+    h3 { font-size: 1rem; margin: 1.25rem 0 0.5rem; color: var(--coffee-warm); }
+    p { margin: 0.5rem 0; }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+    .summary-card {
+      background: #fff;
+      border-radius: 0.65rem;
+      padding: 0.85rem;
+      border: 1px solid rgba(75,53,42,0.1);
+      text-align: center;
+    }
+    .summary-card strong { display: block; font-size: 1.4rem; font-family: Montserrat, sans-serif; }
+    .summary-card span { font-size: 0.8rem; color: var(--text-muted); }
+    .table-wrap {
+      overflow-x: auto;
+      margin: 1rem 0;
+      border-radius: 0.65rem;
+      border: 1px solid rgba(75,53,42,0.12);
+      background: #fff;
+      box-shadow: 0 2px 12px rgba(75,53,42,0.05);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      min-width: 720px;
+    }
+    th, td {
+      padding: 0.55rem 0.65rem;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid rgba(75,53,42,0.08);
+    }
+    th {
+      background: var(--coffee-deep);
+      color: var(--cream-light);
+      font-family: Montserrat, sans-serif;
+      font-weight: 600;
+      font-size: 0.78rem;
+      position: sticky;
+      top: 0;
+    }
+    tr:nth-child(even) td { background: rgba(233,230,221,0.35); }
+    .st-ok { color: var(--green); font-weight: 700; }
+    .st-warn { color: var(--amber); font-weight: 700; }
+    code, pre {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.78rem;
+      background: rgba(75,53,42,0.06);
+      border-radius: 0.35rem;
+    }
+    code { padding: 0.1rem 0.35rem; word-break: break-all; }
+    pre {
+      padding: 0.85rem 1rem;
+      overflow-x: auto;
+      border: 1px solid rgba(75,53,42,0.1);
+    }
+    a { color: var(--coffee-warm); }
+    .note {
+      background: rgba(187,94,60,0.08);
+      border-left: 4px solid var(--coffee-warm);
+      padding: 0.75rem 1rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1rem 0;
+      font-size: 0.88rem;
+    }
+    .checklist { list-style: none; padding: 0; margin: 0; }
+    .checklist li {
+      padding: 0.4rem 0 0.4rem 1.6rem;
+      position: relative;
+      border-bottom: 1px dashed rgba(75,53,42,0.12);
+    }
+    .checklist li::before {
+      content: "☐";
+      position: absolute;
+      left: 0;
+      color: var(--coffee-warm);
+    }
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(75,53,42,0.12);
+    }
+    @media print {
+      body { background: #fff; }
+      .table-wrap { box-shadow: none; }
+      th { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Informe de conectividad al 100%</h1>
+      <p>La Sucursal del Café — Ecosistema Feria + V60 + Pasaporte</p>
+      <p><a href="https://la-sucursal-del-cafe.web.app" style="color:#E9E6DD">la-sucursal-del-cafe.web.app</a> · julio 2026</p>
+      <div class="badges">
+        <span class="badge ok">Hosting OK</span>
+        <span class="badge ok">Apps Script OK</span>
+        <span class="badge ok">Formularios OK</span>
+        <span class="badge warn">Wallet pendiente</span>
+        <span class="badge warn">CI Apps Script opcional</span>
+      </div>
+    </header>
+
+    <nav class="toc">
+      <h2>Contenido</h2>
+      <ul>
+        <li><a href="#resumen">Resumen</a></li>
+        <li><a href="#maestro">Cuadro maestro</a></li>
+        <li><a href="#secretos">Secretos GitHub</a></li>
+        <li><a href="#env">tools/.env</a></li>
+        <li><a href="#modulos">Enlaces por módulo</a></li>
+        <li><a href="#planb">Plan B sin main</a></li>
+        <li><a href="#evento">Checklist evento</a></li>
+      </ul>
+    </nav>
+
+    <section id="resumen">
+      <h2>Resumen ejecutivo</h2>
+      <div class="summary-grid">
+        <div class="summary-card"><strong class="st-ok">✓</strong><span>Firebase Hosting</span></div>
+        <div class="summary-card"><strong class="st-ok">✓</strong><span>Apps Script /exec</span></div>
+        <div class="summary-card"><strong class="st-ok">✓</strong><span>Pasaporte + Jurado</span></div>
+        <div class="summary-card"><strong class="st-warn">!</strong><span>Google Wallet</span></div>
+        <div class="summary-card"><strong class="st-warn">!</strong><span>CI Code.gs OAuth</span></div>
+      </div>
+      <p>La auditoría <code>verificar_todo.py</code> confirma que el sitio, el backend Sheets/Apps Script, pasaporte, jurado V60 y panel admin responden correctamente en producción. Lo pendiente es <strong>opcional o de automatización</strong>: Google Wallet (Cloud Function 404), deploy automático de <code>Code.gs</code> vía GitHub sin OAuth, y permisos Firestore.</p>
+      <div class="note">
+        <strong>URL canónica Apps Script</strong> (usar en secretos y <code>sheets-config.js</code>):<br>
+        <code>https://script.google.com/macros/s/AKfycbyiLN6ms5dSbm6f1ZmZsR7ktqWLFGxGJd5zAnhZlmX3d0lpKFx1AhLXMXWfnF8txsp0/exec</code>
+      </div>
+    </section>
+
+    <section id="maestro">
+      <h2>Cuadro maestro — qué conectar</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Componente</th>
+              <th>Estado</th>
+              <th>Enlace configuración</th>
+              <th>Key / secreto / valor</th>
+              <th>Plan B (sin push main)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Firebase Hosting</td>
+              <td class="st-ok">OK</td>
+              <td><a href="https://console.firebase.google.com/project/la-sucursal-del-cafe/hosting">Firebase Hosting</a></td>
+              <td><code>FIREBASE_SERVICE_ACCOUNT</code> = JSON Admin SDK completo</td>
+              <td><code>py tools/deploy_firebase.py</code></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>URL Apps Script</td>
+              <td class="st-ok">OK</td>
+              <td><a href="https://script.google.com/home">Apps Script</a> → Implementar</td>
+              <td><code>SHEETS_WEB_APP_URL</code> = URL <code>/exec</code></td>
+              <td><code>conectar_sheets.py --configurar-url</code></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Backend Code.gs</td>
+              <td class="st-ok">Prod OK</td>
+              <td>Editor desde hoja Sheets</td>
+              <td><code>APPS_SCRIPT_ID</code> en <code>tools/.env</code></td>
+              <td>Pegar <code>Code.gs</code> manual + Implementar</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>CI deploy Apps Script</td>
+              <td class="st-warn">Pendiente</td>
+              <td><a href="https://github.com/lasucursaldelcafe-droid/feria-cafe-inscripcion/settings/secrets/actions">GitHub Secrets</a></td>
+              <td><code>OAUTH_SCRIPT_TOKEN</code> = JSON token OAuth</td>
+              <td><code>setup_admin.py --sin-firebase</code></td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Google Sheets</td>
+              <td class="st-ok">OK</td>
+              <td><a href="https://sheets.google.com">sheets.google.com</a></td>
+              <td><code>GOOGLE_SHEET_ID</code> en <code>tools/.env</code></td>
+              <td><code>py tools/modo_sin_json.py</code></td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Encabezados hojas</td>
+              <td>Manual</td>
+              <td>Apps Script → <code>sincronizarEncabezados()</code></td>
+              <td>—</td>
+              <td>Ejecutar función en editor</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>SA Sheets (opc.)</td>
+              <td>Opcional</td>
+              <td><a href="https://console.cloud.google.com/iam-admin/serviceaccounts?project=la-sucursal-del-cafe">GCP SA</a></td>
+              <td><code>feria-sheets-sa.json</code></td>
+              <td>Modo sin JSON</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>GitHub Hosting CI</td>
+              <td class="st-ok">OK</td>
+              <td><a href="https://github.com/lasucursaldelcafe-droid/feria-cafe-inscripcion/actions/workflows/deploy-firebase.yml">Workflow</a></td>
+              <td>Push <code>main</code> o <code>gh workflow run</code></td>
+              <td><code>automatizar_manual.py --deploy</code></td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td>Panel admin</td>
+              <td class="st-ok">API OK</td>
+              <td><a href="https://la-sucursal-del-cafe.web.app/admin">/admin</a></td>
+              <td><code>ALLOWED_ADMIN_EMAIL</code></td>
+              <td>No compartir URL</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>Pasaporte</td>
+              <td class="st-ok">OK</td>
+              <td><a href="https://la-sucursal-del-cafe.web.app/pasaporte">/pasaporte</a></td>
+              <td>Apps Script + Admin</td>
+              <td>Alta manual en admin</td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td>Expositor</td>
+              <td class="st-ok">OK</td>
+              <td><a href="https://la-sucursal-del-cafe.web.app/expositor">/expositor</a></td>
+              <td>Código desde Admin → Stands</td>
+              <td>Crear stand en admin</td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td>Jurado V60</td>
+              <td class="st-ok">OK</td>
+              <td><a href="https://la-sucursal-del-cafe.web.app/jurado-v60">/jurado-v60</a></td>
+              <td>PINs: <code>v60organizador</code>, <code>v60sensorial</code></td>
+              <td>Ver JURADO-V60-INSTRUCCIONES.md</td>
+            </tr>
+            <tr>
+              <td>13</td>
+              <td>Google Wallet</td>
+              <td class="st-warn">404</td>
+              <td><a href="https://pay.google.com/business/console">Wallet Console</a></td>
+              <td><code>GOOGLE_WALLET_ISSUER_ID=3388000000023162431</code></td>
+              <td><code>setup_google_wallet.py --auto</code></td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td>Firestore rules</td>
+              <td class="st-warn">IAM</td>
+              <td><a href="https://console.firebase.google.com/project/la-sucursal-del-cafe/firestore">Firestore</a></td>
+              <td>Rol <strong>Firebase Rules Admin</strong> a SA</td>
+              <td>No bloquea evento</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="secretos">
+      <h2>Secretos GitHub Actions</h2>
+      <p>Consola: <a href="https://github.com/lasucursaldelcafe-droid/feria-cafe-inscripcion/settings/secrets/actions">Settings → Secrets → Actions</a></p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Secreto</th><th>Obligatorio</th><th>Qué escribir</th><th>Dónde obtener</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>FIREBASE_SERVICE_ACCOUNT</code></td>
+              <td>Sí</td>
+              <td>JSON completo en una pieza (<code>{ "type": "service_account", ... }</code>)</td>
+              <td><a href="https://console.firebase.google.com/project/la-sucursal-del-cafe/settings/serviceaccounts/adminsdk">Firebase → Service accounts → Generate key</a></td>
+            </tr>
+            <tr>
+              <td><code>SHEETS_WEB_APP_URL</code></td>
+              <td>Recomendado</td>
+              <td>Solo URL <code>https://script.google.com/macros/s/…/exec</code></td>
+              <td><code>tools/CANONICAL_SHEETS_URL.txt</code></td>
+            </tr>
+            <tr>
+              <td><code>OAUTH_SCRIPT_TOKEN</code></td>
+              <td>CI Apps Script</td>
+              <td>Contenido de <code>.oauth-script-token.json</code></td>
+              <td><code>py tools/setup_admin.py --sin-firebase</code></td>
+            </tr>
+            <tr>
+              <td><code>APPS_SCRIPT_ID</code></td>
+              <td>Opcional</td>
+              <td>ID del script (ej. <code>1AbC…</code>)</td>
+              <td>Apps Script → ⚙ → ID del proyecto</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <pre>gh secret set FIREBASE_SERVICE_ACCOUNT &lt; tools/credentials/firebase-hosting-sa.json
+gh secret set SHEETS_WEB_APP_URL --body "$(cat tools/CANONICAL_SHEETS_URL.txt)"
+gh secret set OAUTH_SCRIPT_TOKEN &lt; tools/credentials/.oauth-script-token.json</pre>
+    </section>
+
+    <section id="env">
+      <h2>Variables <code>tools/.env</code> (local)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Variable</th><th>Valor ejemplo</th><th>Uso</th></tr></thead>
+          <tbody>
+            <tr><td><code>SHEETS_WEB_APP_URL</code></td><td>URL /exec canónica</td><td>Formularios, admin, pasaporte</td></tr>
+            <tr><td><code>APPS_SCRIPT_ID</code></td><td>ID del proyecto</td><td>Deploy API</td></tr>
+            <tr><td><code>GOOGLE_SHEET_ID</code></td><td>ID de la hoja</td><td>Scripts Python Sheets</td></tr>
+            <tr><td><code>ALLOWED_ADMIN_EMAIL</code></td><td>lasucursaldelcafe@gmail.com</td><td>Referencia admin</td></tr>
+            <tr><td><code>GOOGLE_WALLET_ISSUER_ID</code></td><td>3388000000023162431</td><td>Google Wallet</td></tr>
+            <tr><td><code>FIREBASE_PROJECT</code></td><td>la-sucursal-del-cafe</td><td>Deploy</td></tr>
+            <tr><td><code>FIREBASE_SERVICE_ACCOUNT_JSON</code></td><td>ruta al JSON local</td><td>Deploy sin GitHub</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="modulos">
+      <h2>Enlaces por módulo</h2>
+      <h3>Sitio público</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Módulo</th><th>URL</th></tr></thead>
+          <tbody>
+            <tr><td>Inicio</td><td><a href="https://la-sucursal-del-cafe.web.app/">/</a></td></tr>
+            <tr><td>Inscripción feria</td><td><a href="https://la-sucursal-del-cafe.web.app/inscripcion">/inscripcion</a></td></tr>
+            <tr><td>V60 Championship</td><td><a href="https://la-sucursal-del-cafe.web.app/competencia">/competencia</a></td></tr>
+            <tr><td>Stands</td><td><a href="https://la-sucursal-del-cafe.web.app/stands">/stands</a></td></tr>
+            <tr><td>Marcas</td><td><a href="https://la-sucursal-del-cafe.web.app/marcas">/marcas</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Pasaporte y fidelización</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Módulo</th><th>URL</th></tr></thead>
+          <tbody>
+            <tr><td>Pasaporte</td><td><a href="https://la-sucursal-del-cafe.web.app/pasaporte">/pasaporte</a></td></tr>
+            <tr><td>Escanear</td><td><a href="https://la-sucursal-del-cafe.web.app/escanear-pasaporte">/escanear-pasaporte</a></td></tr>
+            <tr><td>Fidelización</td><td><a href="https://la-sucursal-del-cafe.web.app/fidelizacion">/fidelizacion</a></td></tr>
+            <tr><td>Mi tarjeta (Wallet)</td><td><a href="https://la-sucursal-del-cafe.web.app/mi-tarjeta">/mi-tarjeta</a> ⚠️</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Jurado V60</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Rol</th><th>URL</th></tr></thead>
+          <tbody>
+            <tr><td>Consola</td><td><a href="https://la-sucursal-del-cafe.web.app/jurado-v60">/jurado-v60</a></td></tr>
+            <tr><td>Config</td><td><a href="https://la-sucursal-del-cafe.web.app/jurado/config?pin=v60organizador">/jurado/config</a></td></tr>
+            <tr><td>Organizador</td><td><a href="https://la-sucursal-del-cafe.web.app/jurado/organizador?pin=v60organizador">/jurado/organizador</a></td></tr>
+            <tr><td>Juez 1</td><td><a href="https://la-sucursal-del-cafe.web.app/jurado/juez?pin=v60sensorial&juez=1">/jurado/juez?juez=1</a></td></tr>
+            <tr><td>Resultados</td><td><a href="https://la-sucursal-del-cafe.web.app/jurado/resultados">/jurado/resultados</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Administración</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Panel</th><th>URL</th></tr></thead>
+          <tbody>
+            <tr><td>Admin</td><td><a href="https://la-sucursal-del-cafe.web.app/admin">/admin</a></td></tr>
+            <tr><td>Expositor</td><td><a href="https://la-sucursal-del-cafe.web.app/expositor">/expositor</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="planb">
+      <h2>Plan B — sin push a <code>main</code></h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Objetivo</th><th>Comando / acción</th></tr></thead>
+          <tbody>
+            <tr><td>Publicar sitio</td><td><code>py tools/deploy_firebase.py</code></td></tr>
+            <tr><td>Actualizar backend</td><td>Pegar Code.gs en Apps Script → Implementar</td></tr>
+            <tr><td>URL local</td><td><code>py tools/conectar_sheets.py --configurar-url "…/exec"</code></td></tr>
+            <tr><td>Mantenimiento total</td><td><code>py tools/automatizar_google.py mantenimiento</code></td></tr>
+            <tr><td>Verificar</td><td><code>python3 tools/verificar_todo.py</code></td></tr>
+            <tr><td>Relanzar CI</td><td><code>gh workflow run "Deploy Firebase Hosting"</code></td></tr>
+            <tr><td>Abrir consolas</td><td><code>py tools/automatizar_google.py urls</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="evento">
+      <h2>Checklist día del evento</h2>
+      <ul class="checklist">
+        <li><code>verificar_todo.py</code> sin fallos críticos</li>
+        <li>Formulario inscripción escribe en Sheets</li>
+        <li>Admin carga KPIs en /admin</li>
+        <li>Competidores Habilitado = Sí en hoja Competencia</li>
+        <li>Organizador jurado con PIN correcto</li>
+        <li>Enlaces juez probados en móvil</li>
+        <li>Operadores pasaporte con PIN activo</li>
+        <li>Expositores con código en /expositor</li>
+      </ul>
+    </section>
+
+    <footer>
+      La Sucursal del Café · Repo: lasucursaldelcafe-droid/feria-cafe-inscripcion ·
+      <a href="informe-conectividad-100.md">Versión Markdown</a> ·
+      <a href="informe-plataforma-jurado-v60.html">Informe jurado V60</a>
+    </footer>
+  </div>
+</body>
+</html>
