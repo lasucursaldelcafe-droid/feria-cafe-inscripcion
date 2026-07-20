@@ -602,7 +602,8 @@
       function renderCupo(count, options) {
         options = options || {};
         const restantes = Math.max(0, CUPO_MAX - count);
-        cupoStatus.textContent = "Cupos registrados: " + count + " de " + CUPO_MAX + " (" + restantes + " disponibles)";
+        const edicionLabel = EVENTO_PRELIMINAR || "Preliminar 2";
+        cupoStatus.textContent = edicionLabel + " · Cupos registrados: " + count + " de " + CUPO_MAX + " (" + restantes + " disponibles)";
         const lleno = count >= CUPO_MAX;
         const bloquear = lleno && !options.fetchError;
         btnSubmit.disabled = bloquear;
@@ -640,6 +641,8 @@
           FormSubmit.fetchCupoCount().then(function (data) {
             if (data && data.ok && typeof data.count === "number") {
               renderCupo(data.count);
+            } else if (data && data.ok && typeof data.totalFilasHoja === "number" && data.totalFilasHoja > 0 && typeof data.count !== "number") {
+              renderCupo(0, { fetchError: true });
             } else {
               renderCupo(0, { fetchError: true });
             }

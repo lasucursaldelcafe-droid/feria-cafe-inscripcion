@@ -160,8 +160,24 @@
     });
   }
 
+  function dedupeCompetenciaRowsByIdentity(rows) {
+    var seen = {};
+    var out = [];
+    (rows || []).forEach(function (row) {
+      var doc = String(row.Documento || row.documento || '').replace(/\D/g, '');
+      var email = String(row.Correo || row.correo || '').trim().toLowerCase();
+      var key = doc || email;
+      if (key && seen[key]) return;
+      if (key) seen[key] = true;
+      out.push(row);
+    });
+    return out;
+  }
+
   function countCompetenciaEditionRows(rows, editionKey) {
-    return filterCompetenciaByEdition(filterValidCompetenciaRows(rows), editionKey).length;
+    return dedupeCompetenciaRowsByIdentity(
+      filterCompetenciaByEdition(filterValidCompetenciaRows(rows), editionKey)
+    ).length;
   }
 
   function ensureCompetenciaEditionVisible(data) {
@@ -182,10 +198,10 @@
   }
 
   function pickCompetenciaRows(data) {
-    return filterCompetenciaByEdition(
+    return dedupeCompetenciaRowsByIdentity(filterCompetenciaByEdition(
       filterValidCompetenciaRows(pickRows(data || lastDashboardData || {}, 'allCompetencia')),
       activeCompetenciaEdition
-    );
+    ));
   }
 
   function getCompetenciaCupoMax() {
@@ -196,7 +212,7 @@
 
   function computeCompetenciaEditionCupo(rows, editionKey) {
     var key = editionKey === 'all' ? 'evento2' : editionKey;
-    var filtered = filterCompetenciaByEdition(rows, key);
+    var filtered = dedupeCompetenciaRowsByIdentity(filterCompetenciaByEdition(rows, key));
     var max = getCompetenciaCupoMax();
     var count = filtered.length;
     return {

@@ -124,11 +124,14 @@ function doGet(e) {
   var params = e && e.parameter ? e.parameter : {};
   if (params.action === 'cupo') {
     var count = getCompetenciaCount_();
+    var totalFilas = getCompetenciaRowCountAll_();
     return jsonResponse({
       ok: true,
       formType: 'competencia',
       eventoActivo: ACTIVE_COMPETENCIA_EVENTO,
+      edicion: 'Preliminar 2',
       count: count,
+      totalFilasHoja: totalFilas,
       max: CUPO_MAX_COMPETENCIA,
       disponibles: Math.max(0, CUPO_MAX_COMPETENCIA - count),
       completo: count >= CUPO_MAX_COMPETENCIA
@@ -373,12 +376,26 @@ function parsePayload_(e) {
 
 function getOrCreateSheet_(name, headers) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(name);
+  var sheet = resolveSheetByName_(name);
   if (!sheet) sheet = ss.insertSheet(name);
   if (sheet.getLastRow() === 0) {
     applyHeaders_(sheet, headers);
   }
   return sheet;
+}
+
+/** Encuentra pestaña aunque el nombre difiera en mayúsculas (p. ej. competencia vs Competencia). */
+function resolveSheetByName_(name) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(name);
+  if (sheet) return sheet;
+  var target = String(name || '').trim().toLowerCase();
+  if (!target) return null;
+  var sheets = ss.getSheets();
+  for (var i = 0; i < sheets.length; i++) {
+    if (String(sheets[i].getName() || '').trim().toLowerCase() === target) return sheets[i];
+  }
+  return null;
 }
 
 // Escribe encabezados en fila 1 (crea columnas si faltan). Ejecutar una vez desde el editor.
@@ -501,6 +518,8 @@ function handleAdminNormalizarCompetenciaEventos_(payload) {
   if (!access.ok) return { ok: false, error: access.error };
   return normalizarEventosCompetenciaEnSheet_();
 }
+
+function normalizeCompetenciaEvento_(evento) {
   return String(evento || '').trim();
 }
 
@@ -565,23 +584,39 @@ function findDuplicateCompetenciaInEvent_(sheet, headers, correo, documento, eve
 }
 
 function getCompetenciaCount_(evento) {
+  normalizarEventosCompetenciaEnSheet_();
+
   var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return 0;
 
   var targetEvento = normalizeCompetenciaEvento_(evento || ACTIVE_COMPETENCIA_EVENTO);
   var eventoCol = HEADERS_COMPETENCIA.indexOf('Evento') + 1;
+  var correoCol = HEADERS_COMPETENCIA.indexOf('Correo') + 1;
+  var docCol = HEADERS_COMPETENCIA.indexOf('Documento') + 1;
   if (eventoCol <= 0) return lastRow - 1;
 
-  var values = sheet.getRange(2, eventoCol, lastRow, 1).getValues();
+  var values = sheet.getRange(2, 1, lastRow, HEADERS_COMPETENCIA.length).getValues();
+  var seen = {};
   var count = 0;
   for (var i = 0; i < values.length; i++) {
-    if (isSameCompetenciaEvento_(values[i][0], targetEvento)) count++;
+    var rowEvento = values[i][eventoCol - 1];
+    if (!isSameCompetenciaEvento_(rowEvento, targetEvento)) continue;
+    var emailKey = correoCol > 0 ? normalizeEmail_(values[i][correoCol - 1]) : '';
+    var docKey = docCol > 0 ? normalizeDoc_(values[i][docCol - 1]) : '';
+    var dedupeKey = docKey || emailKey || ('row-' + i);
+    if (seen[dedupeKey]) continue;
+    seen[dedupeKey] = true;
+    count++;
   }
   return count;
 }
 
-/** Une columnas base + legales + cola (sin .concat anidado dentro de appendRow). */
+function getCompetenciaRowCountAll_() {
+  var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
+  var lastRow = sheet.getLastRow();
+  return lastRow > 1 ? lastRow - 1 : 0;
+}
 function joinRowParts_(baseCols, legalCols, tailCols) {
   var row = [];
   var groups = [baseCols, legalCols, tailCols];
