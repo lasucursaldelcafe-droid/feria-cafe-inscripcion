@@ -690,7 +690,7 @@
           var entry = {
             id: "WL-" + Date.now().toString(36).toUpperCase(),
             fecha: new Date().toISOString(),
-            formulario: "competencia",
+            formulario: "competencia-preliminar-" + ((cfg.circuito && cfg.circuito.preliminarActual) || 2),
             nombre: nombre,
             documento: documento,
             correo: correo,

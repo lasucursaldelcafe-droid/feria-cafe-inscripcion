@@ -101,10 +101,18 @@
   function competenciaEventKey(val) {
     var s = String(val || '').trim();
     if (!s) return '';
-    if (/preliminar\s*2/i.test(s) || /evento\s*2/i.test(s) || /2\.ª/i.test(s)) return 'V60 Championship — Preliminar 2';
-    if (/preliminar\s*1/i.test(s) || /evento\s*1/i.test(s) || /1\.ª/i.test(s)) return 'V60 Championship — Preliminar 1';
-    if (s === 'V60 Championship') return 'V60 Championship — Preliminar 1';
-    return s;
+    var lower = s.toLowerCase();
+    if (/^preliminar-2$|^evento2$|^evt-?2$|^p2$/.test(lower)) return 'V60 Championship — Preliminar 2';
+    if (/^preliminar-1$|^evento1$|^evt-?1$|^p1$/.test(lower)) return 'V60 Championship — Preliminar 1';
+    if (/preliminar\s*2|evento\s*2|2\.ª|segunda\s*preliminar|8 de agosto|mas\s*caf[eé]/i.test(s)) {
+      return 'V60 Championship — Preliminar 2';
+    }
+    if (/preliminar\s*1|evento\s*1|1\.ª|primera\s*preliminar|4 de julio|plaza marbella|marbella/i.test(s)) {
+      return 'V60 Championship — Preliminar 1';
+    }
+    if (lower === 'v60 championship') return 'V60 Championship — Preliminar 1';
+    if (s === 'V60 Championship — Preliminar 1' || s === 'V60 Championship — Preliminar 2') return s;
+    return '';
   }
 
   function getCompetenciaEditionLabel(editionKey) {
@@ -227,12 +235,18 @@
     if (editionHint && lastDashboardData) {
       var allRows = filterValidCompetenciaRows(pickRows(lastDashboardData, 'allCompetencia'));
       var visibleCount = pickCompetenciaRows(lastDashboardData).length;
-      if (!visibleCount && allRows.length && activeCompetenciaEdition !== 'all') {
+      var sinEdicion = allRows.filter(function (row) {
+        return !competenciaEventKey(row.Evento || row.evento);
+      }).length;
+      if (sinEdicion > 0) {
+        editionHint.textContent = sinEdicion + ' inscripción(es) con columna Evento ambigua. Pulsa «Normalizar ediciones en Sheets» para separar Preliminar 1 y 2.';
+        editionHint.hidden = false;
+      } else if (!visibleCount && allRows.length && activeCompetenciaEdition !== 'all') {
         editionHint.innerHTML = 'No hay inscritos en esta edición. ' +
           '<button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-edition-switch="evento1">Ver Preliminar 1</button> ' +
           '<button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-edition-switch="all">Ver todas</button>';
         editionHint.hidden = false;
-      } else {
+      } else if (!editionHint.textContent || editionHint.textContent.indexOf('✓ ') !== 0) {
         editionHint.hidden = true;
         editionHint.textContent = '';
       }
@@ -265,6 +279,36 @@
       closeCompetidorEditor();
       syncCompetenciaEditionUi();
       if (lastDashboardData) renderAdminTabPanels(lastDashboardData);
+    });
+  }
+
+  function bindNormalizarEventosBtn() {
+    var btn = document.getElementById('adminNormalizarEventosBtn');
+    if (!btn || btn.getAttribute('data-bound') === '1') return;
+    btn.setAttribute('data-bound', '1');
+    btn.addEventListener('click', function () {
+      if (!confirm('¿Normalizar la columna Evento en Google Sheets?\n\nAsignará Preliminar 1 o Preliminar 2 a filas con valores mezclados (slugs, fechas antiguas, etc.).')) return;
+      btn.disabled = true;
+      btn.textContent = 'Normalizando…';
+      postAdminAction({ action: 'admin_normalizar_competencia_eventos' }).then(function (res) {
+        btn.disabled = false;
+        btn.textContent = 'Normalizar ediciones en Sheets';
+        if (!res.ok) {
+          showError(res.error || 'No se pudo normalizar.');
+          return;
+        }
+        var msg = res.message || ('Actualizadas ' + (res.updated || 0) + ' fila(s).');
+        var hint = document.getElementById('adminCompetenciaEditionHint');
+        if (hint) {
+          hint.hidden = false;
+          hint.textContent = '✓ ' + msg + ' Recargando panel…';
+        }
+        return loadDashboard();
+      }).catch(function (err) {
+        btn.disabled = false;
+        btn.textContent = 'Normalizar ediciones en Sheets';
+        showError(err.message || 'Error al normalizar.');
+      });
     });
   }
 
@@ -3094,6 +3138,7 @@
     bindPatrocinadorCompetenciaForm();
     bindAdminCreateMarcaForm();
     bindCompetenciaEditionSelector();
+    bindNormalizarEventosBtn();
     bindCompetenciaEditionHintActions();
     bindAdminJuradoPublish();
     bindAdminCreateCompetidorForm();
