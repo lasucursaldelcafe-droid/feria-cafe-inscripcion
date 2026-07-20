@@ -1698,15 +1698,20 @@
   }
 
   function competenciaEventKey(val) {
+    var CE = window.CompetenciaEdition;
+    if (CE && CE.competenciaEventKey) return CE.competenciaEventKey(val);
     var s = String(val || '').trim();
     if (!s) return '';
     if (/preliminar\s*2/i.test(s) || /evento\s*2/i.test(s) || /2\.ª/i.test(s)) return 'V60 Championship — Preliminar 2';
     if (/preliminar\s*1/i.test(s) || /evento\s*1/i.test(s) || /1\.ª/i.test(s)) return 'V60 Championship — Preliminar 1';
     if (s === 'V60 Championship') return 'V60 Championship — Preliminar 1';
-    return s;
+    return '';
   }
 
   function loadCompetidores() {
+    var CE = window.CompetenciaEdition || {};
+    var eventKey = CE.competenciaEventKey || function (v) { return String(v || '').trim(); };
+
     return sheetsGet('admin_dashboard', {}).then(function (data) {
       var eventFilter = tenantSlug || (platformConfig && (platformConfig.eventId || platformConfig.tenantSlug)) || '';
       if (!eventFilter && window.EVENT_CONFIG) {
@@ -1722,14 +1727,8 @@
         });
       var filtered = habilitados.filter(function (row) {
         if (!eventFilter) return true;
-        return competenciaEventKey(row.Evento) === competenciaEventKey(eventFilter);
+        return eventKey(row.Evento) === eventKey(eventFilter);
       });
-      if (!filtered.length && habilitados.length && eventFilter) {
-        filtered = habilitados.slice();
-        window.__juradoCompetenciaEditionFallback = competenciaEventKey(eventFilter);
-      } else {
-        window.__juradoCompetenciaEditionFallback = '';
-      }
       return filtered.map(function (row) {
           return {
             id: String(row.ID || '').trim(),

@@ -124,10 +124,14 @@ function doGet(e) {
   var params = e && e.parameter ? e.parameter : {};
   if (params.action === 'cupo') {
     var count = getCompetenciaCount_();
+    var totalFilas = getCompetenciaRowCountAll_();
     return jsonResponse({
       ok: true,
       formType: 'competencia',
+      eventoActivo: ACTIVE_COMPETENCIA_EVENTO,
+      edicion: 'Preliminar 2',
       count: count,
+      totalFilasHoja: totalFilas,
       max: CUPO_MAX_COMPETENCIA,
       disponibles: Math.max(0, CUPO_MAX_COMPETENCIA - count),
       completo: count >= CUPO_MAX_COMPETENCIA
@@ -258,6 +262,9 @@ function doPost(e) {
     if (action === 'admin_create_competitor') {
       return jsonResponse(handleAdminCreateCompetitor_(payload));
     }
+    if (action === 'admin_normalizar_competencia_eventos') {
+      return jsonResponse(handleAdminNormalizarCompetenciaEventos_(payload));
+    }
     if (action === 'competidor_foto_data') {
       return jsonResponse(getCompetidorFotoData_(payload.id || payload.fileId || payload.url || ''));
     }
@@ -369,12 +376,26 @@ function parsePayload_(e) {
 
 function getOrCreateSheet_(name, headers) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(name);
+  var sheet = resolveSheetByName_(name);
   if (!sheet) sheet = ss.insertSheet(name);
   if (sheet.getLastRow() === 0) {
     applyHeaders_(sheet, headers);
   }
   return sheet;
+}
+
+/** Encuentra pestaña aunque el nombre difiera en mayúsculas (p. ej. competencia vs Competencia). */
+function resolveSheetByName_(name) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(name);
+  if (sheet) return sheet;
+  var target = String(name || '').trim().toLowerCase();
+  if (!target) return null;
+  var sheets = ss.getSheets();
+  for (var i = 0; i < sheets.length; i++) {
+    if (String(sheets[i].getName() || '').trim().toLowerCase() === target) return sheets[i];
+  }
+  return null;
 }
 
 // Escribe encabezados en fila 1 (crea columnas si faltan). Ejecutar una vez desde el editor.
@@ -449,23 +470,96 @@ function findDuplicateInSheet_(sheet, headers, correo, documento) {
   return false;
 }
 
+function findDuplicateInListaEspera_(sheet, correo, documento, formulario) {
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return false;
+
+  var formCol = HEADERS_LISTA_ESPERA.indexOf('Formulario') + 1;
+  var correoCol = HEADERS_LISTA_ESPERA.indexOf('Correo') + 1;
+  var docCol = HEADERS_LISTA_ESPERA.indexOf('Documento') + 1;
+  var emailNorm = normalizeEmail_(correo);
+  var docNorm = documento ? normalizeDoc_(documento) : '';
+  var formNorm = String(formulario || 'competencia-preliminar-2').trim().toLowerCase();
+  var values = sheet.getRange(2, 1, lastRow, HEADERS_LISTA_ESPERA.length).getValues();
+
+  for (var i = 0; i < values.length; i++) {
+    var rowForm = formCol > 0 ? String(values[i][formCol - 1] || '').trim().toLowerCase() : '';
+    if (rowForm && rowForm !== formNorm) continue;
+    if (emailNorm && correoCol > 0 && normalizeEmail_(values[i][correoCol - 1]) === emailNorm) return true;
+    if (docNorm && docCol > 0 && normalizeDoc_(values[i][docCol - 1]) === docNorm) return true;
+  }
+  return false;
+}
+
+function normalizarEventosCompetenciaEnSheet_() {
+  var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { ok: true, updated: 0, message: 'Sin inscripciones en Competencia.' };
+
+  var eventoCol = HEADERS_COMPETENCIA.indexOf('Evento') + 1;
+  if (eventoCol <= 0) return { ok: false, error: 'Columna Evento no encontrada.' };
+
+  var range = sheet.getRange(2, eventoCol, lastRow, 1);
+  var values = range.getValues();
+  var updated = 0;
+  for (var i = 0; i < values.length; i++) {
+    var current = String(values[i][0] || '').trim();
+    var canonical = extractCompetenciaPreliminarKey_(current);
+    if (!canonical || canonical === current) continue;
+    values[i][0] = canonical;
+    updated++;
+  }
+  if (updated > 0) range.setValues(values);
+  return { ok: true, updated: updated, message: 'Eventos normalizados: ' + updated + ' fila(s).' };
+}
+
+function handleAdminNormalizarCompetenciaEventos_(payload) {
+  var access = assertAdminAccess_(payload.idToken || '');
+  if (!access.ok) return { ok: false, error: access.error };
+  return normalizarEventosCompetenciaEnSheet_();
+}
+
 function normalizeCompetenciaEvento_(evento) {
   return String(evento || '').trim();
 }
 
 function extractCompetenciaPreliminarKey_(evento) {
-  var s = normalizeCompetenciaEvento_(evento);
-  if (!s) return '';
-  if (/preliminar\s*2/i.test(s) || /evento\s*2/i.test(s) || /2\.ª/i.test(s)) return 'V60 Championship — Preliminar 2';
-  if (/preliminar\s*1/i.test(s) || /evento\s*1/i.test(s) || /1\.ª/i.test(s)) return 'V60 Championship — Preliminar 1';
-  if (s === 'V60 Championship') return 'V60 Championship — Preliminar 1';
-  return s;
+  var raw = normalizeCompetenciaEvento_(evento);
+  if (!raw) return '';
+  var s = raw.toLowerCase();
+
+  if (/^preliminar-2$|^evento2$|^evt-?2$|^p2$|^competencia-2$/.test(s)) return 'V60 Championship — Preliminar 2';
+  if (/^preliminar-1$|^evento1$|^evt-?1$|^p1$/.test(s)) return 'V60 Championship — Preliminar 1';
+
+  if (/preliminar\s*2|evento\s*2|2\.ª|segunda\s*preliminar|8 de agosto|mas\s*caf[eé]/i.test(raw)) {
+    return 'V60 Championship — Preliminar 2';
+  }
+  if (/preliminar\s*1|evento\s*1|1\.ª|primera\s*preliminar|4 de julio|plaza marbella|marbella/i.test(raw)) {
+    return 'V60 Championship — Preliminar 1';
+  }
+  if (s === 'v60 championship') return 'V60 Championship — Preliminar 1';
+
+  if (raw === 'V60 Championship — Preliminar 1' || raw === 'V60 Championship — Preliminar 2') return raw;
+  return '';
+}
+
+function competenciaEventoFromSlug_(slug) {
+  var s = String(slug || '').trim().toLowerCase();
+  if (/preliminar-2|evento2|evt-?2|^p2$|competencia-2/.test(s)) return 'V60 Championship — Preliminar 2';
+  if (/preliminar-1|evento1|evt-?1|^p1$/.test(s)) return 'V60 Championship — Preliminar 1';
+  var platform = getJuradoTenantPlatform_(s);
+  if (platform && platform.eventName) {
+    var fromName = extractCompetenciaPreliminarKey_(platform.eventName);
+    if (fromName) return fromName;
+    return String(platform.eventName).trim();
+  }
+  return ACTIVE_COMPETENCIA_EVENTO;
 }
 
 function isSameCompetenciaEvento_(rowEvento, targetEvento) {
   var rowKey = extractCompetenciaPreliminarKey_(rowEvento);
   var targetKey = extractCompetenciaPreliminarKey_(targetEvento || ACTIVE_COMPETENCIA_EVENTO);
-  return !!rowKey && rowKey === targetKey;
+  return !!rowKey && !!targetKey && rowKey === targetKey;
 }
 
 function findDuplicateCompetenciaInEvent_(sheet, headers, correo, documento, evento) {
@@ -496,17 +590,31 @@ function getCompetenciaCount_(evento) {
 
   var targetEvento = normalizeCompetenciaEvento_(evento || ACTIVE_COMPETENCIA_EVENTO);
   var eventoCol = HEADERS_COMPETENCIA.indexOf('Evento') + 1;
+  var correoCol = HEADERS_COMPETENCIA.indexOf('Correo') + 1;
+  var docCol = HEADERS_COMPETENCIA.indexOf('Documento') + 1;
   if (eventoCol <= 0) return lastRow - 1;
 
-  var values = sheet.getRange(2, eventoCol, lastRow, 1).getValues();
+  var values = sheet.getRange(2, 1, lastRow, HEADERS_COMPETENCIA.length).getValues();
+  var seen = {};
   var count = 0;
   for (var i = 0; i < values.length; i++) {
-    if (isSameCompetenciaEvento_(values[i][0], targetEvento)) count++;
+    var rowEvento = values[i][eventoCol - 1];
+    if (!isSameCompetenciaEvento_(rowEvento, targetEvento)) continue;
+    var emailKey = correoCol > 0 ? normalizeEmail_(values[i][correoCol - 1]) : '';
+    var docKey = docCol > 0 ? normalizeDoc_(values[i][docCol - 1]) : '';
+    var dedupeKey = docKey || emailKey || ('row-' + i);
+    if (seen[dedupeKey]) continue;
+    seen[dedupeKey] = true;
+    count++;
   }
   return count;
 }
 
-/** Une columnas base + legales + cola (sin .concat anidado dentro de appendRow). */
+function getCompetenciaRowCountAll_() {
+  var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
+  var lastRow = sheet.getLastRow();
+  return lastRow > 1 ? lastRow - 1 : 0;
+}
 function joinRowParts_(baseCols, legalCols, tailCols) {
   var row = [];
   var groups = [baseCols, legalCols, tailCols];
@@ -1269,7 +1377,7 @@ function handleAdminCreateCompetitor_(payload) {
   var data = {
     fecha: new Date().toISOString(),
     id: String(payload.id || ('COMP-' + Date.now().toString(36).toUpperCase())).trim(),
-    evento: payload.evento || ACTIVE_COMPETENCIA_EVENTO,
+    evento: extractCompetenciaPreliminarKey_(payload.evento) || payload.evento || ACTIVE_COMPETENCIA_EVENTO,
     nombre: nombre,
     documento: String(payload.documento || '').trim(),
     celular: celular,
@@ -1911,14 +2019,15 @@ function appendStands_(data) {
 function appendListaEspera_(data) {
   var sheet = getOrCreateSheet_(SHEET_LISTA_ESPERA, HEADERS_LISTA_ESPERA);
   var correo = data.correo || '';
-  if (findDuplicateInSheet_(sheet, HEADERS_LISTA_ESPERA, correo, data.documento)) {
-    throw new Error('Ya estás en la lista de espera con este correo o documento.');
+  var formulario = String(data.formulario || 'competencia-preliminar-2').trim();
+  if (findDuplicateInListaEspera_(sheet, correo, data.documento, formulario)) {
+    throw new Error('Ya estás en la lista de espera con este correo o documento para esta preliminar.');
   }
 
   sheet.appendRow([
     data.fecha || new Date().toISOString(),
     data.id || '',
-    data.formulario || 'competencia',
+    formulario,
     data.nombre || '',
     data.documento || '',
     correo,
@@ -1954,7 +2063,7 @@ function appendCompetencia_(data) {
   var compRow = joinRowParts_([
     data.fecha || new Date().toISOString(),
     data.id || '',
-    data.evento || 'V60 Championship — Preliminar 2',
+    extractCompetenciaPreliminarKey_(data.evento) || data.evento || ACTIVE_COMPETENCIA_EVENTO,
     data.valorInscripcion || '',
     data.nombre || '',
     data.documento || '',
@@ -2851,6 +2960,7 @@ function handleAdminDashboard_(idToken) {
   return jsonResponse({
     ok: true,
     generatedAt: new Date().toISOString(),
+    eventoActivo: ACTIVE_COMPETENCIA_EVENTO,
     stats: {
       visitsToday: analytics.today,
       visitsTotal: analytics.total,
@@ -4810,8 +4920,9 @@ function handleCompetenciaTorneoInscripcion_(payload) {
   }
 
   var mainSheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
-  if (findDuplicateInSheet_(mainSheet, HEADERS_COMPETENCIA, correo, documento)) {
-    return { ok: false, error: 'Ya existe una inscripción con este correo o documento.', duplicate: true };
+  var eventoLabel = competenciaEventoFromSlug_(slug);
+  if (findDuplicateCompetenciaInEvent_(mainSheet, HEADERS_COMPETENCIA, correo, documento, eventoLabel)) {
+    return { ok: false, error: 'Ya existe una inscripción con este correo o documento para esta preliminar.', duplicate: true };
   }
 
   var id = String(data.id || ('COMP-' + slug.toUpperCase().slice(0, 8) + '-' + Date.now().toString(36).toUpperCase())).trim();
@@ -4850,7 +4961,7 @@ function handleCompetenciaTorneoInscripcion_(payload) {
   var mainRow = joinRowParts_([
     now,
     id,
-    slug,
+    eventoLabel,
     reg.fee || '',
     nombre,
     documento,

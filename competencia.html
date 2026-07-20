@@ -463,6 +463,7 @@
   </div>
 
   <script src="js/event-config.js?v=20260706hora330"></script>
+  <script src="js/competencia-edition.js?v=20260720p2"></script>
   <script src="js/site-links.js?v=20260705jurado29"></script>
   <script src="js/seo-structured-data.js"></script>
   <script src="js/sheets-config.js"></script>
@@ -602,7 +603,8 @@
       function renderCupo(count, options) {
         options = options || {};
         const restantes = Math.max(0, CUPO_MAX - count);
-        cupoStatus.textContent = "Cupos registrados: " + count + " de " + CUPO_MAX + " (" + restantes + " disponibles)";
+        const edicionLabel = EVENTO_PRELIMINAR || "Preliminar 2";
+        cupoStatus.textContent = edicionLabel + " · Cupos registrados: " + count + " de " + CUPO_MAX + " (" + restantes + " disponibles)";
         const lleno = count >= CUPO_MAX;
         const bloquear = lleno && !options.fetchError;
         btnSubmit.disabled = bloquear;
@@ -690,7 +692,9 @@
           var entry = {
             id: "WL-" + Date.now().toString(36).toUpperCase(),
             fecha: new Date().toISOString(),
-            formulario: "competencia",
+            formulario: (window.CompetenciaEdition && CompetenciaEdition.getListaEsperaFormularioId)
+              ? CompetenciaEdition.getListaEsperaFormularioId(window.EVENT_CONFIG)
+              : ("competencia-preliminar-" + ((cfg.circuito && cfg.circuito.preliminarActual) || 2)),
             nombre: nombre,
             documento: documento,
             correo: correo,
