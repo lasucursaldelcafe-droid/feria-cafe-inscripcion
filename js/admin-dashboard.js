@@ -98,21 +98,12 @@
     return typeof n === 'number' ? n.toLocaleString('es-CO') : String(n || '0');
   }
 
+  var CE = function editionLib() {
+    return global.CompetenciaEdition || {};
+  };
+
   function competenciaEventKey(val) {
-    var s = String(val || '').trim();
-    if (!s) return '';
-    var lower = s.toLowerCase();
-    if (/^preliminar-2$|^evento2$|^evt-?2$|^p2$/.test(lower)) return 'V60 Championship — Preliminar 2';
-    if (/^preliminar-1$|^evento1$|^evt-?1$|^p1$/.test(lower)) return 'V60 Championship — Preliminar 1';
-    if (/preliminar\s*2|evento\s*2|2\.ª|segunda\s*preliminar|8 de agosto|mas\s*caf[eé]/i.test(s)) {
-      return 'V60 Championship — Preliminar 2';
-    }
-    if (/preliminar\s*1|evento\s*1|1\.ª|primera\s*preliminar|4 de julio|plaza marbella|marbella/i.test(s)) {
-      return 'V60 Championship — Preliminar 1';
-    }
-    if (lower === 'v60 championship') return 'V60 Championship — Preliminar 1';
-    if (s === 'V60 Championship — Preliminar 1' || s === 'V60 Championship — Preliminar 2') return s;
-    return '';
+    return CE().competenciaEventKey ? CE().competenciaEventKey(val) : String(val || '').trim();
   }
 
   function getCompetenciaEditionLabel(editionKey) {
@@ -123,10 +114,9 @@
   }
 
   function getCompetenciaEditionEventId(editionKey) {
-    if (!editionKey || editionKey === 'all') return '';
-    var cfg = global.EVENT_CONFIG || {};
-    var ev = cfg[editionKey] || (editionKey === 'evento2' ? cfg.evento2 : cfg.evento1) || {};
-    return String(ev.eventoId || ev.nombre || '').trim();
+    return CE().getEditionEventId
+      ? CE().getEditionEventId(editionKey, global.EVENT_CONFIG)
+      : '';
   }
 
   function getStoredCompetenciaEdition() {
@@ -134,8 +124,9 @@
       var stored = sessionStorage.getItem(ADMIN_COMPETENCIA_EDITION_KEY);
       if (stored === 'evento1' || stored === 'evento2' || stored === 'all') return stored;
     } catch (e) { /* ignore */ }
-    var cfg = global.EVENT_CONFIG || {};
-    return cfg.torneoActivo === 'evento1' ? 'evento1' : 'evento2';
+    return CE().getActiveEditionKey
+      ? CE().getActiveEditionKey(global.EVENT_CONFIG)
+      : ((global.EVENT_CONFIG || {}).torneoActivo === 'evento1' ? 'evento1' : 'evento2');
   }
 
   function saveCompetenciaEdition(editionKey) {
@@ -146,38 +137,27 @@
   }
 
   function filterCompetenciaByEdition(rows, editionKey) {
-    if (!editionKey || editionKey === 'all') return (rows || []).slice();
-    var target = competenciaEventKey(getCompetenciaEditionEventId(editionKey));
-    if (!target) return (rows || []).slice();
-    return (rows || []).filter(function (row) {
-      return competenciaEventKey(row.Evento || row.evento) === target;
-    });
+    return CE().filterCompetenciaByEdition
+      ? CE().filterCompetenciaByEdition(rows, editionKey, global.EVENT_CONFIG)
+      : (rows || []).slice();
   }
 
   function filterValidCompetenciaRows(rows) {
-    return (rows || []).filter(function (row) {
-      return String(row['ID'] || '').trim() && String(row['Nombre'] || '').trim();
-    });
+    return CE().filterValidCompetenciaRows
+      ? CE().filterValidCompetenciaRows(rows)
+      : (rows || []);
   }
 
   function dedupeCompetenciaRowsByIdentity(rows) {
-    var seen = {};
-    var out = [];
-    (rows || []).forEach(function (row) {
-      var doc = String(row.Documento || row.documento || '').replace(/\D/g, '');
-      var email = String(row.Correo || row.correo || '').trim().toLowerCase();
-      var key = doc || email;
-      if (key && seen[key]) return;
-      if (key) seen[key] = true;
-      out.push(row);
-    });
-    return out;
+    return CE().dedupeCompetenciaRowsByIdentity
+      ? CE().dedupeCompetenciaRowsByIdentity(rows)
+      : (rows || []).slice();
   }
 
   function countCompetenciaEditionRows(rows, editionKey) {
-    return dedupeCompetenciaRowsByIdentity(
-      filterCompetenciaByEdition(filterValidCompetenciaRows(rows), editionKey)
-    ).length;
+    return CE().countCompetenciaEditionRows
+      ? CE().countCompetenciaEditionRows(rows, editionKey, global.EVENT_CONFIG)
+      : 0;
   }
 
   function ensureCompetenciaEditionVisible(data) {
@@ -240,7 +220,7 @@
       if (activeCompetenciaEdition === 'all') {
         var p1 = countCompetenciaEditionRows(allValid, 'evento1');
         var p2 = countCompetenciaEditionRows(allValid, 'evento2');
-        cupoEl.textContent = 'P1: ' + p1 + ' · P2: ' + p2 + ' · Total: ' + allValid.length;
+        cupoEl.textContent = 'P1: ' + p1 + ' · P2: ' + p2 + ' · Inscripciones: ' + (p1 + p2);
       } else {
         cupoEl.textContent = 'Cupo: ' + formatNumber(cupo.count) + ' / ' + formatNumber(cupo.max) +
           (cupo.completo ? ' (completo)' : '');

@@ -528,7 +528,7 @@ function extractCompetenciaPreliminarKey_(evento) {
   if (!raw) return '';
   var s = raw.toLowerCase();
 
-  if (/^preliminar-2$|^evento2$|^evt-?2$|^p2$/.test(s)) return 'V60 Championship — Preliminar 2';
+  if (/^preliminar-2$|^evento2$|^evt-?2$|^p2$|^competencia-2$/.test(s)) return 'V60 Championship — Preliminar 2';
   if (/^preliminar-1$|^evento1$|^evt-?1$|^p1$/.test(s)) return 'V60 Championship — Preliminar 1';
 
   if (/preliminar\s*2|evento\s*2|2\.ª|segunda\s*preliminar|8 de agosto|mas\s*caf[eé]/i.test(raw)) {
@@ -545,7 +545,7 @@ function extractCompetenciaPreliminarKey_(evento) {
 
 function competenciaEventoFromSlug_(slug) {
   var s = String(slug || '').trim().toLowerCase();
-  if (/preliminar-2|evento2|evt-?2|^p2$/.test(s)) return 'V60 Championship — Preliminar 2';
+  if (/preliminar-2|evento2|evt-?2|^p2$|competencia-2/.test(s)) return 'V60 Championship — Preliminar 2';
   if (/preliminar-1|evento1|evt-?1|^p1$/.test(s)) return 'V60 Championship — Preliminar 1';
   var platform = getJuradoTenantPlatform_(s);
   if (platform && platform.eventName) {
@@ -584,8 +584,6 @@ function findDuplicateCompetenciaInEvent_(sheet, headers, correo, documento, eve
 }
 
 function getCompetenciaCount_(evento) {
-  normalizarEventosCompetenciaEnSheet_();
-
   var sheet = getOrCreateSheet_(SHEET_COMPETENCIA, HEADERS_COMPETENCIA);
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return 0;

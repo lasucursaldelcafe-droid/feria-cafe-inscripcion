@@ -1,40 +1,24 @@
 #!/usr/bin/env node
 /**
- * Prueba filtro de edición admin + filas válidas de competencia (Apps Script producción).
+ * Prueba filtro de edición admin + cupo P2 (Apps Script producción).
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import {
+  competenciaEventKey,
+  countCompetenciaEditionRows,
+  dedupeCompetenciaRowsByIdentity,
+  filterCompetenciaByEdition,
+  filterValidCompetenciaRows,
+  PRELIMINAR_2_EVENTO
+} from './competencia-edition-lib.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const WEB =
   'https://script.google.com/macros/s/AKfycbyiLN6ms5dSbm6f1ZmZsR7ktqWLFGxGJd5zAnhZlmX3d0lpKFx1AhLXMXWfnF8txsp0/exec';
 const SITE = 'https://la-sucursal-del-cafe.web.app';
-
-function competenciaEventKey(val) {
-  const s = String(val || '').trim();
-  if (!s) return '';
-  if (/preliminar\s*2/i.test(s) || /evento\s*2/i.test(s) || /2\.ª/i.test(s)) return 'V60 Championship — Preliminar 2';
-  if (/preliminar\s*1/i.test(s) || /evento\s*1/i.test(s) || /1\.ª/i.test(s)) return 'V60 Championship — Preliminar 1';
-  if (s === 'V60 Championship') return 'V60 Championship — Preliminar 1';
-  return s;
-}
-
-function filterValidCompetenciaRows(rows) {
-  return (rows || []).filter((row) => String(row.ID || '').trim() && String(row.Nombre || '').trim());
-}
-
-function filterCompetenciaByEdition(rows, editionKey) {
-  const targets = {
-    evento1: 'V60 Championship — Preliminar 1',
-    evento2: 'V60 Championship — Preliminar 2'
-  };
-  if (!editionKey || editionKey === 'all') return (rows || []).slice();
-  const target = targets[editionKey] || '';
-  if (!target) return (rows || []).slice();
-  return (rows || []).filter((row) => competenciaEventKey(row.Evento || row.evento) === target);
-}
 
 async function getJson(url) {
   const res = await fetch(url, { redirect: 'follow', cache: 'no-store' });
@@ -51,16 +35,44 @@ async function main() {
 
   const adminHtml = readFileSync(join(ROOT, 'admin.html'), 'utf8');
   const adminJs = readFileSync(join(ROOT, 'js', 'admin-dashboard.js'), 'utf8');
+  const editionJs = readFileSync(join(ROOT, 'js', 'competencia-edition.js'), 'utf8');
   const hasHint = adminHtml.includes('adminCompetenciaEditionHint');
   const hasEdition = adminHtml.includes('adminCompetenciaEdition');
-  const hasFilter = adminJs.includes('filterValidCompetenciaRows') && adminJs.includes('ensureCompetenciaEditionVisible');
-  console.log(hasHint && hasEdition && hasFilter ? '[OK]' : '[FAIL]', 'Código local: selector edición + hint + filtros');
-  if (!hasHint || !hasEdition || !hasFilter) failed++;
+  const hasFilter = adminJs.includes('CompetenciaEdition') && adminJs.includes('ensureCompetenciaEditionVisible');
+  const hasSharedLib = editionJs.includes('competencia-edition-lib') || editionJs.includes('PRELIMINAR_2_EVENTO');
+  console.log(hasHint && hasEdition && hasFilter && hasSharedLib ? '[OK]' : '[FAIL]', 'Código local: selector + lib compartida');
+  if (!hasHint || !hasEdition || !hasFilter || !hasSharedLib) failed++;
+
+  // Regresión: slugs y fechas ambiguas
+  const keyTests = [
+    ['preliminar-2', PRELIMINAR_2_EVENTO],
+    ['V60 Championship — Evento 1 · 4 de julio de 2026 · Plaza Marbella', 'V60 Championship — Preliminar 1'],
+    ['V60 Championship — Preliminar 2', PRELIMINAR_2_EVENTO],
+    ['Mas Café Cali', PRELIMINAR_2_EVENTO]
+  ];
+  for (const [input, expected] of keyTests) {
+    const got = competenciaEventKey(input);
+    const ok = got === expected;
+    console.log(ok ? '[OK]' : '[FAIL]', `competenciaEventKey("${String(input).slice(0, 40)}…") → ${got}`);
+    if (!ok) failed++;
+  }
 
   const liveAdmin = await fetch(SITE + '/admin', { redirect: 'follow' });
   const liveHtml = await liveAdmin.text();
-  const liveDeployed = liveHtml.includes('adminCompetenciaEditionHint');
-  console.log(liveDeployed ? '[OK]' : '[WARN]', 'Producción /admin con hint (deploy pendiente si WARN)');
+  const liveDeployed = liveHtml.includes('competencia-edition.js');
+  console.log(liveDeployed ? '[OK]' : '[WARN]', 'Producción /admin con competencia-edition.js (deploy pendiente si WARN)');
+
+  const cupo = await getJson(WEB + '?action=cupo');
+  if (!cupo.ok) {
+    console.log('[FAIL]', 'cupo:', cupo.error || cupo);
+    failed++;
+  } else {
+    console.log('[OK]', `cupo P2=${cupo.count}/${cupo.max} (filas hoja=${cupo.totalFilasHoja ?? '?'})`);
+    if (typeof cupo.totalFilasHoja === 'number' && cupo.count > cupo.totalFilasHoja) {
+      console.log('[FAIL]', 'count mayor que filas totales');
+      failed++;
+    }
+  }
 
   const dash = await getJson(WEB + '?action=admin_dashboard');
   if (!dash.ok) {
@@ -71,24 +83,26 @@ async function main() {
   const raw = dash.allCompetencia || [];
   const invalid = raw.filter((r) => !String(r.ID || '').trim() || !String(r.Nombre || '').trim());
   const valid = filterValidCompetenciaRows(raw);
-  console.log(invalid.length === 0 ? '[OK]' : '[WARN]', `Filas inválidas en API: ${invalid.length} (cliente las filtra: ${valid.length} válidas)`);
+  console.log(invalid.length === 0 ? '[OK]' : '[WARN]', `Filas inválidas en API: ${invalid.length} (válidas: ${valid.length})`);
 
-  const p1 = filterCompetenciaByEdition(valid, 'evento1');
-  const p2 = filterCompetenciaByEdition(valid, 'evento2');
+  const p1 = countCompetenciaEditionRows(valid, 'evento1');
+  const p2 = countCompetenciaEditionRows(valid, 'evento2');
+  const p2Dedup = dedupeCompetenciaRowsByIdentity(filterCompetenciaByEdition(valid, 'evento2')).length;
+  console.log('[OK]', `P1=${p1} P2=${p2} (dedupe P2=${p2Dedup})`);
+
   const porEdicion = dash.stats && dash.stats.competenciaPorEdicion;
-  console.log('[OK]', `P1=${p1.length} P2=${p2.length} total=${valid.length}`);
   if (porEdicion) {
     const match =
-      Number(porEdicion.preliminar1) === p1.length && Number(porEdicion.preliminar2) === p2.length;
+      Number(porEdicion.preliminar1) === p1 && Number(porEdicion.preliminar2) === p2;
     console.log(match ? '[OK]' : '[WARN]', 'stats.competenciaPorEdicion vs filtro cliente', porEdicion);
+    if (cupo.ok && Number(porEdicion.preliminar2) !== cupo.count) {
+      console.log('[WARN]', `cupo API (${cupo.count}) ≠ stats P2 (${porEdicion.preliminar2}) — redeploy Code.gs pendiente`);
+    }
   }
 
-  if (valid.length && p2.length === 0 && p1.length > 0) {
-    console.log('[OK]', 'Fallback esperado: P2 vacío, P1 tiene inscritos (admin auto-cambia a P1)');
-  } else if (valid.length && p1.length === 0 && p2.length > 0) {
-    console.log('[OK]', 'P2 activo con inscritos');
-  } else if (!valid.length) {
-    console.log('[WARN]', 'Sin competidores válidos en Sheets');
+  const sinEdicion = valid.filter((r) => !competenciaEventKey(r.Evento || r.evento)).length;
+  if (sinEdicion > 0) {
+    console.log('[WARN]', `${sinEdicion} fila(s) sin edición clara — ejecutar Normalizar en admin`);
   }
 
   const sample = valid.find((r) => String(r.ID || '').trim());
